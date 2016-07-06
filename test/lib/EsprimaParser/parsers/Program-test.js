@@ -13,9 +13,9 @@ describe('Program tests', () => {
 
   it('should call parseNode on nodes in body', () => {
     program.body = [
-      {type: 'VariableDeclaration'},
-      {type: 'FunctionDeclaration'},
-      {type: 'ExpressionStatement'}
+      createAstNode('VariableDeclaration'),
+      createAstNode('FunctionDeclaration'),
+      createAstNode('ExpressionStatement')
     ]
 
     esprimaParser.Program(program)
