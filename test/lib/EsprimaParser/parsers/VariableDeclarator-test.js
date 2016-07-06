@@ -12,12 +12,13 @@ describe('VariableDeclarator tests', () => {
     sandbox.stub(esprimaParser, 'closureStack', {
       set: sandbox.spy()
     })
+    sandbox.stub(esprimaParser, 'parseNode', () => {
+      return 1
+    })
   })
 
-  it('should call parseNode on init given valid init', () => {
+  it('should call parseNode on init given non-null init', () => {
     variableDeclarator.init = createAstNode('Literal')
-
-    sandbox.stub(esprimaParser, 'parseNode', sandbox.spy())
 
     esprimaParser.VariableDeclarator(variableDeclarator)
 
@@ -30,16 +31,20 @@ describe('VariableDeclarator tests', () => {
   it('should call set of closureStack with id name and init value, given non-null init', () => {
     variableDeclarator.init = createAstNode('Literal', {value: 1})
 
-    sandbox.stub(esprimaParser, 'parseNode', () => {
-      return 1
-    })
-
     esprimaParser.VariableDeclarator(variableDeclarator)
 
     expect(
       esprimaParser.closureStack.set
         .calledWithExactly('a', 1)
     ).to.be.true
+  })
+
+  it('should not call parseNode on init given null init', () => {
+    variableDeclarator.init = null
+
+    esprimaParser.VariableDeclarator(variableDeclarator)
+
+    expect(esprimaParser.parseNode.callCount).to.be.equal(0)
   })
 
   it('should call set of closureStack with id name and undefined, given null init', () => {
@@ -52,5 +57,4 @@ describe('VariableDeclarator tests', () => {
         .calledWithExactly('a', undefined)
     ).to.be.true
   })
-
 })
