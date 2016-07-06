@@ -1,4 +1,8 @@
+'use strict'
+
 const importTestsFrom = require('./helpers/importTestsFrom')
+const registerHelpers = require('./helpers/registerHelpers')
+const unregisterHelpers = require('./helpers/unregisterHelpers')
 
 describe('EsprimaParser tests', () => {
   it('should pass this canary test', () => {
@@ -8,6 +12,11 @@ describe('EsprimaParser tests', () => {
   describe('parsers tests', () => {
     const PARSERS_PATH = './test/lib/EsprimaParser/parsers/'
     const EsprimaParser = require('../lib/EsprimaParser')
+    const esprimaParserHelpers = require('./lib/EsprimaParser/helpers')
+
+    before(() => {
+      registerHelpers(esprimaParserHelpers)
+    })
 
     beforeEach(() => {
       global.esprimaParser = new EsprimaParser()
@@ -15,6 +24,7 @@ describe('EsprimaParser tests', () => {
 
     after(() => {
       delete global.esprimaParser
+      unregisterHelpers(esprimaParserHelpers)
     })
 
     importTestsFrom(PARSERS_PATH)

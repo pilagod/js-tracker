@@ -1,3 +1,5 @@
+'use strict'
+
 const fs = require('fs')
 const testFileRegExp = /-test.js$/
 
@@ -6,9 +8,10 @@ module.exports = (pathFromRoot) => {
   const testFilesOrDirs = fs.readdirSync(pathFromRoot);
 
   testFilesOrDirs.forEach((fileOrDir) => {
-    const testPathFromRoot = pathFromRoot + fileOrDir;
+    const testPathFromRoot = `${pathFromRoot}${fileOrDir}`;
+
     if (fs.statSync(testPathFromRoot).isFile() && testFileRegExp.test(fileOrDir)) {
-      require(`${pathFromHere}fileOrDir`)
+      require(`${pathFromHere}${fileOrDir}`)
     }
   })
 }
