@@ -31,13 +31,13 @@ describe('Identifier tests', () => {
     expect(esprimaParser.Identifier(identifier)).to.be.equal(undefined)
   })
 
-  it('should return null given null \'name\'', () => {
+  it('should return null given \'name\': \'null\'', () => {
     identifier.name = 'null'
 
     expect(esprimaParser.Identifier(identifier)).to.be.equal(null)
   })
 
-  it('should return undefined given undefined \'name\'', () => {
+  it('should return undefined given \'name\': \'undefined\'', () => {
     identifier.name = 'undefined'
 
     expect(esprimaParser.Identifier(identifier)).to.be.equal(undefined)
