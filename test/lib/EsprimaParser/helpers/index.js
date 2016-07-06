@@ -1,5 +1,6 @@
 'use strict'
 
 module.exports = {
-  createAstNode: require('./createAstNode')
+  createAstNode: require('./createAstNode'),
+  createClosureStackStub: require('./createClosureStackStub')
 }

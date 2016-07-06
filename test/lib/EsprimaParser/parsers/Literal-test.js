@@ -1,10 +1,11 @@
 'use strict'
 
+// spec: https://github.com/estree/estree/blob/master/spec.md#literal
+
 describe('Literal tests', () => {
   let literal
 
   beforeEach(() => {
-    /* {type, value, raw, regex} */
     literal = createAstNode('Literal')
   })
 
