@@ -9,7 +9,7 @@ describe('ArrayExpression tests', () => {
     arrayExpression = createAstNode('ArrayExpression')
   })
 
-  it('should return [] given elements []', () => {
+  it('should return [] given no elements', () => {
     arrayExpression.elements = []
 
     expect(esprimaParser.ArrayExpression(arrayExpression)).to.be.eql([])
@@ -21,12 +21,9 @@ describe('ArrayExpression tests', () => {
       createAstNode('Literal', {value: 2})
     ]
 
-    sandbox.stub(esprimaParser, 'parseNode', (() => {
-      let count = 0
-      return () => {
-        return ++count
-      }
-    })())
+    sandbox.stub(esprimaParser, 'parseNode', (literal) => {
+      return literal.value
+    })
 
     expect(esprimaParser.ArrayExpression(arrayExpression)).to.be.eql([1, 2])
   });
