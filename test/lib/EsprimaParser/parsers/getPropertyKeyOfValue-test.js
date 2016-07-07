@@ -1,65 +1,46 @@
 'use strict'
 
 describe('getPropertyKeyOfValue tests', () => {
-  it('should not call parseNode given computed false', () => {
-    sandbox.stub(esprimaParser, 'parseNode', sandbox.spy())
+  for (const computed of [false, true]) {
+    it(`should ${computed ? '' : 'not '}call parseNode ${computed ? 'with key ' : ''}given computed ${computed}`, () => {
+      sandbox.stub(esprimaParser, 'parseNode', sandbox.spy())
 
-    const emptyAstNode = createAstNode()
-    esprimaParser.getPropertyKeyOfValue(emptyAstNode, false)
+      const key = createAstNode() // empty ast node
+      esprimaParser.getPropertyKeyOfValue(key, computed)
 
-    expect(esprimaParser.parseNode.called).to.be.false
-  })
-
-  it('should return \'a\' given Identifier key name \'a\' and computed false', () => {
-    expect(
-      esprimaParser.getPropertyKeyOfValue(
-        createAstNode('Identifier', {name: 'a'}),
-        false
-      )
-    ).to.be.equal('a')
-  })
-
-  it('should return \'b\' given Literal key value \'b\' and computed false', () => {
-    expect(
-      esprimaParser.getPropertyKeyOfValue(
-        createAstNode('Literal', {value: 'b'}),
-        false
-      )
-    ).to.be.equal('b')
-  })
-
-  it('should call parseNode with key given computed true', () => {
-    sandbox.stub(esprimaParser, 'parseNode', sandbox.spy())
-
-    const emptyAstNode = createAstNode()
-    esprimaParser.getPropertyKeyOfValue(emptyAstNode, true)
-
-    expect(esprimaParser.parseNode.calledWithExactly(emptyAstNode)).to.be.true
-  })
-
-  it('should return \'b\' given Identifier key name \'a\', value \'b\' and computed true', () => {
-    sandbox.stub(esprimaParser, 'parseNode', (node) => {
-      if (node.type === 'Identifier' && node.name === 'a') {
-        return 'b'
+      if (computed) {
+        // should call with key given compted true
+        expect(esprimaParser.parseNode.calledWithExactly(key)).to.be.true
+      } else {
+        // should not call given computed false
+        expect(esprimaParser.parseNode.called).to.be.false
       }
     })
 
-    expect(
-      esprimaParser.getPropertyKeyOfValue(
-        createAstNode('Identifier', {name: 'a'}),
-        true
-      )
-    ).to.be.equal('b')
-  })
+    it(`should return \'${computed ? 'b' : 'a'}\' given Identifier key name \'a\'${computed ? ', value \'b\'' : ''} and computed ${computed}`, () => {
+      if (computed) {
+        sandbox.stub(esprimaParser, 'parseNode', () => {
+          return 'b'
+        })
+      }
+      expect(
+        esprimaParser.getPropertyKeyOfValue(
+          createAstNode('Identifier', {name: 'a'}),
+          computed
+        )
+      ).to.be.equal(computed ? 'b' : 'a')
+    })
 
-  it('should return \'b\' given Literal key value \'b\' and computed true', () => {
-    sandbox.stub(esprimaParser, 'parseNode', createLiteralStub())
-
-    expect(
-      esprimaParser.getPropertyKeyOfValue(
-        createAstNode('Literal', {value: 'b'}),
-        true
-      )
-    ).to.be.equal('b')
-  })
+    it(`should return \'b\' given Literal key value \'b\' and computed ${computed}`, () => {
+      if (computed) {
+        sandbox.stub(esprimaParser, 'parseNode', createLiteralStub())
+      }
+      expect(
+        esprimaParser.getPropertyKeyOfValue(
+          createAstNode('Literal', {value: 'b'}),
+          computed
+        )
+      ).to.be.equal('b')
+    })
+  }
 })
