@@ -23,24 +23,26 @@ describe('getPropertyKeyOfValue tests', () => {
           return 'b'
         })
       }
-      expect(
-        esprimaParser.getPropertyKeyOfValue(
-          createAstNode('Identifier', {name: 'a'}),
-          computed
-        )
-      ).to.be.equal(computed ? 'b' : 'a')
+
+      const result = esprimaParser.getPropertyKeyOfValue(
+        createAstNode('Identifier', {name: 'a'}),
+        computed
+      )
+
+      expect(result).to.be.equal(computed ? 'b' : 'a')
     })
 
     it(`should return \'b\' given Literal key value \'b\' and computed ${computed}`, () => {
       if (computed) {
         sandbox.stub(esprimaParser, 'parseNode', createLiteralStub())
       }
-      expect(
-        esprimaParser.getPropertyKeyOfValue(
-          createAstNode('Literal', {value: 'b'}),
-          computed
-        )
-      ).to.be.equal('b')
+
+      const result = esprimaParser.getPropertyKeyOfValue(
+        createAstNode('Literal', {value: 'b'}),
+        computed
+      )
+      
+      expect(result).to.be.equal('b')
     })
   }
 })

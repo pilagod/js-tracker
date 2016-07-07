@@ -12,25 +12,33 @@ describe('Literal tests', () => {
   it('should return \'string\' given value \'string\'', () => {
     literal.value = 'string'
 
-    expect(esprimaParser.Literal(literal)).to.be.equal('string')
+    const result = esprimaParser.Literal(literal)
+
+    expect(result).to.be.equal('string')
   })
 
   it('should return 1 given value 1', () => {
     literal.value = 1
 
-    expect(esprimaParser.Literal(literal)).to.be.equal(1)
+    const result = esprimaParser.Literal(literal)
+
+    expect(result).to.be.equal(1)
   })
 
   it('should return true given value true', () => {
     literal.value = true
 
-    expect(esprimaParser.Literal(literal)).to.be.equal(true)
+    const result = esprimaParser.Literal(literal)
+
+    expect(result).to.be.equal(true)
   })
 
   it('should return null given value null', () => {
     literal.value = null
 
-    expect(esprimaParser.Literal(literal)).to.be.equal(null)
+    const result = esprimaParser.Literal(literal)
+
+    expect(result).to.be.equal(null)
   })
 
   it('should return regexp given regex', () => {

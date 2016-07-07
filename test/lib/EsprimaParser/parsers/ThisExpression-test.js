@@ -25,12 +25,16 @@ describe('ThisExpression tests', () => {
   it('should return esprimaParser given context esprimaParser', () => {
     esprimaParser.closureStack.set('this', esprimaParser)
 
-    expect(esprimaParser.ThisExpression(thisExpression)).to.be.equal(esprimaParser)
+    const result = esprimaParser.ThisExpression(thisExpression)
+
+    expect(result).to.be.equal(esprimaParser)
   })
 
   it('should return undefined given no context', () => {
     esprimaParser.closureStack.set('this', undefined)
 
-    expect(esprimaParser.ThisExpression(thisExpression)).to.be.equal(undefined)
+    const result = esprimaParser.ThisExpression(thisExpression)
+
+    expect(result).to.be.equal(undefined)
   })
 })

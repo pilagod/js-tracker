@@ -28,25 +28,33 @@ describe('Identifier tests', () => {
     identifier.name = 'a'
     esprimaParser.closureStack.set('a', 1)
 
-    expect(esprimaParser.Identifier(identifier)).to.be.equal(1)
+    const result = esprimaParser.Identifier(identifier)
+
+    expect(result).to.be.equal(1)
   })
 
   it('should return undefined given name \'c\', which has no value assigned', () => {
     identifier.name = 'c'
     esprimaParser.closureStack.set('c', undefined)
 
-    expect(esprimaParser.Identifier(identifier)).to.be.equal(undefined)
+    const result = esprimaParser.Identifier(identifier)
+
+    expect(result).to.be.equal(undefined)
   })
 
   it('should return null given name \'null\'', () => {
     identifier.name = 'null'
 
-    expect(esprimaParser.Identifier(identifier)).to.be.equal(null)
+    const result = esprimaParser.Identifier(identifier)
+
+    expect(result).to.be.equal(null)
   })
 
   it('should return undefined given name \'undefined\'', () => {
     identifier.name = 'undefined'
 
-    expect(esprimaParser.Identifier(identifier)).to.be.equal(undefined)
+    const result = esprimaParser.Identifier(identifier)
+
+    expect(result).to.be.equal(undefined)
   })
 })

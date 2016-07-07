@@ -16,7 +16,9 @@ describe('getPropertyKeyOfString tests', () => {
     it(`should return string \'${value}\' given key value ${value}`, () => {
       sandbox.stub(esprimaParser, 'getPropertyKeyOfValue', () => value)
 
-      expect(esprimaParser.getPropertyKeyOfString(null, null)).to.be.equal(`${value}`)
+      const result = esprimaParser.getPropertyKeyOfString(null, null)
+
+      expect(result).to.be.equal(`${value}`)
     })
   }
 })

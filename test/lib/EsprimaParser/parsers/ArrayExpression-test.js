@@ -42,6 +42,8 @@ describe('ArrayExpression tests', () => {
 
     sandbox.stub(esprimaParser, 'parseNode', createLiteralStub())
 
-    expect(esprimaParser.ArrayExpression(arrayExpression)).to.be.eql([1, 2])
+    const result = esprimaParser.ArrayExpression(arrayExpression)
+
+    expect(result).to.be.eql([1, 2])
   });
 })

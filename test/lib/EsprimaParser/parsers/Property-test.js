@@ -41,9 +41,8 @@ describe('Property tests', () => {
   })
 
   it('should return {key: \'a\', value: 1} given property key \'a\' and value 1', () => {
-    expect(esprimaParser.Property(property)).to.be.eql({
-      key: 'a',
-      value: 1
-    })
+    const result = esprimaParser.Property(property)
+
+    expect(result).to.be.eql({key: 'a', value: 1})
   })
 })

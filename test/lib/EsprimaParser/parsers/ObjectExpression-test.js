@@ -12,7 +12,9 @@ describe('ObjectExpression tests', () => {
   it('should return {} given no properties', () => {
     objectExpression.properties = []
 
-    expect(esprimaParser.ObjectExpression(objectExpression)).to.be.eql({})
+    const result = esprimaParser.ObjectExpression(objectExpression)
+
+    expect(result).to.be.eql({})
   })
 
   it('should call parseNode with nodes in properties', () => {
@@ -58,6 +60,8 @@ describe('ObjectExpression tests', () => {
       }
     })
 
-    expect(esprimaParser.ObjectExpression(objectExpression)).to.be.eql({a: 1, b: 2})
+    const result = esprimaParser.ObjectExpression(objectExpression)
+
+    expect(result).to.be.eql({a: 1, b: 2})
   })
 })
