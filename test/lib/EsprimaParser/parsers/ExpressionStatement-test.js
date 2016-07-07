@@ -11,7 +11,7 @@ describe('ExpressionStatement tests', () => {
     sandbox.stub(esprimaParser, 'parseNode', sandbox.spy())
   })
 
-  it('should call parseNode on expression', () => {
+  it('should call parseNode with expression', () => {
     expressionStatement.expression = createAstNode('Literal')
 
     esprimaParser.ExpressionStatement(expressionStatement)

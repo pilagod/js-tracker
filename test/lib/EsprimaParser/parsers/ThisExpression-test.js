@@ -11,6 +11,17 @@ describe('ThisExpression tests', () => {
     sandbox.stub(esprimaParser, 'closureStack', createClosureStackStub())
   })
 
+  it('should call get of closureStack with \'this\'', () => {
+    esprimaParser.closureStack.get = sandbox.spy()
+
+    esprimaParser.ThisExpression(thisExpression)
+
+    expect(
+      esprimaParser.closureStack.get
+        .calledWithExactly('this')
+    ).to.be.true
+  })
+
   it('should return esprimaParser given context esprimaParser', () => {
     esprimaParser.closureStack.set('this', esprimaParser)
 

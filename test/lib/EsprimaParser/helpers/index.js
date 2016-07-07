@@ -2,5 +2,6 @@
 
 module.exports = {
   createAstNode: require('./createAstNode'),
-  createClosureStackStub: require('./createClosureStackStub')
+  createClosureStackStub: require('./createClosureStackStub'),
+  createLiteralStub: require('./createLiteralStub')
 }

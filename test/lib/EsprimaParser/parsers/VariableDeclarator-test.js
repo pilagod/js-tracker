@@ -12,12 +12,10 @@ describe('VariableDeclarator tests', () => {
     sandbox.stub(esprimaParser, 'closureStack', {
       set: sandbox.spy()
     })
-    sandbox.stub(esprimaParser, 'parseNode', () => {
-      return 1
-    })
+    sandbox.stub(esprimaParser, 'parseNode', createLiteralStub())
   })
 
-  it('should call parseNode on init given non-null init', () => {
+  it('should call parseNode with init given non-null init', () => {
     variableDeclarator.init = createAstNode('Literal')
 
     esprimaParser.VariableDeclarator(variableDeclarator)
@@ -39,7 +37,7 @@ describe('VariableDeclarator tests', () => {
     ).to.be.true
   })
 
-  it('should not call parseNode on init given null init', () => {
+  it('should not call parseNode with init given null init', () => {
     variableDeclarator.init = null
 
     esprimaParser.VariableDeclarator(variableDeclarator)

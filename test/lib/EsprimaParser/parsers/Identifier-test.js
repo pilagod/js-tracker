@@ -11,6 +11,19 @@ describe('Identifier tests', () => {
     sandbox.stub(esprimaParser, 'closureStack', createClosureStackStub())
   })
 
+  it('should call get of closureStack with variable name', () => {
+    identifier.name = 'a'
+
+    esprimaParser.closureStack.get = sandbox.spy()
+
+    esprimaParser.Identifier(identifier)
+
+    expect(
+      esprimaParser.closureStack.get
+        .calledWithExactly('a')
+    ).to.be.true
+  })
+
   it('should return 1 given name \'a\', whose value is 1', () => {
     identifier.name = 'a'
     esprimaParser.closureStack.set('a', 1)
@@ -18,15 +31,9 @@ describe('Identifier tests', () => {
     expect(esprimaParser.Identifier(identifier)).to.be.equal(1)
   })
 
-  it('should return 2 given name \'b\', whose value is 2', () => {
-    identifier.name = 'b'
-    esprimaParser.closureStack.set('b', 2)
-
-    expect(esprimaParser.Identifier(identifier)).to.be.equal(2)
-  })
-
   it('should return undefined given name \'c\', which has no value assigned', () => {
     identifier.name = 'c'
+    esprimaParser.closureStack.set('c', undefined)
 
     expect(esprimaParser.Identifier(identifier)).to.be.equal(undefined)
   })

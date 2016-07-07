@@ -11,7 +11,7 @@ describe('VariableDeclaration tests', () => {
     sandbox.stub(esprimaParser, 'parseNode', sandbox.spy())
   })
 
-  it('should call parseNode on nodes in declarations', () => {
+  it('should call parseNode with nodes in declarations', () => {
     variableDeclaration.declarations = [
       createAstNode('VariableDeclarator'),
       createAstNode('VariableDeclarator')

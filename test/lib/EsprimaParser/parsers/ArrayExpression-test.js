@@ -15,15 +15,32 @@ describe('ArrayExpression tests', () => {
     expect(esprimaParser.ArrayExpression(arrayExpression)).to.be.eql([])
   })
 
+  it('should call parseNode with nodes in elements', () => {
+    arrayExpression.elements = [
+      createAstNode('Literal', {value: 1}),
+      createAstNode('Literal', {value: 2})
+    ]
+
+    sandbox.stub(esprimaParser, 'parseNode', sandbox.spy())
+
+    esprimaParser.ArrayExpression(arrayExpression)
+
+    arrayExpression.elements.forEach((node, index) => {
+      expect(
+        esprimaParser.parseNode
+          .getCall(index)
+          .calledWithExactly(node)
+      ).to.be.true
+    })
+  })
+
   it('should return [1, 2] given elements with two nodes whose value is 1 and 2 respectively', () => {
     arrayExpression.elements = [
       createAstNode('Literal', {value: 1}),
       createAstNode('Literal', {value: 2})
     ]
 
-    sandbox.stub(esprimaParser, 'parseNode', (literal) => {
-      return literal.value
-    })
+    sandbox.stub(esprimaParser, 'parseNode', createLiteralStub())
 
     expect(esprimaParser.ArrayExpression(arrayExpression)).to.be.eql([1, 2])
   });

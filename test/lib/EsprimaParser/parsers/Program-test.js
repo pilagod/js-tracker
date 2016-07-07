@@ -11,7 +11,7 @@ describe('Program tests', () => {
     sandbox.stub(esprimaParser, 'parseNode', sandbox.spy())
   })
 
-  it('should call parseNode on nodes in body', () => {
+  it('should call parseNode with nodes in body', () => {
     program.body = [
       createAstNode('VariableDeclaration'),
       createAstNode('FunctionDeclaration'),

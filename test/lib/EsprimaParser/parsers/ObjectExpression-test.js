@@ -15,6 +15,30 @@ describe('ObjectExpression tests', () => {
     expect(esprimaParser.ObjectExpression(objectExpression)).to.be.eql({})
   })
 
+  it('should call parseNode with nodes in properties', () => {
+    objectExpression.properties = [
+      createAstNode('Property'),
+      createAstNode('Property')
+    ]
+
+    sandbox.stub(esprimaParser, 'parseNode', sandbox.spy(() => {
+      return {
+        key: null,
+        value: null
+      }
+    }))
+
+    esprimaParser.ObjectExpression(objectExpression)
+
+    objectExpression.properties.forEach((node, index) => {
+      expect(
+        esprimaParser.parseNode
+          .getCall(index)
+          .calledWithExactly(node)
+      ).to.be.true
+    })
+  })
+
   it('should return {a: 1, b: 2} given properties \'a: 1\' and \'b: 2\'', () => {
     objectExpression.properties = [
       createAstNode('Property', {

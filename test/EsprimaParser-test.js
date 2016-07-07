@@ -14,8 +14,6 @@ describe('EsprimaParser tests', () => {
     const EsprimaParser = require('../lib/EsprimaParser')
     const esprimaParserHelpers = require('./lib/EsprimaParser/helpers')
 
-    console.log('esprimaParser:', new EsprimaParser());
-
     before(() => {
       registerHelpers(esprimaParserHelpers)
     })
