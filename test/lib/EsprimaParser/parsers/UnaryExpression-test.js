@@ -8,33 +8,62 @@ describe('UnaryExpression tests', () => {
   beforeEach(() => {
     unaryExpression = createAstNode('UnaryExpression', {
       argument: createAstNode(),
-      operator: 'possibleOperator',
       prefix: true
     })
 
-    sandbox.stub(esprimaParser, 'getUnaryExpressionResult', sandbox.spy(() => {
-      return 'resultFromGetUnaryExpressionResult'
-    }))
     sandbox.stub(esprimaParser, 'unaryOperator', {
-      'possibleOperator': sandbox.spy()
+      'delete': () => 'deleteOperator',
+      'otherOperators': () => 'otherOperators'
     })
+    sandbox.stub(esprimaParser, 'handleOtherUnaryOperation', sandbox.spy(() => {
+      return 'resultFromHandleOtherUnaryOperation'
+    }))
+    sandbox.stub(esprimaParser, 'handleDeleteUnaryOperation', sandbox.spy(() => {
+      return 'resultFromHandleDeleteUnaryOperation'
+    }))
   })
 
-  it('should call getUnaryExpressionResult with argument and operation', () => {
+  it('should call handleOtherUnaryOperation with argument and proper operation given operator other than delete', () => {
+    unaryExpression.operator = 'otherOperators'
+
     esprimaParser.UnaryExpression(unaryExpression)
 
     expect(
-      esprimaParser.getUnaryExpressionResult
+      esprimaParser.handleOtherUnaryOperation
         .calledWithExactly(
           unaryExpression.argument,
-          esprimaParser.unaryOperator.possibleOperator
+          esprimaParser.unaryOperator.otherOperators
         )
     ).to.be.true
   })
 
-  it('should return result from getUnaryExpressionResult', () => {
+  it('should return result from handleOtherUnaryOperation given operator other than delete', () => {
+    unaryExpression.operator = 'otherOperators'
+
     const result = esprimaParser.UnaryExpression(unaryExpression)
 
-    expect(result).to.be.equal('resultFromGetUnaryExpressionResult')
+    expect(result).to.be.equal('resultFromHandleOtherUnaryOperation')
+  })
+
+  it('should call handleDeleteUnaryOperation with argument and delete operation given operator delete', () => {
+    unaryExpression.operator = 'delete'
+
+    esprimaParser.UnaryExpression(unaryExpression)
+
+    expect(
+      esprimaParser.handleDeleteUnaryOperation
+        .calledWithExactly(
+          unaryExpression.argument,
+          esprimaParser.unaryOperator.delete
+        )
+    ).to.be.true
+  })
+
+  it('should return result from handleDeleteUnaryOperation given operator delete', () => {
+    unaryExpression.operator = 'delete'
+
+    const result = esprimaParser.UnaryExpression(unaryExpression)
+
+    expect(result).to.be.equal('resultFromHandleDeleteUnaryOperation')
   })
 })
