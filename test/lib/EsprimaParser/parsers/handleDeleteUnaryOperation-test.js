@@ -54,7 +54,6 @@ describe('handleDeleteUnaryOperation tests', () => {
     before(() => {
       class Expression {
         getReference() {}
-        getProperty() {}
       }
       expression = new Expression()
     })
@@ -67,11 +66,11 @@ describe('handleDeleteUnaryOperation tests', () => {
       }))
       sandbox.stub(expression, 'getReference', sandbox.spy(() => {
         return {
-          b: 'delete property'
+          object: {
+            'b': 'delete property'
+          },
+          property: 'b'
         }
-      }))
-      sandbox.stub(expression, 'getProperty', sandbox.spy(() => {
-        return 'b'
       }))
     })
 

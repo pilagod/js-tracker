@@ -38,8 +38,46 @@ describe('UnaryOperator tests', () => {
   }
 
   describe('delete operator tests', () => {
-    // @TODO: identifier -> check if window has that value
-    // @TODO: array -> directly delete
-    // @TODO: member -> get ref first (executeExpression)
+    // case object
+    it('should delete object property given property name', () => {
+      const object = {a: 'delete property'}
+      const property = 'a'
+
+      const result = esprimaParser.unaryOperator.delete(object, property)
+
+      expect(object).to.be.eql({})
+      expect(result).to.be.true
+    })
+
+    it('should do nothing given non-existing property of object', () => {
+      const object = {b: 'should not delete this'}
+      const property = 'a'
+
+      const result = esprimaParser.unaryOperator.delete(object, property)
+
+      expect(object).to.be.eql({b: 'should not delete this'})
+      expect(result).to.be.true
+    })
+
+    // case array
+    it('should delete array element given index', () => {
+      const array = [1, 2, 3]
+      const index = 1
+
+      const result = esprimaParser.unaryOperator.delete(array, index)
+
+      expect(array[1]).to.be.undefined
+      expect(result).to.be.true
+    })
+
+    it('should do nothing given non-existing index of array', () => {
+      const array = [1, 2, 3]
+      const index = 3
+
+      const result = esprimaParser.unaryOperator.delete(array, index)
+
+      expect(array).to.be.eql([1, 2, 3])
+      expect(result).to.be.true
+    })
   })
 })
