@@ -12,33 +12,29 @@ describe('UnaryExpression tests', () => {
       prefix: true
     })
 
-    sandbox.stub(esprimaParser, 'parseNode', sandbox.spy(() => 'parsedArgument'))
+    sandbox.stub(esprimaParser, 'getUnaryExpressionResult', sandbox.spy(() => {
+      return 'resultFromGetUnaryExpressionResult'
+    }))
     sandbox.stub(esprimaParser, 'unaryOperator', {
-      'possibleOperator': sandbox.spy(() => 'resultFromOperation')
+      'possibleOperator': sandbox.spy()
     })
   })
 
-  it('should call parseNode with argument and pass result to operation', () => {
+  it('should call getUnaryExpressionResult with argument and operation', () => {
     esprimaParser.UnaryExpression(unaryExpression)
 
     expect(
-      esprimaParser.parseNode
-        .calledWithExactly(unaryExpression.argument)
+      esprimaParser.getUnaryExpressionResult
+        .calledWithExactly(
+          unaryExpression.argument,
+          esprimaParser.unaryOperator.possibleOperator
+        )
     ).to.be.true
   })
 
-  it('should pass parseNode result to operation', () => {
-    esprimaParser.UnaryExpression(unaryExpression)
-
-    expect(
-      esprimaParser.unaryOperator.possibleOperator
-        .calledWithExactly('parsedArgument')
-    ).to.be.true
-  })
-
-  it('should return result of operation', () => {
+  it('should return result from getUnaryExpressionResult', () => {
     const result = esprimaParser.UnaryExpression(unaryExpression)
 
-    expect(result).to.be.equal('resultFromOperation')
+    expect(result).to.be.equal('resultFromGetUnaryExpressionResult')
   })
 })
