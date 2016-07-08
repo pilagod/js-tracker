@@ -44,13 +44,17 @@ describe('BinaryOperator tests', () => {
           return left ^ right
         case '&':
           return left & right
-        case 'in':
-          return left in right
-        case 'instanceof':
-          return left instanceof right
         default:
       }
     }
+  })
+
+  describe('empty string operator test', () => {
+    it('should return right', () => {
+      const result = esprimaParser.binaryOperators['']('left', 'right')
+
+      expect(result).to.be.equal('right')
+    })
   })
 
   for (const operator of [
@@ -75,6 +79,7 @@ describe('BinaryOperator tests', () => {
 
   describe('\'in\' operator test', () => {
     it('should return correct result given left an object', () => {
+      // example from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/in
       const mycar = {make: "Honda", model: "Accord", year: 1998};
 
       expect(esprimaParser.binaryOperators.in('make', mycar)).to.be.true
@@ -86,6 +91,7 @@ describe('BinaryOperator tests', () => {
     })
 
     it('should return correct result given left an array', () => {
+      // example from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/in
       const trees = ["redwood", "bay", "cedar", "oak", "maple"];
 
       expect(esprimaParser.binaryOperators.in(0, trees)).to.be.true
@@ -101,6 +107,7 @@ describe('BinaryOperator tests', () => {
 
   describe('\'instanceof\' operator test', () => {
     it('should return correct result', () => {
+      // example from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/instanceof
       const simpleStr = 'This is a simple string';
       const myString = new String();
       const myDate = new Date();
