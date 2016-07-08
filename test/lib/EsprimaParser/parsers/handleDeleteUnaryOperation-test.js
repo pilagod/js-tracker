@@ -48,7 +48,7 @@ describe('handleDeleteUnaryOperation tests', () => {
   // case MemberExpression -> call parseMemberExpression,
   //                       -> executeExpression to get object,
   //                       -> delete property from object
-  describe('MemberExpression argument tests', () => {
+  describe('MemberExpression and CallExpression argument tests', () => {
     let expression
 
     before(() => {
@@ -59,11 +59,6 @@ describe('handleDeleteUnaryOperation tests', () => {
     })
 
     beforeEach(() => {
-      argument = createAstNode('MemberExpression')
-
-      sandbox.stub(esprimaParser, 'parseMemberExpression', sandbox.spy(() => {
-        return expression
-      }))
       sandbox.stub(expression, 'getReference', sandbox.spy(() => {
         return {
           object: {
@@ -74,29 +69,41 @@ describe('handleDeleteUnaryOperation tests', () => {
       }))
     })
 
-    it('should call parseMemberExpression with argument', () => {
-      esprimaParser.handleDeleteUnaryOperation(argument, deleteOperationSpy)
+    for (const type of ['MemberExpression', 'CallExpression']) {
+      describe(`${type} argument tests`, () => {
+        beforeEach(() => {
+          argument = createAstNode(type)
 
-      expect(
-        esprimaParser.parseMemberExpression
-          .calledWithExactly(argument)
-      ).to.be.true
-    })
+          sandbox.stub(esprimaParser, `parse${type}`, sandbox.spy(() => {
+            return expression
+          }))
+        })
 
-    it('should call delete operation with object and property from result of parseMemberExpression', () => {
-      esprimaParser.handleDeleteUnaryOperation(argument, deleteOperationSpy)
+        it(`should call parse${type} with argument`, () => {
+          esprimaParser.handleDeleteUnaryOperation(argument, deleteOperationSpy)
 
-      expect(
-        deleteOperationSpy
-          .calledWithExactly({b: 'delete property'}, 'b')
-      ).to.be.true
-    })
+          expect(
+            esprimaParser[`parse${type}`]
+              .calledWithExactly(argument)
+          ).to.be.true
+        })
 
-    it('should return result from delete operation', () => {
-      const result = esprimaParser.handleDeleteUnaryOperation(argument, deleteOperationSpy)
+        it(`should call delete operation with object and property from result of parse${type}`, () => {
+          esprimaParser.handleDeleteUnaryOperation(argument, deleteOperationSpy)
 
-      expect(result).to.be.equal('resultFromDeleteOperation')
-    })
+          expect(
+            deleteOperationSpy
+              .calledWithExactly({b: 'delete property'}, 'b')
+          ).to.be.true
+        })
+
+        it('should return result from delete operation', () => {
+          const result = esprimaParser.handleDeleteUnaryOperation(argument, deleteOperationSpy)
+
+          expect(result).to.be.equal('resultFromDeleteOperation')
+        })
+      })
+    }
   })
 
   // case Other -> retrun true only
