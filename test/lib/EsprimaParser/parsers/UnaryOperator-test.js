@@ -29,7 +29,7 @@ describe('UnaryOperator tests', () => {
     describe(`\'${operator}\' operator tests`, () => {
       it('should return correct result', () => {
         for (const argument of ['string', 1, true, null, undefined]) {
-          const result = esprimaParser.unaryOperator[operator](argument)
+          const result = esprimaParser.unaryOperators[operator](argument)
 
           expect(result).to.be.eql(getUnaryOperationResult(operator, argument))
         }
@@ -43,7 +43,7 @@ describe('UnaryOperator tests', () => {
       const object = {a: 'delete property'}
       const property = 'a'
 
-      const result = esprimaParser.unaryOperator.delete(object, property)
+      const result = esprimaParser.unaryOperators.delete(object, property)
 
       expect(object).to.be.eql({})
       expect(result).to.be.true
@@ -53,7 +53,7 @@ describe('UnaryOperator tests', () => {
       const object = {b: 'should not delete this'}
       const property = 'a'
 
-      const result = esprimaParser.unaryOperator.delete(object, property)
+      const result = esprimaParser.unaryOperators.delete(object, property)
 
       expect(object).to.be.eql({b: 'should not delete this'})
       expect(result).to.be.true
@@ -64,7 +64,7 @@ describe('UnaryOperator tests', () => {
       const array = [1, 2, 3]
       const index = 1
 
-      const result = esprimaParser.unaryOperator.delete(array, index)
+      const result = esprimaParser.unaryOperators.delete(array, index)
 
       expect(array[1]).to.be.undefined
       expect(result).to.be.true
@@ -74,7 +74,7 @@ describe('UnaryOperator tests', () => {
       const array = [1, 2, 3]
       const index = 3
 
-      const result = esprimaParser.unaryOperator.delete(array, index)
+      const result = esprimaParser.unaryOperators.delete(array, index)
 
       expect(array).to.be.eql([1, 2, 3])
       expect(result).to.be.true

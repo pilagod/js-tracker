@@ -11,7 +11,7 @@ describe('UnaryExpression tests', () => {
       prefix: true
     })
 
-    sandbox.stub(esprimaParser, 'unaryOperator', {
+    sandbox.stub(esprimaParser, 'unaryOperators', {
       'delete': () => 'delete',
       'otherOperators': () => 'otherOperators'
     })
@@ -34,7 +34,7 @@ describe('UnaryExpression tests', () => {
         esprimaParser.handleOtherUnaryOperation
           .calledWithExactly(
             unaryExpression.argument,
-            esprimaParser.unaryOperator.otherOperators
+            esprimaParser.unaryOperators.otherOperators
           )
       ).to.be.true
     })
@@ -59,7 +59,7 @@ describe('UnaryExpression tests', () => {
         esprimaParser.handleDeleteUnaryOperation
           .calledWithExactly(
             unaryExpression.argument,
-            esprimaParser.unaryOperator.delete
+            esprimaParser.unaryOperators.delete
           )
       ).to.be.true
     })
