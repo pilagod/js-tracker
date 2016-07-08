@@ -26,7 +26,7 @@ describe('UnaryOperator tests', () => {
   })
 
   for (const operator of ['-', '+', '!', '~', 'typeof', 'void']) {
-    describe(`\'${operator}\' operator tests`, () => {
+    describe(`\'${operator}\' operator test`, () => {
       it('should return correct result', () => {
         for (const argument of ['string', 1, true, null, undefined]) {
           const result = esprimaParser.unaryOperators[operator](argument)
