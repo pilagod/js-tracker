@@ -1,11 +1,11 @@
 'use strict'
 
 describe('handleOtherUnaryOperation tests', () => {
-  let argument, operationSpy
+  let argument, unaryOperationSpy
 
   beforeEach(() => {
     argument = createAstNode()
-    operationSpy = sandbox.spy(() => 'resultFromOperation')
+    unaryOperationSpy = sandbox.spy(() => 'resultFromUnaryOperation')
 
     sandbox.stub(esprimaParser, 'parseNode', sandbox.spy(() => 'parsedArgument'))
   })
@@ -19,15 +19,15 @@ describe('handleOtherUnaryOperation tests', () => {
     ).to.be.true
   })
 
-  it('should pass result from parseNode to operation', () => {
-    esprimaParser.handleOtherUnaryOperation(argument, operationSpy)
+  it('should pass result from parseNode to unary operation', () => {
+    esprimaParser.handleOtherUnaryOperation(argument, unaryOperationSpy)
 
-    expect(operationSpy.calledWithExactly('parsedArgument')).to.be.true
+    expect(unaryOperationSpy.calledWithExactly('parsedArgument')).to.be.true
   })
 
-  it('should return result from operation', () => {
-    const result = esprimaParser.handleOtherUnaryOperation(argument, operationSpy)
+  it('should return result from unary operation', () => {
+    const result = esprimaParser.handleOtherUnaryOperation(argument, unaryOperationSpy)
 
-    expect(result).to.be.equal('resultFromOperation')
+    expect(result).to.be.equal('resultFromUnaryOperation')
   })
 })
