@@ -12,7 +12,7 @@ describe('UnaryExpression tests', () => {
     })
 
     sandbox.stub(esprimaParser, 'unaryOperator', {
-      'delete': () => 'deleteOperator',
+      'delete': () => 'delete',
       'otherOperators': () => 'otherOperators'
     })
     sandbox.stub(esprimaParser, 'handleOtherUnaryOperation', sandbox.spy(() => {
@@ -23,6 +23,7 @@ describe('UnaryExpression tests', () => {
     }))
   })
 
+  // operators other than delete
   it('should call handleOtherUnaryOperation with argument and proper operation given operator other than delete', () => {
     unaryExpression.operator = 'otherOperators'
 
@@ -45,6 +46,7 @@ describe('UnaryExpression tests', () => {
     expect(result).to.be.equal('resultFromHandleOtherUnaryOperation')
   })
 
+  // operator delete
   it('should call handleDeleteUnaryOperation with argument and delete operation given operator delete', () => {
     unaryExpression.operator = 'delete'
 
