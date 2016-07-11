@@ -13,9 +13,8 @@ describe('BinaryExpression tests', () => {
     sandbox.stub(esprimaParser, 'parseNode', sandbox.spy((node) => {
       if (node.value === 'left') {
         return 'parsed left'
-      } else if (node.value === 'right') {
-        return 'parsed right'
       }
+      return 'parsed right'
     }))
     sandbox.stub(esprimaParser, 'binaryOperators', {
       'possibleBinaryOperator': sandbox.spy(() => {
@@ -42,7 +41,7 @@ describe('BinaryExpression tests', () => {
     ).to.be.true
   })
 
-  it('should call binary operation with parsed left and right then return the result', () => {
+  it('should call proper binary operation with parsed left and right then return the result', () => {
     const result = esprimaParser.BinaryExpression(binaryExpression)
 
     expect(

@@ -1,5 +1,3 @@
-'use strict'
-
 describe('transformUpdateToAssignment tests', () => {
   for (const operator of [['++', '+='], ['--', '-=']]) {
     it(`should return AssignmentExpression \'${operator[1]}\' format from UpdateExpression \'${operator[0]}\'`, () => {
