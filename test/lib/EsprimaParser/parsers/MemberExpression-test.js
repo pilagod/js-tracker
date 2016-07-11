@@ -15,22 +15,22 @@ describe('MemberExpression tests', () => {
   beforeEach(() => {
     memberExpression = createAstNode('MemberExpression')
 
-    sandbox.stub(esprimaParser, 'parseMemberExpression', sandbox.spy(() => {
+    sandbox.stub(esprimaParser, 'parseExpression', sandbox.spy(() => {
       return expression
     }))
     sandbox.spy(expression, 'execute')
   })
 
-  it('should call parseMemberExpression with memberExpression', () => {
+  it('should call parseExpression with memberExpression', () => {
     esprimaParser.MemberExpression(memberExpression)
 
     expect(
-      esprimaParser.parseMemberExpression
+      esprimaParser.parseExpression
         .calledWithExactly(memberExpression)
     ).to.be.true
   })
 
-  it('should call execute of expression object return from parseMemberExpression', () => {
+  it('should call execute of expression object return from parseExpression', () => {
     esprimaParser.MemberExpression(memberExpression)
 
     expect(expression.execute.calledOnce).to.be.true

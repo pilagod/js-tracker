@@ -59,16 +59,16 @@ describe('handleReferenceOperation tests', () => {
         beforeEach(() => {
           argument = createAstNode(type)
 
-          sandbox.stub(esprimaParser, `parse${type}`, sandbox.spy(() => {
+          sandbox.stub(esprimaParser, `parseExpression`, sandbox.spy(() => {
             return expression
           }))
         })
 
-        it(`should call parse${type} with argument`, () => {
+        it(`should call parseExpression with argument`, () => {
           esprimaParser.handleReferenceOperation(argument, operationSpy, ...[])
 
           expect(
-            esprimaParser[`parse${type}`]
+            esprimaParser.parseExpression
               .calledWithExactly(argument)
           ).to.be.true
         })
