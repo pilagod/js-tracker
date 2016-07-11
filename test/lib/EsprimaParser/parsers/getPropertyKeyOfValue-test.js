@@ -1,5 +1,3 @@
-'use strict'
-
 describe('getPropertyKeyOfValue tests', () => {
   for (const computed of [false, true]) {
     it(`should ${computed ? '' : 'not '}call parseNode ${computed ? 'with key ' : ''}given computed ${computed}`, () => {
@@ -41,7 +39,7 @@ describe('getPropertyKeyOfValue tests', () => {
         createAstNode('Literal', {value: 'b'}),
         computed
       )
-      
+
       expect(result).to.be.equal('b')
     })
   }

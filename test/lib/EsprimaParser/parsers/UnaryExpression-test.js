@@ -1,5 +1,3 @@
-'use strict'
-
 // spec: https://github.com/estree/estree/blob/bc34a7cc861640aa8ee18d93186720be1b13db53/spec.md#unaryexpression
 
 describe('UnaryExpression tests', () => {
@@ -15,7 +13,7 @@ describe('UnaryExpression tests', () => {
       'delete': () => 'delete',
       'otherOperators': () => 'otherOperators'
     })
-    sandbox.stub(esprimaParser, 'handleOtherUnaryOperation', sandbox.spy(() => {
+    sandbox.stub(esprimaParser, 'handleUnaryOperation', sandbox.spy(() => {
       return 'resultFromHandleOtherUnaryOperation'
     }))
     sandbox.stub(esprimaParser, 'handleDeleteUnaryOperation', sandbox.spy(() => {
@@ -25,13 +23,13 @@ describe('UnaryExpression tests', () => {
 
   describe('operations other than delete tests', () => {
     // operators other than delete
-    it('should call handleOtherUnaryOperation with argument and proper operation', () => {
+    it('should call handleUnaryOperation with argument and proper operation', () => {
       unaryExpression.operator = 'otherOperators'
 
       esprimaParser.UnaryExpression(unaryExpression)
 
       expect(
-        esprimaParser.handleOtherUnaryOperation
+        esprimaParser.handleUnaryOperation
           .calledWithExactly(
             unaryExpression.argument,
             esprimaParser.unaryOperators.otherOperators
@@ -39,7 +37,7 @@ describe('UnaryExpression tests', () => {
       ).to.be.true
     })
 
-    it('should return result from handleOtherUnaryOperation', () => {
+    it('should return result from handleUnaryOperation', () => {
       unaryExpression.operator = 'otherOperators'
 
       const result = esprimaParser.UnaryExpression(unaryExpression)

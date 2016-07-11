@@ -1,5 +1,3 @@
-'use strict'
-
 describe('BinaryOperator tests', () => {
   let getBinaryOperatorResult
 

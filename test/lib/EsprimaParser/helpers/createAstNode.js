@@ -1,5 +1,3 @@
-'use strict'
-
 module.exports = (type, props) => {
   if (props) {
     return Object.assign({}, {

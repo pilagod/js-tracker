@@ -1,5 +1,3 @@
-'use strict'
-
 describe('AssignmentExpression tests', () => {
   let assignmentExpression
 

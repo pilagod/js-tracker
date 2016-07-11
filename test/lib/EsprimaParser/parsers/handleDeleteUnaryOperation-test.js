@@ -1,5 +1,3 @@
-'use strict'
-
 describe('handleDeleteUnaryOperation tests', () => {
   let argument, deleteOperationSpy
 

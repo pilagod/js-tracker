@@ -1,5 +1,3 @@
-'use strict'
-
 describe('getPropertyKeyOfString tests', () => {
   it('should call getPropertyKeyOfValue with key and computed', () => {
     sandbox.stub(esprimaParser, 'getPropertyKeyOfValue', sandbox.spy())

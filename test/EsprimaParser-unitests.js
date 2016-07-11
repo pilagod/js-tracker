@@ -1,5 +1,3 @@
-'use strict'
-
 const importTestsFrom = require('./helpers/importTestsFrom')
 const registerHelpers = require('./helpers/registerHelpers')
 const unregisterHelpers = require('./helpers/unregisterHelpers')

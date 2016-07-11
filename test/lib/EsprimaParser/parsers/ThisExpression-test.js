@@ -1,5 +1,3 @@
-'use strict'
-
 // spec: https://github.com/estree/estree/blob/master/spec.md#thisexpression
 
 describe('ThisExpression tests', () => {
