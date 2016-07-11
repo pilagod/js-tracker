@@ -4,7 +4,7 @@
   "description": "A chrome extension tracking the behavior of javascript manipulating html elements on web",
   "main": "index.js",
   "scripts": {
-    "test": "mocha --harmony",
+    "test": "mocha",
     "dev": "watchify lib/EsprimaParser/index-es6.js -o lib/EsprimaParser/index.js"
   },
   "repository": {

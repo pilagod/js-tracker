@@ -36,46 +36,63 @@ describe('UnaryOperator tests', () => {
   }
 
   describe('delete operator tests', () => {
-    // case object
-    it('should delete object property given property name', () => {
-      const object = {a: 'delete property'}
-      const property = 'a'
+    let target
 
-      const result = esprimaParser.unaryOperators.delete(object, property)
-
-      expect(object).to.be.eql({})
-      expect(result).to.be.true
+    // case Identifier
+    describe('Identifier tests', () => {
+      
     })
 
-    it('should do nothing given non-existing property of object', () => {
-      const object = {b: 'should not delete this'}
-      const property = 'a'
+    describe('Object tests', () => {
+      beforeEach(() => {
+        target = {
+          property: 'a'
+        }
+      })
 
-      const result = esprimaParser.unaryOperators.delete(object, property)
+      it('should delete object property given property name', () => {
+        target.object = {a: 'delete property'}
 
-      expect(object).to.be.eql({b: 'should not delete this'})
-      expect(result).to.be.true
+        const result = esprimaParser.unaryOperators.delete(target)
+
+        expect(target.object).to.be.eql({})
+        expect(result).to.be.true
+      })
+
+      it('should do nothing given non-existing property of object', () => {
+        target.object = {b: 'should not delete this'}
+
+        const result = esprimaParser.unaryOperators.delete(target)
+
+        expect(target.object).to.be.eql({b: 'should not delete this'})
+        expect(result).to.be.true
+      })
     })
 
-    // case array
-    it('should delete array element given index', () => {
-      const array = [1, 2, 3]
-      const index = 1
+    describe('Array tests', () => {
+      beforeEach(() => {
+        target = {
+          object: [1, 2, 3],
+        }
+      })
 
-      const result = esprimaParser.unaryOperators.delete(array, index)
+      it('should delete array element given index', () => {
+        target.property = 1
 
-      expect(array[1]).to.be.undefined
-      expect(result).to.be.true
-    })
+        const result = esprimaParser.unaryOperators.delete(target)
 
-    it('should do nothing given non-existing index of array', () => {
-      const array = [1, 2, 3]
-      const index = 3
+        expect(target.object[1]).to.be.undefined
+        expect(result).to.be.true
+      })
 
-      const result = esprimaParser.unaryOperators.delete(array, index)
+      it('should do nothing given non-existing index of array', () => {
+        target.property = 3
 
-      expect(array).to.be.eql([1, 2, 3])
-      expect(result).to.be.true
+        const result = esprimaParser.unaryOperators.delete(target)
+
+        expect(target.object).to.be.eql([1, 2, 3])
+        expect(result).to.be.true
+      })
     })
   })
 })

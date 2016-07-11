@@ -9,7 +9,7 @@ describe('handleUnaryOperation tests', () => {
   })
 
   it('should call parseNode with argument', () => {
-    esprimaParser.handleUnaryOperation(argument, () => {})
+    esprimaParser.handleOperation(argument, () => {})
 
     expect(
       esprimaParser.parseNode
@@ -18,13 +18,13 @@ describe('handleUnaryOperation tests', () => {
   })
 
   it('should pass result from parseNode to unary operation', () => {
-    esprimaParser.handleUnaryOperation(argument, unaryOperationSpy)
+    esprimaParser.handleOperation(argument, unaryOperationSpy)
 
     expect(unaryOperationSpy.calledWithExactly('parsedArgument')).to.be.true
   })
 
   it('should return result from unary operation', () => {
-    const result = esprimaParser.handleUnaryOperation(argument, unaryOperationSpy)
+    const result = esprimaParser.handleOperation(argument, unaryOperationSpy)
 
     expect(result).to.be.equal('resultFromUnaryOperation')
   })

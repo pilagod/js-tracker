@@ -1,21 +1,99 @@
 describe('handleReferenceOperation tests', () => {
-  let argument, operationSpy
+  let argument, remainingArgs, operationSpy
+
+  before(() => {
+    remainingArgs = [1, 'string', true, null, undefined]
+  })
 
   beforeEach(() => {
     operationSpy = sandbox.spy(() => 'resultFromOperation')
   })
 
+  // case Identifier -> call operation with reference property and remaining arguments
   describe('Identifier argument tests', () => {
     beforeEach(() => {
       argument = createAstNode('Identifier', {name: 'a'})
     })
 
-    it('should ')
+    it('should call operation with {property: \'a\'} and remaining arguments', () => {
+      esprimaParser.handleReferenceOperation(argument, operationSpy, ...remainingArgs)
+
+      expect(
+        operationSpy
+          .calledWithExactly({property: 'a'}, ...remainingArgs)
+      ).to.be.true
+    })
+
+    it('should return the result from operation', () => {
+      const result = esprimaParser.handleReferenceOperation(argument, operationSpy, ...remainingArgs)
+
+      expect(result).to.be.equal('resultFromOperation')
+    })
   })
 
+  // case MemberExpression -> call parse${type},
+  //                       -> call getReference to get object and property,
+  //                       -> call operation with reference and remaining arguments
   describe('MemberExpression and CallExpression argument tests', () => {
-  })
+    const referenceStub = {
+      object: {'b': 'operated property'},
+      property: 'b'
+    }
+    let expression
 
-  describe('Other argument tests', () => {
+    before(() => {
+      class Expression {
+        getReference() {}
+      }
+      expression = new Expression()
+    })
+
+    beforeEach(() => {
+      sandbox.stub(expression, 'getReference', sandbox.spy(() => {
+        return referenceStub
+      }))
+    })
+
+    for (const type of ['MemberExpression', 'CallExpression']) {
+      describe(`${type} argument tests`, () => {
+        beforeEach(() => {
+          argument = createAstNode(type)
+
+          sandbox.stub(esprimaParser, `parse${type}`, sandbox.spy(() => {
+            return expression
+          }))
+        })
+
+        it(`should call parse${type} with argument`, () => {
+          esprimaParser.handleReferenceOperation(argument, operationSpy, ...[])
+
+          expect(
+            esprimaParser[`parse${type}`]
+              .calledWithExactly(argument)
+          ).to.be.true
+        })
+
+        it('should call getReference of parsed expression', () => {
+          esprimaParser.handleReferenceOperation(argument, operationSpy, ...[])
+
+          expect(expression.getReference.calledOnce).to.be.true
+        })
+
+        it(`should call operation with referenceStub and remaining arguments`, () => {
+          esprimaParser.handleReferenceOperation(argument, operationSpy, ...remainingArgs)
+
+          expect(
+            operationSpy
+              .calledWithExactly(referenceStub, ...remainingArgs)
+          ).to.be.true
+        })
+
+        it('should return result from operation', () => {
+          const result = esprimaParser.handleReferenceOperation(argument, operationSpy, ...remainingArgs)
+
+          expect(result).to.be.equal('resultFromOperation')
+        })
+      })
+    }
   })
 })
