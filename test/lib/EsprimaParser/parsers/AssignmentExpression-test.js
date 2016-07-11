@@ -11,7 +11,7 @@ describe('AssignmentExpression tests', () => {
     sandbox.stub(esprimaParser, 'BinaryExpression', sandbox.spy(() => {
       return 'resultFromBinaryExpression'
     }))
-    sandbox.stub(esprimaParser, 'handleAssignment', sandbox.spy())
+    sandbox.stub(esprimaParser, 'handleReferenceOperation', sandbox.spy())
   })
 
   it('should call BinaryExpression with replaced operator', () => {
@@ -24,12 +24,16 @@ describe('AssignmentExpression tests', () => {
     )
   })
 
-  it('should call handleAssignment with left and new value', () => {
+  it('should call handleReferenceOperation with left, handleAssignment and new value', () => {
     esprimaParser.AssignmentExpression(assignmentExpression)
 
     expect(
-      esprimaParser.handleAssignment
-        .calledWithExactly(assignmentExpression.left, 'resultFromBinaryExpression')
+      esprimaParser.handleReferenceOperation
+        .calledWithExactly(
+          assignmentExpression.left,
+          esprimaParser.assignmentOperators['='],
+          'resultFromBinaryExpression'
+        )
     ).to.be.true
   })
 

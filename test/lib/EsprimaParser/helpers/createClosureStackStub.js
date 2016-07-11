@@ -6,6 +6,9 @@ module.exports = () => {
     },
     set(name, value) {
       closure[name] = value
+    },
+    update(name, value) {
+      closure[name] = value
     }
   }
 }
