@@ -43,15 +43,15 @@ describe('handleReferenceOperation tests', () => {
 
     before(() => {
       class Expression {
-        getReference() {}
+        getReference() {
+          return referenceStub
+        }
       }
       expression = new Expression()
     })
 
     beforeEach(() => {
-      sandbox.stub(expression, 'getReference', sandbox.spy(() => {
-        return referenceStub
-      }))
+      sandbox.spy(expression, 'getReference')
     })
 
     for (const type of ['MemberExpression', 'CallExpression']) {
