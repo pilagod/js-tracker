@@ -40,18 +40,46 @@ describe('UnaryOperator tests', () => {
 
     // case Identifier
     describe('Identifier tests', () => {
-      
+      let windowStub
+
+      beforeEach(() => {
+        windowStub = {
+          a: 'delete property'
+        }
+
+        sandbox.stub(esprimaParser, 'closureStack', {
+          get: () => windowStub
+        })
+      })
+
+      it('should delete window property given property name but no object referecne', () => {
+        target = {property: 'a'}
+
+        const result = esprimaParser.unaryOperators.delete(target)
+
+        expect(windowStub).to.be.eql({})
+        expect(result).to.be.true
+      })
+
+      it('should do nothing given non-existing property of window', () => {
+        target = {property: 'b'}
+
+        const result = esprimaParser.unaryOperators.delete(target)
+
+        expect(windowStub).to.be.eql({a: 'delete property'})
+        expect(result).to.be.true
+      })
     })
 
     describe('Object tests', () => {
       beforeEach(() => {
         target = {
-          property: 'a'
+          object: {a: 'delete property'}
         }
       })
 
       it('should delete object property given property name', () => {
-        target.object = {a: 'delete property'}
+        target.property = 'a'
 
         const result = esprimaParser.unaryOperators.delete(target)
 
@@ -60,11 +88,11 @@ describe('UnaryOperator tests', () => {
       })
 
       it('should do nothing given non-existing property of object', () => {
-        target.object = {b: 'should not delete this'}
+        target.property = 'b'
 
         const result = esprimaParser.unaryOperators.delete(target)
 
-        expect(target.object).to.be.eql({b: 'should not delete this'})
+        expect(target.object).to.be.eql({a: 'delete property'})
         expect(result).to.be.true
       })
     })
@@ -72,7 +100,7 @@ describe('UnaryOperator tests', () => {
     describe('Array tests', () => {
       beforeEach(() => {
         target = {
-          object: [1, 2, 3],
+          object: [1, 2, 3]
         }
       })
 
