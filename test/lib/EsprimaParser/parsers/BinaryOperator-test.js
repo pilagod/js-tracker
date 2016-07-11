@@ -62,7 +62,7 @@ describe('BinaryOperator tests', () => {
     "+", "-", "*", "/", "%",
     "|", "^", "&"]
   ) {
-    describe(`\'${operator}\' operator test`, () => {
+    describe(`'${operator}' operator test`, () => {
       it('should return correct result', () => {
         for (const left of ['string', 1, true, null, undefined]) {
           for (const right of ['string', 1, true, null, undefined]) {
