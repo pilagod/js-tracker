@@ -5,6 +5,8 @@ describe('ArrayExpression tests', () => {
 
   beforeEach(() => {
     arrayExpression = createAstNode('ArrayExpression')
+
+    sandbox.stub(esprimaParser, 'parseNode', createLiteralStub())
   })
 
   it('should return [] given no elements', () => {
@@ -18,8 +20,6 @@ describe('ArrayExpression tests', () => {
       createAstNode('Literal', {value: 1}),
       createAstNode('Literal', {value: 2})
     ]
-
-    sandbox.stub(esprimaParser, 'parseNode', sandbox.spy())
 
     esprimaParser.ArrayExpression(arrayExpression)
 
@@ -37,8 +37,6 @@ describe('ArrayExpression tests', () => {
       createAstNode('Literal', {value: 1}),
       createAstNode('Literal', {value: 2})
     ]
-
-    sandbox.stub(esprimaParser, 'parseNode', createLiteralStub())
 
     const result = esprimaParser.ArrayExpression(arrayExpression)
 

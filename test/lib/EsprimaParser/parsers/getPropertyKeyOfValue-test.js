@@ -7,7 +7,7 @@ describe('getPropertyKeyOfValue tests', () => {
       esprimaParser.getPropertyKeyOfValue(key, computed)
 
       if (computed) {
-        // should call with key given compted true
+        // should call with key given computed true
         expect(esprimaParser.parseNode.calledWithExactly(key)).to.be.true
       } else {
         // should not call given computed false

@@ -2,10 +2,10 @@ describe('handleUnaryOperation tests', () => {
   let argument, unaryOperationSpy
 
   beforeEach(() => {
-    argument = createAstNode()
+    argument = createAstNode('Literal', {value: 'parsedArgument'})
     unaryOperationSpy = sandbox.spy(() => 'resultFromUnaryOperation')
 
-    sandbox.stub(esprimaParser, 'parseNode', sandbox.spy(() => 'parsedArgument'))
+    sandbox.stub(esprimaParser, 'parseNode', sandbox.spy(createLiteralStub()))
   })
 
   it('should call parseNode with argument', () => {
