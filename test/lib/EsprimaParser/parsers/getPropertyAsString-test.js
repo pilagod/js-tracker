@@ -1,20 +1,20 @@
 describe('getPropertyKeyOfString tests', () => {
   it('should call getPropertyKeyOfValue with key and computed', () => {
-    sandbox.stub(esprimaParser, 'getPropertyKeyOfValue', sandbox.spy())
+    sandbox.stub(esprimaParser, 'getPropertyValue', sandbox.spy())
 
-    esprimaParser.getPropertyKeyOfString('key', 'computed')
+    esprimaParser.getPropertyAsString('key', 'computed')
 
     expect(
-      esprimaParser.getPropertyKeyOfValue
+      esprimaParser.getPropertyValue
         .calledWithExactly('key', 'computed')
     ).to.be.true
   })
 
   for (const value of ['string', 1, true, null, undefined]) {
     it(`should return string \'${value}\' given key value ${value}`, () => {
-      sandbox.stub(esprimaParser, 'getPropertyKeyOfValue', () => value)
+      sandbox.stub(esprimaParser, 'getPropertyValue', () => value)
 
-      const result = esprimaParser.getPropertyKeyOfString(null, null)
+      const result = esprimaParser.getPropertyAsString(null, null)
 
       expect(result).to.be.equal(`${value}`)
     })

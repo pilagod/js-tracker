@@ -47,7 +47,7 @@ describe('BinaryOperator tests', () => {
     }
   })
 
-  describe('empty string operator test', () => {
+  describe('empty string operator', () => {
     it('should return right', () => {
       const result = esprimaParser.binaryOperators['']('left', 'right')
 
@@ -62,7 +62,7 @@ describe('BinaryOperator tests', () => {
     "+", "-", "*", "/", "%",
     "|", "^", "&"]
   ) {
-    describe(`'${operator}' operator test`, () => {
+    describe(`'${operator}' operator`, () => {
       it('should return correct result', () => {
         for (const left of ['string', 1, true, null, undefined]) {
           for (const right of ['string', 1, true, null, undefined]) {
@@ -75,7 +75,7 @@ describe('BinaryOperator tests', () => {
     })
   }
 
-  describe('\'in\' operator test', () => {
+  describe('\'in\' operator', () => {
     it('should return correct result given left an object', () => {
       // example from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/in
       const mycar = {make: "Honda", model: "Accord", year: 1998};
@@ -103,7 +103,7 @@ describe('BinaryOperator tests', () => {
     })
   })
 
-  describe('\'instanceof\' operator test', () => {
+  describe('\'instanceof\' operator', () => {
     it('should return correct result', () => {
       // example from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/instanceof
       const simpleStr = 'This is a simple string';

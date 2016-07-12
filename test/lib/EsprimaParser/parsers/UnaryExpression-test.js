@@ -21,7 +21,7 @@ describe('UnaryExpression tests', () => {
     }))
   })
 
-  describe('operations other than delete tests', () => {
+  describe('operations other than delete', () => {
     // operators other than delete
     it('should call handleOperation with argument and proper operation', () => {
       unaryExpression.operator = 'otherOperators'
@@ -46,7 +46,7 @@ describe('UnaryExpression tests', () => {
     })
   })
 
-  describe('operation delete tests', () => {
+  describe('operation delete', () => {
     // operator delete
     it('should call handleReferenceOperation with argument and delete operation', () => {
       unaryExpression.operator = 'delete'

@@ -24,7 +24,7 @@ describe('UnaryOperator tests', () => {
   })
 
   for (const operator of ['-', '+', '!', '~', 'typeof', 'void']) {
-    describe(`'${operator}' operator test`, () => {
+    describe(`'${operator}' operator`, () => {
       it('should return correct result', () => {
         for (const argument of ['string', 1, true, null, undefined]) {
           const result = esprimaParser.unaryOperators[operator](argument)
@@ -35,11 +35,11 @@ describe('UnaryOperator tests', () => {
     })
   }
 
-  describe('delete operator tests', () => {
+  describe('delete operator', () => {
     let target
 
     // case Identifier
-    describe('Identifier tests', () => {
+    describe('Identifier', () => {
       let windowStub
 
       beforeEach(() => {
@@ -71,7 +71,7 @@ describe('UnaryOperator tests', () => {
       })
     })
 
-    describe('Object tests', () => {
+    describe('Object', () => {
       beforeEach(() => {
         target = {
           object: {a: 'delete property'}
@@ -97,7 +97,7 @@ describe('UnaryOperator tests', () => {
       })
     })
 
-    describe('Array tests', () => {
+    describe('Array', () => {
       beforeEach(() => {
         target = {
           object: [1, 2, 3]

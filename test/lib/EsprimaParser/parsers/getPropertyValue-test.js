@@ -4,7 +4,7 @@ describe('getPropertyKeyOfValue tests', () => {
       sandbox.stub(esprimaParser, 'parseNode', sandbox.spy())
 
       const key = createAstNode() // empty ast node
-      esprimaParser.getPropertyKeyOfValue(key, computed)
+      esprimaParser.getPropertyValue(key, computed)
 
       if (computed) {
         // should call with key given computed true
@@ -22,7 +22,7 @@ describe('getPropertyKeyOfValue tests', () => {
         })
       }
 
-      const result = esprimaParser.getPropertyKeyOfValue(
+      const result = esprimaParser.getPropertyValue(
         createAstNode('Identifier', {name: 'a'}),
         computed
       )
@@ -35,7 +35,7 @@ describe('getPropertyKeyOfValue tests', () => {
         sandbox.stub(esprimaParser, 'parseNode', createLiteralStub())
       }
 
-      const result = esprimaParser.getPropertyKeyOfValue(
+      const result = esprimaParser.getPropertyValue(
         createAstNode('Literal', {value: 'b'}),
         computed
       )

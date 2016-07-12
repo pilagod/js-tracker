@@ -9,7 +9,7 @@ describe('Property tests', () => {
       value: createAstNode('Literal', {value: 1})
     })
 
-    sandbox.stub(esprimaParser, 'getPropertyKeyOfString', sandbox.spy(createLiteralStub()))
+    sandbox.stub(esprimaParser, 'getPropertyAsString', sandbox.spy(createLiteralStub()))
     sandbox.stub(esprimaParser, 'parseNode', sandbox.spy(createLiteralStub()))
   })
 
@@ -24,7 +24,7 @@ describe('Property tests', () => {
     esprimaParser.Property(property)
 
     expect(
-      esprimaParser.getPropertyKeyOfString
+      esprimaParser.getPropertyAsString
         .calledWithExactly(property.key, property.computed)
     ).to.be.true
   })

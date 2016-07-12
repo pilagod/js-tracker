@@ -17,7 +17,7 @@ describe('parseExpression tests', () => {
   })
 
   for (const type of ['MemberExpression', 'CallExpression']) {
-    describe(`${type} tests`, () => {
+    describe(`${type}`, () => {
       let node
 
       beforeEach(() => {

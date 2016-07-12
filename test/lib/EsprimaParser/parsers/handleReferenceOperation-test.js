@@ -10,7 +10,7 @@ describe('handleReferenceOperation tests', () => {
   })
 
   // case Identifier -> call operation with reference property and remaining arguments
-  describe('Identifier argument tests', () => {
+  describe('Identifier argument', () => {
     beforeEach(() => {
       argument = createAstNode('Identifier', {name: 'a'})
     })
@@ -34,7 +34,7 @@ describe('handleReferenceOperation tests', () => {
   // case MemberExpression -> call parse${type},
   //                       -> call getReference to get object and property,
   //                       -> call operation with reference and remaining arguments
-  describe('MemberExpression and CallExpression argument tests', () => {
+  describe('MemberExpression and CallExpression', () => {
     const referenceStub = {
       object: {'b': 'operated property'},
       property: 'b'
@@ -55,7 +55,7 @@ describe('handleReferenceOperation tests', () => {
     })
 
     for (const type of ['MemberExpression', 'CallExpression']) {
-      describe(`${type} argument tests`, () => {
+      describe(`${type} argument`, () => {
         beforeEach(() => {
           argument = createAstNode(type)
 
