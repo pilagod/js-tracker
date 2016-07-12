@@ -6,7 +6,7 @@ describe('MemberExpression tests', () => {
   before(() => {
     class Expression {
       execute() {
-        return 'executedMemberExpression'
+        return 'executedExpression'
       }
     }
     expression = new Expression()
@@ -36,9 +36,9 @@ describe('MemberExpression tests', () => {
     expect(expression.execute.calledOnce).to.be.true
   })
 
-  it('should return result of execute of expression object', () => {
+  it('should return result from execute of expression object', () => {
     const result = esprimaParser.MemberExpression(memberExpression)
 
-    expect(result).to.be.equal('executedMemberExpression')
+    expect(result).to.be.equal('executedExpression')
   })
 })
