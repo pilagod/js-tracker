@@ -1,18 +1,18 @@
 describe('parseCallExpression tests', () => {
   let callExpression
 
-  const setGetCalleeAndCalledMethodReturnValue = (
+  const setParseCalleeAndMethodReturnValue = (
     callee = ['callee'],
-    calledMethod = {
+    method = {
       method: 'method',
       arguments: ['parsedArguments']
     }
   ) => {
-    if (esprimaParser.getCalleeAndCalledMethod.restore) {
-      esprimaParser.getCalleeAndCalledMethod.restore()
+    if (esprimaParser.parseCalleeAndMethod.restore) {
+      esprimaParser.parseCalleeAndMethod.restore()
     }
-    sandbox.stub(esprimaParser, 'getCalleeAndCalledMethod', sandbox.spy(() => {
-      return {callee, calledMethod}
+    sandbox.stub(esprimaParser, 'parseCalleeAndMethod', sandbox.spy(() => {
+      return {callee, method}
     }))
   }
 
@@ -25,7 +25,7 @@ describe('parseCallExpression tests', () => {
     sandbox.stub(esprimaParser, 'parseArguments', sandbox.spy(() => {
       return ['parsedArguments']
     }))
-    setGetCalleeAndCalledMethodReturnValue()
+    setParseCalleeAndMethodReturnValue()
   })
 
   it('should call parseArguments with call arguments', () => {
@@ -41,7 +41,7 @@ describe('parseCallExpression tests', () => {
     esprimaParser.parseCallExpression(callExpression)
 
     expect(
-      esprimaParser.getCalleeAndCalledMethod
+      esprimaParser.parseCalleeAndMethod
         .calledWithExactly('callee', ['parsedArguments'])
     ).to.be.true
   })
@@ -57,7 +57,7 @@ describe('parseCallExpression tests', () => {
   })
 
   it('should return [[...], calledMethod] given array callee', () => {
-    setGetCalleeAndCalledMethodReturnValue([[1, 2, 3]])
+    setParseCalleeAndMethodReturnValue([[1, 2, 3]])
 
     const result = esprimaParser.parseCallExpression(callExpression)
 
@@ -69,7 +69,7 @@ describe('parseCallExpression tests', () => {
   })
 
   it('should return [object1, object2, ..., calledMethod] given member callee', () => {
-    setGetCalleeAndCalledMethodReturnValue(['object1', 'object2'])
+    setParseCalleeAndMethodReturnValue(['object1', 'object2'])
 
     const result = esprimaParser.parseCallExpression(callExpression)
 
@@ -81,7 +81,7 @@ describe('parseCallExpression tests', () => {
   })
 
   it('should return [calledMethod] given null callee', () => {
-    setGetCalleeAndCalledMethodReturnValue(null)
+    setParseCalleeAndMethodReturnValue(null)
 
     const result = esprimaParser.parseCallExpression(callExpression)
 

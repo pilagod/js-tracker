@@ -3,7 +3,7 @@ describe('parseArguments tests', () => {
 
   beforeEach(() => {
     sandbox.stub(esprimaParser, 'parseNode', sandbox.spy((argument) => {
-      return `parsed ${argument}`
+      return `parsed${argument.charAt(0).toUpperCase()}${argument.slice(1)}`
     }))
   })
 
@@ -24,9 +24,9 @@ describe('parseArguments tests', () => {
     const result = esprimaParser.parseArguments(calledArguments)
 
     expect(result).to.be.eql([
-      'parsed argument1',
-      'parsed argument2',
-      'parsed argument3'
+      'parsedArgument1',
+      'parsedArgument2',
+      'parsedArgument3'
     ])
   })
 })
