@@ -30,6 +30,7 @@ describe('ArrayExpression tests', () => {
           .calledWithExactly(node)
       ).to.be.true
     })
+    expect(esprimaParser.parseNode.calledTwice).to.be.true
   })
 
   it('should return [1, 2] given elements with two nodes whose value is 1 and 2 respectively', () => {

@@ -25,6 +25,7 @@ describe('SequenceExpression tests', () => {
           .calledWithExactly(expression)
       ).to.be.true
     })
+    expect(esprimaParser.parseNode.calledThrice).to.be.true
   })
 
   it('should return last expression result', () => {

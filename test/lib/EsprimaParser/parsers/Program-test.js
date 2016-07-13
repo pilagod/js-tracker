@@ -24,5 +24,6 @@ describe('Program tests', () => {
           .calledWithExactly(node)
       ).to.be.true
     })
+    expect(esprimaParser.parseNode.calledThrice).to.be.true
   })
 })

@@ -24,5 +24,6 @@ describe('VariableDeclaration tests', () => {
           .calledWithExactly(node)
       ).to.be.true
     })
+    expect(esprimaParser.parseNode.calledTwice).to.be.true
   })
 })
