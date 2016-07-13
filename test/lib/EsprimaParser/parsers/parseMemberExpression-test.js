@@ -9,7 +9,7 @@ describe('parseMemberExpression tests', () => {
       computed: 'computed'
     })
 
-    sandbox.stub(esprimaParser, 'getObjectAsArray', sandbox.spy(createLiteralStub()))
+    sandbox.stub(esprimaParser, 'getObjectAsExpressionArray', sandbox.spy(createLiteralStub()))
     sandbox.stub(esprimaParser, 'getPropertyAsString', sandbox.spy(createLiteralStub()))
   })
 
@@ -17,7 +17,7 @@ describe('parseMemberExpression tests', () => {
     esprimaParser.parseMemberExpression(memberExpression)
 
     expect(
-      esprimaParser.getObjectAsArray
+      esprimaParser.getObjectAsExpressionArray
         .calledWithExactly(memberExpression.object)
     ).to.be.true
   })
@@ -31,9 +31,13 @@ describe('parseMemberExpression tests', () => {
     ).to.be.true
   })
 
+  const setGetObjectAsExpressionArrayReturnValue = (value) => {
+    esprimaParser.getObjectAsExpressionArray.restore()
+    sandbox.stub(esprimaParser, 'getObjectAsExpressionArray').returns(value)
+  }
+
   it('should return [\'object\', \'property\'] given getObjectAsArray returns [\'object\']', () => {
-    esprimaParser.getObjectAsArray.restore()
-    sandbox.stub(esprimaParser, 'getObjectAsArray').returns(['object'])
+    setGetObjectAsExpressionArrayReturnValue(['object'])
 
     const result = esprimaParser.parseMemberExpression(memberExpression)
 
@@ -41,17 +45,15 @@ describe('parseMemberExpression tests', () => {
   })
 
   it('should return [\'object1\', \'object2\', \'property\'] given getObjectAsArray returns [\'object1\', \'object2\']', () => {
-    esprimaParser.getObjectAsArray.restore()
-    sandbox.stub(esprimaParser, 'getObjectAsArray').returns(['object'])
+    setGetObjectAsExpressionArrayReturnValue(['object1', 'object2'])
 
     const result = esprimaParser.parseMemberExpression(memberExpression)
 
-    expect(result).to.be.eql(['object', 'property'])
+    expect(result).to.be.eql(['object1', 'object2', 'property'])
   })
 
   it('should return [[1, 2, 3], \'property\'] given getObjectAsArray returns [[1, 2, 3]]', () => {
-    esprimaParser.getObjectAsArray.restore()
-    sandbox.stub(esprimaParser, 'getObjectAsArray').returns([[1, 2, 3]])
+    setGetObjectAsExpressionArrayReturnValue([[1, 2, 3]])
 
     const result = esprimaParser.parseMemberExpression(memberExpression)
 
