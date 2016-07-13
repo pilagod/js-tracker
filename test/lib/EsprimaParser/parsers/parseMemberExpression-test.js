@@ -1,6 +1,6 @@
 describe('parseMemberExpression tests', () => {
   let memberExpression
-  
+
   beforeEach(() => {
     memberExpression = createAstNode('memberExpression', {
       object: createAstNode('Literal', {value: 'object'}),

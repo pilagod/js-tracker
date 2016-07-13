@@ -49,6 +49,7 @@ describe('parseCallExpression tests', () => {
   it('should return [callee, calledMethod] given valid callee', () => {
     const result = esprimaParser.parseCallExpression(callExpression)
 
+    expect(result).to.be.instanceof(Array)
     expect(result).to.be.eql(['callee', {
       method: 'method',
       arguments: ['parsedArguments']
@@ -60,6 +61,7 @@ describe('parseCallExpression tests', () => {
 
     const result = esprimaParser.parseCallExpression(callExpression)
 
+    expect(result).to.be.instanceof(Array)
     expect(result).to.be.eql([[1, 2, 3], {
       method: 'method',
       arguments: ['parsedArguments']
@@ -71,6 +73,7 @@ describe('parseCallExpression tests', () => {
 
     const result = esprimaParser.parseCallExpression(callExpression)
 
+    expect(result).to.be.instanceof(Array)
     expect(result).to.be.eql(['object1', 'object2', {
       method: 'method',
       arguments: ['parsedArguments']
@@ -82,6 +85,7 @@ describe('parseCallExpression tests', () => {
 
     const result = esprimaParser.parseCallExpression(callExpression)
 
+    expect(result).to.be.instanceof(Array)
     expect(result).to.be.eql([{
       method: 'method',
       arguments: ['parsedArguments']
