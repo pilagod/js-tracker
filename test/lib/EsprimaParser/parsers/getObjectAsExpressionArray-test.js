@@ -1,4 +1,4 @@
-describe('getExpressionAsArray tests', () => {
+describe('getObjectAsExpressionArray tests', () => {
   it('should call parseMemberExpression and return given object type MemberExpression', () => {
     const object = createAstNode('MemberExpression')
 
