@@ -7,14 +7,9 @@ describe('BlockStatement tests', () => {
     blockStatement = createAstNode('BlockStatement')
 
     sandbox.stub(esprimaParser, 'parseNode', sandbox.spy((node) => {
-      switch (node.type) {
-        case 'ReturnStatement':
-          return 'RETURN'
-        case 'ContinueStatement':
-          return 'CONTINUE'
-        case 'BreakStatement':
-          return 'BREAK'
-        default:
+      if (node.type === 'FlowControlStatement') {
+        // ReturnStatement, ContinueStatement, BreakStatement
+        return 'flowControlSignal'
       }
     }))
   })
@@ -37,26 +32,21 @@ describe('BlockStatement tests', () => {
     })
   })
 
-  for (const [type, expectedResult] of [
-    ['ReturnStatement', 'RETURN'],
-    ['ContinueStatement', 'CONTINUE'],
-    ['BreakStatement', 'BREAK']
-  ]) {
-    it(`should stop immediately and return when it occurs ${type}`, () => {
-      blockStatement.body = [
-        createAstNode(),
-        createAstNode(type),
-        createAstNode('NeverCalled')
-      ]
+  it('should stop immediately and return when it occurs flow control statement', () => {
+    // ReturnStatement, ContinueStatement, BreakStatement
+    blockStatement.body = [
+      createAstNode(),
+      createAstNode('FlowControlStatement'),
+      createAstNode('NeverCalledNode')
+    ]
 
-      const result = esprimaParser.BlockStatement(blockStatement)
+    const result = esprimaParser.BlockStatement(blockStatement)
 
-      expect(esprimaParser.parseNode.calledTwice).to.be.true
-      expect(
-        esprimaParser.parseNode
-          .neverCalledWith(blockStatement.body[2])
-      ).to.be.true
-      expect(result).to.be.equal(expectedResult)
-    })
-  }
+    expect(esprimaParser.parseNode.calledTwice).to.be.true
+    expect(
+      esprimaParser.parseNode
+        .neverCalledWith(blockStatement.body[2])
+    ).to.be.true
+    expect(result).to.be.equal('flowControlSignal')
+  })
 })
