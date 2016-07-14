@@ -43,8 +43,12 @@ describe('getCalleeAndMethod tests', () => {
         computed: 'computed'
       })
 
-      sandbox.stub(esprimaParser, 'getObjectAsExpressionArray', sandbox.spy())
-      sandbox.stub(esprimaParser, 'getPropertyAsString', sandbox.spy())
+      sandbox.stub(esprimaParser, 'getObjectAsExpressionArray', sandbox.spy(() => {
+        return 'resultFromGetObjectAsExpressionArray'
+      }))
+      sandbox.stub(esprimaParser, 'getPropertyAsString', sandbox.spy(() => {
+        return 'resultFromGetPropertyAsString'
+      }))
     })
 
     it('should call getObjectAsExpressionArray with object property of calleeExpression', () => {
@@ -76,7 +80,10 @@ describe('getCalleeAndMethod tests', () => {
     })
 
     it('should return callee from getObjectAsExpressionArray and method from getPropertyAsString', () => {
+      const {callee, method} = esprimaParser.getCalleeAndMethod(calleeExpression)
 
+      expect(callee).to.be.equal('resultFromGetObjectAsExpressionArray')
+      expect(method).to.be.equal('resultFromGetPropertyAsString')
     })
   })
 })
