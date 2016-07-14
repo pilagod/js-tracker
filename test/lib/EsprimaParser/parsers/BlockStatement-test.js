@@ -32,6 +32,18 @@ describe('BlockStatement tests', () => {
     })
   })
 
+  it('should return undefined given no flow control statement', () => {
+    blockStatement.body = [
+      createAstNode(),
+      createAstNode(),
+      createAstNode()
+    ]
+
+    const result = esprimaParser.BlockStatement(blockStatement)
+
+    expect(result).to.be.undefined
+  })
+
   it('should stop immediately and return when it occurs flow control statement', () => {
     // ReturnStatement, ContinueStatement, BreakStatement
     blockStatement.body = [
