@@ -13,7 +13,7 @@ describe('getFirstNonEmptyCaseIndex tests', () => {
     })()
   })
 
-  it('should call isCaseNotEmptyOrDefault with each switchCase from matchedIndex to default case given no matched cases', () => {
+  it('should call isCaseNotEmptyOrDefault with each switchCase from matchedIndex given no matched cases', () => {
     sandbox.stub(esprimaParser, 'isCaseNotEmptyOrDefault', sandbox.spy(
       // index start from 1, remove first 'false':
       // [false, false, false, false, true] -> [false, false, false, true]

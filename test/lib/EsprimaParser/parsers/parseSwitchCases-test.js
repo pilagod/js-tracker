@@ -30,7 +30,7 @@ describe('parseSwitchCases tests', () => {
         esprimaParser.isCaseTestMatchDiscriminant
           .getCall(index)
           .calledWithExactly(switchCase.test, 'discriminant')
-      )
+      ).to.be.true
     })
   })
 
@@ -46,7 +46,7 @@ describe('parseSwitchCases tests', () => {
       expect(
         esprimaParser.isCaseTestMatchDiscriminant
           .neverCalledWith(`SwitchCase${i+1}Test`)
-      )
+      ).to.be.true
     }
   })
 
