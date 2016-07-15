@@ -55,7 +55,7 @@ describe('parseSwitchCases tests', () => {
 
     expect(
       esprimaParser.parseMatchedSwitchCase
-        .calledWithExactly(switchCases[1], 1)
+        .calledWithExactly(switchCases, 1)
     ).to.be.true
     expect(result).to.be.equal('resultFromParseMatchedSwitchCase')
   })

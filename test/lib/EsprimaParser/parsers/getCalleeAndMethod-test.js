@@ -3,10 +3,10 @@ describe('getCalleeAndMethod tests', () => {
 
   describe('calleeExpression other than MemberExpression', () => {
     beforeEach(() => {
-      calleeExpression = createAstNode('OtherThanMemberExpression')
+      calleeExpression = 'calleeExpression'
 
       sandbox.stub(esprimaParser, 'parseNode', sandbox.spy(() => {
-        return 'method'
+        return 'parsedCalleeExpression'
       }))
     })
 
@@ -31,7 +31,7 @@ describe('getCalleeAndMethod tests', () => {
         esprimaParser.getCalleeAndMethod(calleeExpression)
 
       expect(callee).to.be.null
-      expect(method).to.be.eql('method')
+      expect(method).to.be.eql('parsedCalleeExpression')
     })
   })
 
