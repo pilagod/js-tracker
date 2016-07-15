@@ -28,7 +28,7 @@ describe('parseCalleeAndMethod tests', () => {
     expect(result).to.have.property('method')
   })
 
-  it('should return callee from getCalleeAndMethod and method object with property method from getCalleeAndMethod and arguments from calledArguments', () => {
+  it('should return callee from getCalleeAndMethod and method an object with property method from getCalleeAndMethod and arguments from calledArguments', () => {
     const {callee, method} =
       esprimaParser.parseCalleeAndMethod(calleeExpression, calledArguments)
 

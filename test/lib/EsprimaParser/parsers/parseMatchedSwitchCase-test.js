@@ -2,15 +2,17 @@ describe('parseMatchedSwitchCase tests', () => {
   const matchedIndex = 1
   let switchCases
 
-  beforeEach(() => {
+  before(() => {
     switchCases = (() => {
       const result = []
-      for (let i = 0; i < 3; i += 1) {
+      for (let i = 0; i < 5; i += 1) {
         result.push(createAstNode(`SwitchCase${i+1}`, {test: `SwitchCase${i+1}Test`}))
       }
       return result
     })()
+  })
 
+  beforeEach(() => {
     sandbox.stub(esprimaParser, 'getFirstNonEmptyCaseIndex', sandbox.spy(() => {
       return 'firstNonEmptyCaseIndex'
     }))
