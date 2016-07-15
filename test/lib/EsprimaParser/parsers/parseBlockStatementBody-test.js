@@ -1,5 +1,7 @@
 describe('parseBlockStatementBody tests', () => {
-  const isFlowControlStatementStub = (results = [false, false, false]) => {
+  const isFlowControlStatementStub = (
+    results = [false, false, false]
+  ) => {
     const returns = (function* () {
       for (const result of results) {
         yield result
@@ -58,7 +60,7 @@ describe('parseBlockStatementBody tests', () => {
   })
 
   it('should call parseNode with node until first flow control statement and return the result', () => {
-    setIsFlowControlStatementStubReturnValues([false, true])
+    setIsFlowControlStatementStubReturnValues([false, true, false])
 
     const result = esprimaParser.parseBlockStatementBody(body)
 
@@ -71,7 +73,7 @@ describe('parseBlockStatementBody tests', () => {
   })
 
   it('should call isFlowControlStatement with node until first flow control statement', () => {
-    setIsFlowControlStatementStubReturnValues([false, true])
+    setIsFlowControlStatementStubReturnValues([false, true, false])
 
     esprimaParser.parseBlockStatementBody(body)
 

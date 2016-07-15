@@ -17,7 +17,7 @@ describe('isFlowControlStatement', () => {
     expect(result).to.be.true
   })
 
-  it('should return false given other type of flow control statement', () => {
+  it('should return false given other type than flow control statement', () => {
     const result = esprimaParser.isFlowControlStatement('NotFlowControlStatement')
 
     expect(result).to.be.false
