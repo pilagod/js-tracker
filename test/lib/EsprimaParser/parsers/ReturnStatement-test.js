@@ -6,9 +6,21 @@ describe('ReturnStatement tests', () => {
   beforeEach(() => {
     returnStatement = createAstNode('ReturnStatement')
 
+    sandbox.stub(esprimaParser, 'status', {
+      set: sandbox.spy()
+    })
     sandbox.stub(esprimaParser, 'parseNode', sandbox.spy(() => {
       return 'parsedArgument'
     }))
+  })
+
+  it('should set esprimaParser status to \'return\'', () => {
+    esprimaParser.ReturnStatement(returnStatement)
+
+    expect(
+      esprimaParser.status.set
+        .calledWithExactly('return')
+    ).to.be.true
   })
 
   it('should call parseNode with argument and return', () => {

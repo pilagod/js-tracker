@@ -6,11 +6,24 @@ describe('ContinueStatement tests', () => {
 
   beforeEach(() => {
     continueStatement = createAstNode('ContinueStatement')
+
+    sandbox.stub(esprimaParser, 'status', {
+      set: sandbox.spy()
+    })
   })
 
-  it('should return \'CONTINUE\' signal', () => {
+  it('should set esprimaParser status to \'continue\'', () => {
+    esprimaParser.ContinueStatement(continueStatement)
+
+    expect(
+      esprimaParser.status.set
+        .calledWithExactly('continue')
+    ).to.be.true
+  })
+
+  it('should return undefined', () => {
     const result = esprimaParser.ContinueStatement(continueStatement)
 
-    expect(result).to.be.equal('CONTINUE')
+    expect(result).to.be.undefined
   })
 })
