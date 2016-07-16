@@ -12,7 +12,8 @@ describe('DoWhileStatement tests', () => {
     sandbox.stub(esprimaParser, 'parseNode')
     sandbox.stub(esprimaParser, 'status', {
       unset: sandbox.spy(),
-      isLoopBreakStatus: sandbox.stub()
+      isLoopBreakStatus: sandbox.stub(),
+      isLoopContinueStatus: sandbox.stub()
     })
     sandbox.stub(esprimaParser, 'WhileStatement')
   })
@@ -32,12 +33,33 @@ describe('DoWhileStatement tests', () => {
     expect(esprimaParser.status.isLoopBreakStatus.calledOnce).to.be.true
   })
 
-  it('should call parseNode before isLoopBreakStatus', () => {
+  it('should call isLoopContinueStatus of esprimaParser status', () => {
+    esprimaParser.DoWhileStatement(doWhileStatement)
+
+    expect(esprimaParser.status.isLoopContinueStatus.calledOnce).to.be.true
+  })
+
+  it('should call parseNode before isLoopBreakStatus and isLoopContinueStatus', () => {
     esprimaParser.DoWhileStatement(doWhileStatement)
 
     expect(
       esprimaParser.parseNode
         .calledBefore(esprimaParser.status.isLoopBreakStatus)
+    ).to.be.true
+    expect(
+      esprimaParser.parseNode
+        .calledBefore(esprimaParser.status.isLoopContinueStatus)
+    ).to.be.true
+  })
+
+  it('should unset continue status given isLoopContinueStatus returns true', () => {
+    esprimaParser.status.isLoopContinueStatus.returns(true)
+
+    esprimaParser.DoWhileStatement(doWhileStatement)
+
+    expect(
+      esprimaParser.status.unset
+        .calledWithExactly('continue')
     ).to.be.true
   })
 

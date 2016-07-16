@@ -1,6 +1,10 @@
-test1:
-  if (1) {
-    console.log(1);
-    break test1
-    console.log(2);
-  }
+function test (count) {
+  console.log(count);
+  return count < 10
+}
+
+let count = 1
+
+do {
+  continue
+} while (test(count++))
