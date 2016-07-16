@@ -5,9 +5,7 @@ describe('MemberExpression tests', () => {
 
   before(() => {
     class Expression {
-      execute() {
-        return 'executedExpression'
-      }
+      execute() {}
     }
     expression = new Expression()
   })
@@ -15,10 +13,10 @@ describe('MemberExpression tests', () => {
   beforeEach(() => {
     memberExpression = createAstNode('MemberExpression')
 
-    sandbox.stub(esprimaParser, 'parseExpression', sandbox.spy(() => {
-      return expression
-    }))
-    sandbox.spy(expression, 'execute')
+    sandbox.stub(esprimaParser, 'parseExpression')
+      .returns(expression)
+    sandbox.stub(expression, 'execute')
+      .returns('resultFromExecute')
   })
 
   it('should call parseExpression with memberExpression', () => {
@@ -30,7 +28,7 @@ describe('MemberExpression tests', () => {
     ).to.be.true
   })
 
-  it('should call execute of expression object return from parseExpression', () => {
+  it('should call execute of expression object returned from parseExpression', () => {
     esprimaParser.MemberExpression(memberExpression)
 
     expect(expression.execute.calledOnce).to.be.true
@@ -39,6 +37,6 @@ describe('MemberExpression tests', () => {
   it('should return result from execute of expression object', () => {
     const result = esprimaParser.MemberExpression(memberExpression)
 
-    expect(result).to.be.equal('executedExpression')
+    expect(result).to.be.equal('resultFromExecute')
   })
 })

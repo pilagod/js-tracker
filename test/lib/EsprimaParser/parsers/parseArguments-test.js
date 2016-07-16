@@ -1,10 +1,14 @@
 describe('parseArguments tests', () => {
-  const calledArguments = ['argument1', 'argument2', 'argument3']
+  let calledArguments
 
   beforeEach(() => {
-    sandbox.stub(esprimaParser, 'parseNode', sandbox.spy((argument) => {
-      return `parsed${argument.charAt(0).toUpperCase()}${argument.slice(1)}`
-    }))
+    calledArguments = [
+      createAstNode('Expression1'),
+      createAstNode('Expression2'),
+      createAstNode('Expression3')
+    ]
+
+    sandbox.stub(esprimaParser, 'parseNode', createParseNodeStub())
   })
 
   it('should call parseNode with each argument', () => {
@@ -24,9 +28,9 @@ describe('parseArguments tests', () => {
     const result = esprimaParser.parseArguments(calledArguments)
 
     expect(result).to.be.eql([
-      'parsedArgument1',
-      'parsedArgument2',
-      'parsedArgument3'
+      'parsedExpression1',
+      'parsedExpression2',
+      'parsedExpression3'
     ])
   })
 })

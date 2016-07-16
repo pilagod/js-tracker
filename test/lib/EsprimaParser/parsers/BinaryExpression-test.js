@@ -5,16 +5,15 @@ describe('BinaryExpression tests', () => {
 
   beforeEach(() => {
     binaryExpression = createAstNode('BinaryExpression', {
-      operator: 'possibleBinaryOperator',
-      left: createAstNode('Literal', {value: 'parsed left'}),
-      right: createAstNode('Literal', {value: 'parsed right'})
+      operator: 'binaryOperator',
+      left: createAstNode('ExpressionLeft'),
+      right: createAstNode('ExpressionRight')
     })
 
-    sandbox.stub(esprimaParser, 'parseNode', sandbox.spy(createLiteralStub()))
+    sandbox.stub(esprimaParser, 'parseNode', createParseNodeStub())
     sandbox.stub(esprimaParser, 'binaryOperators', {
-      'possibleBinaryOperator': sandbox.spy(() => {
-        return 'resultFromPossibleBinaryOperator'
-      })
+      'binaryOperator': sandbox.stub()
+        .returns('resultFromBinaryOperator')
     })
   })
 
@@ -40,9 +39,9 @@ describe('BinaryExpression tests', () => {
     const result = esprimaParser.BinaryExpression(binaryExpression)
 
     expect(
-      esprimaParser.binaryOperators.possibleBinaryOperator
-        .calledWithExactly('parsed left', 'parsed right')
+      esprimaParser.binaryOperators.binaryOperator
+        .calledWithExactly('parsedExpressionLeft', 'parsedExpressionRight')
     ).to.be.true
-    expect(result).to.be.equal('resultFromPossibleBinaryOperator')
+    expect(result).to.be.equal('resultFromBinaryOperator')
   })
 })

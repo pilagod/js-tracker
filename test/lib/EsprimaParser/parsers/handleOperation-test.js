@@ -2,14 +2,14 @@ describe('handleUnaryOperation tests', () => {
   let argument, unaryOperationSpy
 
   beforeEach(() => {
-    argument = createAstNode('Literal', {value: 'parsedArgument'})
+    argument = createAstNode('Expression')
     unaryOperationSpy = sandbox.spy(() => 'resultFromUnaryOperation')
 
-    sandbox.stub(esprimaParser, 'parseNode', sandbox.spy(createLiteralStub()))
+    sandbox.stub(esprimaParser, 'parseNode', createParseNodeStub())
   })
 
   it('should call parseNode with argument', () => {
-    esprimaParser.handleOperation(argument, () => {})
+    esprimaParser.handleOperation(argument, unaryOperationSpy)
 
     expect(
       esprimaParser.parseNode
@@ -20,7 +20,10 @@ describe('handleUnaryOperation tests', () => {
   it('should pass result from parseNode to unary operation', () => {
     esprimaParser.handleOperation(argument, unaryOperationSpy)
 
-    expect(unaryOperationSpy.calledWithExactly('parsedArgument')).to.be.true
+    expect(
+      unaryOperationSpy
+        .calledWithExactly('parsedExpression')
+    ).to.be.true
   })
 
   it('should return result from unary operation', () => {

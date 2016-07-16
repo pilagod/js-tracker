@@ -1,21 +1,20 @@
 describe('parseMatchedCase tests', () => {
-  const matchedIndex = 1
-  let switchCases
+  let switchCases, matchedIndex
 
   before(() => {
     switchCases = (() => {
       const result = []
       for (let i = 0; i < 5; i += 1) {
-        result.push(createAstNode(`SwitchCase${i+1}`, {test: `SwitchCase${i+1}Test`}))
+        result.push(createAstNode(`SwitchCase${i+1}`))
       }
       return result
     })()
+    matchedIndex = 1
   })
 
   beforeEach(() => {
-    sandbox.stub(esprimaParser, 'parseStatements', sandbox.spy(() => {
-      return 'resultFromParseStatements'
-    }))
+    sandbox.stub(esprimaParser, 'parseStatements')
+      .returns('resultFromParseStatements')
   })
 
   it('should call parseStatementBody with switchCases slice by matchedIndex and return ', () => {

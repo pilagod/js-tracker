@@ -6,7 +6,7 @@ describe('ArrayExpression tests', () => {
   beforeEach(() => {
     arrayExpression = createAstNode('ArrayExpression')
 
-    sandbox.stub(esprimaParser, 'parseNode', createLiteralStub())
+    sandbox.stub(esprimaParser, 'parseNode', createParseNodeStub())
   })
 
   it('should return [] given no elements', () => {
@@ -17,8 +17,9 @@ describe('ArrayExpression tests', () => {
 
   it('should call parseNode with nodes in elements', () => {
     arrayExpression.elements = [
-      createAstNode('Literal', {value: 1}),
-      createAstNode('Literal', {value: 2})
+      createAstNode('Expression1'),
+      createAstNode('Expression2'),
+      createAstNode('Expression3')
     ]
 
     esprimaParser.ArrayExpression(arrayExpression)
@@ -30,17 +31,22 @@ describe('ArrayExpression tests', () => {
           .calledWithExactly(node)
       ).to.be.true
     })
-    expect(esprimaParser.parseNode.calledTwice).to.be.true
+    expect(esprimaParser.parseNode.calledThrice).to.be.true
   })
 
-  it('should return [1, 2] given elements with two nodes whose value is 1 and 2 respectively', () => {
+  it('should return an array containig all parsed elements', () => {
     arrayExpression.elements = [
-      createAstNode('Literal', {value: 1}),
-      createAstNode('Literal', {value: 2})
+      createAstNode('Expression1'),
+      createAstNode('Expression2'),
+      createAstNode('Expression3')
     ]
 
     const result = esprimaParser.ArrayExpression(arrayExpression)
 
-    expect(result).to.be.eql([1, 2])
+    expect(result).to.be.eql([
+      'parsedExpression1',
+      'parsedExpression2',
+      'parsedExpression3'
+    ])
   });
 })

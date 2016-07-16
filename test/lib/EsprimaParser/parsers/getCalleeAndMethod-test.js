@@ -3,11 +3,9 @@ describe('getCalleeAndMethod tests', () => {
 
   describe('calleeExpression other than MemberExpression', () => {
     beforeEach(() => {
-      calleeExpression = 'calleeExpression'
+      calleeExpression = createAstNode('Expression')
 
-      sandbox.stub(esprimaParser, 'parseNode', sandbox.spy(() => {
-        return 'parsedCalleeExpression'
-      }))
+      sandbox.stub(esprimaParser, 'parseNode', createParseNodeStub())
     })
 
     it('should call parseNode with calleeExpression', () => {
@@ -31,24 +29,22 @@ describe('getCalleeAndMethod tests', () => {
         esprimaParser.getCalleeAndMethod(calleeExpression)
 
       expect(callee).to.be.null
-      expect(method).to.be.eql('parsedCalleeExpression')
+      expect(method).to.be.equal('parsedExpression')
     })
   })
 
   describe('calleeExpression is MemberExpression', () => {
     beforeEach(() => {
       calleeExpression = createAstNode('MemberExpression', {
-        object: 'object',
-        property: 'property',
-        computed: 'computed'
+        object: createAstNode('ExpressionObject'),
+        property: createAstNode('ExpressionProperty'),
+        computed: 'boolean'
       })
 
-      sandbox.stub(esprimaParser, 'getObjectAsExpressionArray', sandbox.spy(() => {
-        return 'resultFromGetObjectAsExpressionArray'
-      }))
-      sandbox.stub(esprimaParser, 'getPropertyAsString', sandbox.spy(() => {
-        return 'resultFromGetPropertyAsString'
-      }))
+      sandbox.stub(esprimaParser, 'getObjectAsExpressionArray')
+        .returns('resultFromGetObjectAsExpressionArray')
+      sandbox.stub(esprimaParser, 'getPropertyKeyAsString')
+        .returns('resultFromGetPropertyKeyAsString')
     })
 
     it('should call getObjectAsExpressionArray with object property of calleeExpression', () => {
@@ -60,11 +56,11 @@ describe('getCalleeAndMethod tests', () => {
       ).to.be.true
     })
 
-    it('should call getPropertyAsString with property and computed property of calleeExpression', () => {
+    it('should call getPropertyKeyAsString with property and computed property of calleeExpression', () => {
       esprimaParser.getCalleeAndMethod(calleeExpression)
 
       expect(
-        esprimaParser.getPropertyAsString
+        esprimaParser.getPropertyKeyAsString
           .calledWithExactly(
             calleeExpression.property,
             calleeExpression.computed
@@ -83,7 +79,7 @@ describe('getCalleeAndMethod tests', () => {
       const {callee, method} = esprimaParser.getCalleeAndMethod(calleeExpression)
 
       expect(callee).to.be.equal('resultFromGetObjectAsExpressionArray')
-      expect(method).to.be.equal('resultFromGetPropertyAsString')
+      expect(method).to.be.equal('resultFromGetPropertyKeyAsString')
     })
   })
 })

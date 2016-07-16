@@ -48,11 +48,23 @@ describe('UnaryOperator tests', () => {
         }
 
         sandbox.stub(esprimaParser, 'closureStack', {
-          get: () => windowStub
+          get: sandbox.stub()
+            .withArgs('window').returns(windowStub)
         })
       })
 
-      it('should delete window property given property name but no object referecne', () => {
+      it('should call get of closureStack with window given no object reference', () => {
+        target = {property: 'a'}
+
+        esprimaParser.unaryOperators.delete(target)
+
+        expect(
+          esprimaParser.closureStack.get
+            .calledWithExactly('window')
+        ).to.be.true
+      })
+
+      it('should delete window property given no object referecne', () => {
         target = {property: 'a'}
 
         const result = esprimaParser.unaryOperators.delete(target)

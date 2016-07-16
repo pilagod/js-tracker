@@ -47,7 +47,7 @@ describe('BinaryOperator tests', () => {
     }
   })
 
-  describe('empty string operator', () => {
+  describe('\'\' operator (for AssignmentExpression \'=\' operator use)', () => {
     it('should return right', () => {
       const result = esprimaParser.binaryOperators['']('left', 'right')
 

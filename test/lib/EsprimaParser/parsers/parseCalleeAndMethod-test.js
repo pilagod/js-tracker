@@ -1,14 +1,19 @@
 describe('parseCalleeAndMethod tests', () => {
-  const calleeExpression = 'calleeExpression'
-  const calledArguments = ['argument1', 'argument2', 'argument3']
+  let calleeExpression, calledArguments
 
   beforeEach(() => {
-    sandbox.stub(esprimaParser, 'getCalleeAndMethod', sandbox.spy(() => {
-      return {
+    calleeExpression = createAstNode('Expression')
+    calledArguments = [
+      'parsedExpression1',
+      'parsedExpression2',
+      'parsedExpression3'
+    ]
+
+    sandbox.stub(esprimaParser, 'getCalleeAndMethod')
+      .returns({
         callee: 'calleeFromGetCalleeAndMethod',
         method: 'methodFromGetCalleeAndMethod'
-      }
-    }))
+      })
   })
 
   it('should call getCalleeAndMethod with calleeExpression', () => {

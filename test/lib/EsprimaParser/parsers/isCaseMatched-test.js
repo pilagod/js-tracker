@@ -1,12 +1,13 @@
 describe('isCaseMatched tests', () => {
-  const discriminant = 'discriminant'
+  let testExpression, discriminant
 
   beforeEach(() => {
-    sandbox.stub(esprimaParser, 'parseNode', sandbox.spy(createLiteralStub()))
+    testExpression = createAstNode('Expression')
+    discriminant = 'discriminant'
   })
 
   it('should call parseNode with testExpression', () => {
-    const testExpression = createAstNode('Literal')
+    sandbox.stub(esprimaParser, 'parseNode')
 
     esprimaParser.isCaseMatched(testExpression, discriminant)
 
@@ -17,15 +18,8 @@ describe('isCaseMatched tests', () => {
   })
 
   it('should return true if parsed testExpression equals to discriminant', () => {
-    const testExpression = createAstNode('Literal', {value: 'discriminant'})
-
-    const result = esprimaParser.isCaseMatched(testExpression, discriminant)
-
-    expect(result).to.be.true
-  })
-
-  it('should return true if test is null (default case)', () => {
-    const testExpression = null
+    sandbox.stub(esprimaParser, 'parseNode')
+      .withArgs(testExpression).returns(discriminant)
 
     const result = esprimaParser.isCaseMatched(testExpression, discriminant)
 
@@ -33,10 +27,19 @@ describe('isCaseMatched tests', () => {
   })
 
   it('should return false if parsed testExpression does not equals to discriminant', () => {
-    const testExpression = createAstNode('Literal', {value: 'some other value'})
+    sandbox.stub(esprimaParser, 'parseNode')
+      .withArgs(testExpression).returns('different')
 
     const result = esprimaParser.isCaseMatched(testExpression, discriminant)
 
     expect(result).to.be.false
+  })
+
+  it('should return true if test is null (default case)', () => {
+    testExpression = null
+
+    const result = esprimaParser.isCaseMatched(testExpression, discriminant)
+
+    expect(result).to.be.true
   })
 })

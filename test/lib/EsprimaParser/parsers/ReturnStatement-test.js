@@ -4,14 +4,14 @@ describe('ReturnStatement tests', () => {
   let returnStatement
 
   beforeEach(() => {
-    returnStatement = createAstNode('ReturnStatement')
+    returnStatement = createAstNode('ReturnStatement', {
+      argument: createAstNode('Expression')
+    })
 
     sandbox.stub(esprimaParser, 'status', {
       set: sandbox.spy()
     })
-    sandbox.stub(esprimaParser, 'parseNode', sandbox.spy(() => {
-      return 'parsedArgument'
-    }))
+    sandbox.stub(esprimaParser, 'parseNode', createParseNodeStub())
   })
 
   it('should set esprimaParser status to \'return\'', () => {
@@ -24,15 +24,13 @@ describe('ReturnStatement tests', () => {
   })
 
   it('should call parseNode with argument and return', () => {
-    returnStatement.argument = createAstNode()
-
     const result = esprimaParser.ReturnStatement(returnStatement)
 
     expect(
       esprimaParser.parseNode
         .calledWithExactly(returnStatement.argument)
     ).to.be.true
-    expect(result).to.be.equal('parsedArgument')
+    expect(result).to.be.equal('parsedExpression')
   })
 
   it('should not call parseNode and return undefined given null argument', () => {

@@ -17,16 +17,12 @@ describe('ObjectExpression tests', () => {
 
   it('should call parseNode with nodes in properties', () => {
     objectExpression.properties = [
-      createAstNode('Property'),
-      createAstNode('Property')
+      createAstNode('Property1'),
+      createAstNode('Property2')
     ]
 
-    sandbox.stub(esprimaParser, 'parseNode', sandbox.spy(() => {
-      return {
-        key: null,
-        value: null
-      }
-    }))
+    sandbox.stub(esprimaParser, 'parseNode')
+      .returns({key: 'key', value: 'value'})
 
     esprimaParser.ObjectExpression(objectExpression)
 
@@ -41,22 +37,15 @@ describe('ObjectExpression tests', () => {
 
   it('should return {a: 1, b: 2} given properties \'a: 1\' and \'b: 2\'', () => {
     objectExpression.properties = [
-      createAstNode('Property', {
-        key: createAstNode('Literal', {value: 'a'}),
-        value: createAstNode('Literal', {value: 1})
-      }),
-      createAstNode('Property', {
-        key: createAstNode('Literal', {value: 'b'}),
-        value: createAstNode('Literal', {value: 2})
-      })
+      createAstNode('Property1'),
+      createAstNode('Property2')
     ]
 
-    sandbox.stub(esprimaParser, 'parseNode', (property) => {
-      return {
-        key: property.key.value,
-        value: property.value.value
-      }
-    })
+    sandbox.stub(esprimaParser, 'parseNode')
+      .withArgs(objectExpression.properties[0])
+        .returns({key: 'a', value: 1})
+      .withArgs(objectExpression.properties[1])
+        .returns({key: 'b', value: 2})
 
     const result = esprimaParser.ObjectExpression(objectExpression)
 

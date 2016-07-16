@@ -4,24 +4,23 @@ describe('AssignmentExpression tests', () => {
   beforeEach(() => {
     assignmentExpression = createAstNode('AssignmentExpression', {
       operator: 'binaryOperator=',
-      left: createAstNode(),
-      right: createAstNode()
+      left: createAstNode('ExpressionLeft'),
+      right: createAstNode('ExpressionRight')
     })
 
-    sandbox.stub(esprimaParser, 'BinaryExpression', sandbox.spy(() => {
-      return 'resultFromBinaryExpression'
-    }))
-    sandbox.stub(esprimaParser, 'handleReferenceOperation', sandbox.spy())
+    sandbox.stub(esprimaParser, 'BinaryExpression')
+      .returns('resultFromBinaryExpression')
+    sandbox.stub(esprimaParser, 'handleReferenceOperation')
   })
 
-  it('should call BinaryExpression with replaced operator', () => {
+  it('should call BinaryExpression with assignmentExpression whose operator has been replaced', () => {
     esprimaParser.AssignmentExpression(assignmentExpression)
 
     expect(assignmentExpression.operator).to.be.equal('binaryOperator')
     expect(
       esprimaParser.BinaryExpression
         .calledWithExactly(assignmentExpression)
-    )
+    ).to.be.true
   })
 
   it('should call handleReferenceOperation with left, handleAssignment and new value', () => {

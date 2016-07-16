@@ -1,15 +1,24 @@
 describe('parseMemberExpression tests', () => {
   let memberExpression
 
+  const setGetObjectAsExpressionArrayReturn = (expressionArray) => {
+    if (esprimaParser.getObjectAsExpressionArray.restore) {
+      esprimaParser.getObjectAsExpressionArray.restore()
+    }
+    sandbox.stub(esprimaParser, 'getObjectAsExpressionArray')
+      .returns(expressionArray)
+  }
+
   beforeEach(() => {
     memberExpression = createAstNode('memberExpression', {
-      object: createAstNode('Literal', {value: 'object'}),
-      property: createAstNode('Literal', {value: 'property'}),
-      computed: 'computed'
+      object: createAstNode('Expression'),
+      property: createAstNode('Expression'),
+      computed: 'boolean'
     })
 
-    sandbox.stub(esprimaParser, 'getObjectAsExpressionArray', sandbox.spy(createLiteralStub()))
-    sandbox.stub(esprimaParser, 'getPropertyAsString', sandbox.spy(createLiteralStub()))
+    setGetObjectAsExpressionArrayReturn(['object'])
+    sandbox.stub(esprimaParser, 'getPropertyKeyAsString')
+      .returns('property')
   })
 
   it('should call getObjectAsExpressionArray with member object', () => {
@@ -25,19 +34,15 @@ describe('parseMemberExpression tests', () => {
     esprimaParser.parseMemberExpression(memberExpression)
 
     expect(
-      esprimaParser.getPropertyAsString
-        .calledWithExactly(memberExpression.property, 'computed')
+      esprimaParser.getPropertyKeyAsString
+        .calledWithExactly(
+          memberExpression.property,
+          memberExpression.computed
+        )
     ).to.be.true
   })
 
-  const setGetObjectAsExpressionArrayReturnValue = (value) => {
-    esprimaParser.getObjectAsExpressionArray.restore()
-    sandbox.stub(esprimaParser, 'getObjectAsExpressionArray').returns(value)
-  }
-
   it('should return [\'object\', \'property\'] given getObjectAsExpressionArray returns [\'object\']', () => {
-    setGetObjectAsExpressionArrayReturnValue(['object'])
-
     const result = esprimaParser.parseMemberExpression(memberExpression)
 
     expect(result).to.be.instanceof(Array)
@@ -45,7 +50,7 @@ describe('parseMemberExpression tests', () => {
   })
 
   it('should return [\'object1\', \'object2\', \'property\'] given getObjectAsExpressionArray returns [\'object1\', \'object2\']', () => {
-    setGetObjectAsExpressionArrayReturnValue(['object1', 'object2'])
+    setGetObjectAsExpressionArrayReturn(['object1', 'object2'])
 
     const result = esprimaParser.parseMemberExpression(memberExpression)
 
@@ -54,7 +59,7 @@ describe('parseMemberExpression tests', () => {
   })
 
   it('should return [[1, 2, 3], \'property\'] given getObjectAsExpressionArray returns [[1, 2, 3]]', () => {
-    setGetObjectAsExpressionArrayReturnValue([[1, 2, 3]])
+    setGetObjectAsExpressionArrayReturn([[1, 2, 3]])
 
     const result = esprimaParser.parseMemberExpression(memberExpression)
 

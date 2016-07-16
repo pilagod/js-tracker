@@ -6,33 +6,19 @@ describe('ThisExpression tests', () => {
   beforeEach(() => {
     thisExpression = createAstNode('ThisExpression')
 
-    sandbox.stub(esprimaParser, 'closureStack', createClosureStackStub())
+    sandbox.stub(esprimaParser, 'closureStack', {
+      get: sandbox.stub()
+        .returns('resultFromClosureStackGet')
+    })
   })
 
-  it('should call get of closureStack with \'this\'', () => {
-    esprimaParser.closureStack.get = sandbox.spy()
-
-    esprimaParser.ThisExpression(thisExpression)
+  it('should call get of closureStack with \'this\' and return', () => {
+    const result = esprimaParser.ThisExpression(thisExpression)
 
     expect(
       esprimaParser.closureStack.get
         .calledWithExactly('this')
     ).to.be.true
-  })
-
-  it('should return esprimaParser given context esprimaParser', () => {
-    esprimaParser.closureStack.set('this', esprimaParser)
-
-    const result = esprimaParser.ThisExpression(thisExpression)
-
-    expect(result).to.be.equal(esprimaParser)
-  })
-
-  it('should return undefined given no context', () => {
-    esprimaParser.closureStack.set('this', undefined)
-
-    const result = esprimaParser.ThisExpression(thisExpression)
-
-    expect(result).to.be.equal(undefined)
+    expect(result).to.be.equal('resultFromClosureStackGet')
   })
 })

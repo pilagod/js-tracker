@@ -2,18 +2,15 @@ describe('parseExpression tests', () => {
   class ExpressionStub {}
 
   beforeEach(() => {
-    sandbox.stub(esprimaParser, 'parseMemberExpression', sandbox.spy(() => {
-      return 'resultFromParseMemberExpression'
-    }))
-    sandbox.stub(esprimaParser, 'parseCallExpression', sandbox.spy(() => {
-      return 'resultFromParseCallExpression'
-    }))
-    sandbox.stub(esprimaParser, 'escodegen', sandbox.spy(() => {
-      return 'escodegenCodeText'
-    }))
-    sandbox.stub(esprimaParser, 'Expression', sandbox.spy(() => {
+    sandbox.stub(esprimaParser, 'parseMemberExpression')
+      .returns('resultFromParseMemberExpression')
+    sandbox.stub(esprimaParser, 'parseCallExpression')
+      .returns('resultFromParseCallExpression')
+    sandbox.stub(esprimaParser, 'escodegen')
+      .returns('resultFromEscodegen')
+    sandbox.stub(esprimaParser, 'Expression', () => {
       return new ExpressionStub()
-    }))
+    })
   })
 
   for (const type of ['MemberExpression', 'CallExpression']) {
@@ -22,7 +19,7 @@ describe('parseExpression tests', () => {
 
       beforeEach(() => {
         node = createAstNode(type, {
-          loc: 'nodeLocationInfo'
+          loc: 'location'
         })
       })
 
@@ -37,8 +34,8 @@ describe('parseExpression tests', () => {
 
       it(`should return a new Expression object with result from parse${type} and node info`, () => {
         const nodeInfo = {
-          code: 'escodegenCodeText',
-          loc: 'nodeLocationInfo'
+          code: 'resultFromEscodegen',
+          loc: 'location'
         }
 
         const result = esprimaParser.parseExpression(node)

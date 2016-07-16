@@ -1,25 +1,27 @@
 describe('parseSwitchCases tests', () => {
-  const setIsCaseMatchedStub = (results) => {
-    sandbox.stub(esprimaParser, 'isCaseMatched', sandbox.spy(
-      createResultsGenerator(results)
-    ))
-  }
   let switchCases
+
+  const setIsCaseMatchedStub = (results) => {
+    sandbox.stub(esprimaParser, 'isCaseMatched', createResultsGenerator(results))
+  }
 
   before(() => {
     switchCases = (() => {
       const result = []
       for (let i = 0; i < 5; i += 1) {
-        result.push(createAstNode(`SwitchCase${i+1}`, {test: `SwitchCase${i+1}Test`}))
+        result.push(
+          createAstNode(`SwitchCase${i+1}`, {
+            test: createAstNode(`ExpressionTest${i+1}`)
+          })
+        )
       }
       return result
     })()
   })
 
   beforeEach(() => {
-    sandbox.stub(esprimaParser, 'parseMatchedCase', sandbox.spy(() => {
-      return 'resultFromParseMatchedSwitchCase'
-    }))
+    sandbox.stub(esprimaParser, 'parseMatchedCase')
+      .returns('resultFromParseMatchedSwitchCase')
   })
 
   it('should call isCaseMatched with SwitchCase test and discriminant until default case given no matched cases', () => {
@@ -46,7 +48,7 @@ describe('parseSwitchCases tests', () => {
     for (let i = 2; i < 5; i += 1) {
       expect(
         esprimaParser.isCaseMatched
-          .neverCalledWith(`SwitchCase${i+1}Test`)
+          .neverCalledWith(switchCases[i].test)
       ).to.be.true
     }
   })
@@ -54,7 +56,8 @@ describe('parseSwitchCases tests', () => {
   it('should call parseMatchedSwitchCase with SwitchCases and matchedIndex then return when case matched', () => {
     setIsCaseMatchedStub([false, true, false, false, true])
 
-    const result = esprimaParser.parseSwitchCases(switchCases, 'discriminant')
+    const result =
+      esprimaParser.parseSwitchCases(switchCases, 'discriminant')
 
     expect(
       esprimaParser.parseMatchedCase

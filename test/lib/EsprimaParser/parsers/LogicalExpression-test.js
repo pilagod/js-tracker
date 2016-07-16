@@ -5,16 +5,15 @@ describe('LogicalExpression tests', () => {
 
   beforeEach(() => {
     logicalExpression = createAstNode('LogicalExpression', {
-      operator: 'possibleLogicalOperator',
-      left: createAstNode('Literal', {value: 'parsed left'}),
-      right: createAstNode('Literal', {value: 'parsed right'})
+      operator: 'logicalOperator',
+      left: createAstNode('ExpressionLeft'),
+      right: createAstNode('ExpressionRight')
     })
 
-    sandbox.stub(esprimaParser, 'parseNode', sandbox.spy(createLiteralStub()))
+    sandbox.stub(esprimaParser, 'parseNode', createParseNodeStub())
     sandbox.stub(esprimaParser, 'logicalOperators', {
-      'possibleLogicalOperator': sandbox.spy(() => {
-        return 'resultFromPossibleLogicalOperator'
-      })
+      'logicalOperator': sandbox.stub()
+        .returns('resultFromLogicalOperator')
     })
   })
 
@@ -40,9 +39,9 @@ describe('LogicalExpression tests', () => {
     const result = esprimaParser.LogicalExpression(logicalExpression)
 
     expect(
-      esprimaParser.logicalOperators.possibleLogicalOperator
-        .calledWithExactly('parsed left', 'parsed right')
+      esprimaParser.logicalOperators.logicalOperator
+        .calledWithExactly('parsedExpressionLeft', 'parsedExpressionRight')
     ).to.be.true
-    expect(result).to.be.equal('resultFromPossibleLogicalOperator')
+    expect(result).to.be.equal('resultFromLogicalOperator')
   })
 })

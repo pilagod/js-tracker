@@ -10,16 +10,14 @@ describe('CallExpression tests', () => {
 
   beforeEach(() => {
     callExpression = createAstNode('CallExpression', {
-      callee: null,
-      arguments: []
+      callee: createAstNode('Expression'),
+      arguments: [createAstNode('Expression')]
     })
 
-    sandbox.stub(esprimaParser, 'parseExpression', sandbox.spy(() => {
-      return expression
-    }))
-    sandbox.stub(esprimaParser, 'checkAndExecute', sandbox.spy(() => {
-      return 'checkAndExecutedExpression'
-    }))
+    sandbox.stub(esprimaParser, 'parseExpression')
+      .returns(expression)
+    sandbox.stub(esprimaParser, 'checkAndExecute')
+      .returns('resultFromCheckAndExecute')
   })
 
   it('should call parseExpression with callExpression', () => {
@@ -31,15 +29,19 @@ describe('CallExpression tests', () => {
     ).to.be.true
   })
 
-  it('should call checkAndExecute of expression object return from parseExpression', () => {
+  it('should call checkAndExecute with expression object returned from parseExpression', () => {
     esprimaParser.CallExpression(callExpression)
 
     expect(esprimaParser.checkAndExecute.calledOnce).to.be.true
+    expect(
+      esprimaParser.checkAndExecute
+        .calledWithExactly(expression)
+    ).to.be.true
   })
 
-  it('should return result from checkAndExecute of expression object', () => {
+  it('should return result from checkAndExecute', () => {
     const result = esprimaParser.CallExpression(callExpression)
 
-    expect(result).to.be.equal('checkAndExecutedExpression')
+    expect(result).to.be.equal('resultFromCheckAndExecute')
   })
 })

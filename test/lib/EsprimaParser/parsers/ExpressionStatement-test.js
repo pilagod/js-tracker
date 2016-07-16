@@ -4,14 +4,14 @@ describe('ExpressionStatement tests', () => {
   let expressionStatement
 
   beforeEach(() => {
-    expressionStatement = createAstNode('ExpressionStatement')
+    expressionStatement = createAstNode('ExpressionStatement', {
+      expression: createAstNode('Expression')
+    })
 
-    sandbox.stub(esprimaParser, 'parseNode', sandbox.spy())
+    sandbox.stub(esprimaParser, 'parseNode', createParseNodeStub())
   })
 
   it('should call parseNode with expression', () => {
-    expressionStatement.expression = createAstNode('Literal')
-
     esprimaParser.ExpressionStatement(expressionStatement)
 
     expect(

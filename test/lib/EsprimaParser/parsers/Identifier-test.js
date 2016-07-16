@@ -6,13 +6,13 @@ describe('Identifier tests', () => {
   beforeEach(() => {
     identifier = createAstNode('Identifier')
 
-    sandbox.stub(esprimaParser, 'closureStack', createClosureStackStub())
+    sandbox.stub(esprimaParser, 'closureStack', {
+      get: sandbox.stub()
+    })
   })
 
   it('should call get of closureStack with variable name', () => {
     identifier.name = 'a'
-
-    esprimaParser.closureStack.get = sandbox.spy()
 
     esprimaParser.Identifier(identifier)
 
@@ -24,7 +24,9 @@ describe('Identifier tests', () => {
 
   it('should return 1 given name \'a\', whose value is 1', () => {
     identifier.name = 'a'
-    esprimaParser.closureStack.set('a', 1)
+
+    esprimaParser.closureStack.get
+      .withArgs('a').returns(1)
 
     const result = esprimaParser.Identifier(identifier)
 
@@ -33,7 +35,9 @@ describe('Identifier tests', () => {
 
   it('should return undefined given name \'c\', which has no value assigned', () => {
     identifier.name = 'c'
-    esprimaParser.closureStack.set('c', undefined)
+
+    esprimaParser.closureStack.get
+      .withArgs('c').returns(undefined)
 
     const result = esprimaParser.Identifier(identifier)
 

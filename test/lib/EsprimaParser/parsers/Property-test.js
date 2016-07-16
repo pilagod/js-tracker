@@ -5,12 +5,12 @@ describe('Property tests', () => {
 
   beforeEach(() => {
     property = createAstNode('Property', {
-      key: createAstNode('Literal', {value: 'a'}),
-      value: createAstNode('Literal', {value: 1})
+      key: createAstNode('Literal|Ideintifier'),
+      value: createAstNode('Expression')
     })
 
-    sandbox.stub(esprimaParser, 'getPropertyAsString', sandbox.spy(createLiteralStub()))
-    sandbox.stub(esprimaParser, 'parseNode', sandbox.spy(createLiteralStub()))
+    sandbox.stub(esprimaParser, 'getPropertyKeyAsString')
+    sandbox.stub(esprimaParser, 'parseNode')
   })
 
   it('should return an object contains key and value', () => {
@@ -20,11 +20,11 @@ describe('Property tests', () => {
     expect(result).to.have.property('value')
   })
 
-  it('should call getPropertyKeyOfString with key and computed', () => {
+  it('should call getPropertyAsString with key and computed', () => {
     esprimaParser.Property(property)
 
     expect(
-      esprimaParser.getPropertyAsString
+      esprimaParser.getPropertyKeyAsString
         .calledWithExactly(property.key, property.computed)
     ).to.be.true
   })
@@ -39,8 +39,14 @@ describe('Property tests', () => {
   })
 
   it('should return {key: \'a\', value: 1} given property key \'a\' and value 1', () => {
+    esprimaParser.getPropertyKeyAsString.returns('a')
+    esprimaParser.parseNode.returns(1)
+
     const result = esprimaParser.Property(property)
 
-    expect(result).to.be.eql({key: 'a', value: 1})
+    expect(result).to.be.eql({
+      key: 'a',
+      value: 1
+    })
   })
 })

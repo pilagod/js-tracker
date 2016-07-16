@@ -1,5 +1,5 @@
 describe('handleReferenceOperation tests', () => {
-  let argument, remainingArgs, operationSpy
+  let argument, operationSpy, remainingArgs
 
   before(() => {
     remainingArgs = [1, 'string', true, null, undefined]
@@ -9,7 +9,7 @@ describe('handleReferenceOperation tests', () => {
     operationSpy = sandbox.spy(() => 'resultFromOperation')
   })
 
-  // case Identifier -> call operation with reference property and remaining arguments
+  // case Identifier
   describe('Identifier argument', () => {
     beforeEach(() => {
       argument = createAstNode('Identifier', {name: 'a'})
@@ -32,16 +32,12 @@ describe('handleReferenceOperation tests', () => {
   })
 
   // case MemberExpression
-  //   -> call parseExpression,
-  //   -> call getReference to get object and property (call getExpressionReference),
-  //   -> call operation with reference and remaining arguments
   describe('MemberExpression argument', () => {
     beforeEach(() => {
       argument = createAstNode('MemberExpression')
 
-      sandbox.stub(esprimaParser, 'getMemberExpressionReference', sandbox.spy(() => {
-        return 'resultFromGetMemberExpressionReference'
-      }))
+      sandbox.stub(esprimaParser, 'getMemberExpressionReference')
+        .returns('resultFromGetMemberExpressionReference')
     })
 
     it('should call getMemberExpressionReference with argument', () => {
@@ -58,7 +54,10 @@ describe('handleReferenceOperation tests', () => {
 
       expect(
         operationSpy
-          .calledWithExactly('resultFromGetMemberExpressionReference', ...remainingArgs)
+          .calledWithExactly(
+            'resultFromGetMemberExpressionReference',
+            ...remainingArgs
+          )
       ).to.be.true
       expect(result).to.be.equal('resultFromOperation')
     })
@@ -67,7 +66,7 @@ describe('handleReferenceOperation tests', () => {
   // @TODO: need to test outlier
   describe('Other argument', () => {
     beforeEach(() => {
-      argument = createAstNode('Other')
+      argument = createAstNode('Expression')
     })
 
     it('should return undefined', () => {

@@ -4,17 +4,18 @@ describe('VariableDeclaration tests', () => {
   let variableDeclaration
 
   beforeEach(() => {
-    variableDeclaration = createAstNode('VariableDeclaration')
+    variableDeclaration = createAstNode('VariableDeclaration', {
+      declarations: [
+        createAstNode('VariableDeclarator1'),
+        createAstNode('VariableDeclarator2'),
+        createAstNode('VariableDeclarator3')
+      ]
+    })
 
-    sandbox.stub(esprimaParser, 'parseNode', sandbox.spy())
+    sandbox.stub(esprimaParser, 'parseNode')
   })
 
   it('should call parseNode with nodes in declarations', () => {
-    variableDeclaration.declarations = [
-      createAstNode('VariableDeclarator'),
-      createAstNode('VariableDeclarator')
-    ]
-
     esprimaParser.VariableDeclaration(variableDeclaration)
 
     variableDeclaration.declarations.forEach((node, index) => {
@@ -24,6 +25,6 @@ describe('VariableDeclaration tests', () => {
           .calledWithExactly(node)
       ).to.be.true
     })
-    expect(esprimaParser.parseNode.calledTwice).to.be.true
+    expect(esprimaParser.parseNode.calledThrice).to.be.true
   })
 })

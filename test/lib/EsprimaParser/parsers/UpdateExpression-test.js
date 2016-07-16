@@ -1,18 +1,19 @@
 // spec: https://github.com/estree/estree/blob/master/spec.md#updateexpression
-
+// assume always prefix
 describe('UpdateExpression tests', () => {
   let updateExpression
 
-  // prefix
   beforeEach(() => {
-    updateExpression = createAstNode('UpdateExpression')
+    updateExpression = createAstNode('UpdateExpression', {
+      operator: 'updateOperator',
+      argument: createAstNode('Expression'),
+      prefix: 'boolean'
+    })
 
-    sandbox.stub(esprimaParser, 'transformUpdateToAssignment', sandbox.spy(() => {
-      return 'transformedExpression'
-    }))
-    sandbox.stub(esprimaParser, 'AssignmentExpression', sandbox.spy(() => {
-      return 'after-assignment value'
-    }))
+    sandbox.stub(esprimaParser, 'transformUpdateToAssignment')
+      .returns('resultFromTransformUpdateToAssignment')
+    sandbox.stub(esprimaParser, 'AssignmentExpression')
+      .returns('resultFromAssignmentExpression')
   })
 
   it('should call transformUpdateToAssignment with updateExpression', () => {
@@ -29,18 +30,18 @@ describe('UpdateExpression tests', () => {
 
     expect(
       esprimaParser.AssignmentExpression
-        .calledWithExactly('transformedExpression')
+        .calledWithExactly('resultFromTransformUpdateToAssignment')
     ).to.be.true
   })
 
   it('should return origin value given prefix false', () => {
     updateExpression.prefix = false
 
-    sandbox.stub(esprimaParser, 'parseNode', () => 'argument value')
+    sandbox.stub(esprimaParser, 'parseNode', createParseNodeStub())
 
     const result = esprimaParser.UpdateExpression(updateExpression)
 
-    expect(result).to.be.equal('argument value')
+    expect(result).to.be.equal('parsedExpression')
   })
 
   it('should return after-assignment value given prefix true', () => {
@@ -48,6 +49,6 @@ describe('UpdateExpression tests', () => {
 
     const result = esprimaParser.UpdateExpression(updateExpression)
 
-    expect(result).to.be.equal('after-assignment value')
+    expect(result).to.be.equal('resultFromAssignmentExpression')
   })
 })

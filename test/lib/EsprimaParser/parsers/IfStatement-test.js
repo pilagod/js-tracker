@@ -5,16 +5,23 @@ describe('IfStatement tests', () => {
 
   beforeEach(() => {
     ifStatement = createAstNode('IfStatement', {
-      test: createAstNode('Literal', {value: true}),
-      consequent: createAstNode('Literal', {value: 'consequent'}),
-      alternate: createAstNode('Literal', {value: 'alternate'})
+      test: createAstNode('Expression'),
+      consequent: createAstNode('StatementConsequent'),
+      alternate: createAstNode('StatementAlternate')
     })
 
-    sandbox.stub(esprimaParser, 'parseNode', sandbox.spy(createLiteralStub()))
+    const parseNodeStub = createParseNodeStub()
+
+    sandbox.stub(esprimaParser, 'parseNode')
+      .withArgs(ifStatement.consequent)
+        .returns(parseNodeStub(ifStatement.consequent))
+      .withArgs(ifStatement.alternate)
+        .returns(parseNodeStub(ifStatement.alternate))
   })
 
   it('should call parseNode with test', () => {
-    ifStatement.test = createAstNode('Literal', {value: true})
+    esprimaParser.parseNode
+      .withArgs(ifStatement.test).returns(true)
 
     esprimaParser.IfStatement(ifStatement)
 
@@ -25,6 +32,9 @@ describe('IfStatement tests', () => {
   })
 
   it('should call parseNode with consequent only and return given test passes', () => {
+    esprimaParser.parseNode
+      .withArgs(ifStatement.test).returns(true)
+
     const result = esprimaParser.IfStatement(ifStatement)
 
     expect(
@@ -35,11 +45,12 @@ describe('IfStatement tests', () => {
       esprimaParser.parseNode
         .neverCalledWith(ifStatement.alternate)
     ).to.be.true
-    expect(result).to.be.equal('consequent')
+    expect(result).to.be.equal('parsedStatementConsequent')
   })
 
   it('should call parseNode with alternate only and return given test falis', () => {
-    ifStatement.test = createAstNode('Literal', {value: false})
+    esprimaParser.parseNode
+      .withArgs(ifStatement.test).returns(false)
 
     const result = esprimaParser.IfStatement(ifStatement)
 
@@ -51,6 +62,6 @@ describe('IfStatement tests', () => {
       esprimaParser.parseNode
         .neverCalledWith(ifStatement.consequent)
     ).to.be.true
-    expect(result).to.be.equal('alternate')
+    expect(result).to.be.equal('parsedStatementAlternate')
   })
 })

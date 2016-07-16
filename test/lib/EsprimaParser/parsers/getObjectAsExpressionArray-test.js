@@ -2,9 +2,8 @@ describe('getObjectAsExpressionArray tests', () => {
   it('should call parseMemberExpression and return given object type MemberExpression', () => {
     const object = createAstNode('MemberExpression')
 
-    sandbox.stub(esprimaParser, 'parseMemberExpression', sandbox.spy(() => {
-      return ['object', 'property']
-    }))
+    sandbox.stub(esprimaParser, 'parseMemberExpression')
+      .returns(['object', 'property'])
 
     const result = esprimaParser.getObjectAsExpressionArray(object)
 
@@ -18,12 +17,11 @@ describe('getObjectAsExpressionArray tests', () => {
   it('should call parseCallExpression and return given object type CallExpression', () => {
     const object = createAstNode('CallExpression')
 
-    sandbox.stub(esprimaParser, 'parseCallExpression', sandbox.spy(() => {
-      return ['callee', {
+    sandbox.stub(esprimaParser, 'parseCallExpression')
+      .returns(['callee', {
         method: 'method',
         arguments: 'arguments'
-      }]
-    }))
+      }])
 
     const result = esprimaParser.getObjectAsExpressionArray(object)
 
@@ -38,11 +36,9 @@ describe('getObjectAsExpressionArray tests', () => {
   })
 
   it('should call parseNode and return an array given object type other than Member & Call Expression', () => {
-    const object = createAstNode('TypeOtherThanMemberAndCall')
+    const object = createAstNode('Expression')
 
-    sandbox.stub(esprimaParser, 'parseNode', sandbox.spy(() => {
-      return 'resultFromParseNode'
-    }))
+    sandbox.stub(esprimaParser, 'parseNode', createParseNodeStub())
 
     const result = esprimaParser.getObjectAsExpressionArray(object)
 
@@ -51,6 +47,6 @@ describe('getObjectAsExpressionArray tests', () => {
         .calledWithExactly(object)
     ).to.be.true
     expect(result).to.be.instanceof(Array)
-    expect(result).to.be.eql(['resultFromParseNode'])
+    expect(result).to.be.eql(['parsedExpression'])
   })
 })

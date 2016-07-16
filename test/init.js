@@ -3,6 +3,7 @@ const sinon = require('sinon')
 
 before(() => {
   global.expect = expect
+  global.sinon = sinon
 })
 
 beforeEach(() => {

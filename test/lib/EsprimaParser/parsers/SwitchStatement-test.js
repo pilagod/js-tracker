@@ -5,7 +5,7 @@ describe('SwitchStatement tests', () => {
 
   beforeEach(() => {
     switchStatement = createAstNode('SwitchStatement', {
-      discriminant: 'discriminant',
+      discriminant: createAstNode('Expression'),
       cases: [
         createAstNode('SwitchCase1'),
         createAstNode('SwitchCase2'),
@@ -13,12 +13,11 @@ describe('SwitchStatement tests', () => {
       ]
     })
 
-    sandbox.stub(esprimaParser, 'parseNode', sandbox.spy(() => {
-      return 'parsedDiscriminant'
-    }))
-    sandbox.stub(esprimaParser, 'parseSwitchCases', sandbox.spy(() => {
-      return 'resultFromParseSwitchCases'
-    }))
+    sandbox.stub(esprimaParser, 'parseNode')
+      .withArgs(switchStatement.discriminant)
+        .returns('parsedDiscriminant')
+    sandbox.stub(esprimaParser, 'parseSwitchCases')
+      .returns('resultFromParseSwitchCases')
     sandbox.stub(esprimaParser, 'status', {
       unset: sandbox.spy()
     })
@@ -29,7 +28,7 @@ describe('SwitchStatement tests', () => {
 
     expect(
       esprimaParser.parseNode
-        .calledWithExactly('discriminant')
+        .calledWithExactly(switchStatement.discriminant)
     ).to.be.true
   })
 

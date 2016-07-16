@@ -4,18 +4,18 @@ describe('Program tests', () => {
   let program
 
   beforeEach(() => {
-    program = createAstNode('Program')
+    program = createAstNode('Program', {
+      body: [
+        createAstNode('Statement1'),
+        createAstNode('Statement2'),
+        createAstNode('Statement3')
+      ]
+    })
 
-    sandbox.stub(esprimaParser, 'parseNode', sandbox.spy())
+    sandbox.stub(esprimaParser, 'parseNode')
   })
 
   it('should call parseNode with nodes in body', () => {
-    program.body = [
-      createAstNode('VariableDeclaration'),
-      createAstNode('FunctionDeclaration'),
-      createAstNode('ExpressionStatement')
-    ]
-
     esprimaParser.Program(program)
 
     program.body.forEach((node) => {

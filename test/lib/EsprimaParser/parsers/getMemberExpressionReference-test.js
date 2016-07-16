@@ -3,9 +3,7 @@ describe('getMemberExpressionReference tests', () => {
 
   before(() => {
     class Expression {
-      getReference() {
-        return 'resultFromExpressionGetReference'
-      }
+      getReference() {}
     }
     expression = new Expression()
   })
@@ -13,10 +11,10 @@ describe('getMemberExpressionReference tests', () => {
   beforeEach(() => {
     memberExpression = createAstNode('MemberExpression')
 
-    sandbox.stub(esprimaParser, 'parseExpression', sandbox.spy(() => {
-      return expression
-    }))
-    sandbox.spy(expression, 'getReference')
+    sandbox.stub(esprimaParser, 'parseExpression')
+      .returns(expression)
+    sandbox.stub(expression, 'getReference')
+      .returns('resultFromGetReference')
   })
 
   it('should call parseExpression with MemberExpression', () => {
@@ -36,6 +34,6 @@ describe('getMemberExpressionReference tests', () => {
       expression.getReference
         .calledWithExactly()
     ).to.be.true
-    expect(result).to.be.equal('resultFromExpressionGetReference')
+    expect(result).to.be.equal('resultFromGetReference')
   })
 })

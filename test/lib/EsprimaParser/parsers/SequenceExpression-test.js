@@ -6,13 +6,13 @@ describe('SequenceExpression tests', () => {
   beforeEach(() => {
     sequenceExpression = createAstNode('SequenceExpression', {
       expressions: [
-        createAstNode('Literal', {value: 'first'}),
-        createAstNode('Literal', {value: 'second'}),
-        createAstNode('Literal', {value: 'third'})
+        createAstNode('Expression1'),
+        createAstNode('Expression2'),
+        createAstNode('Expression3')
       ]
     })
 
-    sandbox.stub(esprimaParser, 'parseNode', sandbox.spy(createLiteralStub()))
+    sandbox.stub(esprimaParser, 'parseNode', createParseNodeStub())
   })
 
   it('should call parseNode with each expression', () => {
@@ -31,6 +31,6 @@ describe('SequenceExpression tests', () => {
   it('should return last expression result', () => {
     const result = esprimaParser.SequenceExpression(sequenceExpression)
 
-    expect(result).to.be.equal('third')
+    expect(result).to.be.equal('parsedExpression3')
   })
 })
