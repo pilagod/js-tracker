@@ -1,10 +1,5 @@
 describe('parseBlockStatementBody tests', () => {
-  const setStatusStub = (
-    results = [false, false, false]
-  ) => {
-    if (esprimaParser.status.restore) {
-      esprimaParser.status.restore()
-    }
+  const setStatusStub = (results) => {
     sandbox.stub(esprimaParser, 'status', {
       isEitherStatus: sandbox.spy(
         createResultsGenerator(results)
@@ -21,19 +16,22 @@ describe('parseBlockStatementBody tests', () => {
       createAstNode('Statement3')
     ]
 
-    setStatusStub()
     sandbox.stub(esprimaParser, 'parseNode', sandbox.spy((node) => {
       return `resultFrom${node.type}`
     }))
   })
 
   it('should call isEitherStatus of esprimaParser status each loop given no flow control statement', () => {
+    setStatusStub([false, false, false])
+
     esprimaParser.parseStatementBody(body)
 
     expect(esprimaParser.status.isEitherStatus.calledThrice).to.be.true
   })
 
   it('should call parseNode with each body node given no flow control statement, and return last parsed result', () => {
+    setStatusStub([false, false, false])
+    
     const result = esprimaParser.parseStatementBody(body)
 
     body.forEach((node, index) => {

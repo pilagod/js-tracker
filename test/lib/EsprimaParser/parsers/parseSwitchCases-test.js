@@ -1,4 +1,9 @@
 describe('parseSwitchCases tests', () => {
+  const setIsCaseMatchedStub = (results) => {
+    sandbox.stub(esprimaParser, 'isCaseMatched', sandbox.spy(
+      createResultsGenerator(results)
+    ))
+  }
   let switchCases
 
   before(() => {
@@ -17,43 +22,37 @@ describe('parseSwitchCases tests', () => {
     }))
   })
 
-  it('should call isTestMatchDiscriminant with SwitchCase test and discriminant until default case given no matched cases', () => {
-    sandbox.stub(esprimaParser, 'isTestMatchDiscriminant', sandbox.spy(
-      // last one result always true, standing for default case
-      createResultsGenerator([false, false, false, false, true])
-    ))
+  it('should call isCaseMatched with SwitchCase test and discriminant until default case given no matched cases', () => {
+    // last one result always true, standing for default case
+    setIsCaseMatchedStub([false, false, false, false, true])
 
     esprimaParser.parseSwitchCases(switchCases, 'discriminant')
 
     switchCases.forEach((switchCase, index) => {
       expect(
-        esprimaParser.isTestMatchDiscriminant
+        esprimaParser.isCaseMatched
           .getCall(index)
           .calledWithExactly(switchCase.test, 'discriminant')
       ).to.be.true
     })
   })
 
-  it('should call isTestMatchDiscriminant with each SwitchCase test and discriminant until first matched case', () => {
-    sandbox.stub(esprimaParser, 'isTestMatchDiscriminant', sandbox.spy(
-      createResultsGenerator([false, true, false, false, true])
-    ))
+  it('should call isCaseMatched with each SwitchCase test and discriminant until first matched case', () => {
+    setIsCaseMatchedStub([false, true, false, false, true])
 
     esprimaParser.parseSwitchCases(switchCases, 'discriminant')
 
-    expect(esprimaParser.isTestMatchDiscriminant.calledTwice).to.be.true
+    expect(esprimaParser.isCaseMatched.calledTwice).to.be.true
     for (let i = 2; i < 5; i += 1) {
       expect(
-        esprimaParser.isTestMatchDiscriminant
+        esprimaParser.isCaseMatched
           .neverCalledWith(`SwitchCase${i+1}Test`)
       ).to.be.true
     }
   })
 
   it('should call parseMatchedSwitchCase with SwitchCases and matchedIndex then return when case matched', () => {
-    sandbox.stub(esprimaParser, 'isTestMatchDiscriminant',
-      createResultsGenerator([false, true, false, false, true])
-    )
+    setIsCaseMatchedStub([false, true, false, false, true])
 
     const result = esprimaParser.parseSwitchCases(switchCases, 'discriminant')
 
