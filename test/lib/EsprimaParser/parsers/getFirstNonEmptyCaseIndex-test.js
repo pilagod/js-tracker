@@ -1,5 +1,10 @@
 describe('getFirstNonEmptyCaseIndex tests', () => {
   const matchedIndex = 1
+  const setIsCaseNonEmptyOrDefaultStub = (results) => {
+    sandbox.stub(esprimaParser, 'isCaseNonEmptyOrDefault', sandbox.spy(
+      createResultsGenerator(results)
+    ))
+  }
   let switchCases
 
   before(() => {
@@ -13,26 +18,22 @@ describe('getFirstNonEmptyCaseIndex tests', () => {
     })()
   })
 
-  it('should call isCaseNotEmptyOrDefault with each switchCase from matchedIndex given no matched cases', () => {
-    sandbox.stub(esprimaParser, 'isCaseNotEmptyOrDefault', sandbox.spy(
-      // index start from 1, remove first 'false':
-      // [false, false, false, false, true] -> [false, false, false, true]
-      createResultsGenerator([false, false, false, true])
-    ))
+  it('should call isCaseNonEmptyOrDefault with each switchCase from matchedIndex given no matched cases', () => {
+    // index would start from 1 given matchedIndex 1
+    // first result of isCaseNonEmptyOrDefault is omitted
+    setIsCaseNonEmptyOrDefaultStub([/*false, */false, false, false, true])
 
     esprimaParser.getFirstNonEmptyCaseIndex(switchCases, matchedIndex)
 
-    expect(esprimaParser.isCaseNotEmptyOrDefault.callCount).to.be.equal(4)
+    expect(esprimaParser.isCaseNonEmptyOrDefault.callCount).to.be.equal(4)
     expect(
-      esprimaParser.isCaseNotEmptyOrDefault
+      esprimaParser.isCaseNonEmptyOrDefault
         .neverCalledWith(switchCases[0])
     ).to.be.true
   })
 
   it('should return default case index given no matched cases', () => {
-    sandbox.stub(esprimaParser, 'isCaseNotEmptyOrDefault',
-      createResultsGenerator([false, false, false, true])
-    )
+    setIsCaseNonEmptyOrDefaultStub([/*false, */false, false, false, true])
 
     const result = esprimaParser.getFirstNonEmptyCaseIndex(switchCases, matchedIndex)
 
@@ -40,9 +41,7 @@ describe('getFirstNonEmptyCaseIndex tests', () => {
   })
 
   it('should return firstNonEmptyCaseIndex 3 given third case the first non empty one', () => {
-    sandbox.stub(esprimaParser, 'isCaseNotEmptyOrDefault',
-      createResultsGenerator([false, false, true, true])
-    )
+    setIsCaseNonEmptyOrDefaultStub([/*false, */false, false, true, true])
 
     const result = esprimaParser.getFirstNonEmptyCaseIndex(switchCases, matchedIndex)
 

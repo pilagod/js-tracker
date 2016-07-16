@@ -1,5 +1,6 @@
 describe('parseMatchedCase tests', () => {
   const matchedIndex = 1
+  const firstNonEmptyCaseIndex = 2
   let switchCases
 
   before(() => {
@@ -14,10 +15,10 @@ describe('parseMatchedCase tests', () => {
 
   beforeEach(() => {
     sandbox.stub(esprimaParser, 'getFirstNonEmptyCaseIndex', sandbox.spy(() => {
-      return 'firstNonEmptyCaseIndex'
+      return firstNonEmptyCaseIndex
     }))
-    sandbox.stub(esprimaParser, 'parseCasesUntilBreakOrDefault', sandbox.spy(() => {
-      return 'resultFromSwitchCases'
+    sandbox.stub(esprimaParser, 'parseStatements', sandbox.spy(() => {
+      return 'resultFromParseStatements'
     }))
   })
 
@@ -30,13 +31,13 @@ describe('parseMatchedCase tests', () => {
     ).to.be.true
   })
 
-  it('should call parseCasesUntilBreakOrDefault with switchCases and firstNonEmptyCaseIndex then return', () => {
+  it('should call parseStatementBody with switchCases slice by firstNonEmptyCaseIndex and return ', () => {
     const result = esprimaParser.parseMatchedCase(switchCases, matchedIndex)
 
     expect(
-      esprimaParser.parseCasesUntilBreakOrDefault
-        .calledWithExactly(switchCases, 'firstNonEmptyCaseIndex')
+      esprimaParser.parseStatements
+        .calledWithExactly(switchCases.slice(firstNonEmptyCaseIndex))
     ).to.be.true
-    expect(result).to.be.equal('resultFromSwitchCases')
+    expect(result).to.be.equal('resultFromParseStatements')
   })
 })
