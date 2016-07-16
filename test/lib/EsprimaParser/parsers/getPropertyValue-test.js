@@ -1,4 +1,4 @@
-describe('getPropertyKeyOfValue tests', () => {
+describe('getPropertyKeyValue tests', () => {
   for (const computed of [false, true]) {
     it(`should ${computed ? '' : 'not '}call parseNode ${computed ? 'with key ' : ''}given computed ${computed}`, () => {
       sandbox.stub(esprimaParser, 'parseNode', sandbox.spy())

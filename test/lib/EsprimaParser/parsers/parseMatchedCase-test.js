@@ -1,4 +1,4 @@
-describe('parseMatchedSwitchCase tests', () => {
+describe('parseMatchedCase tests', () => {
   const matchedIndex = 1
   let switchCases
 

@@ -1,4 +1,4 @@
-describe('getPropertyKeyOfString tests', () => {
+describe('getPropertyKeyAsString tests', () => {
   it('should call getPropertyKeyOfValue with key and computed', () => {
     sandbox.stub(esprimaParser, 'getPropertyValue', sandbox.spy())
 

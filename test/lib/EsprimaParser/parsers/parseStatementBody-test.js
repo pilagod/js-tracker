@@ -1,4 +1,4 @@
-describe('parseBlockStatementBody tests', () => {
+describe('parseStatementBody tests', () => {
   const setStatusStub = (results) => {
     sandbox.stub(esprimaParser, 'status', {
       isEitherStatus: sandbox.spy(
@@ -31,7 +31,7 @@ describe('parseBlockStatementBody tests', () => {
 
   it('should call parseNode with each body node given no flow control statement, and return last parsed result', () => {
     setStatusStub([false, false, false])
-    
+
     const result = esprimaParser.parseStatementBody(body)
 
     body.forEach((node, index) => {

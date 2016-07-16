@@ -1,4 +1,4 @@
-describe('isCaseNotEmptyOrDefault tests', () => {
+describe('isCaseNonEmptyOrDefault tests', () => {
   let switchCase
 
   beforeEach(() => {
