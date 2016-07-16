@@ -18,6 +18,12 @@ describe('SwitchCase tests', () => {
   })
 
   it('should call parseStatements with consequent and return', () => {
-    
+    const result = esprimaParser.SwitchCase(switchCase)
+
+    expect(
+      esprimaParser.parseStatements
+        .calledWithExactly(switchCase.consequent)
+    ).to.be.true
+    expect(result).to.be.equal('resultFromParseStatements')
   })
 })
