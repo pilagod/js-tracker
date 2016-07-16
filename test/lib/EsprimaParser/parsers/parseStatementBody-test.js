@@ -18,7 +18,7 @@ describe('parseBlockStatementBody tests', () => {
       createResultsGenerator([false, false, false])
     ))
 
-    const result = esprimaParser.parseBlockStatementBody(body)
+    const result = esprimaParser.parseStatementBody(body)
 
     body.forEach((node, index) => {
       expect(
@@ -35,7 +35,7 @@ describe('parseBlockStatementBody tests', () => {
       createResultsGenerator([false, false, false])
     ))
 
-    esprimaParser.parseBlockStatementBody(body)
+    esprimaParser.parseStatementBody(body)
 
     body.forEach((node, index) => {
       expect(
@@ -51,7 +51,7 @@ describe('parseBlockStatementBody tests', () => {
       createResultsGenerator([false, true, false])
     ))
 
-    const result = esprimaParser.parseBlockStatementBody(body)
+    const result = esprimaParser.parseStatementBody(body)
 
     expect(esprimaParser.parseNode.calledTwice).to.be.true
     expect(
@@ -66,7 +66,7 @@ describe('parseBlockStatementBody tests', () => {
       createResultsGenerator([false, true, false])
     ))
 
-    esprimaParser.parseBlockStatementBody(body)
+    esprimaParser.parseStatementBody(body)
 
     expect(esprimaParser.parseNode.calledTwice).to.be.true
     expect(

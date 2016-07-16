@@ -8,16 +8,16 @@ describe('BlockStatement tests', () => {
       body: ['statement1', 'statement2', 'statement3']
     })
 
-    sandbox.stub(esprimaParser, 'parseBlockStatementBody', () => {
+    sandbox.stub(esprimaParser, 'parseStatementBody', () => {
       return 'resultFromParseBlockStatementBody'
     })
   })
 
-  it('should call parseBlockStatementBody with body and return the result', () => {
+  it('should call parseStatementBody with body and return the result', () => {
     const result = esprimaParser.BlockStatement(blockStatement)
 
     expect(
-      esprimaParser.parseBlockStatementBody
+      esprimaParser.parseStatementBody
         .calledWithExactly(blockStatement.body)
     )
     expect(result).to.be.equal('resultFromParseBlockStatementBody')
