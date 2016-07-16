@@ -19,6 +19,9 @@ describe('SwitchStatement tests', () => {
     sandbox.stub(esprimaParser, 'parseSwitchCases', sandbox.spy(() => {
       return 'resultFromParseSwitchCases'
     }))
+    sandbox.stub(esprimaParser, 'status', {
+      unset: sandbox.spy()
+    })
   })
 
   it('should call parseNode with discriminant', () => {
@@ -30,13 +33,22 @@ describe('SwitchStatement tests', () => {
     ).to.be.true
   })
 
-  it('should call parseSwitchCases with cases and parsed discriminant then return', () => {
-    const result = esprimaParser.SwitchStatement(switchStatement)
+  it('should call parseSwitchCases with cases and parsed discriminant', () => {
+    esprimaParser.SwitchStatement(switchStatement)
 
     expect(
       esprimaParser.parseSwitchCases
         .calledWithExactly(switchStatement.cases, 'parsedDiscriminant')
     ).to.be.true
-    expect(result).to.be.equal('resultFromParseSwitchCases')
+  })
+
+  it('should call unset of esprimaParser status with \'break\'', () => {
+    // switch should not unset return, and there is no continue statement in it
+    esprimaParser.SwitchStatement(switchStatement)
+
+    expect(
+      esprimaParser.status.unset
+        .calledWithExactly('break')
+    ).to.be.true
   })
 })
