@@ -5,37 +5,37 @@ describe('isCaseMatched tests', () => {
     sandbox.stub(esprimaParser, 'parseNode', sandbox.spy(createLiteralStub()))
   })
 
-  it('should call parseNode with caseTestExpression', () => {
-    const caseTestExpression = createAstNode('Literal')
+  it('should call parseNode with testExpression', () => {
+    const testExpression = createAstNode('Literal')
 
-    esprimaParser.isCaseMatched(caseTestExpression, discriminant)
+    esprimaParser.isCaseMatched(testExpression, discriminant)
 
     expect(
       esprimaParser.parseNode
-        .calledWithExactly(caseTestExpression)
+        .calledWithExactly(testExpression)
     ).to.be.true
   })
 
-  it('should return true if parsed caseTestExpression equals to discriminant', () => {
-    const caseTestExpression = createAstNode('Literal', {value: 'discriminant'})
+  it('should return true if parsed testExpression equals to discriminant', () => {
+    const testExpression = createAstNode('Literal', {value: 'discriminant'})
 
-    const result = esprimaParser.isCaseMatched(caseTestExpression, discriminant)
+    const result = esprimaParser.isCaseMatched(testExpression, discriminant)
 
     expect(result).to.be.true
   })
 
   it('should return true if test is null (default case)', () => {
-    const caseTestExpression = null
+    const testExpression = null
 
-    const result = esprimaParser.isCaseMatched(caseTestExpression, discriminant)
+    const result = esprimaParser.isCaseMatched(testExpression, discriminant)
 
     expect(result).to.be.true
   })
 
-  it('should return false if parsed caseTestExpression does not equals to discriminant', () => {
-    const caseTestExpression = createAstNode('Literal', {value: 'some other value'})
+  it('should return false if parsed testExpression does not equals to discriminant', () => {
+    const testExpression = createAstNode('Literal', {value: 'some other value'})
 
-    const result = esprimaParser.isCaseMatched(caseTestExpression, discriminant)
+    const result = esprimaParser.isCaseMatched(testExpression, discriminant)
 
     expect(result).to.be.false
   })
