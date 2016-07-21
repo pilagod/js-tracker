@@ -1,14 +1,14 @@
-// spec: https://github.com/estree/estree/blob/master/spec.md#whilestatement
+// spec: https://github.com/estree/estree/blob/master/spec.md#forstatement
 
-describe('WhileStatement tests', () => {
-  let whileStatement
+describe('ForStatement tests', () => {
+  let forStatement
 
   const setTestResults = (results) => {
     const getTestResults = createResultsGenerator(results)
 
     for (const index of results.keys()) {
       esprimaParser.parseNode
-        .withArgs(whileStatement.test)
+        .withArgs(forStatement.test)
           .onCall(index).returns(getTestResults())
     }
   }
@@ -19,8 +19,10 @@ describe('WhileStatement tests', () => {
   }
 
   beforeEach(() => {
-    whileStatement = createAstNode('WhileStatement', {
-      test: createAstNode('Expression'),
+    forStatement = createAstNode('ForStatement', {
+      init: createAstNode('ExpressionInit'),
+      test: createAstNode('ExpressionTest'),
+      update: createAstNode('ExpressionUpdate'),
       body: createAstNode('Statement')
     })
 
@@ -32,25 +34,56 @@ describe('WhileStatement tests', () => {
     })
   })
 
-  it('should call parseNode with test until test fails', () => {
-    setTestResults([true, true, false, true, true])
-
-    esprimaParser.WhileStatement(whileStatement)
+  it('should call parseNode with init given non-null init', () => {
+    esprimaParser.ForStatement(forStatement)
 
     expect(
       esprimaParser.parseNode
-        .withArgs(whileStatement.test).calledThrice
+        .calledWithExactly(forStatement.init)
+    ).to.be.true
+  })
+
+  it('should not call parseNode with init given null init', () => {
+    forStatement.init = null
+
+    esprimaParser.ForStatement(forStatement)
+
+    expect(
+      esprimaParser.parseNode
+        .neverCalledWith(forStatement.init)
+    ).to.be.true
+  })
+
+  it('should call parseNode with test until test fails', () => {
+    setTestResults([true, true, false, true, true])
+
+    esprimaParser.ForStatement(forStatement)
+
+    expect(
+      esprimaParser.parseNode
+        .withArgs(forStatement.test).calledThrice
+    ).to.be.true
+  })
+
+  it('should call parseNode with update each time test passes', () => {
+    setTestResults([true, true, false])
+
+    esprimaParser.ForStatement(forStatement)
+
+    expect(
+      esprimaParser.parseNode
+        .withArgs(forStatement.update).calledTwice
     ).to.be.true
   })
 
   it('should call parseNode with body each time test passes', () => {
     setTestResults([true, true, false])
 
-    esprimaParser.WhileStatement(whileStatement)
+    esprimaParser.ForStatement(forStatement)
 
     expect(
       esprimaParser.parseNode
-        .withArgs(whileStatement.body).calledTwice
+        .withArgs(forStatement.body).calledTwice
     ).to.be.true
   })
 
@@ -58,7 +91,7 @@ describe('WhileStatement tests', () => {
     setTestResults([true, true, false])
     setCheckStatusResults('isLoopBreakStatus', [false, false, false])
 
-    esprimaParser.WhileStatement(whileStatement)
+    esprimaParser.ForStatement(forStatement)
 
     expect(esprimaParser.status.isLoopBreakStatus.calledTwice).to.be.true
   })
@@ -67,7 +100,7 @@ describe('WhileStatement tests', () => {
     setTestResults([true, true, false])
     setCheckStatusResults('isLoopContinueStatus', [false, false, false])
 
-    esprimaParser.WhileStatement(whileStatement)
+    esprimaParser.ForStatement(forStatement)
 
     expect(esprimaParser.status.isLoopContinueStatus.calledTwice).to.be.true
   })
@@ -76,11 +109,11 @@ describe('WhileStatement tests', () => {
     setTestResults([true, true, true])
     setCheckStatusResults('isLoopBreakStatus', [false, true, false])
 
-    esprimaParser.WhileStatement(whileStatement)
+    esprimaParser.ForStatement(forStatement)
 
     expect(
       esprimaParser.parseNode
-        .withArgs(whileStatement.body).calledTwice
+        .withArgs(forStatement.body).calledTwice
     ).to.be.true
     expect(
       esprimaParser.status.unset
@@ -92,11 +125,11 @@ describe('WhileStatement tests', () => {
     setTestResults([true, true, true])
     setCheckStatusResults('isLoopContinueStatus', [false, true, false])
 
-    esprimaParser.WhileStatement(whileStatement)
+    esprimaParser.ForStatement(forStatement)
 
     expect(
       esprimaParser.parseNode
-        .withArgs(whileStatement.body).calledThrice
+        .withArgs(forStatement.body).calledThrice
     ).to.be.true
     expect(
       esprimaParser.status.unset
@@ -107,9 +140,9 @@ describe('WhileStatement tests', () => {
   it('should return parsed body result', () => {
     setTestResults([true])
     esprimaParser.parseNode
-      .withArgs(whileStatement.body).returns('parsedStatement')
+      .withArgs(forStatement.body).returns('parsedStatement')
 
-    const result = esprimaParser.WhileStatement(whileStatement)
+    const result = esprimaParser.ForStatement(forStatement)
 
     expect(result).to.be.equal('parsedStatement')
   })
@@ -117,12 +150,16 @@ describe('WhileStatement tests', () => {
   it('should return undefined given test fails from beginning', () => {
     setTestResults([false])
 
-    const result = esprimaParser.WhileStatement(whileStatement)
+    const result = esprimaParser.ForStatement(forStatement)
 
     expect(result).to.be.undefined
     expect(
       esprimaParser.parseNode
-        .withArgs(whileStatement.body).called
+        .withArgs(forStatement.body).called
+    ).to.be.false
+    expect(
+      esprimaParser.parseNode
+        .withArgs(forStatement.update).called
     ).to.be.false
   })
 })
