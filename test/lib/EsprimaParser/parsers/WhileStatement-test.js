@@ -1,8 +1,6 @@
 // spec: https://github.com/estree/estree/blob/master/spec.md#whilestatement
 
 describe('WhileStatement tests', () => {
-  let whileStatement
-
   const setTestResults = (results) => {
     const getTestResults = createResultsGenerator(results)
 
@@ -12,11 +10,12 @@ describe('WhileStatement tests', () => {
           .onCall(index).returns(getTestResults())
     }
   }
-
   const setCheckStatusResults = (method, results) => {
     esprimaParser.status[method] =
       sandbox.spy(createResultsGenerator(results))
   }
+
+  let whileStatement
 
   beforeEach(() => {
     whileStatement = createAstNode('WhileStatement', {
@@ -54,21 +53,43 @@ describe('WhileStatement tests', () => {
     ).to.be.true
   })
 
-  it('should call isLoopBreakStatus of esprimaParser status each time test passes', () => {
+  it('should call isLoopBreakStatus of esprimaParser status after parsing body each time test passes', () => {
     setTestResults([true, true, false])
     setCheckStatusResults('isLoopBreakStatus', [false, false, false])
 
     esprimaParser.WhileStatement(whileStatement)
 
+    for (let i = 0; i < 2; i += 1) {
+      expect(
+        esprimaParser.status.isLoopBreakStatus
+          .getCall(i)
+          .calledAfter(
+            esprimaParser.parseNode
+              .withArgs(whileStatement.body)
+              .getCall(i)
+          )
+      ).to.be.true
+    }
     expect(esprimaParser.status.isLoopBreakStatus.calledTwice).to.be.true
   })
 
-  it('should call isLoopContinueStatus of esprimaParser status each time test passes', () => {
+  it('should call isLoopContinueStatus of esprimaParser status after parsing body each time test passes', () => {
     setTestResults([true, true, false])
     setCheckStatusResults('isLoopContinueStatus', [false, false, false])
 
     esprimaParser.WhileStatement(whileStatement)
 
+    for (let i = 0; i < 2; i += 1) {
+      expect(
+        esprimaParser.status.isLoopContinueStatus
+          .getCall(i)
+          .calledAfter(
+            esprimaParser.parseNode
+              .withArgs(whileStatement.body)
+              .getCall(i)
+          )
+      ).to.be.true
+    }
     expect(esprimaParser.status.isLoopContinueStatus.calledTwice).to.be.true
   })
 
@@ -107,7 +128,8 @@ describe('WhileStatement tests', () => {
   it('should return parsed body result', () => {
     setTestResults([true])
     esprimaParser.parseNode
-      .withArgs(whileStatement.body).returns('parsedStatement')
+      .withArgs(whileStatement.body)
+        .returns('parsedStatement')
 
     const result = esprimaParser.WhileStatement(whileStatement)
 

@@ -27,15 +27,23 @@ describe('DoWhileStatement tests', () => {
     ).to.be.true
   })
 
-  it('should call isLoopBreakStatus of esprimaParser status', () => {
+  it('should call isLoopBreakStatus of esprimaParser status before calling WhileStatement', () => {
     esprimaParser.DoWhileStatement(doWhileStatement)
 
+    expect(
+      esprimaParser.status.isLoopBreakStatus
+        .calledBefore(esprimaParser.WhileStatement)
+    ).to.be.true
     expect(esprimaParser.status.isLoopBreakStatus.calledOnce).to.be.true
   })
 
-  it('should call isLoopContinueStatus of esprimaParser status', () => {
+  it('should call isLoopContinueStatus of esprimaParser status before calling WhileStatement', () => {
     esprimaParser.DoWhileStatement(doWhileStatement)
 
+    expect(
+      esprimaParser.status.isLoopContinueStatus
+        .calledBefore(esprimaParser.WhileStatement)
+    ).to.be.true
     expect(esprimaParser.status.isLoopContinueStatus.calledOnce).to.be.true
   })
 
