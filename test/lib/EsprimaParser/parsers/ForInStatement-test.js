@@ -22,6 +22,7 @@ describe('ForInStatement', () => {
     sandbox.stub(esprimaParser, 'parseNode')
       .withArgs(forInStatement.right)
         .returns(rightStub)
+    sandbox.stub(esprimaParser, 'updateVariables')
     sandbox.stub(esprimaParser, 'closureStack', {
       update: sandbox.spy()
     })
@@ -46,16 +47,16 @@ describe('ForInStatement', () => {
     ).to.be.true
   })
 
-  it('should call update of closureStack with left name and right elements key each loop', () => {
+  it('should call updateVariables with left name and right key each loop', () => {
     esprimaParser.ForInStatement(forInStatement)
 
     for (const key in rightStub) {
       expect(
-        esprimaParser.closureStack.update
+        esprimaParser.updateVariables
           .calledWithExactly(leftStub, key)
       ).to.be.true
     }
-    expect(esprimaParser.closureStack.update.calledThrice).to.be.true
+    expect(esprimaParser.updateVariables.calledThrice).to.be.true
   })
 
   it('should call parseNode with body after updating left in each loop', () => {
@@ -67,7 +68,7 @@ describe('ForInStatement', () => {
           .withArgs(forInStatement.body)
             .getCall(i)
             .calledAfter(
-              esprimaParser.closureStack.update
+              esprimaParser.updateVariables
                 .getCall(i)
             )
       ).to.be.true
@@ -105,7 +106,7 @@ describe('ForInStatement', () => {
       esprimaParser.parseNode
         .withArgs(forInStatement.body).calledTwice
     ).to.be.true
-    expect(esprimaParser.closureStack.update.calledTwice).to.be.true
+    expect(esprimaParser.updateVariables.calledTwice).to.be.true
   })
 
   it('should return parsed body result', () => {

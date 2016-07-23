@@ -1,20 +1,19 @@
 // spec: https://github.com/estree/estree/blob/master/spec.md#assignmentoperator
 
 describe('AssignmentOperators tests', () => {
-  it('should call update of closureStack with property and value given no object reference', () => {
+  it('should call updateVariables with property and value given no object reference', () => {
+    const value = 'value'
     const target = {
       property: 'a'
     }
 
-    sandbox.stub(esprimaParser, 'closureStack', {
-      update: sandbox.spy()
-    })
+    sandbox.stub(esprimaParser, 'updateVariables')
 
-    esprimaParser.assignmentOperators['='](target, 'value')
+    esprimaParser.assignmentOperators['='](target, value)
 
     expect(
-      esprimaParser.closureStack.update
-        .calledWithExactly('a', 'value')
+      esprimaParser.updateVariables
+        .calledWithExactly(target.property, value)
     ).to.be.true
   })
 
