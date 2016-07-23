@@ -5,14 +5,26 @@ describe('VariableDeclarator tests', () => {
 
   beforeEach(() => {
     variableDeclarator = createAstNode('VariableDeclarator', {
-      id: createAstNode('Identifier', {name: 'variableName'}),
+      id: createAstNode('Identifier', {
+        name: 'name'
+      }),
       init: createAstNode('Expression')
     })
 
-    sandbox.stub(esprimaParser, 'closureStack', {
-      set: sandbox.spy()
-    })
-    sandbox.stub(esprimaParser, 'parseNode', createParseNodeStub())
+    sandbox.stub(esprimaParser, 'getName')
+      .returns('variables')
+    sandbox.stub(esprimaParser, 'parseNode')
+      .returns('values')
+    sandbox.stub(esprimaParser, 'setVariables')
+  })
+
+  it('should call getName with id', () => {
+    esprimaParser.VariableDeclarator(variableDeclarator)
+
+    expect(
+      esprimaParser.getName
+        .calledWithExactly(variableDeclarator.id)
+    ).to.be.true
   })
 
   it('should call parseNode with init given non-null init', () => {
@@ -24,31 +36,23 @@ describe('VariableDeclarator tests', () => {
     ).to.be.true
   })
 
-  it('should call set of closureStack with id name and init value, given non-null init', () => {
+  it('should call setVariables with variables from getName and values from parseNode given non-null init', () => {
     esprimaParser.VariableDeclarator(variableDeclarator)
 
     expect(
-      esprimaParser.closureStack.set
-        .calledWithExactly('variableName', 'parsedExpression')
+      esprimaParser.setVariables
+        .calledWithExactly('variables', 'values')
     ).to.be.true
   })
 
-  it('should not call parseNode with init given null init', () => {
-    variableDeclarator.init = null
-
-    esprimaParser.VariableDeclarator(variableDeclarator)
-
-    expect(esprimaParser.parseNode.callCount).to.be.equal(0)
-  })
-
-  it('should call set of closureStack with id name and undefined, given null init', () => {
+  it('should call setVariables with variables from getName and undefined given null init', () => {
     variableDeclarator.init = null
 
     esprimaParser.VariableDeclarator(variableDeclarator)
 
     expect(
-      esprimaParser.closureStack.set
-        .calledWithExactly('variableName', undefined)
+      esprimaParser.setVariables
+        .calledWithExactly('variables', undefined)
     ).to.be.true
   })
 })
