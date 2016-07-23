@@ -1,32 +1,49 @@
 describe('getName tests', () => {
-  it('should call getNameFromVariableDeclaration with node and return given node type VariableDeclaration', () => {
-    const node = createAstNode('VariableDeclaration')
+  describe('VariableDeclaration', () => {
+    let node
 
-    sandbox.stub(esprimaParser, 'getNameFromVariableDeclaration')
-      .returns('resultFromGetNameFromVariableDeclaration')
+    beforeEach(() => {
+      node = createAstNode('VariableDeclaration')
 
-    const result = esprimaParser.getName(node)
+      sandbox.stub(esprimaParser, 'parseNode')
+      sandbox.stub(esprimaParser, 'getNameFromVariableDeclaration')
+        .returns('resultFromGetNameFromVariableDeclaration')
+    })
 
-    expect(
-      esprimaParser.getNameFromVariableDeclaration
-        .calledWithExactly(node)
-    ).to.be.true
-    expect(result).to.be.equal('resultFromGetNameFromVariableDeclaration')
+    it('should call parseNode with node before getNameFromVariableDeclaration', () => {
+      esprimaParser.getName(node)
+
+      expect(
+        esprimaParser.parseNode
+          .calledWithExactly(node)
+      ).to.be.true
+      expect(
+        esprimaParser.parseNode
+          .calledBefore(
+            esprimaParser.getNameFromVariableDeclaration
+          )
+      ).to.be.true
+    })
+
+    it('should call getNameFromVariableDeclaration with node and return', () => {
+      const result = esprimaParser.getName(node)
+
+      expect(
+        esprimaParser.getNameFromVariableDeclaration
+          .calledWithExactly(node)
+      ).to.be.true
+      expect(result).to.be.equal('resultFromGetNameFromVariableDeclaration')
+    })
   })
 
-  it('should call getNameFromIdentifier with node and return given node type Identifier', () => {
-    const node = createAstNode('Identifier')
-
-    sandbox.stub(esprimaParser, 'getNameFromIdentifier')
-      .returns('resultFromGetNameFromIdentifier')
+  it('should return node name given node type Identifier', () => {
+    const node = createAstNode('Identifier', {
+      name: 'name of Identifier'
+    })
 
     const result = esprimaParser.getName(node)
 
-    expect(
-      esprimaParser.getNameFromIdentifier
-        .calledWithExactly(node)
-    ).to.be.true
-    expect(result).to.be.equal('resultFromGetNameFromIdentifier')
+    expect(result).to.be.equal(node.name)
   })
 
   it('should return null given unknown node type', () => {
