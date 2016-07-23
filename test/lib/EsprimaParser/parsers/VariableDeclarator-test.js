@@ -11,18 +11,18 @@ describe('VariableDeclarator tests', () => {
       init: createAstNode('Expression')
     })
 
-    sandbox.stub(esprimaParser, 'getName')
+    sandbox.stub(esprimaParser, 'getNameFromPattern')
       .returns('variables')
     sandbox.stub(esprimaParser, 'parseNode')
       .returns('values')
     sandbox.stub(esprimaParser, 'setVariables')
   })
 
-  it('should call getName with id', () => {
+  it('should call getNameFromPattern with id', () => {
     esprimaParser.VariableDeclarator(variableDeclarator)
 
     expect(
-      esprimaParser.getName
+      esprimaParser.getNameFromPattern
         .calledWithExactly(variableDeclarator.id)
     ).to.be.true
   })

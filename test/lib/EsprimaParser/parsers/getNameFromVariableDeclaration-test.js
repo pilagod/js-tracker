@@ -10,17 +10,27 @@ describe('getNameFromVariableDeclaration tests', () => {
       ]
     })
 
-    sandbox.stub(esprimaParser, 'getName')
-      .returns('resultFromGetName')
+    sandbox.stub(esprimaParser, 'parseNode')
+    sandbox.stub(esprimaParser, 'getNameFromPattern')
+      .returns('resultFromGetNameFromPattern')
   })
 
-  it('should call getName with first VariableDeclarator\' id in declarations and return', () => {
+  it('should call parseNode with node', () => {
+    esprimaParser.getNameFromVariableDeclaration(variableDeclaration)
+
+    expect(
+      esprimaParser.parseNode
+        .calledWithExactly(variableDeclaration)
+    ).to.be.true
+  })
+
+  it('should call getNameFromPattern with first VariableDeclarator\'s id in declarations and return', () => {
     const result = esprimaParser.getNameFromVariableDeclaration(variableDeclaration)
 
     expect(
-      esprimaParser.getName
+      esprimaParser.getNameFromPattern
         .calledWithExactly(variableDeclaration.declarations[0].id)
     ).to.be.true
-    expect(result).to.be.equal('resultFromGetName')
+    expect(result).to.be.equal('resultFromGetNameFromPattern')
   })
 })
