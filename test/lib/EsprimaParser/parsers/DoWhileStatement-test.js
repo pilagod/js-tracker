@@ -10,11 +10,7 @@ describe('DoWhileStatement tests', () => {
     })
 
     sandbox.stub(esprimaParser, 'parseNode')
-    sandbox.stub(esprimaParser, 'status', {
-      unset: sandbox.spy(),
-      isLoopBreakStatus: sandbox.stub(),
-      isLoopContinueStatus: sandbox.stub()
-    })
+    sandbox.stub(esprimaParser, 'getLoopStatusAndReset')
     sandbox.stub(esprimaParser, 'WhileStatement')
   })
 
@@ -27,84 +23,37 @@ describe('DoWhileStatement tests', () => {
     ).to.be.true
   })
 
-  it('should call isLoopBreakStatus of esprimaParser status before calling WhileStatement', () => {
+  it('should call getLoopStatusAndReset after parsing body', () => {
     esprimaParser.DoWhileStatement(doWhileStatement)
 
     expect(
-      esprimaParser.status.isLoopBreakStatus
-        .calledBefore(esprimaParser.WhileStatement)
-    ).to.be.true
-    expect(esprimaParser.status.isLoopBreakStatus.calledOnce).to.be.true
-  })
-
-  it('should call isLoopContinueStatus of esprimaParser status before calling WhileStatement', () => {
-    esprimaParser.DoWhileStatement(doWhileStatement)
-
-    expect(
-      esprimaParser.status.isLoopContinueStatus
-        .calledBefore(esprimaParser.WhileStatement)
-    ).to.be.true
-    expect(esprimaParser.status.isLoopContinueStatus.calledOnce).to.be.true
-  })
-
-  it('should call parseNode before isLoopBreakStatus and isLoopContinueStatus', () => {
-    esprimaParser.DoWhileStatement(doWhileStatement)
-
-    expect(
-      esprimaParser.parseNode
-        .calledBefore(esprimaParser.status.isLoopBreakStatus)
-    ).to.be.true
-    expect(
-      esprimaParser.parseNode
-        .calledBefore(esprimaParser.status.isLoopContinueStatus)
+      esprimaParser.getLoopStatusAndReset
+        .calledAfter(
+          esprimaParser.parseNode
+            .withArgs(doWhileStatement.body)
+        )
     ).to.be.true
   })
 
-  it('should unset continue status given isLoopContinueStatus returns true', () => {
-    esprimaParser.status.isLoopContinueStatus.returns(true)
-
-    esprimaParser.DoWhileStatement(doWhileStatement)
-
-    expect(
-      esprimaParser.status.unset
-        .calledWithExactly('continue')
-    ).to.be.true
-  })
-
-  it('should not call WhileStatement and should unset break status given isLoopBreakStatus returns true', () => {
-    esprimaParser.status.isLoopBreakStatus.returns(true)
+  it('should not call WhileStatement given getLoopStatusAndReset returns \'break\' status', () => {
+    esprimaParser.getLoopStatusAndReset.returns('break')
 
     esprimaParser.DoWhileStatement(doWhileStatement)
 
     expect(esprimaParser.WhileStatement.called).to.be.false
-    expect(
-      esprimaParser.status.unset
-        .calledWithExactly('break')
-    ).to.be.true
   })
 
-  it('should call WhileStatement with doWhileStatement given isLoopBreakStatus returns false', () => {
-    esprimaParser.status.isLoopBreakStatus.returns(false)
-
-    esprimaParser.DoWhileStatement(doWhileStatement)
-
-    expect(
-      esprimaParser.WhileStatement
-        .calledWithExactly(doWhileStatement)
-    ).to.be.true
-  })
-
-  it('should return result from parseNode given isLoopBreakStatus returns true', () => {
-    esprimaParser.parseNode.returns('parsedStatement')
-    esprimaParser.status.isLoopBreakStatus.returns(true)
+  it('should return result from parseNode with body given getLoopStatusAndReset returns \'break\' status', () => {
+    esprimaParser.getLoopStatusAndReset.returns('break')
+    esprimaParser.parseNode.returns('resultFromParseNode')
 
     const result = esprimaParser.DoWhileStatement(doWhileStatement)
 
-    expect(result).to.be.equal('parsedStatement')
+    expect(result).to.be.equal('resultFromParseNode')
   })
 
-  it('should return result from WhileStatement given isLoopBreakStatus returns false', () => {
-    esprimaParser.status.isLoopBreakStatus.returns(false)
+  it('should return result from WhileStatement given getLoopStatusAndReset returns not \'break\' status', () => {
+    esprimaParser.getLoopStatusAndReset.returns(undefined)
     esprimaParser.WhileStatement.returns('resultFromWhileStatement')
 
     const result = esprimaParser.DoWhileStatement(doWhileStatement)

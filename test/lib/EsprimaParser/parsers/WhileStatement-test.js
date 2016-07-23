@@ -10,11 +10,6 @@ describe('WhileStatement tests', () => {
           .onCall(index).returns(getTestResults())
     }
   }
-  const setCheckStatusResults = (method, results) => {
-    esprimaParser.status[method] =
-      sandbox.spy(createResultsGenerator(results))
-  }
-
   let whileStatement
 
   beforeEach(() => {
@@ -24,11 +19,7 @@ describe('WhileStatement tests', () => {
     })
 
     sandbox.stub(esprimaParser, 'parseNode')
-    sandbox.stub(esprimaParser, 'status', {
-      unset: sandbox.spy(),
-      isLoopBreakStatus: () => {},
-      isLoopContinueStatus: () => {}
-    })
+    sandbox.stub(esprimaParser, 'getLoopStatusAndReset')
   })
 
   it('should call parseNode with test until test fails', () => {
@@ -53,15 +44,14 @@ describe('WhileStatement tests', () => {
     ).to.be.true
   })
 
-  it('should call isLoopBreakStatus of esprimaParser status after parsing body each time test passes', () => {
+  it('should call getLoopStatusAndReset after parsing body each loop', () => {
     setTestResults([true, true, false])
-    setCheckStatusResults('isLoopBreakStatus', [false, false, false])
 
     esprimaParser.WhileStatement(whileStatement)
 
     for (let i = 0; i < 2; i += 1) {
       expect(
-        esprimaParser.status.isLoopBreakStatus
+        esprimaParser.getLoopStatusAndReset
           .getCall(i)
           .calledAfter(
             esprimaParser.parseNode
@@ -70,58 +60,19 @@ describe('WhileStatement tests', () => {
           )
       ).to.be.true
     }
-    expect(esprimaParser.status.isLoopBreakStatus.calledTwice).to.be.true
+    expect(esprimaParser.getLoopStatusAndReset.calledTwice).to.be.true
   })
 
-  it('should call isLoopContinueStatus of esprimaParser status after parsing body each time test passes', () => {
-    setTestResults([true, true, false])
-    setCheckStatusResults('isLoopContinueStatus', [false, false, false])
-
-    esprimaParser.WhileStatement(whileStatement)
-
-    for (let i = 0; i < 2; i += 1) {
-      expect(
-        esprimaParser.status.isLoopContinueStatus
-          .getCall(i)
-          .calledAfter(
-            esprimaParser.parseNode
-              .withArgs(whileStatement.body)
-              .getCall(i)
-          )
-      ).to.be.true
-    }
-    expect(esprimaParser.status.isLoopContinueStatus.calledTwice).to.be.true
-  })
-
-  it('should break the loop and unset break status given isLoopBreakStatus returns true', () => {
+  it('should break loop given getLoopStatusAndReset returns \'break\' status', () => {
     setTestResults([true, true, true])
-    setCheckStatusResults('isLoopBreakStatus', [false, true, false])
+    esprimaParser.getLoopStatusAndReset
+      .onCall(1).returns('break')
 
     esprimaParser.WhileStatement(whileStatement)
 
     expect(
       esprimaParser.parseNode
         .withArgs(whileStatement.body).calledTwice
-    ).to.be.true
-    expect(
-      esprimaParser.status.unset
-        .calledWithExactly('break')
-    ).to.be.true
-  })
-
-  it('should continue the loop and unset continue status given isLoopContinueStatus returns true', () => {
-    setTestResults([true, true, true])
-    setCheckStatusResults('isLoopContinueStatus', [false, true, false])
-
-    esprimaParser.WhileStatement(whileStatement)
-
-    expect(
-      esprimaParser.parseNode
-        .withArgs(whileStatement.body).calledThrice
-    ).to.be.true
-    expect(
-      esprimaParser.status.unset
-        .calledWithExactly('continue')
     ).to.be.true
   })
 

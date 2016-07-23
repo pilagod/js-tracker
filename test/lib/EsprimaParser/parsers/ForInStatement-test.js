@@ -2,17 +2,12 @@
 
 describe('ForInStatement', () => {
   const leftStub = 'name of left'
+  const rightStubLength = 2
   const rightStub = {
     'a': 1,
     'b': 2,
     'c': 3
   }
-  const rightStubLength = 2
-  const setCheckStatusResults = (method, results) => {
-    esprimaParser.status[method] =
-      sandbox.spy(createResultsGenerator(results))
-  }
-
   let forInStatement
 
   beforeEach(() => {
@@ -22,7 +17,7 @@ describe('ForInStatement', () => {
       body: createAstNode('Statement')
     })
 
-    sandbox.stub(esprimaParser, 'getNameFromDeclarationAndPattern')
+    sandbox.stub(esprimaParser, 'getName')
       .returns(leftStub)
     sandbox.stub(esprimaParser, 'parseNode')
       .withArgs(forInStatement.right)
@@ -30,18 +25,14 @@ describe('ForInStatement', () => {
     sandbox.stub(esprimaParser, 'closureStack', {
       update: sandbox.spy()
     })
-    sandbox.stub(esprimaParser, 'status', {
-      unset: sandbox.spy(),
-      isLoopBreakStatus: () => {},
-      isLoopContinueStatus: () => {}
-    })
+    sandbox.stub(esprimaParser, 'getLoopStatusAndReset')
   })
 
-  it('should call getNameFromDeclarationAndPattern with left', () => {
+  it('should call getName with left', () => {
     esprimaParser.ForInStatement(forInStatement)
 
     expect(
-      esprimaParser.getNameFromDeclarationAndPattern
+      esprimaParser.getName
         .calledWithExactly(forInStatement.left)
     ).to.be.true
   })
@@ -55,7 +46,7 @@ describe('ForInStatement', () => {
     ).to.be.true
   })
 
-  it('should call update of closureStack with left name and right elements key before parsing body', () => {
+  it('should call update of closureStack with left name and right elements key each loop', () => {
     esprimaParser.ForInStatement(forInStatement)
 
     for (const key in rightStub) {
@@ -64,15 +55,13 @@ describe('ForInStatement', () => {
           .calledWithExactly(leftStub, key)
       ).to.be.true
     }
+    expect(esprimaParser.closureStack.update.calledThrice).to.be.true
   })
 
-  it('should call parseNode with body before updating left in each loop', () => {
-    let i = 0
-    let length = Object.keys(rightStub).length
-
+  it('should call parseNode with body after updating left in each loop', () => {
     esprimaParser.ForInStatement(forInStatement)
 
-    while (i < rightStubLength) {
+    for (let i = 0; i < rightStubLength; i += 1) {
       expect(
         esprimaParser.parseNode
           .withArgs(forInStatement.body)
@@ -82,8 +71,6 @@ describe('ForInStatement', () => {
                 .getCall(i)
             )
       ).to.be.true
-
-      i += 1
     }
     expect(
       esprimaParser.parseNode
@@ -91,16 +78,12 @@ describe('ForInStatement', () => {
     ).to.be.true
   })
 
-  it('should call isLoopBreakStatus of esprimaParser status after parsing body each time test passes', () => {
-    let i = 0
-
-    setCheckStatusResults('isLoopBreakStatus', [false, false, false])
-
+  it('should call getLoopStatusAndReset after parsing body each loop', () => {
     esprimaParser.ForInStatement(forInStatement)
 
-    while (i < rightStubLength) {
+    for (let i = 0; i < rightStubLength; i += 1) {
       expect(
-        esprimaParser.status.isLoopBreakStatus
+        esprimaParser.getLoopStatusAndReset
           .getCall(i)
           .calledAfter(
             esprimaParser.parseNode
@@ -108,37 +91,13 @@ describe('ForInStatement', () => {
               .getCall(i)
           )
       ).to.be.true
-
-      i += 1
     }
-    expect(esprimaParser.status.isLoopBreakStatus.calledThrice).to.be.true
+    expect(esprimaParser.getLoopStatusAndReset.calledThrice).to.be.true
   })
 
-  it('should call isLoopContinueStatus of esprimaParser status after parsing body each time test passes', () => {
-    let i = 0
-
-    setCheckStatusResults('isLoopContinueStatus', [false, false, false])
-
-    esprimaParser.ForInStatement(forInStatement)
-
-    while (i < rightStubLength) {
-      expect(
-        esprimaParser.status.isLoopContinueStatus
-          .getCall(i)
-          .calledAfter(
-            esprimaParser.parseNode
-              .withArgs(forInStatement.body)
-              .getCall(i)
-          )
-      ).to.be.true
-
-      i += 1
-    }
-    expect(esprimaParser.status.isLoopContinueStatus.calledThrice).to.be.true
-  })
-
-  it('should break the loop and unset break status given isLoopBreakStatus returns true', () => {
-    setCheckStatusResults('isLoopBreakStatus', [false, true, false])
+  it('should break loop given getLoopStatusAndReset returns \'break\' status', () => {
+    esprimaParser.getLoopStatusAndReset
+      .onCall(1).returns('break')
 
     esprimaParser.ForInStatement(forInStatement)
 
@@ -146,25 +105,7 @@ describe('ForInStatement', () => {
       esprimaParser.parseNode
         .withArgs(forInStatement.body).calledTwice
     ).to.be.true
-    expect(
-      esprimaParser.status.unset
-        .calledWithExactly('break')
-    ).to.be.true
-  })
-
-  it('should continue the loop and unset continue status given isLoopContinueStatus returns true', () => {
-    setCheckStatusResults('isLoopContinueStatus', [false, true, false])
-
-    esprimaParser.ForInStatement(forInStatement)
-
-    expect(
-      esprimaParser.parseNode
-        .withArgs(forInStatement.body).calledThrice
-    ).to.be.true
-    expect(
-      esprimaParser.status.unset
-        .calledWithExactly('continue')
-    ).to.be.true
+    expect(esprimaParser.closureStack.update.calledTwice).to.be.true
   })
 
   it('should return parsed body result', () => {
