@@ -7,16 +7,16 @@ describe('ContinueStatement tests', () => {
   beforeEach(() => {
     continueStatement = createAstNode('ContinueStatement')
 
-    sandbox.stub(esprimaParser, 'status', {
+    sandbox.stub(esprimaParser, 'flowStatus', {
       set: sandbox.spy()
     })
   })
 
-  it('should set esprimaParser status to \'continue\'', () => {
+  it('should set flowStatus to \'continue\'', () => {
     esprimaParser.ContinueStatement(continueStatement)
 
     expect(
-      esprimaParser.status.set
+      esprimaParser.flowStatus.set
         .calledWithExactly('continue')
     ).to.be.true
   })

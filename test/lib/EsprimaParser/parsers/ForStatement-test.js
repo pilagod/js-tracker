@@ -27,11 +27,6 @@ describe('ForStatement tests', () => {
 
     sandbox.stub(esprimaParser, 'parseNode')
     sandbox.stub(esprimaParser, 'getLoopStatusAndReset')
-    sandbox.stub(esprimaParser, 'status', {
-      unset: sandbox.spy(),
-      isLoopBreakStatus: () => {},
-      isLoopContinueStatus: () => {}
-    })
   })
 
   it('should call parseNode with init', () => {

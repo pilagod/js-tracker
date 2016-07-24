@@ -18,7 +18,7 @@ describe('SwitchStatement tests', () => {
         .returns('parsedDiscriminant')
     sandbox.stub(esprimaParser, 'parseSwitchCases')
       .returns('resultFromParseSwitchCases')
-    sandbox.stub(esprimaParser, 'status', {
+    sandbox.stub(esprimaParser, 'flowStatus', {
       unset: sandbox.spy()
     })
   })
@@ -41,12 +41,12 @@ describe('SwitchStatement tests', () => {
     ).to.be.true
   })
 
-  it('should call unset of esprimaParser status with \'break\'', () => {
+  it('should unset flowStatus of \'break\'', () => {
     // switch should not unset return, and there is no continue statement in it
     esprimaParser.SwitchStatement(switchStatement)
 
     expect(
-      esprimaParser.status.unset
+      esprimaParser.flowStatus.unset
         .calledWithExactly('break')
     ).to.be.true
   })
