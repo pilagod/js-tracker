@@ -11,27 +11,16 @@ describe('handleCatchClause tests', () => {
 
   describe('given non-null handler', () => {
     beforeEach(() => {
-      sandbox.stub(esprimaParser, 'getNameFromPattern')
-        .returns('resultFromGetNameFromPattern')
-      sandbox.stub(esprimaParser, 'setVariables')
+      sandbox.stub(esprimaParser, 'setErrorInCatchClause')
       sandbox.stub(esprimaParser, 'parseNode', createParseNodeStub())
     })
 
-    it('should call getNameFromPattern with handler param', () => {
+    it('should call setCatchClauseError with handler param and error', () => {
       esprimaParser.handleCatchClause(handler, error)
 
       expect(
-        esprimaParser.getNameFromPattern
-          .calledWithExactly(handler.param)
-      ).to.be.true
-    })
-
-    it('should call setVariables with result from getNameFromPattern and error', () => {
-      esprimaParser.handleCatchClause(handler, error)
-
-      expect(
-        esprimaParser.setVariables
-          .calledWithExactly('resultFromGetNameFromPattern', error)
+        esprimaParser.setErrorInCatchClause
+          .calledWithExactly(handler.param, error)
       ).to.be.true
     })
 

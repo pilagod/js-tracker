@@ -8,7 +8,7 @@ describe('ExpressionStatement tests', () => {
       expression: createAstNode('Expression')
     })
 
-    sandbox.stub(esprimaParser, 'parseNode', createParseNodeStub())
+    sandbox.stub(esprimaParser, 'parseNode')
   })
 
   it('should call parseNode with expression', () => {

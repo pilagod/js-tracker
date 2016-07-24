@@ -13,10 +13,10 @@ describe('UnaryExpression tests', () => {
       'delete': () => 'delete',
       'otherOperators': () => 'otherOperators'
     })
-    sandbox.stub(esprimaParser, 'handleOperation')
-      .returns('resultFromHandleOtherUnaryOperation')
+    sandbox.stub(esprimaParser, 'handleUnaryOperation')
+      .returns('resultFromHandleUnaryOperation')
     sandbox.stub(esprimaParser, 'handleReferenceOperation')
-      .returns('resultFromhandleReferenceOperation')
+      .returns('resultFromHandleReferenceOperation')
   })
 
   describe('operations other than delete', () => {
@@ -24,11 +24,11 @@ describe('UnaryExpression tests', () => {
       unaryExpression.operator = 'otherOperators'
     })
     // operators other than delete
-    it('should call handleOperation with argument and proper operation', () => {
+    it('should call handleUnaryOperation with argument and proper operation', () => {
       esprimaParser.UnaryExpression(unaryExpression)
 
       expect(
-        esprimaParser.handleOperation
+        esprimaParser.handleUnaryOperation
           .calledWithExactly(
             unaryExpression.argument,
             esprimaParser.unaryOperators.otherOperators
@@ -36,10 +36,10 @@ describe('UnaryExpression tests', () => {
       ).to.be.true
     })
 
-    it('should return result from handleOperation', () => {
+    it('should return result from handleUnaryOperation', () => {
       const result = esprimaParser.UnaryExpression(unaryExpression)
 
-      expect(result).to.be.equal('resultFromHandleOtherUnaryOperation')
+      expect(result).to.be.equal('resultFromHandleUnaryOperation')
     })
   })
 
@@ -63,7 +63,7 @@ describe('UnaryExpression tests', () => {
     it('should return result from handleReferenceOperation', () => {
       const result = esprimaParser.UnaryExpression(unaryExpression)
 
-      expect(result).to.be.equal('resultFromhandleReferenceOperation')
+      expect(result).to.be.equal('resultFromHandleReferenceOperation')
     })
   })
 })

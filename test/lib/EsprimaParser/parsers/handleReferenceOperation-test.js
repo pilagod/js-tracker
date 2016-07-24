@@ -1,34 +1,9 @@
 describe('handleReferenceOperation tests', () => {
-  let argument, operationSpy, remainingArgs
-
-  before(() => {
-    remainingArgs = [1, 'string', true, null, undefined]
-  })
+  const remainingArgs = [1, 'string', true, null, undefined]
+  let argument, operationSpy
 
   beforeEach(() => {
     operationSpy = sandbox.spy(() => 'resultFromOperation')
-  })
-
-  // case Identifier
-  describe('Identifier argument', () => {
-    beforeEach(() => {
-      argument = createAstNode('Identifier', {name: 'a'})
-    })
-
-    it('should call operation with {property: \'a\'} and remaining arguments', () => {
-      esprimaParser.handleReferenceOperation(argument, operationSpy, ...remainingArgs)
-
-      expect(
-        operationSpy
-          .calledWithExactly({property: 'a'}, ...remainingArgs)
-      ).to.be.true
-    })
-
-    it('should return the result from operation', () => {
-      const result = esprimaParser.handleReferenceOperation(argument, operationSpy, ...remainingArgs)
-
-      expect(result).to.be.equal('resultFromOperation')
-    })
   })
 
   // case MemberExpression
@@ -36,26 +11,37 @@ describe('handleReferenceOperation tests', () => {
     beforeEach(() => {
       argument = createAstNode('MemberExpression')
 
-      sandbox.stub(esprimaParser, 'getMemberExpressionReference')
-        .returns('resultFromGetMemberExpressionReference')
+      sandbox.stub(esprimaParser, 'parseExpression')
+        .returns('resultFromParseExpression')
+      sandbox.stub(esprimaParser, 'getExpressionReference')
+        .returns('resultFromGetExpressionReference')
     })
 
-    it('should call getMemberExpressionReference with argument', () => {
+    it('should call parseExpression with argument', () => {
       esprimaParser.handleReferenceOperation(argument, operationSpy, ...remainingArgs)
 
       expect(
-        esprimaParser.getMemberExpressionReference
+        esprimaParser.parseExpression
           .calledWithExactly(argument)
       ).to.be.true
     })
 
-    it('should call operation with result from getMemberExpressionReference and remaining arguments then return', () => {
+    it('should call getExpressionReference with expression from parseExpression', () => {
+      esprimaParser.handleReferenceOperation(argument, operationSpy, ...remainingArgs)
+
+      expect(
+        esprimaParser.getExpressionReference
+          .calledWithExactly('resultFromParseExpression')
+      ).to.be.true
+    })
+
+    it('should call operation with result from getExpressionReference and remaining arguments then return', () => {
       const result = esprimaParser.handleReferenceOperation(argument, operationSpy, ...remainingArgs)
 
       expect(
         operationSpy
           .calledWithExactly(
-            'resultFromGetMemberExpressionReference',
+            'resultFromGetExpressionReference',
             ...remainingArgs
           )
       ).to.be.true
@@ -63,16 +49,39 @@ describe('handleReferenceOperation tests', () => {
     })
   })
 
-  // @TODO: need to test outlier
-  describe('Other argument', () => {
+  // case Pattern
+  describe('Pattern argument', () => {
     beforeEach(() => {
-      argument = createAstNode('Expression')
+      argument = createAstNode('Pattern')
+
+      sandbox.stub(esprimaParser, 'getNameFromPattern')
+        .returns('resultFromGetNameFromPattern')
     })
 
-    it('should return undefined', () => {
+    it('should call getNameFromPattern with argument', () => {
+      esprimaParser.handleReferenceOperation(argument, operationSpy, ...remainingArgs)
+
+      expect(
+        esprimaParser.getNameFromPattern
+          .calledWithExactly(argument)
+      ).to.be.true
+    })
+
+    it('should call operation with {property: \'resultFromGetNameFromPattern\'} and remaining arguments', () => {
+      esprimaParser.handleReferenceOperation(argument, operationSpy, ...remainingArgs)
+
+      expect(
+        operationSpy
+          .calledWithExactly({
+            property: 'resultFromGetNameFromPattern'
+          }, ...remainingArgs)
+      ).to.be.true
+    })
+
+    it('should return the result from operation', () => {
       const result = esprimaParser.handleReferenceOperation(argument, operationSpy, ...remainingArgs)
 
-      expect(result).to.be.undefined
+      expect(result).to.be.equal('resultFromOperation')
     })
   })
 })

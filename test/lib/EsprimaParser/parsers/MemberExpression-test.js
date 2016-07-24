@@ -15,7 +15,7 @@ describe('MemberExpression tests', () => {
 
     sandbox.stub(esprimaParser, 'parseExpression')
       .returns(expression)
-    sandbox.stub(expression, 'execute')
+    sandbox.stub(esprimaParser, 'execute')
       .returns('resultFromExecute')
   })
 
@@ -28,13 +28,16 @@ describe('MemberExpression tests', () => {
     ).to.be.true
   })
 
-  it('should call execute of expression object returned from parseExpression', () => {
+  it('should call execute with expression object returned from parseExpression', () => {
     esprimaParser.MemberExpression(memberExpression)
 
-    expect(expression.execute.calledOnce).to.be.true
+    expect(
+      esprimaParser.execute
+        .calledWithExactly(expression)
+    ).to.be.true
   })
 
-  it('should return result from execute of expression object', () => {
+  it('should return result from execute', () => {
     const result = esprimaParser.MemberExpression(memberExpression)
 
     expect(result).to.be.equal('resultFromExecute')

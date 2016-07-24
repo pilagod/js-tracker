@@ -49,7 +49,8 @@ describe('UnaryOperator tests', () => {
 
         sandbox.stub(esprimaParser, 'closureStack', {
           get: sandbox.stub()
-            .withArgs('window').returns(windowStub)
+            .withArgs('window')
+              .returns(windowStub)
         })
       })
 
