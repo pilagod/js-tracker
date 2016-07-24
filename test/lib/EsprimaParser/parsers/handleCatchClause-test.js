@@ -51,7 +51,8 @@ describe('handleCatchClause tests', () => {
       handler = null
 
       expect(
-        esprimaParser.handleCatchClause.bind(esprimaParser, handler, error)
+        esprimaParser.handleCatchClause
+          .bind(esprimaParser, handler, error)
       ).to.throw(error)
     })
   })
