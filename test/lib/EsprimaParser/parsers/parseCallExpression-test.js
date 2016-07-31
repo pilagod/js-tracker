@@ -1,30 +1,24 @@
 describe('parseCallExpression tests', () => {
-  let callExpression, calledArguments
-
-  const setParseCalleeAndMethodReturnCallee = (callee) => {
-    if (esprimaParser.parseCalleeAndMethod.restore) {
-      esprimaParser.parseCalleeAndMethod.restore()
-    }
-    sandbox.stub(esprimaParser, 'parseCalleeAndMethod')
-      .returns({
-        callee: callee,
-        method: {
-          method: 'method',
-          arguments: calledArguments
-        }
-      })
-  }
+  const callee = ['string', ['array']]
+  let callExpression, method
 
   beforeEach(() => {
     callExpression = createAstNode('CallExpression', {
       callee: createAstNode('Expression'),
       arguments: [createAstNode('Expression')]
     })
-    calledArguments = ['parsedExpression']
+
+    method = {
+      setArguments: sandbox.spy()
+    }
 
     sandbox.stub(esprimaParser, 'parseArguments')
-      .returns(calledArguments)
-    setParseCalleeAndMethodReturnCallee(['callee'])
+      .returns('resultFromParseArguments')
+    sandbox.stub(esprimaParser, 'parseCallee')
+      .returns({
+        callee: callee,
+        method: method
+      })
   })
 
   it('should call parseArguments with call arguments', () => {
@@ -36,58 +30,39 @@ describe('parseCallExpression tests', () => {
     ).to.be.true
   })
 
-  it('should call getCalleeAndCalledMethod with call callee and result from parseArguments', () => {
+  it('should call parseCallee with callee', () => {
     esprimaParser.parseCallExpression(callExpression)
 
     expect(
-      esprimaParser.parseCalleeAndMethod
-        .calledWithExactly(callExpression.callee, calledArguments)
+      esprimaParser.parseCallee
+        .calledWithExactly(callExpression.callee)
     ).to.be.true
   })
 
-  it('should return [callee, calledMethod] given valid callee', () => {
-    const result = esprimaParser.parseCallExpression(callExpression)
+  it('should call setArguments of method got from parseCallee with parsedArguments', () => {
+    esprimaParser.parseCallExpression(callExpression)
 
-    expect(result).to.be.instanceof(Array)
-    expect(result).to.be.eql(['callee', {
-      method: 'method',
-      arguments: calledArguments
-    }])
+    expect(
+      method.setArguments
+        .calledWithExactly('resultFromParseArguments')
+    ).to.be.true
   })
 
-  it('should return [[...], calledMethod] given array callee', () => {
-    setParseCalleeAndMethodReturnCallee([[1, 2, 3]])
-
+  it('should return an array containing destructed callee and method given valid callee', () => {
     const result = esprimaParser.parseCallExpression(callExpression)
 
-    expect(result).to.be.instanceof(Array)
-    expect(result).to.be.eql([[1, 2, 3], {
-      method: 'method',
-      arguments: calledArguments
-    }])
+    expect(result).to.be.eql([...callee, method])
   })
 
-  it('should return [object1, object2, ..., calledMethod] given member callee', () => {
-    setParseCalleeAndMethodReturnCallee(['object1', 'object2'])
+  it('should return an array containing only method given undefined callee', () => {
+    esprimaParser.parseCallee
+      .returns({
+        callee: undefined,
+        method: method
+      })
 
     const result = esprimaParser.parseCallExpression(callExpression)
 
-    expect(result).to.be.instanceof(Array)
-    expect(result).to.be.eql(['object1', 'object2', {
-      method: 'method',
-      arguments: calledArguments
-    }])
-  })
-
-  it('should return [calledMethod] given null callee', () => {
-    setParseCalleeAndMethodReturnCallee(null)
-
-    const result = esprimaParser.parseCallExpression(callExpression)
-
-    expect(result).to.be.instanceof(Array)
-    expect(result).to.be.eql([{
-      method: 'method',
-      arguments: calledArguments
-    }])
+    expect(result).to.be.eql([method])
   })
 })
