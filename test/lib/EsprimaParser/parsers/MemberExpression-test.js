@@ -4,10 +4,9 @@ describe('MemberExpression tests', () => {
   let expression, memberExpression
 
   before(() => {
-    class Expression {
-      execute() {}
+    expression = {
+      data: ['data']
     }
-    expression = new Expression()
   })
 
   beforeEach(() => {
@@ -28,12 +27,12 @@ describe('MemberExpression tests', () => {
     ).to.be.true
   })
 
-  it('should call execute with expression object returned from parseExpression', () => {
+  it('should call execute with expression data returned from parseExpression', () => {
     esprimaParser.MemberExpression(memberExpression)
 
     expect(
       esprimaParser.execute
-        .calledWithExactly(expression)
+        .calledWithExactly(expression.data)
     ).to.be.true
   })
 
