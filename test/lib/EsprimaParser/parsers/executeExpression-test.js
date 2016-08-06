@@ -6,6 +6,8 @@ describe('executeExpression tests', () => {
       reduce: sandbox.stub()
         .returns('resultFromReduceOfData')
     }
+
+    sandbox.stub(esprimaParser, 'checkStyleOrClassList')
   })
 
   it('should call reduce of data with executeReducer and undefined', () => {
@@ -14,6 +16,15 @@ describe('executeExpression tests', () => {
     expect(
       data.reduce
         .calledWithExactly(esprimaParser.executeReducer, undefined)
+    ).to.be.true
+  })
+
+  it('should call checkStyleOrClassList with result from reduce of data', () => {
+    esprimaParser.executeExpression(data)
+
+    expect(
+      esprimaParser.checkStyleOrClassList
+        .calledWithExactly('resultFromReduceOfData')
     ).to.be.true
   })
 
