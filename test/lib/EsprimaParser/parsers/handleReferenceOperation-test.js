@@ -1,87 +1,34 @@
 describe('handleReferenceOperation tests', () => {
-  const remainingArgs = [1, 'string', true, null, undefined]
-  let argument, operationSpy
+  const args = ['arg1', 'arg2', 'arg3']
+  const operation = () => {}
 
-  beforeEach(() => {
-    operationSpy = sandbox.spy(() => 'resultFromOperation')
+  it('should call handleMemberReferenceOperation with all arguments passed given MemberExpression argument and return', () => {
+    const argument = createAstNode('MemberExpression')
+
+    sandbox.stub(esprimaParser, 'handleMemberReferenceOperation')
+      .returns('resultFromHandleMemberReferenceOperation')
+
+    const result = esprimaParser.handleReferenceOperation(argument, operation, ...args)
+
+    expect(
+      esprimaParser.handleMemberReferenceOperation
+        .calledWithExactly(argument, operation, ...args)
+    ).to.be.true
+    expect(result).to.be.equal('resultFromHandleMemberReferenceOperation')
   })
 
-  // case MemberExpression
-  describe('MemberExpression argument', () => {
-    beforeEach(() => {
-      argument = createAstNode('MemberExpression')
+  it('should call handlePatternReferenceOperation with all arguments passed given Pattern argument and return', () => {
+    const argument = createAstNode('Pattern')
 
-      sandbox.stub(esprimaParser, 'parseExpression')
-        .returns('resultFromParseExpression')
-      sandbox.stub(esprimaParser, 'getExpressionReference')
-        .returns('resultFromGetExpressionReference')
-    })
+    sandbox.stub(esprimaParser, 'handlePatternReferenceOperation')
+      .returns('handlePatternReferenceOperation')
 
-    it('should call parseExpression with argument', () => {
-      esprimaParser.handleReferenceOperation(argument, operationSpy, ...remainingArgs)
+    const result = esprimaParser.handleReferenceOperation(argument, operation, ...args)
 
-      expect(
-        esprimaParser.parseExpression
-          .calledWithExactly(argument)
-      ).to.be.true
-    })
-
-    it('should call getExpressionReference with expression from parseExpression', () => {
-      esprimaParser.handleReferenceOperation(argument, operationSpy, ...remainingArgs)
-
-      expect(
-        esprimaParser.getExpressionReference
-          .calledWithExactly('resultFromParseExpression')
-      ).to.be.true
-    })
-
-    it('should call operation with result from getExpressionReference and remaining arguments then return', () => {
-      const result = esprimaParser.handleReferenceOperation(argument, operationSpy, ...remainingArgs)
-
-      expect(
-        operationSpy
-          .calledWithExactly(
-            'resultFromGetExpressionReference',
-            ...remainingArgs
-          )
-      ).to.be.true
-      expect(result).to.be.equal('resultFromOperation')
-    })
-  })
-
-  // case Pattern
-  describe('Pattern argument', () => {
-    beforeEach(() => {
-      argument = createAstNode('Pattern')
-
-      sandbox.stub(esprimaParser, 'getNameFromPattern')
-        .returns('resultFromGetNameFromPattern')
-    })
-
-    it('should call getNameFromPattern with argument', () => {
-      esprimaParser.handleReferenceOperation(argument, operationSpy, ...remainingArgs)
-
-      expect(
-        esprimaParser.getNameFromPattern
-          .calledWithExactly(argument)
-      ).to.be.true
-    })
-
-    it('should call operation with {property: \'resultFromGetNameFromPattern\'} and remaining arguments', () => {
-      esprimaParser.handleReferenceOperation(argument, operationSpy, ...remainingArgs)
-
-      expect(
-        operationSpy
-          .calledWithExactly({
-            property: 'resultFromGetNameFromPattern'
-          }, ...remainingArgs)
-      ).to.be.true
-    })
-
-    it('should return the result from operation', () => {
-      const result = esprimaParser.handleReferenceOperation(argument, operationSpy, ...remainingArgs)
-
-      expect(result).to.be.equal('resultFromOperation')
-    })
+    expect(
+      esprimaParser.handlePatternReferenceOperation
+        .calledWithExactly(argument, operation, ...args)
+    ).to.be.true
+    expect(result).to.be.equal('handlePatternReferenceOperation')
   })
 })
