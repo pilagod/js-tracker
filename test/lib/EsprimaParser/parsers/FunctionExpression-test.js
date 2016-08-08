@@ -12,7 +12,7 @@ describe('FunctionExpression tests', () => {
 
     sandbox.stub(esprimaParser, 'FunctionAgent', FunctionAgentStub)
     // can not stub a function to an object
-    sandbox.stub(esprimaParser.parseFunction, 'bind')
+    sandbox.stub(esprimaParser.parseFunctionAgent, 'bind')
       .withArgs(esprimaParser)
         .returns('resultFromBind')
     sandbox.stub(esprimaParser, 'scriptUrl', 'resultFromScriptUrl')
