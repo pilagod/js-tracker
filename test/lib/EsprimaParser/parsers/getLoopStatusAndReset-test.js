@@ -34,6 +34,6 @@ describe('getLoopStatusAndReset tests', () => {
   it('should return null given isLoopBreakStatus and isLoopContinueStatus return both false', () => {
     const result = esprimaParser.getLoopStatusAndReset()
 
-    expect(result).to.be.null
+    expect(result).to.be.undefined
   })
 })

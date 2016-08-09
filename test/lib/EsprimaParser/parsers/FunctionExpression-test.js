@@ -17,8 +17,8 @@ describe('FunctionExpression tests', () => {
         .returns('resultFromBind')
     sandbox.stub(esprimaParser, 'scriptUrl', 'resultFromScriptUrl')
     sandbox.stub(esprimaParser, 'closureStack', {
-      getCurrentStack: sandbox.stub()
-        .returns('resultFromGetCurrentStack')
+      getStack: sandbox.stub()
+        .returns('resultFromGetStack')
     })
   })
 
@@ -28,7 +28,7 @@ describe('FunctionExpression tests', () => {
       params: functionExpression.params,
       parser: 'resultFromBind',
       scriptUrl: 'resultFromScriptUrl',
-      closureStack: 'resultFromGetCurrentStack'
+      closureStack: 'resultFromGetStack'
     }
 
     const result = esprimaParser.FunctionExpression(functionExpression)
