@@ -1,15 +1,22 @@
 describe('getEnvironment tests', () => {
+  let context
+
   beforeEach(() => {
-    sandbox.stub(esprimaParser, 'scriptUrl', 'scriptUrlStub')
-    sandbox.stub(esprimaParser, 'closureStack', 'closureStackStub')
+    context = {
+      scriptUrl: 'scriptUrl',
+      closureStack: {
+        getStack: sandbox.stub().returns('closureStack')
+      }
+    }
   })
 
-  it('should return and object containing esprimaParser current scriptUrl and closureStack', () => {
-    const result = esprimaParser.getEnvironment()
+  it('should return an object containing given context\'s scriptUrl and copy of closureStack', () => {
+    const result = esprimaParser.getEnvironment(context)
 
+    expect(context.closureStack.getStack.called).to.be.true
     expect(result).to.be.eql({
-      scriptUrl: 'scriptUrlStub',
-      closureStack: 'closureStackStub'
+      scriptUrl: 'scriptUrl',
+      closureStack: 'closureStack'
     })
   })
 })

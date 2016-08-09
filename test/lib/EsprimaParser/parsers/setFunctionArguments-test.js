@@ -1,19 +1,23 @@
 describe('setFunctionArguments tests', () => {
-  const params = ['param1', 'param2', 'param3']
-  const calledArguments = ['arg1', 'arg2', 'arg3']
+  const params = {
+    keys: ['param1', 'param2', 'param3'],
+    values: ['arg1', 'arg2', 'arg3']
+  }
 
   beforeEach(() => {
     sandbox.stub(esprimaParser, 'setVariables')
   })
 
-  it('should call setVariables with each pair of params and calledArguments', () => {
-    esprimaParser.setFunctionArguments(params, calledArguments)
+  it('should call setVariables with each param\'s keys and values', () => {
+    esprimaParser.setFunctionArguments(params)
 
-    for (let i = 0; i < params.length; i += 1) {
+    const length = params.keys.length
+
+    for (let i = 0; i < length; i += 1) {
       expect(
         esprimaParser.setVariables
           .getCall(i)
-            .calledWithExactly(params[i], calledArguments[i])
+            .calledWithExactly(params.keys[i], params.values[i])
       ).to.be.true
     }
   })

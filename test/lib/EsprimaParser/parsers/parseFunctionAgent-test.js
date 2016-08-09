@@ -8,51 +8,62 @@ describe('parseFunctionAgent tests', () => {
 
   beforeEach(() => {
     sandbox.stub(esprimaParser, 'getEnvironment')
-    sandbox.stub(esprimaParser, 'setFunctionEnvironment')
-    sandbox.stub(esprimaParser, 'setFunctionContext')
-    sandbox.stub(esprimaParser, 'setFunctionArguments')
+      .withArgs(esprimaParser).returns('globalEnvironment')
+      .withArgs(functionAgent).returns('functionEnvironment')
+    sandbox.stub(esprimaParser, 'setEnvironment')
+    sandbox.stub(esprimaParser, 'setFunctionClosure')
     sandbox.stub(esprimaParser, 'parseNode')
-    sandbox.stub(esprimaParser, 'resetEnvironment')
   })
 
-  it('should call getEnvironment', () => {
-    esprimaParser.parseFunctionAgent(functionAgent, context, calledArguments)
-
-    expect(esprimaParser.getEnvironment.called).to.be.true
-  })
-
-  it('should call setFunctionEnvironment with functionAgent after getEnvironment', () => {
+  it('should call getEnvironment with esprimaParser', () => {
     esprimaParser.parseFunctionAgent(functionAgent, context, calledArguments)
 
     expect(
-      esprimaParser.setFunctionEnvironment
+      esprimaParser.getEnvironment
+        .calledWithExactly(esprimaParser)
+    ).to.be.true
+  })
+
+  it('should call getEnvironment with functionAgent', () => {
+    esprimaParser.parseFunctionAgent(functionAgent, context, calledArguments)
+
+    expect(
+      esprimaParser.getEnvironment
         .calledWithExactly(functionAgent)
     ).to.be.true
-    expect(
-      esprimaParser.setFunctionEnvironment
-        .calledAfter(esprimaParser.getEnvironment)
-    ).to.be.true
   })
 
-  it('should call setFunctionContext with context', () => {
+  it('should call setEnvironment with esprimaParser and function environment after getEnvironment with esprimaParser', () => {
     esprimaParser.parseFunctionAgent(functionAgent, context, calledArguments)
 
     expect(
-      esprimaParser.setFunctionContext
-        .calledWithExactly(context)
+      esprimaParser.setEnvironment
+        .calledWithExactly(esprimaParser, 'functionEnvironment')
+    ).to.be.true
+    expect(
+      esprimaParser.setEnvironment
+        .withArgs(esprimaParser, 'functionEnvironment')
+          .calledAfter(esprimaParser.getEnvironment.withArgs(esprimaParser))
     ).to.be.true
   })
 
-  it('should call setFunctionArguments with functionAgent.params and calledArguments', () => {
+  it('should call setFunctionClosure with context and an object of keys (params) and values (calledArguments) after setEnvironment with function environment', () => {
     esprimaParser.parseFunctionAgent(functionAgent, context, calledArguments)
 
     expect(
-      esprimaParser.setFunctionArguments
-        .calledWithExactly(functionAgent.params, calledArguments)
+      esprimaParser.setFunctionClosure
+        .calledWithExactly(context, {
+          keys: functionAgent.params,
+          values: calledArguments
+        })
+    ).to.be.true
+    expect(
+      esprimaParser.setFunctionClosure
+        .calledAfter(esprimaParser.setEnvironment.withArgs(esprimaParser, 'functionEnvironment'))
     ).to.be.true
   })
 
-  it('should call parseNode with functionAgent body after all above settings done', () => {
+  it('should call parseNode with functionAgent body after setFunctionClosure', () => {
     esprimaParser.parseFunctionAgent(functionAgent, context, calledArguments)
 
     expect(
@@ -61,44 +72,29 @@ describe('parseFunctionAgent tests', () => {
     ).to.be.true
     expect(
       esprimaParser.parseNode
-        .calledAfter(esprimaParser.setFunctionEnvironment)
-    ).to.be.true
-    expect(
-      esprimaParser.parseNode
-        .calledAfter(esprimaParser.setFunctionContext)
-    ).to.be.true
-    expect(
-      esprimaParser.parseNode
-        .calledAfter(esprimaParser.setFunctionArguments)
+        .calledAfter(esprimaParser.setFunctionClosure)
     ).to.be.true
   })
 
-  it('should call resetEnvironment with result from getEnvironment after parseNode', () => {
-    const getEnvironmentStub = {
-      scriptUrl: 'scriptUrl',
-      closureStack: {}
-    }
-    esprimaParser.getEnvironment.returns(getEnvironmentStub)
-
+  it('should call setEnvironment with esprimaParser and globalEnvironment after parseNode', () => {
     esprimaParser.parseFunctionAgent(functionAgent, context, calledArguments)
 
     expect(
-      esprimaParser.resetEnvironment
-        .calledWithExactly(getEnvironmentStub)
+      esprimaParser.setEnvironment
+        .calledWithExactly(esprimaParser, 'globalEnvironment')
     ).to.be.true
     expect(
-      esprimaParser.resetEnvironment
-        .calledAfter(esprimaParser.parseNode)
+      esprimaParser.setEnvironment
+        .withArgs(esprimaParser, 'globalEnvironment')
+          .calledAfter(esprimaParser.parseNode)
     ).to.be.true
   })
 
   it('should return result from parseNode', () => {
-    const parseNodeStub = 'resultFromParseNode'
-
-    esprimaParser.parseNode.returns(parseNodeStub)
+    esprimaParser.parseNode.returns('resultFromParseNode')
 
     const result = esprimaParser.parseFunctionAgent(functionAgent, context, calledArguments)
 
-    expect(result).to.be.equal(parseNodeStub)
+    expect(result).to.be.equal('resultFromParseNode')
   })
 })
