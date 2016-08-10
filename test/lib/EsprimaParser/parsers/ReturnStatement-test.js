@@ -11,34 +11,36 @@ describe('ReturnStatement tests', () => {
     sandbox.stub(esprimaParser, 'flowStatus', {
       set: sandbox.spy()
     })
-    sandbox.stub(esprimaParser, 'parseNode', createParseNodeStub())
+    sandbox.stub(esprimaParser, 'parseReturnArgument')
   })
 
-  it('should set flowStatus to \'return\'', () => {
+  it('should call parseReturnArgument with argument', () => {
+    esprimaParser.ReturnStatement(returnStatement)
+
+    expect(
+      esprimaParser.parseReturnArgument
+        .calledWithExactly(returnStatement.argument)
+    ).to.be.true
+  })
+
+  it('should set flowStatus to \'return\' after parseReturnArgument', () => {
     esprimaParser.ReturnStatement(returnStatement)
 
     expect(
       esprimaParser.flowStatus.set
         .calledWithExactly('return')
     ).to.be.true
-  })
-
-  it('should call parseNode with argument and return', () => {
-    const result = esprimaParser.ReturnStatement(returnStatement)
-
     expect(
-      esprimaParser.parseNode
-        .calledWithExactly(returnStatement.argument)
+      esprimaParser.flowStatus.set
+        .calledAfter(esprimaParser.parseReturnArgument)
     ).to.be.true
-    expect(result).to.be.equal('parsedExpression')
   })
 
-  it('should not call parseNode and return undefined given null argument', () => {
-    returnStatement.argument = null
+  it('should return result from parseReturnArgument', () => {
+    esprimaParser.parseReturnArgument.returns('resultFromParseReturnArgument')
 
     const result = esprimaParser.ReturnStatement(returnStatement)
 
-    expect(esprimaParser.parseNode.called).to.be.false
-    expect(result).to.be.undefined
+    expect(result).to.be.equal('resultFromParseReturnArgument')
   })
 })
