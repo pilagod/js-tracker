@@ -26,7 +26,7 @@ describe('ForInStatement', () => {
     sandbox.stub(esprimaParser, 'closureStack', {
       update: sandbox.spy()
     })
-    sandbox.stub(esprimaParser, 'getLoopStatusAndReset')
+    sandbox.stub(esprimaParser, 'resetLoopStatus')
   })
 
   it('should call getIteratorName with left', () => {
@@ -79,12 +79,12 @@ describe('ForInStatement', () => {
     ).to.be.true
   })
 
-  it('should call getLoopStatusAndReset after parsing body each loop', () => {
+  it('should call resetLoopStatus after parsing body each loop', () => {
     esprimaParser.ForInStatement(forInStatement)
 
     for (let i = 0; i < rightStubLength; i += 1) {
       expect(
-        esprimaParser.getLoopStatusAndReset
+        esprimaParser.resetLoopStatus
           .getCall(i)
           .calledAfter(
             esprimaParser.parseNode
@@ -93,11 +93,11 @@ describe('ForInStatement', () => {
           )
       ).to.be.true
     }
-    expect(esprimaParser.getLoopStatusAndReset.calledThrice).to.be.true
+    expect(esprimaParser.resetLoopStatus.calledThrice).to.be.true
   })
 
-  it('should break loop given getLoopStatusAndReset returns \'break\' status', () => {
-    esprimaParser.getLoopStatusAndReset
+  it('should break loop given resetLoopStatus returns \'break\' status', () => {
+    esprimaParser.resetLoopStatus
       .onCall(1).returns('break')
 
     esprimaParser.ForInStatement(forInStatement)

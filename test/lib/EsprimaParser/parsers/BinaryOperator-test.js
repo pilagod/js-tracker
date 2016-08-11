@@ -104,7 +104,7 @@ describe('BinaryOperator tests', () => {
   })
 
   describe('\'instanceof\' operator', () => {
-    it('should return correct result', () => {
+    it('should return correct result with instanceof operator given left has non-FunctionAgent constructor', () => {
       // example from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/instanceof
       const simpleStr = 'This is a simple string';
       const myString = new String();
@@ -122,5 +122,25 @@ describe('BinaryOperator tests', () => {
       expect(esprimaParser.binaryOperators.instanceof(myDate, String)).to.be.false
       expect(esprimaParser.binaryOperators.instanceof(myDate, Object)).to.be.true
     })
+  })
+
+  it('should call isInPrototypeChain with left and right.prototype and return given left has FunctionAgent constructor', () => {
+    const functionAgentStub = function () {}
+
+    sandbox.stub(esprimaParser, 'FunctionAgent', functionAgentStub)
+    sandbox.stub(esprimaParser, 'isInPrototypeChain')
+      .returns('resultFromIsInPrototypeChain')
+
+    const targetFunctionAgent = new functionAgentStub()
+    const functionAgent = new functionAgentStub()
+    functionAgent.constructor = targetFunctionAgent
+
+    const result = esprimaParser.binaryOperators.instanceof(functionAgent, targetFunctionAgent)
+
+    expect(
+      esprimaParser.isInPrototypeChain
+        .calledWithExactly(functionAgent, targetFunctionAgent.prototype)
+    ).to.be.true
+    expect(result).to.be.equal('resultFromIsInPrototypeChain')
   })
 })

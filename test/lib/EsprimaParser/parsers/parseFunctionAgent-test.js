@@ -13,6 +13,9 @@ describe('parseFunctionAgent tests', () => {
     sandbox.stub(esprimaParser, 'setEnvironment')
     sandbox.stub(esprimaParser, 'setFunctionClosure')
     sandbox.stub(esprimaParser, 'parseNode')
+    sandbox.stub(esprimaParser, 'flowStatus', {
+      unset: sandbox.stub()
+    })
   })
 
   it('should call getEnvironment with esprimaParser', () => {
@@ -87,6 +90,19 @@ describe('parseFunctionAgent tests', () => {
       esprimaParser.setEnvironment
         .withArgs(esprimaParser, 'globalEnvironment')
           .calledAfter(esprimaParser.parseNode)
+    ).to.be.true
+  })
+
+  it('should call unset of flowStatus with return after parseNode', () => {
+    esprimaParser.parseFunctionAgent(functionAgent, context, calledArguments)
+
+    expect(
+      esprimaParser.flowStatus.unset
+        .calledWithExactly('return')
+    ).to.be.true
+    expect(
+      esprimaParser.flowStatus.unset
+        .calledAfter(esprimaParser.parseNode)
     ).to.be.true
   })
 

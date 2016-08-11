@@ -10,7 +10,7 @@ describe('DoWhileStatement tests', () => {
     })
 
     sandbox.stub(esprimaParser, 'parseNode')
-    sandbox.stub(esprimaParser, 'getLoopStatusAndReset')
+    sandbox.stub(esprimaParser, 'resetLoopStatus')
     sandbox.stub(esprimaParser, 'WhileStatement')
   })
 
@@ -23,11 +23,11 @@ describe('DoWhileStatement tests', () => {
     ).to.be.true
   })
 
-  it('should call getLoopStatusAndReset after parsing body', () => {
+  it('should call resetLoopStatus after parsing body', () => {
     esprimaParser.DoWhileStatement(doWhileStatement)
 
     expect(
-      esprimaParser.getLoopStatusAndReset
+      esprimaParser.resetLoopStatus
         .calledAfter(
           esprimaParser.parseNode
             .withArgs(doWhileStatement.body)
@@ -35,16 +35,16 @@ describe('DoWhileStatement tests', () => {
     ).to.be.true
   })
 
-  it('should not call WhileStatement given getLoopStatusAndReset returns \'break\' status', () => {
-    esprimaParser.getLoopStatusAndReset.returns('break')
+  it('should not call WhileStatement given resetLoopStatus returns \'break\' status', () => {
+    esprimaParser.resetLoopStatus.returns('break')
 
     esprimaParser.DoWhileStatement(doWhileStatement)
 
     expect(esprimaParser.WhileStatement.called).to.be.false
   })
 
-  it('should return result from parseNode with body given getLoopStatusAndReset returns \'break\' status', () => {
-    esprimaParser.getLoopStatusAndReset.returns('break')
+  it('should return result from parseNode with body given resetLoopStatus returns \'break\' status', () => {
+    esprimaParser.resetLoopStatus.returns('break')
     esprimaParser.parseNode.returns('resultFromParseNode')
 
     const result = esprimaParser.DoWhileStatement(doWhileStatement)
@@ -52,8 +52,8 @@ describe('DoWhileStatement tests', () => {
     expect(result).to.be.equal('resultFromParseNode')
   })
 
-  it('should return result from WhileStatement given getLoopStatusAndReset returns not \'break\' status', () => {
-    esprimaParser.getLoopStatusAndReset.returns(undefined)
+  it('should return result from WhileStatement given resetLoopStatus returns not \'break\' status', () => {
+    esprimaParser.resetLoopStatus.returns(undefined)
     esprimaParser.WhileStatement.returns('resultFromWhileStatement')
 
     const result = esprimaParser.DoWhileStatement(doWhileStatement)
