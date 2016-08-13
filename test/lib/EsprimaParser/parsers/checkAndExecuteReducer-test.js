@@ -9,8 +9,11 @@ describe('checkAndExecuteReducer tests', () => {
   beforeEach(() => {
     sandbox.stub(esprimaParser, 'getLastElementOfStack')
       .returns('resultFromGetLastElementOfStack')
-    sandbox.stub(esprimaParser, 'getCurExpStatus')
-      .returns('resultFromGetCurExpStatus')
+    sandbox.stub(esprimaParser, 'checkerDispatcher', {
+      dispatch: sandbox.stub().returns('resultFromCheckerDispatcher')
+    })
+    // sandbox.stub(esprimaParser, 'getCurExpStatus')
+    //   .returns('resultFromGetCurExpStatus')
     sandbox.stub(esprimaParser, 'handleCurExpStatus')
   })
 
@@ -23,21 +26,21 @@ describe('checkAndExecuteReducer tests', () => {
     ).to.be.true
   })
 
-  it('should call getCurExpStatus with result from getLastElementOfStack and curExp', () => {
+  it('should call dispatch of checkerDispatcher with result from getLastElementOfStack and curExp', () => {
     esprimaParser.checkAndExecuteReducer(info, resultStack, curExp)
 
     expect(
-      esprimaParser.getCurExpStatus
+      esprimaParser.checkerDispatcher.dispatch
         .calledWithExactly('resultFromGetLastElementOfStack', curExp)
     ).to.be.true
   })
 
-  it('should call handleCurExpStatus with info, resultStack and result from getCurExpStatus', () => {
+  it('should call handleCurExpStatus with info, resultStack and result from checkerDispatcher', () => {
     esprimaParser.checkAndExecuteReducer(info, resultStack, curExp)
 
     expect(
       esprimaParser.handleCurExpStatus
-        .calledWithExactly(info, resultStack, 'resultFromGetCurExpStatus')
+        .calledWithExactly(info, resultStack, 'resultFromCheckerDispatcher')
     ).to.be.true
   })
 

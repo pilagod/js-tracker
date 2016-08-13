@@ -45,7 +45,7 @@ describe('checkAndExecute tests', () => {
     ).to.be.true
   })
 
-  it('should call getArrayLastElement with resultCreateResultStack and return', () => {
+  it('should call getLastElementOfStack with resultCreateResultStack and return', () => {
     const result = esprimaParser.checkAndExecute(data, info)
 
     expect(
