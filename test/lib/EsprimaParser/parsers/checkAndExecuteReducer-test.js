@@ -12,8 +12,6 @@ describe('checkAndExecuteReducer tests', () => {
     sandbox.stub(esprimaParser, 'checkerDispatcher', {
       dispatch: sandbox.stub().returns('resultFromCheckerDispatcher')
     })
-    // sandbox.stub(esprimaParser, 'getCurExpStatus')
-    //   .returns('resultFromGetCurExpStatus')
     sandbox.stub(esprimaParser, 'handleCurExpStatus')
   })
 
