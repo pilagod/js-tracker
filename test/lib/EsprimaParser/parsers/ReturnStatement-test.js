@@ -1,7 +1,11 @@
 // spec: https://github.com/estree/estree/blob/master/spec.md#returnstatement
 
 describe('ReturnStatement tests', () => {
-  let returnStatement
+  let returnStatement, FlowState
+
+  before(() => {
+    FlowState = require('../../../../lib/EsprimaParser/structures/FlowState')
+  })
 
   beforeEach(() => {
     returnStatement = createAstNode('ReturnStatement', {
@@ -23,12 +27,12 @@ describe('ReturnStatement tests', () => {
     ).to.be.true
   })
 
-  it('should set flowState to \'return\' after parseReturnArgument', () => {
+  it('should set flowState to FlowState.RETURN after parseReturnArgument', () => {
     esprimaParser.ReturnStatement(returnStatement)
 
     expect(
       esprimaParser.flowState.set
-        .calledWithExactly('return')
+        .calledWithExactly(FlowState.RETURN)
     ).to.be.true
     expect(
       esprimaParser.flowState.set

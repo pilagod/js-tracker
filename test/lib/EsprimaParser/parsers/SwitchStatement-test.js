@@ -1,7 +1,11 @@
 // spec: https://github.com/estree/estree/blob/master/spec.md#switchstatement
 
 describe('SwitchStatement tests', () => {
-  let switchStatement
+  let switchStatement, FlowState
+
+  before(() => {
+    FlowState = require('../../../../lib/EsprimaParser/structures/FlowState')
+  })
 
   beforeEach(() => {
     switchStatement = createAstNode('SwitchStatement', {
@@ -41,13 +45,13 @@ describe('SwitchStatement tests', () => {
     ).to.be.true
   })
 
-  it('should unset flowState of \'break\'', () => {
+  it('should unset flowState of FlowState.BREAK', () => {
     // switch should not unset return, and there is no continue statement in it
     esprimaParser.SwitchStatement(switchStatement)
 
     expect(
       esprimaParser.flowState.unset
-        .calledWithExactly('break')
+        .calledWithExactly(FlowState.BREAK)
     ).to.be.true
   })
 })

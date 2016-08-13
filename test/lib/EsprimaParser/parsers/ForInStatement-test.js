@@ -8,7 +8,11 @@ describe('ForInStatement', () => {
     'b': 2,
     'c': 3
   }
-  let forInStatement
+  let forInStatement, FlowState
+
+  before(() => {
+    FlowState = require('../../../../lib/EsprimaParser/structures/FlowState')
+  })
 
   beforeEach(() => {
     forInStatement = createAstNode('ForInStatement', {
@@ -96,9 +100,9 @@ describe('ForInStatement', () => {
     expect(esprimaParser.resetLoopState.calledThrice).to.be.true
   })
 
-  it('should break loop given resetLoopState returns \'break\' status', () => {
+  it('should break loop given resetLoopState returns FlowState.BREAK', () => {
     esprimaParser.resetLoopState
-      .onCall(1).returns('break')
+      .onCall(1).returns(FlowState.BREAK)
 
     esprimaParser.ForInStatement(forInStatement)
 

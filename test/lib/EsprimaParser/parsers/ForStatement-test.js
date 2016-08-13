@@ -15,7 +15,11 @@ describe('ForStatement tests', () => {
       sandbox.spy(createResultsGenerator(results))
   }
 
-  let forStatement
+  let forStatement, FlowState
+
+  before(() => {
+    FlowState = require('../../../../lib/EsprimaParser/structures/FlowState')
+  })
 
   beforeEach(() => {
     forStatement = createAstNode('ForStatement', {
@@ -79,10 +83,10 @@ describe('ForStatement tests', () => {
     expect(esprimaParser.resetLoopState.calledTwice).to.be.true
   })
 
-  it('should break loop given resetLoopState returns \'break\' state', () => {
+  it('should break loop given resetLoopState returns FlowState.BREAK', () => {
     setTestResults([true, true, true])
     esprimaParser.resetLoopState
-      .onCall(1).returns('break')
+      .onCall(1).returns(FlowState.BREAK)
 
     esprimaParser.ForStatement(forStatement)
 

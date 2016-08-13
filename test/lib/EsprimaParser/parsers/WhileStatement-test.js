@@ -10,7 +10,11 @@ describe('WhileStatement tests', () => {
           .onCall(index).returns(getTestResults())
     }
   }
-  let whileStatement
+  let whileStatement, FlowState
+
+  before(() => {
+    FlowState = require('../../../../lib/EsprimaParser/structures/FlowState')
+  })
 
   beforeEach(() => {
     whileStatement = createAstNode('WhileStatement', {
@@ -63,10 +67,10 @@ describe('WhileStatement tests', () => {
     expect(esprimaParser.resetLoopState.calledTwice).to.be.true
   })
 
-  it('should break loop given resetLoopState returns \'break\' status', () => {
+  it('should break loop given resetLoopState returns FlowState.BREAK', () => {
     setTestResults([true, true, true])
     esprimaParser.resetLoopState
-      .onCall(1).returns('break')
+      .onCall(1).returns(FlowState.BREAK)
 
     esprimaParser.WhileStatement(whileStatement)
 

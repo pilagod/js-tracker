@@ -6,6 +6,12 @@ describe('parseFunctionAgent tests', () => {
   const context = 'context'
   const calledArguments = ['arg1', 'arg2', 'arg3']
 
+  let FlowState
+
+  before(() => {
+    FlowState = require('../../../../lib/EsprimaParser/structures/FlowState')
+  })
+
   beforeEach(() => {
     sandbox.stub(esprimaParser, 'getEnvironment')
       .withArgs(esprimaParser).returns('globalEnvironment')
@@ -93,12 +99,12 @@ describe('parseFunctionAgent tests', () => {
     ).to.be.true
   })
 
-  it('should call unset of flowState with return after parseNode', () => {
+  it('should call unset of flowState with FlowState.RETURN after parseNode', () => {
     esprimaParser.parseFunctionAgent(functionAgent, context, calledArguments)
 
     expect(
       esprimaParser.flowState.unset
-        .calledWithExactly('return')
+        .calledWithExactly(FlowState.RETURN)
     ).to.be.true
     expect(
       esprimaParser.flowState.unset

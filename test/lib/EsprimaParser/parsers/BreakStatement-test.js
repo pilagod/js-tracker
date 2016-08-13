@@ -1,7 +1,11 @@
 // spec: https://github.com/estree/estree/blob/master/spec.md#breakstatement
 // @TODO: label
 describe('BreakStatement tests', () => {
-  let breakStatement
+  let breakStatement, FlowState
+
+  before(() => {
+    FlowState = require('../../../../lib/EsprimaParser/structures/FlowState')
+  })
 
   beforeEach(() => {
     breakStatement = createAstNode('BreakStatement')
@@ -11,12 +15,12 @@ describe('BreakStatement tests', () => {
     })
   })
 
-  it('should set flowState to \'break\'', () => {
+  it('should set flowState to FlowState.BREAK', () => {
     esprimaParser.BreakStatement(breakStatement)
 
     expect(
       esprimaParser.flowState.set
-        .calledWithExactly('break')
+        .calledWithExactly(FlowState.BREAK)
     ).to.be.true
   })
 

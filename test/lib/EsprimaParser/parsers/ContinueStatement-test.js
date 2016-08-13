@@ -2,7 +2,11 @@
 // @TODO: label
 
 describe('ContinueStatement tests', () => {
-  let continueStatement
+  let continueStatement, FlowState
+
+  before(() => {
+    FlowState = require('../../../../lib/EsprimaParser/structures/FlowState')
+  })
 
   beforeEach(() => {
     continueStatement = createAstNode('ContinueStatement')
@@ -12,12 +16,12 @@ describe('ContinueStatement tests', () => {
     })
   })
 
-  it('should set flowState to \'continue\'', () => {
+  it('should set flowState to FlowState.CONTINUE', () => {
     esprimaParser.ContinueStatement(continueStatement)
 
     expect(
       esprimaParser.flowState.set
-        .calledWithExactly('continue')
+        .calledWithExactly(FlowState.CONTINUE)
     ).to.be.true
   })
 

@@ -1,7 +1,11 @@
 // spec: https://github.com/estree/estree/blob/master/spec.md#dowhilestatement
 
 describe('DoWhileStatement tests', () => {
-  let doWhileStatement
+  let doWhileStatement, FlowState
+
+  before(() => {
+    FlowState = require('../../../../lib/EsprimaParser/structures/FlowState')
+  })
 
   beforeEach(() => {
     doWhileStatement = createAstNode('DoWhileStatement', {
@@ -35,16 +39,16 @@ describe('DoWhileStatement tests', () => {
     ).to.be.true
   })
 
-  it('should not call WhileStatement given resetLoopState returns \'break\' status', () => {
-    esprimaParser.resetLoopState.returns('break')
+  it('should not call WhileStatement given resetLoopState returns FlowState.BREAK', () => {
+    esprimaParser.resetLoopState.returns(FlowState.BREAK)
 
     esprimaParser.DoWhileStatement(doWhileStatement)
 
     expect(esprimaParser.WhileStatement.called).to.be.false
   })
 
-  it('should return result from parseNode with body given resetLoopState returns \'break\' status', () => {
-    esprimaParser.resetLoopState.returns('break')
+  it('should return result from parseNode with body given resetLoopState returns FlowState.BREAK', () => {
+    esprimaParser.resetLoopState.returns(FlowState.BREAK)
     esprimaParser.parseNode.returns('resultFromParseNode')
 
     const result = esprimaParser.DoWhileStatement(doWhileStatement)
