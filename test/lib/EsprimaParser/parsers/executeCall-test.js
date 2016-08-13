@@ -1,16 +1,14 @@
 describe('executeCall tests', () => {
   const pre = 'pre'
   const cur = {
-    arguments: 'arguments'
+    arguments: ['arg1', 'arg2', 'arg3']
   }
   let methodStub
 
   beforeEach(() => {
     methodStub = {
-      self: 'self',
       apply: sandbox.stub().returns('resultFromApply')
     }
-
     sandbox.stub(esprimaParser, 'getMethod')
       .returns(methodStub)
   })
@@ -24,19 +22,7 @@ describe('executeCall tests', () => {
     ).to.be.true
   })
 
-  it('should call apply of method got from getMethod with method.self and cur.arguments given valid method.self and return', () => {
-    const result = esprimaParser.executeCall(pre, cur)
-
-    expect(
-      methodStub.apply
-        .calledWithExactly(methodStub.self, cur.arguments)
-    ).to.be.true
-    expect(result).to.be.equal('resultFromApply')
-  })
-
-  it('should call apply of method got from getMethod with pre and cur.arguments given undefined method.self and return', () => {
-    methodStub.self = undefined
-
+  it('should call apply of result from getMethod with pre and cur.arguments then return', () => {
     const result = esprimaParser.executeCall(pre, cur)
 
     expect(
