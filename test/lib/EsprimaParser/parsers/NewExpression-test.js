@@ -1,4 +1,9 @@
 describe('NewExpression tests', () => {
+  const CalledConstructor = function (...calledArguments) {
+    this.calledArguments = calledArguments
+  }
+  const calledArguments = [1, 2, 3, 4]
+
   let newExpression
 
   beforeEach(() => {
@@ -8,11 +13,11 @@ describe('NewExpression tests', () => {
     })
 
     sandbox.stub(esprimaParser, 'parseNode')
-      .returns('resultFromParseNode')
+      .returns(CalledConstructor)
     sandbox.stub(esprimaParser, 'parseArguments')
-      .returns('resultFromParseArguments')
-    sandbox.stub(esprimaParser, 'createInstance')
-      .returns('resultFromCreateInstance')
+      .returns(calledArguments)
+    // sandbox.stub(esprimaParser, 'createInstance')
+    //   .returns('resultFromCreateInstance')
   })
 
   it('should call parseNode with callee', () => {
@@ -33,16 +38,23 @@ describe('NewExpression tests', () => {
     ).to.be.true
   })
 
-  it('should call createInstance with CalledConstructor from parseNode and initArguments from parseArguments and return', () => {
+  it('should return an instance of result from parseNode, initialized with result from parseArguments', () => {
     const result = esprimaParser.NewExpression(newExpression)
 
-    expect(
-      esprimaParser.createInstance
-        .calledWithExactly(
-          'resultFromParseNode',
-          'resultFromParseArguments'
-        )
-    ).to.be.true
-    expect(result).to.be.equal('resultFromCreateInstance')
+    expect(result).to.be.instanceof(CalledConstructor)
+    expect(result.calledArguments).to.be.eql(calledArguments)
   })
+
+  // it('should call createInstance with CalledConstructor from parseNode and initArguments from parseArguments and return', () => {
+  //   const result = esprimaParser.NewExpression(newExpression)
+  //
+  //   expect(
+  //     esprimaParser.createInstance
+  //       .calledWithExactly(
+  //         'resultFromParseNode',
+  //         'resultFromParseArguments'
+  //       )
+  //   ).to.be.true
+  //   expect(result).to.be.equal('resultFromCreateInstance')
+  // })
 })
