@@ -16,8 +16,6 @@ describe('NewExpression tests', () => {
       .returns(CalledConstructor)
     sandbox.stub(esprimaParser, 'parseArguments')
       .returns(calledArguments)
-    // sandbox.stub(esprimaParser, 'createInstance')
-    //   .returns('resultFromCreateInstance')
   })
 
   it('should call parseNode with callee', () => {
@@ -44,17 +42,4 @@ describe('NewExpression tests', () => {
     expect(result).to.be.instanceof(CalledConstructor)
     expect(result.calledArguments).to.be.eql(calledArguments)
   })
-
-  // it('should call createInstance with CalledConstructor from parseNode and initArguments from parseArguments and return', () => {
-  //   const result = esprimaParser.NewExpression(newExpression)
-  //
-  //   expect(
-  //     esprimaParser.createInstance
-  //       .calledWithExactly(
-  //         'resultFromParseNode',
-  //         'resultFromParseArguments'
-  //       )
-  //   ).to.be.true
-  //   expect(result).to.be.equal('resultFromCreateInstance')
-  // })
 })
