@@ -8,6 +8,7 @@ describe('createFunctionAgent tests', () => {
     closureStack: 'closureStack'
   }
   const getFunctionAgentParserStub = function () {}
+  
   let functionExpression
 
   beforeEach(() => {
@@ -17,8 +18,6 @@ describe('createFunctionAgent tests', () => {
       .returns(parseFunctionInfoStub)
     sandbox.stub(esprimaParser, 'getEnvironment')
       .returns(getEnvironmentStub)
-    sandbox.stub(esprimaParser, 'getFunctionAgentParser')
-      .returns(getFunctionAgentParserStub)
     sandbox.stub(esprimaParser, 'FunctionAgent', function (init) {
       this.init = init
     })
@@ -33,12 +32,6 @@ describe('createFunctionAgent tests', () => {
     ).to.be.true
   })
 
-  it('should call getFunctionAgentParser', () => {
-    esprimaParser.createFunctionAgent(functionExpression)
-
-    expect(esprimaParser.getFunctionAgentParser.called).to.be.true
-  })
-
   it('should call parseFunctionInfo with functionExpression', () => {
     esprimaParser.createFunctionAgent(functionExpression)
 
@@ -50,7 +43,6 @@ describe('createFunctionAgent tests', () => {
 
   it('should create new instance of FunctionAgent init with an object concat all above results and return', () => {
     const expectedInit = Object.assign(
-      {parser: getFunctionAgentParserStub},
       getEnvironmentStub,
       parseFunctionInfoStub
     )
