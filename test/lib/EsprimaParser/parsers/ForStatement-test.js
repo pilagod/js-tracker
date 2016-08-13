@@ -26,7 +26,7 @@ describe('ForStatement tests', () => {
     })
 
     sandbox.stub(esprimaParser, 'parseNode')
-    sandbox.stub(esprimaParser, 'resetLoopStatus')
+    sandbox.stub(esprimaParser, 'resetLoopState')
   })
 
   it('should call parseNode with init', () => {
@@ -60,14 +60,14 @@ describe('ForStatement tests', () => {
     ).to.be.true
   })
 
-  it('should call resetLoopStatus after parsing body each loop', () => {
+  it('should call resetLoopState after parsing body each loop', () => {
     setTestResults([true, true, false])
 
     esprimaParser.ForStatement(forStatement)
 
     for (let i = 0; i < 2; i += 1) {
       expect(
-        esprimaParser.resetLoopStatus
+        esprimaParser.resetLoopState
           .getCall(i)
           .calledAfter(
             esprimaParser.parseNode
@@ -76,12 +76,12 @@ describe('ForStatement tests', () => {
           )
       ).to.be.true
     }
-    expect(esprimaParser.resetLoopStatus.calledTwice).to.be.true
+    expect(esprimaParser.resetLoopState.calledTwice).to.be.true
   })
 
-  it('should break loop given resetLoopStatus returns \'break\' state', () => {
+  it('should break loop given resetLoopState returns \'break\' state', () => {
     setTestResults([true, true, true])
-    esprimaParser.resetLoopStatus
+    esprimaParser.resetLoopState
       .onCall(1).returns('break')
 
     esprimaParser.ForStatement(forStatement)

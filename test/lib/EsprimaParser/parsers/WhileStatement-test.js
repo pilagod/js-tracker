@@ -19,7 +19,7 @@ describe('WhileStatement tests', () => {
     })
 
     sandbox.stub(esprimaParser, 'parseNode')
-    sandbox.stub(esprimaParser, 'resetLoopStatus')
+    sandbox.stub(esprimaParser, 'resetLoopState')
   })
 
   it('should call parseNode with test until test fails', () => {
@@ -44,14 +44,14 @@ describe('WhileStatement tests', () => {
     ).to.be.true
   })
 
-  it('should call resetLoopStatus after parsing body each loop', () => {
+  it('should call resetLoopState after parsing body each loop', () => {
     setTestResults([true, true, false])
 
     esprimaParser.WhileStatement(whileStatement)
 
     for (let i = 0; i < 2; i += 1) {
       expect(
-        esprimaParser.resetLoopStatus
+        esprimaParser.resetLoopState
           .getCall(i)
           .calledAfter(
             esprimaParser.parseNode
@@ -60,12 +60,12 @@ describe('WhileStatement tests', () => {
           )
       ).to.be.true
     }
-    expect(esprimaParser.resetLoopStatus.calledTwice).to.be.true
+    expect(esprimaParser.resetLoopState.calledTwice).to.be.true
   })
 
-  it('should break loop given resetLoopStatus returns \'break\' status', () => {
+  it('should break loop given resetLoopState returns \'break\' status', () => {
     setTestResults([true, true, true])
-    esprimaParser.resetLoopStatus
+    esprimaParser.resetLoopState
       .onCall(1).returns('break')
 
     esprimaParser.WhileStatement(whileStatement)

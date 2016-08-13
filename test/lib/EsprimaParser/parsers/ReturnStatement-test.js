@@ -8,7 +8,7 @@ describe('ReturnStatement tests', () => {
       argument: createAstNode('Expression')
     })
 
-    sandbox.stub(esprimaParser, 'flowStatus', {
+    sandbox.stub(esprimaParser, 'flowState', {
       set: sandbox.spy()
     })
     sandbox.stub(esprimaParser, 'parseReturnArgument')
@@ -23,15 +23,15 @@ describe('ReturnStatement tests', () => {
     ).to.be.true
   })
 
-  it('should set flowStatus to \'return\' after parseReturnArgument', () => {
+  it('should set flowState to \'return\' after parseReturnArgument', () => {
     esprimaParser.ReturnStatement(returnStatement)
 
     expect(
-      esprimaParser.flowStatus.set
+      esprimaParser.flowState.set
         .calledWithExactly('return')
     ).to.be.true
     expect(
-      esprimaParser.flowStatus.set
+      esprimaParser.flowState.set
         .calledAfter(esprimaParser.parseReturnArgument)
     ).to.be.true
   })

@@ -1,12 +1,11 @@
 // spec: https://github.com/estree/estree/blob/master/spec.md#callexpression
 
 describe('CallExpression tests', () => {
-  let expression, callExpression
-
-  before(() => {
-    class Expression {}
-    expression = new Expression()
-  })
+  const expression = {
+    data: 'data',
+    info: 'info'
+  }
+  let callExpression
 
   beforeEach(() => {
     callExpression = createAstNode('CallExpression', {
@@ -29,13 +28,13 @@ describe('CallExpression tests', () => {
     ).to.be.true
   })
 
-  it('should call checkAndExecute with expression object returned from parseExpression', () => {
+  it('should call checkAndExecute with expression data and info returned from parseExpression', () => {
     esprimaParser.CallExpression(callExpression)
 
     expect(esprimaParser.checkAndExecute.calledOnce).to.be.true
     expect(
       esprimaParser.checkAndExecute
-        .calledWithExactly(expression)
+        .calledWithExactly(expression.data, expression.info)
     ).to.be.true
   })
 

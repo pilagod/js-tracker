@@ -6,16 +6,16 @@ describe('BreakStatement tests', () => {
   beforeEach(() => {
     breakStatement = createAstNode('BreakStatement')
 
-    sandbox.stub(esprimaParser, 'flowStatus', {
+    sandbox.stub(esprimaParser, 'flowState', {
       set: sandbox.spy()
     })
   })
 
-  it('should set flowStatus to \'break\'', () => {
+  it('should set flowState to \'break\'', () => {
     esprimaParser.BreakStatement(breakStatement)
 
     expect(
-      esprimaParser.flowStatus.set
+      esprimaParser.flowState.set
         .calledWithExactly('break')
     ).to.be.true
   })
