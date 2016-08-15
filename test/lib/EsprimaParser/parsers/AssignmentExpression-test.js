@@ -21,25 +21,7 @@ describe('AssignmentExpression tests', () => {
         .calledWithExactly(assignmentExpression)
     ).to.be.true
   })
-
-  // it('should call transformAssignmentToBinary with assignmentExpression', () => {
-  //   esprimaParser.AssignmentExpression(assignmentExpression)
-  //
-  //   expect(
-  //     esprimaParser.transformAssignmentToBinary
-  //       .calledWithExactly(assignmentExpression)
-  //   ).to.be.true
-  // })
-  //
-  // it('should call BinaryExpression with result from transformAssignmentToBinary', () => {
-  //   esprimaParser.AssignmentExpression(assignmentExpression)
-  //
-  //   expect(
-  //     esprimaParser.BinaryExpression
-  //       .calledWithExactly('resultFromTransformAssignmentToBinary')
-  //   ).to.be.true
-  // })
-
+  
   it('should call handleReferenceOperation with left, handleAssignment and result from getAssignmentValue', () => {
     esprimaParser.AssignmentExpression(assignmentExpression)
 

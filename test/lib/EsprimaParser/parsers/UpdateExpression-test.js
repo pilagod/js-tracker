@@ -1,5 +1,5 @@
 // spec: https://github.com/estree/estree/blob/master/spec.md#updateexpression
-// assume always prefix
+
 describe('UpdateExpression tests', () => {
   let updateExpression
 
@@ -10,45 +10,47 @@ describe('UpdateExpression tests', () => {
       prefix: 'boolean'
     })
 
-    sandbox.stub(esprimaParser, 'transformUpdateToAssignment')
-      .returns('resultFromTransformUpdateToAssignment')
-    sandbox.stub(esprimaParser, 'AssignmentExpression')
-      .returns('resultFromAssignmentExpression')
+    sandbox.stub(esprimaParser, 'parseNode')
+      .returns('resultFromParseNode')
+    sandbox.stub(esprimaParser, 'getUpdateValue')
+      .returns('resultFromGetUpdateValue')
   })
 
-  it('should call transformUpdateToAssignment with updateExpression', () => {
+  it('should call parseNode with argument of updateExpression', () => {
     esprimaParser.UpdateExpression(updateExpression)
 
     expect(
-      esprimaParser.transformUpdateToAssignment
+      esprimaParser.parseNode
+        .calledWithExactly(updateExpression.argument)
+    ).to.be.true
+  })
+
+  it('should call getUpdateValue with updateExpression after parseNode', () => {
+    esprimaParser.UpdateExpression(updateExpression)
+
+    expect(
+      esprimaParser.getUpdateValue
         .calledWithExactly(updateExpression)
     ).to.be.true
+    expect(
+      esprimaParser.getUpdateValue
+        .calledAfter(esprimaParser.parseNode)
+    ).to.be.true
   })
 
-  it('should call AssignmentExpression with transformed expression', () => {
-    esprimaParser.UpdateExpression(updateExpression)
+  it('should return update value given prefix true', () => {
+    updateExpression.prefix = true
 
-    expect(
-      esprimaParser.AssignmentExpression
-        .calledWithExactly('resultFromTransformUpdateToAssignment')
-    ).to.be.true
+    const result = esprimaParser.UpdateExpression(updateExpression)
+
+    expect(result).to.be.equal('resultFromGetUpdateValue')
   })
 
   it('should return origin value given prefix false', () => {
     updateExpression.prefix = false
 
-    sandbox.stub(esprimaParser, 'parseNode', createParseNodeStub())
-
     const result = esprimaParser.UpdateExpression(updateExpression)
 
-    expect(result).to.be.equal('parsedExpression')
-  })
-
-  it('should return after-assignment value given prefix true', () => {
-    updateExpression.prefix = true
-
-    const result = esprimaParser.UpdateExpression(updateExpression)
-
-    expect(result).to.be.equal('resultFromAssignmentExpression')
+    expect(result).to.be.equal('resultFromParseNode')
   })
 })
