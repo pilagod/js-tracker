@@ -3,48 +3,51 @@ describe('checkAndExecuteReducer tests', () => {
     code: 'code',
     loc: 'loc'
   }
-  const resultStack = ['result1', 'result2', 'result3']
-  const curExp = 'curExp'
+  const calleeStack = ['callee1', 'callee2', 'callee3']
+  const callee = calleeStack.slice(-1)[0]
+  const expression = 'expression'
+  const statusStub = {
+    type: 'STATE'
+  }
 
   beforeEach(() => {
-    sandbox.stub(esprimaParser, 'getLastElementOfStack')
-      .returns('resultFromGetLastElementOfStack')
-    sandbox.stub(esprimaParser, 'checkerDispatcher', {
-      dispatch: sandbox.stub().returns('resultFromCheckerDispatcher')
+    sandbox.stub(esprimaParser, 'callChecker', {
+      dispatch: sandbox.stub().returns(statusStub)
     })
-    sandbox.stub(esprimaParser, 'handleCurExpStatus')
+    sandbox.stub(esprimaParser, 'addAffectedElementToCollection')
+    sandbox.stub(esprimaParser, 'updateCalleeStack')
   })
 
-  it('should call getLastElementOfStack with resultStack', () => {
-    esprimaParser.checkAndExecuteReducer(info, resultStack, curExp)
+  it('should call dispatch of callChecker with last element of calleeStack and expression', () => {
+    esprimaParser.checkAndExecuteReducer(info, calleeStack, expression)
 
     expect(
-      esprimaParser.getLastElementOfStack
-        .calledWithExactly(resultStack)
+      esprimaParser.callChecker.dispatch
+        .calledWithExactly(callee, expression)
     ).to.be.true
   })
 
-  it('should call dispatch of checkerDispatcher with result from getLastElementOfStack and curExp', () => {
-    esprimaParser.checkAndExecuteReducer(info, resultStack, curExp)
+  it('should call addAffectedElementToCollection with info, callee, expression, and status got from callChecker', () => {
+    esprimaParser.checkAndExecuteReducer(info, calleeStack, expression)
 
     expect(
-      esprimaParser.checkerDispatcher.dispatch
-        .calledWithExactly('resultFromGetLastElementOfStack', curExp)
+      esprimaParser.addAffectedElementToCollection
+        .calledWithExactly(info, callee, expression, statusStub)
     ).to.be.true
   })
 
-  it('should call handleCurExpStatus with info, resultStack and result from checkerDispatcher', () => {
-    esprimaParser.checkAndExecuteReducer(info, resultStack, curExp)
+  it('should call updateCalleeStack with calleeStack, callee, expression, status', () => {
+    esprimaParser.checkAndExecuteReducer(info, calleeStack, expression)
 
     expect(
-      esprimaParser.handleCurExpStatus
-        .calledWithExactly(info, resultStack, 'resultFromCheckerDispatcher')
+      esprimaParser.updateCalleeStack
+        .calledWithExactly(calleeStack, callee, expression, statusStub)
     ).to.be.true
   })
 
-  it('should return resultStack', () => {
-    const result = esprimaParser.checkAndExecuteReducer(info, resultStack, curExp)
+  it('should return calleeStack', () => {
+    const result = esprimaParser.checkAndExecuteReducer(info, calleeStack, expression)
 
-    expect(result).to.be.equal(resultStack)
+    expect(result).to.be.equal(calleeStack)
   })
 })

@@ -1,4 +1,4 @@
-describe('createResultStack tests', () => {
+describe('createCalleeStack tests', () => {
   const data = ['data1']
 
   beforeEach(() => {
@@ -7,7 +7,7 @@ describe('createResultStack tests', () => {
   })
 
   it('should call execute with data', () => {
-    esprimaParser.createResultStack(data)
+    esprimaParser.createCalleeStack(data)
 
     expect(
       esprimaParser.execute
@@ -16,7 +16,7 @@ describe('createResultStack tests', () => {
   })
 
   it('should return an array containing result from execute', () => {
-    const result = esprimaParser.createResultStack(data)
+    const result = esprimaParser.createCalleeStack(data)
 
     expect(result).to.be.eql(['resultFromExecute'])
   })

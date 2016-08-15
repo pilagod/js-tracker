@@ -6,20 +6,20 @@ describe('checkAndExecute tests', () => {
   }
 
   beforeEach(() => {
-    sandbox.stub(esprimaParser, 'createResultStack')
-      .returns('resultCreateResultStack')
+    sandbox.stub(esprimaParser, 'createCalleeStack')
+      .returns('resultCreateCalleeStack')
     sandbox.stub(esprimaParser, 'createCheckAndExecuteReducer')
       .returns('resultFromCreateCheckAndExecuteReducer')
     sandbox.stub(data, 'reduce')
-    sandbox.stub(esprimaParser, 'getLastElementOfStack')
-      .returns('resultFromGetLastElementOfStack')
+    sandbox.stub(esprimaParser, 'getLastElement')
+      .returns('resultFromGetLastElement')
   })
 
-  it('should call createResultStack with an array containing first element of data', () => {
+  it('should call createCalleeStack with an array containing first element of data', () => {
     esprimaParser.checkAndExecute(data, info)
 
     expect(
-      esprimaParser.createResultStack
+      esprimaParser.createCalleeStack
         .calledWithExactly(['data1'])
     ).to.be.ture
   })
@@ -33,25 +33,25 @@ describe('checkAndExecute tests', () => {
     ).to.be.true
   })
 
-  it('should call reduce of data with result from createCheckAndExecuteReducer and result from createResultStack', () => {
+  it('should call reduce of data with result from createCheckAndExecuteReducer and result from createCalleeStack', () => {
     esprimaParser.checkAndExecute(data, info)
 
     expect(
       data.reduce
         .calledWithExactly(
           'resultFromCreateCheckAndExecuteReducer',
-          'resultCreateResultStack'
+          'resultCreateCalleeStack'
         )
     ).to.be.true
   })
 
-  it('should call getLastElementOfStack with resultCreateResultStack and return', () => {
+  it('should call getLastElement with resultCreateCalleeStack and return', () => {
     const result = esprimaParser.checkAndExecute(data, info)
 
     expect(
-      esprimaParser.getLastElementOfStack
-        .calledWithExactly('resultCreateResultStack')
+      esprimaParser.getLastElement
+        .calledWithExactly('resultCreateCalleeStack')
     ).to.be.true
-    expect(result).to.be.equal('resultFromGetLastElementOfStack')
+    expect(result).to.be.equal('resultFromGetLastElement')
   })
 })
