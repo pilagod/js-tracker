@@ -6,22 +6,21 @@ describe('checkAndExecute tests', () => {
   }
 
   beforeEach(() => {
-    sandbox.stub(esprimaParser, 'createCalleeStack')
-      .returns('resultCreateCalleeStack')
+    sandbox.stub(esprimaParser, 'execute')
+      .returns('resultFromExecute')
     sandbox.stub(esprimaParser, 'createCheckAndExecuteReducer')
       .returns('resultFromCreateCheckAndExecuteReducer')
     sandbox.stub(data, 'reduce')
-    sandbox.stub(esprimaParser, 'getLastElement')
-      .returns('resultFromGetLastElement')
+      .returns('resultFromReduce')
   })
 
-  it('should call createCalleeStack with an array containing first element of data', () => {
+  it('should call execute with an array containing only first element in data', () => {
     esprimaParser.checkAndExecute(data, info)
 
     expect(
-      esprimaParser.createCalleeStack
+      esprimaParser.execute
         .calledWithExactly(['data1'])
-    ).to.be.ture
+    ).to.be.true
   })
 
   it('should call createCheckAndExecuteReducer with info', () => {
@@ -33,25 +32,21 @@ describe('checkAndExecute tests', () => {
     ).to.be.true
   })
 
-  it('should call reduce of data with result from createCheckAndExecuteReducer and result from createCalleeStack', () => {
+  it('should call reduce of data with result from createCheckAndExecuteReducer and result from execute', () => {
     esprimaParser.checkAndExecute(data, info)
 
     expect(
       data.reduce
         .calledWithExactly(
           'resultFromCreateCheckAndExecuteReducer',
-          'resultCreateCalleeStack'
+          'resultFromExecute'
         )
     ).to.be.true
   })
 
-  it('should call getLastElement with resultCreateCalleeStack and return', () => {
+  it('should return result from reduce', () => {
     const result = esprimaParser.checkAndExecute(data, info)
 
-    expect(
-      esprimaParser.getLastElement
-        .calledWithExactly('resultCreateCalleeStack')
-    ).to.be.true
-    expect(result).to.be.equal('resultFromGetLastElement')
+    expect(result).to.be.equal('resultFromReduce')
   })
 })
