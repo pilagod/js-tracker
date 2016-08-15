@@ -47,14 +47,6 @@ describe('BinaryOperator tests', () => {
     }
   })
 
-  describe('\'\' operator (for AssignmentExpression \'=\' operator use)', () => {
-    it('should return right', () => {
-      const result = esprimaParser.binaryOperators['']('left', 'right')
-
-      expect(result).to.be.equal('right')
-    })
-  })
-
   for (const operator of [
     "==", "!=", "===", "!==",
     "<", "<=", ">", ">=",

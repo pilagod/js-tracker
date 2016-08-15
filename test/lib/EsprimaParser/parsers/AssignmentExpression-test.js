@@ -8,32 +8,39 @@ describe('AssignmentExpression tests', () => {
       right: createAstNode('ExpressionRight')
     })
 
-    sandbox.stub(esprimaParser, 'transformAssignmentToBinary')
-      .returns('resultFromTransformAssignmentToBinary')
-    sandbox.stub(esprimaParser, 'BinaryExpression')
-      .returns('resultFromBinaryExpression')
+    sandbox.stub(esprimaParser, 'getAssignmentValue')
+      .returns('resultFromGetAssignmentValue')
     sandbox.stub(esprimaParser, 'handleReferenceOperation')
   })
 
-  it('should call transformAssignmentToBinary with assignmentExpression', () => {
+  it('should call getAssignmentValue with assignmentExpression', () => {
     esprimaParser.AssignmentExpression(assignmentExpression)
 
     expect(
-      esprimaParser.transformAssignmentToBinary
+      esprimaParser.getAssignmentValue
         .calledWithExactly(assignmentExpression)
     ).to.be.true
   })
 
-  it('should call BinaryExpression with result from transformAssignmentToBinary', () => {
-    esprimaParser.AssignmentExpression(assignmentExpression)
+  // it('should call transformAssignmentToBinary with assignmentExpression', () => {
+  //   esprimaParser.AssignmentExpression(assignmentExpression)
+  //
+  //   expect(
+  //     esprimaParser.transformAssignmentToBinary
+  //       .calledWithExactly(assignmentExpression)
+  //   ).to.be.true
+  // })
+  //
+  // it('should call BinaryExpression with result from transformAssignmentToBinary', () => {
+  //   esprimaParser.AssignmentExpression(assignmentExpression)
+  //
+  //   expect(
+  //     esprimaParser.BinaryExpression
+  //       .calledWithExactly('resultFromTransformAssignmentToBinary')
+  //   ).to.be.true
+  // })
 
-    expect(
-      esprimaParser.BinaryExpression
-        .calledWithExactly('resultFromTransformAssignmentToBinary')
-    ).to.be.true
-  })
-
-  it('should call handleReferenceOperation with left, handleAssignment and new value', () => {
+  it('should call handleReferenceOperation with left, handleAssignment and result from getAssignmentValue', () => {
     esprimaParser.AssignmentExpression(assignmentExpression)
 
     expect(
@@ -41,14 +48,14 @@ describe('AssignmentExpression tests', () => {
         .calledWithExactly(
           assignmentExpression.left,
           esprimaParser.assignmentOperators['='],
-          'resultFromBinaryExpression'
+          'resultFromGetAssignmentValue'
         )
     ).to.be.true
   })
 
-  it('should return result from BinaryExpression', () => {
+  it('should return result from getAssignmentValue', () => {
     const result = esprimaParser.AssignmentExpression(assignmentExpression)
 
-    expect(result).to.be.equal('resultFromBinaryExpression')
+    expect(result).to.be.equal('resultFromGetAssignmentValue')
   })
 })
