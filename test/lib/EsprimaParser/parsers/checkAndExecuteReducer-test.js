@@ -27,13 +27,21 @@ describe('checkAndExecuteReducer tests', () => {
     ).to.be.true
   })
 
-  it('should call addInfoToCollection with callee, expression status and info', () => {
+  it('should call addInfoToCollection with callee, expression status and info given non-undefined status', () => {
     esprimaParser.checkAndExecuteReducer(info, callee, expression)
 
     expect(
       esprimaParser.addInfoToCollection
         .calledWithExactly(callee, expression, statusStub, info)
     ).to.be.true
+  })
+
+  it('should not call addInfoToCollection given undefined status', () => {
+    esprimaParser.callChecker.dispatch.returns(undefined)
+
+    esprimaParser.checkAndExecuteReducer(info, callee, expression)
+
+    expect(esprimaParser.addInfoToCollection.called).to.be.false
   })
 
   it('should call getNextCallee with callee, expression and status then return', () => {
