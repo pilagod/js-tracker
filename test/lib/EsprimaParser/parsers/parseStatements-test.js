@@ -1,6 +1,4 @@
 describe('parseStatements tests', () => {
-  let body
-
   const setStateStub = (results) => {
     sandbox.stub(esprimaParser, 'flowState', {
       isEitherState: sandbox.spy(
@@ -8,6 +6,7 @@ describe('parseStatements tests', () => {
       )
     })
   }
+  let body
 
   beforeEach(() => {
     body = [
@@ -15,7 +14,6 @@ describe('parseStatements tests', () => {
       createAstNode('Statement2'),
       createAstNode('Statement3')
     ]
-
     sandbox.stub(esprimaParser, 'parseNode', createParseNodeStub())
   })
 
