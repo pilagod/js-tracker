@@ -17,7 +17,7 @@ describe('addInfoToElement tests', () => {
     sandbox.stub(esprimaParser, 'collection', {
       addEvent: sandbox.spy()
     })
-    esprimaParser.addInfoToElement(element, status, info)
+    esprimaParser.addInfoToElement(element, info, status)
 
     expect(
       esprimaParser.collection.addEvent
@@ -32,7 +32,7 @@ describe('addInfoToElement tests', () => {
     sandbox.stub(esprimaParser, 'collection', {
       addManipulation: sandbox.spy()
     })
-    esprimaParser.addInfoToElement(element, status, info)
+    esprimaParser.addInfoToElement(element, info, status)
 
     expect(
       esprimaParser.collection.addManipulation

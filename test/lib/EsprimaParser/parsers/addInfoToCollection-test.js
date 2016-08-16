@@ -15,7 +15,7 @@ describe('addInfoToCollection tests', () => {
   })
 
   it('should call getAffectedElement with callee, expression and status', () => {
-    esprimaParser.addInfoToCollection(callee, expression, status, info)
+    esprimaParser.addInfoToCollection(callee, expression, info, status)
 
     expect(
       esprimaParser.getAffectedElement
@@ -24,11 +24,11 @@ describe('addInfoToCollection tests', () => {
   })
 
   it('should call addInfoToElement with info, result from getAffectedElement and status', () => {
-    esprimaParser.addInfoToCollection(callee, expression, status, info)
+    esprimaParser.addInfoToCollection(callee, expression, info, status)
 
     expect(
       esprimaParser.addInfoToElement
-        .calledWithExactly('resultFromGetAffectedElement', status, info)
+        .calledWithExactly('resultFromGetAffectedElement', info, status)
     ).to.be.true
   })
 })

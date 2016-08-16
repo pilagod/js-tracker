@@ -32,7 +32,7 @@ describe('checkAndExecuteReducer tests', () => {
 
     expect(
       esprimaParser.addInfoToCollection
-        .calledWithExactly(callee, expression, statusStub, info)
+        .calledWithExactly(callee, expression, info, statusStub)
     ).to.be.true
   })
 

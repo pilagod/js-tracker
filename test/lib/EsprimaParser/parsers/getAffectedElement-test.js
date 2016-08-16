@@ -4,14 +4,6 @@ describe('getAffectedElement tests', () => {
     arguments: ['arg1', 'arg2', 'arg3']
   }
 
-  it('should return callee given status has no property passive', () => {
-    const status = {}
-
-    const result = esprimaParser.getAffectedElement(callee, expression, status)
-
-    expect(result).to.be.equal(callee)
-  })
-
   it('should return expression arguments indexed by status.passive given status has property passive', () => {
     const status = {
       passive: 1
@@ -19,5 +11,20 @@ describe('getAffectedElement tests', () => {
     const result = esprimaParser.getAffectedElement(callee, expression, status)
 
     expect(result).to.be.equal('arg2')
+  })
+
+  it('should call getElement with callee and return', () => {
+    const status = {}
+
+    sandbox.stub(esprimaParser, 'getElementFrom')
+      .returns('resultFromGetElementFrom')
+
+    const result = esprimaParser.getAffectedElement(callee, expression, status)
+
+    expect(
+      esprimaParser.getElementFrom
+        .calledWithExactly(callee)
+    ).to.be.true
+    expect(result).to.be.equal('resultFromGetElementFrom')
   })
 })
