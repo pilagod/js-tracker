@@ -2,14 +2,14 @@ describe('createAddEventListenerFromPropEvent tests', () => {
   const propEvent = 'onclick'
   const handler = function () {}
 
-  let setArgumentsSpy
+  let addArgumentsSpy
 
   beforeEach(() => {
-    setArgumentsSpy = sandbox.spy()
+    addArgumentsSpy = sandbox.spy()
 
     sandbox.stub(esprimaParser, 'Method', function (method) {
       this.method = method
-      this.setArguments = setArgumentsSpy
+      this.addArguments = addArgumentsSpy
     })
     sandbox.stub(esprimaParser, 'getEventFromPropEvent')
       .returns('resultFromGetEventFromPropEvent')
@@ -33,11 +33,11 @@ describe('createAddEventListenerFromPropEvent tests', () => {
     ).to.be.true
   })
 
-  it('should call setArguments of Method with an array containing result from getEventFromPropEvent and handler', () => {
+  it('should call addArguments of Method with an array containing result from getEventFromPropEvent and handler', () => {
     esprimaParser.createAddEventListenerFromPropEvent(propEvent, handler)
 
     expect(
-      setArgumentsSpy
+      addArgumentsSpy
         .calledWithExactly(['resultFromGetEventFromPropEvent', handler])
     ).to.be.true
   })

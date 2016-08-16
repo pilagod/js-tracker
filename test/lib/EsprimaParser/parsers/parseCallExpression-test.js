@@ -1,5 +1,6 @@
 describe('parseCallExpression tests', () => {
   const callee = ['string', ['array']]
+
   let callExpression, method
 
   beforeEach(() => {
@@ -9,7 +10,7 @@ describe('parseCallExpression tests', () => {
     })
 
     method = {
-      setArguments: sandbox.spy()
+      addArguments: sandbox.spy()
     }
 
     sandbox.stub(esprimaParser, 'parseArguments')
@@ -39,11 +40,11 @@ describe('parseCallExpression tests', () => {
     ).to.be.true
   })
 
-  it('should call setArguments of method got from parseCallee with parsedArguments', () => {
+  it('should call addArguments of method got from parseCallee with parsedArguments', () => {
     esprimaParser.parseCallExpression(callExpression)
 
     expect(
-      method.setArguments
+      method.addArguments
         .calledWithExactly('resultFromParseArguments')
     ).to.be.true
   })
