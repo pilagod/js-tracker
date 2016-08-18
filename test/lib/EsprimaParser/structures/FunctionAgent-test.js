@@ -16,7 +16,7 @@ describe('FunctionAgent tests', () => {
   })
 
   describe('init tests', () => {
-    it('should set instance properties properly with given init arguments', () => {
+    it('should set instance properties properly to given init arguments', () => {
       const functionAgent = new FunctionAgent(functionAgentInitArguments)
 
       expect(functionAgent.body).to.be.equal(functionAgentInitArguments.body)
