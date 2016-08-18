@@ -18,24 +18,26 @@ describe('Method tests', () => {
     })
   })
 
-  describe('addArguments tests', () => {
+  describe('methods tests', () => {
     let methodInstance
 
     beforeEach(() => {
       methodInstance = new Method('method')
     })
 
-    it('should push each element in given array to property arguments', () => {
-      methodInstance.setArguments([1, 2, 3])
+    describe('addArguments tests', () => {
+      it('should push each element in given array to property arguments', () => {
+        methodInstance.setArguments([1, 2, 3])
 
-      expect(methodInstance.arguments).to.be.eql([1, 2, 3])
-    })
+        expect(methodInstance.arguments).to.be.eql([1, 2, 3])
+      })
 
-    it('should concat results from different calls', () => {
-      methodInstance.setArguments([1, 2, 3])
-      methodInstance.setArguments([4, 5, 6])
+      it('should concat results from different calls', () => {
+        methodInstance.setArguments([1, 2, 3])
+        methodInstance.setArguments([4, 5, 6])
 
-      expect(methodInstance.arguments).to.be.eql([1, 2, 3, 4, 5, 6])
+        expect(methodInstance.arguments).to.be.eql([1, 2, 3, 4, 5, 6])
+      })
     })
   })
 })
