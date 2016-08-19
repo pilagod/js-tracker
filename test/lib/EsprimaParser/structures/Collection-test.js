@@ -1,0 +1,2 @@
+describe('Collection tests', () => {
+})

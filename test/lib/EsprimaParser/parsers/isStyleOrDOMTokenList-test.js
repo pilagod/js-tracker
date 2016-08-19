@@ -4,21 +4,16 @@ describe('isStyleOrDOMTokenList tests', () => {
 
   beforeEach(() => {
     sandbox.stub(esprimaParser, 'closureStack', {
-      get: sandbox.stub()
-        .withArgs('window')
-          .returns(contextStub)
+      getContext: sandbox.stub().returns(contextStub)
     })
     sandbox.stub(esprimaParser, 'isStyle')
     sandbox.stub(esprimaParser, 'isDOMTokenList')
   })
 
-  it('should call get of closureStack with \'window\'', () => {
+  it('should call getContext of closureStack', () => {
     esprimaParser.isStyleOrDOMTokenList(executedData)
 
-    expect(
-      esprimaParser.closureStack.get
-        .calledWithExactly('window')
-    ).to.be.true
+    expect(esprimaParser.closureStack.getContext.called).to.be.true
   })
 
   it('should call isStyle with context and executedData', () => {
