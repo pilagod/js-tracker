@@ -5,25 +5,39 @@ describe('Closure tests', () => {
     Closure = require('../../../../lib/EsprimaParser/structures/Closure')
   })
 
-  describe('init tests', () => {
-    it('should set property data to the copy of given data', () => {
+  describe('constructor tests', () => {
+    beforeEach(() => {
+      sandbox.stub(Closure, 'isObject')
+    })
+
+    it('should call isObject with given data', () => {
       const data = {}
-      const closure = new Closure(data)
+      const result = new Closure(data)
 
-      expect(closure.data).to.be.eql(data)
-      expect(closure.data).to.not.equal(data)
+      expect(
+        Closure.isObject
+          .calledWithExactly(data)
+      ).to.be.true
     })
 
-    it('should set property data to empty object given array data', () => {
-      const closure = new Closure([1, 2, 3])
+    it('should set property data to given data if isObject returns true', () => {
+      const data = {'a': 1}
 
-      expect(closure.data).to.be.eql({})
+      Closure.isObject.withArgs(data).returns(true)
+
+      const result = new Closure(data)
+
+      expect(result.data).to.be.eql(data)
     })
 
-    it('should set property data to empty object given undefined data', () => {
-      const closure = new Closure()
+    it('should set property data to empty object given isObject returns false', () => {
+      const data = [1, 2, 3]
 
-      expect(closure.data).to.be.eql({})
+      Closure.isObject.withArgs(data).returns(false)
+
+      const result = new Closure(data)
+
+      expect(result.data).to.be.eql({})
     })
   })
 
@@ -31,7 +45,9 @@ describe('Closure tests', () => {
     let closure
 
     beforeEach(() => {
-      closure = new Closure({a: 1})
+      closure = new Closure({
+        'a': 1
+      })
     })
 
     describe('get tests', () => {
@@ -79,6 +95,86 @@ describe('Closure tests', () => {
         const result = closure.exist('b')
 
         expect(result).to.be.false
+      })
+    })
+  })
+
+  describe('static tests', () => {
+    describe('isObject tests', () => {
+      it('should return true given a plain object', () => {
+        const result = Closure.isObject({})
+
+        expect(result).to.be.true
+      })
+
+      it('should return true given a custom instance', () => {
+        const result = Closure.isObject(new (class {})())
+
+        expect(result).to.be.true
+      })
+
+      // nodejs environment
+      it('should return true given [object global]', () => {
+        const result = Closure.isObject(global)
+
+        expect(result).to.be.true
+      })
+
+      // browser environment
+      it('should return true given [object Window]', () => {
+        const window = {}
+
+        sandbox.stub(Object.prototype, 'toString')
+          .returns('[object Window]')
+
+        const result = Closure.isObject(window)
+
+        expect(result).to.be.true
+      })
+
+      it('should return false given an array', () => {
+        let results = []
+
+        results.push(Closure.isObject([1, 2, 3]))
+        results.push(Closure.isObject(new Array(1, 2, 3)))
+
+        expect(results).to.be.eql([false, false])
+      })
+
+      it('should return false given a function', () => {
+        let results = []
+
+        results.push(Closure.isObject(function () {}))
+        results.push(Closure.isObject(new Function()))
+
+        expect(results).to.be.eql([false, false])
+      })
+
+      it('should return false given a string', () => {
+        let results = []
+
+        results.push(Closure.isObject('string'))
+        results.push(Closure.isObject(new String('string')))
+
+        expect(results).to.be.eql([false, false])
+      })
+
+      it('should return false given a number', () => {
+        let results = []
+
+        results.push(Closure.isObject(1))
+        results.push(Closure.isObject(new Number(1)))
+
+        expect(results).to.be.eql([false, false])
+      })
+
+      it('should return false given a undefined / null', () => {
+        let results = []
+
+        results.push(Closure.isObject(null))
+        results.push(Closure.isObject(undefined))
+
+        expect(results).to.be.eql([false, false])
       })
     })
   })

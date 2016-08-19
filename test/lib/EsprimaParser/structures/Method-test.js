@@ -9,7 +9,7 @@ describe('Method tests', () => {
     expect(true).to.be.true
   })
 
-  describe('init tests', () => {
+  describe('constructor tests', () => {
     it('should set property method to given method and arguments to empty array', () => {
       const methodInstance = new Method('method')
 

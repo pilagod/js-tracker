@@ -9,7 +9,7 @@ describe('FlowState tests', () => {
     FlowState = require('../../../../lib/EsprimaParser/structures/FlowState')
   })
 
-  describe('init tests', () => {
+  describe('constructor tests', () => {
     it('should set property state to undefined', () => {
       const flowState = new FlowState()
 
