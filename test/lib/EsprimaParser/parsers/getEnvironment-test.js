@@ -5,7 +5,7 @@ describe('getEnvironment tests', () => {
     context = {
       scriptUrl: 'scriptUrl',
       closureStack: {
-        getStack: sandbox.stub().returns('closureStack')
+        getClone: sandbox.stub().returns('closureStack')
       }
     }
   })
@@ -13,7 +13,7 @@ describe('getEnvironment tests', () => {
   it('should return an object containing given context\'s scriptUrl and copy of closureStack', () => {
     const result = esprimaParser.getEnvironment(context)
 
-    expect(context.closureStack.getStack.called).to.be.true
+    expect(context.closureStack.getClone.called).to.be.true
     expect(result).to.be.eql({
       scriptUrl: 'scriptUrl',
       closureStack: 'closureStack'

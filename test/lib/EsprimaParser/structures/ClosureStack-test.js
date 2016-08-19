@@ -217,7 +217,7 @@ describe('ClosureStack tests', () => {
       })
     })
 
-    describe('getStack tests', () => {
+    describe('getClone tests', () => {
       beforeEach(() => {
         sandbox.stub(closureStack, 'constructor', function () {
           this.setContext = sandbox.spy()
@@ -226,13 +226,13 @@ describe('ClosureStack tests', () => {
       })
 
       it('should return an instanceof closureStack\'s constructor', () => {
-        const newClosureStack = closureStack.getStack()
+        const newClosureStack = closureStack.getClone()
 
         expect(newClosureStack).to.be.instanceof(closureStack.constructor)
       })
 
       it('should call setContext with calling closureStack context', () => {
-        const newClosureStack = closureStack.getStack()
+        const newClosureStack = closureStack.getClone()
 
         expect(
           newClosureStack.setContext
@@ -241,7 +241,7 @@ describe('ClosureStack tests', () => {
       })
 
       it('should call setStack with calling closureStack stack', () => {
-        const newClosureStack = closureStack.getStack()
+        const newClosureStack = closureStack.getClone()
 
         expect(
           newClosureStack.setStack
