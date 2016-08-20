@@ -28,7 +28,7 @@ describe('EsprimaParser tests', () => {
     importTestsFrom(PARSERS_PATH)
   })
 
-  describe('structures tests', () => {
+  describe.only('structures tests', () => {
     const STRUCTURES_PATH = './test/lib/EsprimaParser/structures/'
 
     importTestsFrom(STRUCTURES_PATH)

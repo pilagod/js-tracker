@@ -1,9 +1,7 @@
 describe('addInfoToElements tests', () => {
   const elements = 'elements'
-  const info = {
-    code: 'code',
-    loc: 'loc'
-  }
+  const info = {}
+  
   let CallChecker
 
   before(() => {

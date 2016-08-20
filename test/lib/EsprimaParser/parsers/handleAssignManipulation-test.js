@@ -1,10 +1,7 @@
 describe('handleAssignManipulation tests', () => {
   const object = 'object'
   const property = 'property'
-  const info = {
-    code: 'code',
-    loc: 'loc'
-  }
+  const info = {}
   const value = 'value'
 
   let status, CallChecker

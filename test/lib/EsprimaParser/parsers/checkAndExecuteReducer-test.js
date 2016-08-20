@@ -1,13 +1,8 @@
 describe('checkAndExecuteReducer tests', () => {
-  const info = {
-    code: 'code',
-    loc: 'loc'
-  }
+  const info = {}
   const callee = 'callee'
   const expression = 'expression'
-  const statusStub = {
-    type: 'STATE'
-  }
+  const statusStub = {}
 
   beforeEach(() => {
     sandbox.stub(esprimaParser, 'callChecker', {

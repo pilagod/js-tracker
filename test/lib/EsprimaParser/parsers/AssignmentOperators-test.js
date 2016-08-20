@@ -4,15 +4,11 @@ describe('AssignmentOperators tests', () => {
   const target = {
     object: 'object',
     property: 'property',
-    info: {
-      code: 'code',
-      loc: 'loc'
-    }
+    info: {}
   }
   const value = 'value'
-  const statusStub = {
-    type: 'STATE'
-  }
+  const statusStub = {}
+  
   beforeEach(() => {
     sandbox.stub(esprimaParser, 'callChecker', {
       dispatch: sandbox.stub().returns(statusStub)

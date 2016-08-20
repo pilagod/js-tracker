@@ -1,8 +1,5 @@
 describe('createCheckAndExecuteReducer tests', () => {
-  const info = {
-    code: 'code',
-    loc: 'loc'
-  }
+  const info = {}
 
   beforeEach(() => {
     sandbox.stub(esprimaParser, 'checkAndExecuteReducer')

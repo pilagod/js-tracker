@@ -1,9 +1,6 @@
 describe('checkAndExecute tests', () => {
   const data = ['data1', 'data2', 'data3']
-  const info = {
-    code: 'code',
-    loc: 'loc'
-  }
+  const info = {}
 
   beforeEach(() => {
     sandbox.stub(esprimaParser, 'execute')

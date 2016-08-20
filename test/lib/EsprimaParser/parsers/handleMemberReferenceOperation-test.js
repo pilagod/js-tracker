@@ -8,6 +8,7 @@ describe('handleMemberReferenceOperation tests', () => {
     property: 'property'
   }
   const args = ['arg1', 'arg2', 'arg3']
+  
   let memberExpression, operationStub
 
   beforeEach(() => {
