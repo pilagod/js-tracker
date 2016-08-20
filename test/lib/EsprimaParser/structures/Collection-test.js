@@ -133,6 +133,66 @@ describe('Collection tests', () => {
       })
     })
 
+    describe('getCollectionIdOnElement tests', () => {
+      let element
+
+      beforeEach(() => {
+        element = {}
+
+        sandbox.stub(collection, 'createElementCollection')
+      })
+
+      it('should call createElementCollection given element has no CollectionId', () => {
+        collection.getCollectionIdOnElement(element)
+
+        expect(collection.createElementCollection.called).to.be.true
+      })
+
+      it('should set element CollectionId to the result from createElementCollection and return given element has no CollectionId', () => {
+        collection.createElementCollection.returns(1)
+
+        const result = collection.getCollectionIdOnElement(element)
+
+        expect(element.CollectionId).to.be.equal(1)
+        expect(result).to.be.equal(1)
+      })
+
+      it('should not call createElementCollection and return element CollectionId given element has CollectionId', () => {
+        element.CollectionId = 3
+
+        const result = collection.getCollectionIdOnElement(element)
+
+        expect(result).to.be.equal(3)
+        expect(collection.createElementCollection.called).to.be.false
+      })
+    })
+
+    describe('createElementCollection tests', () => {
+      it('should increment 1 to id', () => {
+        collection.createElementCollection()
+
+        expect(collection.id).to.be.equal(1)
+      })
+
+      it('should add and init a new collection with new id as key', () => {
+        const expectedCollection = {
+          '1': {
+            [CallChecker.MANIPULATION]: {},
+            [CallChecker.EVENT]: {}
+          }
+        }
+        collection.createElementCollection()
+
+        expect(collection.data).to.be.eql(expectedCollection)
+      })
+
+      it('should return new id', () => {
+        const result = collection.createElementCollection()
+
+        expect(result).to.be.equal(1)
+      })
+    })
+
     describe('getKeyFromInfo tests', () => {
       const info = {
         loc: {
@@ -151,60 +211,19 @@ describe('Collection tests', () => {
       })
     })
 
-    describe('getCollectionIdOnElement tests', () => {
-      it('should set CollectionId to (id + 1) on element given element has no CollectionId', () => {
-        const element = {}
-
-        collection.getCollectionIdOnElement(element)
-
-        expect(collection.id).to.be.equal(1)
-        expect(element.CollectionId).to.be.equal(1)
-      })
-
-      it('should init new id in collection data', () => {
-        const element = {}
-
-        collection.getCollectionIdOnElement(element)
-
-        expect(Object.keys(collection.data).length).to.be.equal(1)
-        expect(collection.data[collection.id]).to.be.eql({
-          [CallChecker.MANIPULATION]: {},
-          [CallChecker.EVENT]: {}
-        })
-      })
-
-      it('should return element new CollectionId given element has no CollectionId before', () => {
-        const element = {}
-
-        const result = collection.getCollectionIdOnElement(element)
-
-        expect(result).to.be.equal(1)
-      })
-
-      it('should return element CollectionId given element already has CollectionId', () => {
-        const element = {
-          CollectionId: 3
-        }
-        const result = collection.getCollectionIdOnElement(element)
-
-        expect(result).to.be.equal(3)
-      })
-    })
-
     describe('addCodeToCollectionData tests', () => {
-      let element, data
+      let data, groupStub
 
       beforeEach(() => {
-        element = {}
+        groupStub = {}
         data = {
+          id: 1,
           type: CallChecker.EVENT,
           key: 'script.js:2:10',
           code: 'code'
         }
-        data.id = collection.getCollectionIdOnElement(element)
-
         sandbox.stub(collection, 'getCollectionGroup')
-          .returns({})
+          .returns(groupStub)
       })
 
       it('should call getCollectionGroup with id and type', () => {
@@ -217,11 +236,6 @@ describe('Collection tests', () => {
       })
 
       it('should set {key: code} to group get from getCollectionGroup given key not exists in it', () => {
-        const groupStub = collection.data[1][CallChecker.EVENT]
-
-        collection.getCollectionGroup
-          .returns(groupStub)
-
         collection.addCodeToCollectionData(data)
 
         expect(Object.keys(groupStub).length).to.be.equal(1)
@@ -229,12 +243,7 @@ describe('Collection tests', () => {
       })
 
       it('should not set {key: code} to group get from getCollectionGroup given key exists in it', () => {
-        const groupStub = collection.data[1][CallChecker.EVENT]
-
         groupStub[data.key] = 'other code'
-
-        collection.getCollectionGroup
-          .returns(groupStub)
 
         collection.addCodeToCollectionData(data)
 
@@ -244,11 +253,15 @@ describe('Collection tests', () => {
     })
 
     describe('getCollectionGroup tests', () => {
-      let id, element
+      const id = 1
 
       beforeEach(() => {
-        element = {}
-        id = collection.getCollectionIdOnElement(element)
+        collection.data = {
+          '1': {
+            [CallChecker.MANIPULATION]: {},
+            [CallChecker.EVENT]: {}
+          }
+        }
       })
 
       it('should return group from collection data by given id and type', () => {
