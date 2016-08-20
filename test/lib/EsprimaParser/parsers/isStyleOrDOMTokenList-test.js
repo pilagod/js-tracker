@@ -1,45 +1,36 @@
 describe('isStyleOrDOMTokenList tests', () => {
-  const executedData = 'executedData'
+  const object = 'object'
   const contextStub = {}
 
   beforeEach(() => {
-    sandbox.stub(esprimaParser, 'closureStack', {
-      getContext: sandbox.stub().returns(contextStub)
-    })
     sandbox.stub(esprimaParser, 'isStyle')
     sandbox.stub(esprimaParser, 'isDOMTokenList')
   })
 
-  it('should call getContext of closureStack', () => {
-    esprimaParser.isStyleOrDOMTokenList(executedData)
-
-    expect(esprimaParser.closureStack.getContext.called).to.be.true
-  })
-
-  it('should call isStyle with context and executedData', () => {
-    esprimaParser.isStyleOrDOMTokenList(executedData)
+  it('should call isStyle with object', () => {
+    esprimaParser.isStyleOrDOMTokenList(object)
 
     expect(
       esprimaParser.isStyle
-        .calledWithExactly(contextStub, executedData)
+        .calledWithExactly(object)
     ).to.be.true
   })
 
-  it('should call isDOMTokenList with context and executedData given isStyle returns false', () => {
+  it('should call isDOMTokenList with object given isStyle returns false', () => {
     esprimaParser.isStyle.returns(false)
 
-    esprimaParser.isStyleOrDOMTokenList(executedData)
+    esprimaParser.isStyleOrDOMTokenList(object)
 
     expect(
       esprimaParser.isDOMTokenList
-        .calledWithExactly(contextStub, executedData)
+        .calledWithExactly(object)
     ).to.be.true
   })
 
   it('should not call isDOMTokenList given isStyle returns true', () => {
     esprimaParser.isStyle.returns(true)
 
-    esprimaParser.isStyleOrDOMTokenList(executedData)
+    esprimaParser.isStyleOrDOMTokenList(object)
 
     expect(esprimaParser.isDOMTokenList.called).to.be.false
   })
@@ -47,7 +38,7 @@ describe('isStyleOrDOMTokenList tests', () => {
   it('should return true given isStyle returns true', () => {
     esprimaParser.isStyle.returns(true)
 
-    const result = esprimaParser.isStyleOrDOMTokenList(executedData)
+    const result = esprimaParser.isStyleOrDOMTokenList(object)
 
     expect(result).to.be.true
   })
@@ -56,7 +47,7 @@ describe('isStyleOrDOMTokenList tests', () => {
     esprimaParser.isStyle.returns(false)
     esprimaParser.isDOMTokenList.returns(true)
 
-    const result = esprimaParser.isStyleOrDOMTokenList(executedData)
+    const result = esprimaParser.isStyleOrDOMTokenList(object)
 
     expect(result).to.be.true
   })
@@ -65,7 +56,7 @@ describe('isStyleOrDOMTokenList tests', () => {
     esprimaParser.isStyle.returns(false)
     esprimaParser.isDOMTokenList.returns(false)
 
-    const result = esprimaParser.isStyleOrDOMTokenList(executedData)
+    const result = esprimaParser.isStyleOrDOMTokenList(object)
 
     expect(result).to.be.false
   })

@@ -1,21 +1,25 @@
 describe('hasNoParent tests', () => {
-  it('should return false given non-object executedData', () => {
-    const executedData = 1
-    const result = esprimaParser.hasNoParent(executedData)
+  it('should return false given non-object object', () => {
+    const object = 1
+    const result = esprimaParser.hasNoParent(object)
 
     expect(result).to.be.false
   })
 
-  it('should call hasOwnProperty of executedData with \'parent\' and return', () => {
-    const executedData = {
-      hasOwnProperty: sandbox.stub().returns('resultFromHasOwnProperty')
-    }
-    const result = esprimaParser.hasNoParent(executedData)
+  it('should return true given object object has no parent property', () => {
+    const object = {}
 
-    expect(
-      executedData.hasOwnProperty
-        .calledWithExactly('parent')
-    ).to.be.true
-    expect(result).to.be.equal('resultFromHasOwnProperty')
+    const result = esprimaParser.hasNoParent(object)
+
+    expect(result).to.be.true
+  })
+
+  it('should return false given object object has parent property', () => {
+    const object = {
+      parent: 'parent'
+    }
+    const result = esprimaParser.hasNoParent(object)
+
+    expect(result).to.be.false
   })
 })

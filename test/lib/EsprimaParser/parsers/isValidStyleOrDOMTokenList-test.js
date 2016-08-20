@@ -1,28 +1,28 @@
 describe('isValidStyleOrDOMTokenList tests', () => {
-  const executedData = 'executedData'
+  const object = 'object'
 
   beforeEach(() => {
     sandbox.stub(esprimaParser, 'hasNoParent')
     sandbox.stub(esprimaParser, 'isStyleOrDOMTokenList')
   })
 
-  it('should call hasNoParent with executedData', () => {
-    esprimaParser.isValidStyleOrDOMTokenList(executedData)
+  it('should call hasNoParent with object', () => {
+    esprimaParser.isValidStyleOrDOMTokenList(object)
 
     expect(
       esprimaParser.hasNoParent
-        .calledWithExactly(executedData)
+        .calledWithExactly(object)
     ).to.be.true
   })
 
-  it('should call isStyleOrDOMTokenList with executedData given hasNoParent returns true', () => {
+  it('should call isStyleOrDOMTokenList with object given hasNoParent returns true', () => {
     esprimaParser.hasNoParent.returns(true)
 
-    esprimaParser.isValidStyleOrDOMTokenList(executedData)
+    esprimaParser.isValidStyleOrDOMTokenList(object)
 
     expect(
       esprimaParser.isStyleOrDOMTokenList
-        .calledWithExactly(executedData)
+        .calledWithExactly(object)
     ).to.be.true
   })
 
@@ -30,7 +30,7 @@ describe('isValidStyleOrDOMTokenList tests', () => {
     esprimaParser.hasNoParent.returns(true)
     esprimaParser.isStyleOrDOMTokenList.returns(true)
 
-    const result = esprimaParser.isValidStyleOrDOMTokenList(executedData)
+    const result = esprimaParser.isValidStyleOrDOMTokenList(object)
 
     expect(result).to.be.true
   })
@@ -39,7 +39,7 @@ describe('isValidStyleOrDOMTokenList tests', () => {
     esprimaParser.hasNoParent.returns(false)
     esprimaParser.isStyleOrDOMTokenList.returns(true)
 
-    const result = esprimaParser.isValidStyleOrDOMTokenList(executedData)
+    const result = esprimaParser.isValidStyleOrDOMTokenList(object)
 
     expect(result).to.be.false
   })
@@ -48,7 +48,7 @@ describe('isValidStyleOrDOMTokenList tests', () => {
     esprimaParser.hasNoParent.returns(true)
     esprimaParser.isStyleOrDOMTokenList.returns(false)
 
-    const result = esprimaParser.isValidStyleOrDOMTokenList(executedData)
+    const result = esprimaParser.isValidStyleOrDOMTokenList(object)
 
     expect(result).to.be.false
   })

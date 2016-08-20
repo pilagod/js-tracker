@@ -7,12 +7,6 @@ describe('ClosureStack tests', () => {
   })
 
   describe('constructor tests', () => {
-    it('should set property context to given context', () => {
-      const closureStack = new ClosureStack(global)
-
-      expect(closureStack.context).to.be.equal(global)
-    })
-
     it('should init property stack as an array containing only one closure init with context', () => {
       const closureStack = new ClosureStack(global)
       const closure = new Closure(global)
@@ -28,14 +22,6 @@ describe('ClosureStack tests', () => {
 
     beforeEach(() => {
       closureStack = new ClosureStack(global)
-    })
-
-    describe('getContext tests', () => {
-      it('should return context', () => {
-        const result = closureStack.getContext()
-
-        expect(result).to.be.equal(global)
-      })
     })
 
     describe('get tests', () => {
@@ -231,15 +217,6 @@ describe('ClosureStack tests', () => {
         expect(newClosureStack).to.be.instanceof(closureStack.constructor)
       })
 
-      it('should call setContext with calling closureStack context', () => {
-        const newClosureStack = closureStack.getClone()
-
-        expect(
-          newClosureStack.setContext
-            .calledWithExactly(closureStack.context)
-        ).to.be.true
-      })
-
       it('should call setStack with calling closureStack stack', () => {
         const newClosureStack = closureStack.getClone()
 
@@ -247,16 +224,6 @@ describe('ClosureStack tests', () => {
           newClosureStack.setStack
             .calledWithExactly(closureStack.stack)
         ).to.be.true
-      })
-    })
-
-    describe('setContext tests', () => {
-      it('should set context to given context', () => {
-        const context = {}
-
-        closureStack.setContext(context)
-
-        expect(closureStack.context).to.be.equal(context)
       })
     })
 

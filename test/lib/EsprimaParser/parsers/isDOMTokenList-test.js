@@ -4,18 +4,22 @@ describe('isDOMTokenList test', () => {
     DOMTokenList: DOMTokenListStub
   }
 
-  it('should return true given executedData is instance of DOMTokenList', () => {
-    const executedData = new DOMTokenListStub()
+  beforeEach(() => {
+    sandbox.stub(esprimaParser, 'context', contextStub)
+  })
 
-    const result = esprimaParser.isDOMTokenList(contextStub, executedData)
+  it('should return true given object is instance of DOMTokenList', () => {
+    const object = new DOMTokenListStub()
+
+    const result = esprimaParser.isDOMTokenList(object)
 
     expect(result).to.be.true
   })
 
-  it('should return true given executedData is instance of DOMTokenList', () => {
-    const executedData = new (class {})
+  it('should return true given object is instance of DOMTokenList', () => {
+    const object = new (class {})
 
-    const result = esprimaParser.isDOMTokenList(contextStub, executedData)
+    const result = esprimaParser.isDOMTokenList(object)
 
     expect(result).to.be.false
   })
