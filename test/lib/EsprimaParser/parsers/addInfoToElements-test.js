@@ -1,5 +1,5 @@
-describe('addInfoToElement tests', () => {
-  const element = 'element'
+describe('addInfoToElements tests', () => {
+  const elements = 'elements'
   const info = {
     code: 'code',
     loc: 'loc'
@@ -10,33 +10,33 @@ describe('addInfoToElement tests', () => {
     CallChecker = require('../../../../lib/EsprimaParser/structures/CallChecker')
   })
 
-  it('should call addEvent of collection with element and info given status type CallChecker.EVENT', () => {
+  it('should call addEvent of collection with elements and info given status type CallChecker.EVENT', () => {
     const status = {
       type: CallChecker.EVENT
     }
     sandbox.stub(esprimaParser, 'collection', {
       addEvent: sandbox.spy()
     })
-    esprimaParser.addInfoToElement(element, info, status)
+    esprimaParser.addInfoToElements(elements, info, status)
 
     expect(
       esprimaParser.collection.addEvent
-        .calledWithExactly(element, info)
+        .calledWithExactly(elements, info)
     ).to.be.true
   })
 
-  it('should call addManipulation of collection with element and info given status type CallChecker.MANIPULATION', () => {
+  it('should call addManipulation of collection with elements and info given status type CallChecker.MANIPULATION', () => {
     const status = {
       type: CallChecker.MANIPULATION
     }
     sandbox.stub(esprimaParser, 'collection', {
       addManipulation: sandbox.spy()
     })
-    esprimaParser.addInfoToElement(element, info, status)
+    esprimaParser.addInfoToElements(elements, info, status)
 
     expect(
       esprimaParser.collection.addManipulation
-        .calledWithExactly(element, info)
+        .calledWithExactly(elements, info)
     ).to.be.true
   })
 })

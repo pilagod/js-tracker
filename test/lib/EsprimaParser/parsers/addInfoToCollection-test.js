@@ -5,30 +5,29 @@ describe('addInfoToCollection tests', () => {
   }
   const callee = 'callee'
   const expression = 'expression'
-  const status = {
-    type: 'STATE'
-  }
+  const status = {type: 'STATE'}
+
   beforeEach(() => {
-    sandbox.stub(esprimaParser, 'getAffectedElement')
-      .returns('resultFromGetAffectedElement')
-    sandbox.stub(esprimaParser, 'addInfoToElement')
+    sandbox.stub(esprimaParser, 'getAffectedElements')
+      .returns('resultFromGetAffectedElements')
+    sandbox.stub(esprimaParser, 'addInfoToElements')
   })
 
-  it('should call getAffectedElement with callee, expression and status', () => {
+  it('should call getAffectedElements with callee, expression and status', () => {
     esprimaParser.addInfoToCollection(callee, expression, info, status)
 
     expect(
-      esprimaParser.getAffectedElement
+      esprimaParser.getAffectedElements
         .calledWithExactly(callee, expression, status)
     ).to.be.true
   })
 
-  it('should call addInfoToElement with info, result from getAffectedElement and status', () => {
+  it('should call addInfoToElements with info, result from getAffectedElements and status', () => {
     esprimaParser.addInfoToCollection(callee, expression, info, status)
 
     expect(
-      esprimaParser.addInfoToElement
-        .calledWithExactly('resultFromGetAffectedElement', info, status)
+      esprimaParser.addInfoToElements
+        .calledWithExactly('resultFromGetAffectedElements', info, status)
     ).to.be.true
   })
 })
