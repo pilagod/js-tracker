@@ -1,4 +1,5 @@
-const importTestsFrom = require('./helpers/importTestsFrom')
+const importAllFrom = require('import-all-from')
+
 const registerHelpers = require('./helpers/registerHelpers')
 const unregisterHelpers = require('./helpers/unregisterHelpers')
 
@@ -25,12 +26,12 @@ describe('EsprimaParser tests', () => {
       unregisterHelpers(esprimaParserHelpers)
     })
 
-    importTestsFrom(PARSERS_PATH)
+    importAllFrom(PARSERS_PATH)
   })
 
-  describe.only('structures tests', () => {
+  describe('structures tests', () => {
     const STRUCTURES_PATH = './test/lib/EsprimaParser/structures/'
 
-    importTestsFrom(STRUCTURES_PATH)
+    importAllFrom(STRUCTURES_PATH)
   })
 })

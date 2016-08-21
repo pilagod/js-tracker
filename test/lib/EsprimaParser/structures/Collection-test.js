@@ -264,7 +264,7 @@ describe('Collection tests', () => {
         }
       })
 
-      it('should return group from collection data by given id and type', () => {
+      it('should return the group from collection data indexed by given id and type', () => {
         const type = CallChecker.EVENT
 
         const result = collection.getCollectionGroup(id, type)
@@ -272,7 +272,7 @@ describe('Collection tests', () => {
         expect(result).to.be.equal(collection.data[id][type])
       })
 
-      it('should return group from collection data by given id and type', () => {
+      it('should return the group from collection data indexed by given id and type', () => {
         const type = CallChecker.MANIPULATION
 
         const result = collection.getCollectionGroup(id, type)
