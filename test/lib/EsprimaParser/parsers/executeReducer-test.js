@@ -1,13 +1,13 @@
 describe('executeReducer tests', () => {
   const pre = 'pre'
-  const method = 'method'
+  const callee = 'callee'
 
   beforeEach(() => {
-    sandbox.stub(esprimaParser, 'Method', function () {})
+    sandbox.stub(esprimaParser, 'CalleeAgent', function () {})
   })
 
-  it('should call executeCall with pre and cur given cur is instance of Method and return', () => {
-    const cur = new (esprimaParser.Method)(method)
+  it('should call executeCall with pre and cur given cur is instance of CalleeAgent and return', () => {
+    const cur = new (esprimaParser.CalleeAgent)(callee)
 
     sandbox.stub(esprimaParser, 'executeCall')
       .returns('resultFromExecuteCall')
@@ -21,7 +21,7 @@ describe('executeReducer tests', () => {
     expect(result).to.be.equal('resultFromExecuteCall')
   })
 
-  it('should call executeMember with pre and cur given cur is not instance of Method and return', () => {
+  it('should call executeMember with pre and cur given cur is not instance of CalleeAgent and return', () => {
     const cur = 'cur'
 
     sandbox.stub(esprimaParser, 'executeMember')

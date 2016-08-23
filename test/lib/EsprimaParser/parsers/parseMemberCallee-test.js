@@ -12,8 +12,8 @@ describe('parseMemberCallee', () => {
       .returns('resultFromGetObjectAsExpressionArray')
     sandbox.stub(esprimaParser, 'getPropertyKeyAsString')
       .returns('resultFromGetPropertyKeyAsString')
-    sandbox.stub(esprimaParser, 'getMethodInstance')
-      .returns('resultFromGetMethodInstance')
+    sandbox.stub(esprimaParser, 'getCalleeAgent')
+      .returns('resultFromGetCalleeAgent')
   })
 
   it('should call getObjectAsExpressionArray with object property of calleeExpression', () => {
@@ -41,7 +41,7 @@ describe('parseMemberCallee', () => {
     esprimaParser.parseMemberCallee(calleeExpression)
 
     expect(
-      esprimaParser.getMethodInstance
+      esprimaParser.getCalleeAgent
         .calledWithExactly('resultFromGetPropertyKeyAsString')
     ).to.be.true
   })
@@ -50,6 +50,6 @@ describe('parseMemberCallee', () => {
     const {caller, callee} = esprimaParser.parseMemberCallee(calleeExpression)
 
     expect(caller).to.be.equal('resultFromGetObjectAsExpressionArray')
-    expect(callee).to.be.equal('resultFromGetMethodInstance')
+    expect(callee).to.be.equal('resultFromGetCalleeAgent')
   })
 })

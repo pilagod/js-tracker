@@ -5,8 +5,8 @@ describe('parseOtherCallee tests', () => {
     calleeExpression = createAstNode('Expression')
 
     sandbox.stub(esprimaParser, 'parseNode', createParseNodeStub())
-    sandbox.stub(esprimaParser, 'getMethodInstance')
-      .returns('resultFromGetMethodInstance')
+    sandbox.stub(esprimaParser, 'getCalleeAgent')
+      .returns('resultFromGetCalleeAgent')
   })
 
   it('should call parseNode with calleeExpression', () => {
@@ -22,7 +22,7 @@ describe('parseOtherCallee tests', () => {
     esprimaParser.parseOtherCallee(calleeExpression)
 
     expect(
-      esprimaParser.getMethodInstance
+      esprimaParser.getCalleeAgent
         .calledWithExactly('parsedExpression')
     ).to.be.true
   })
@@ -32,6 +32,6 @@ describe('parseOtherCallee tests', () => {
       esprimaParser.parseOtherCallee(calleeExpression)
 
     expect(caller).to.be.undefined
-    expect(callee).to.be.equal('resultFromGetMethodInstance')
+    expect(callee).to.be.equal('resultFromGetCalleeAgent')
   })
 })
