@@ -1,7 +1,7 @@
 describe('addInfoToCollection tests', () => {
   const info = {}
+  const caller = 'caller'
   const callee = 'callee'
-  const expression = 'expression'
   const status = {}
 
   beforeEach(() => {
@@ -10,17 +10,17 @@ describe('addInfoToCollection tests', () => {
     sandbox.stub(esprimaParser, 'addInfoToElements')
   })
 
-  it('should call getAffectedElements with callee, expression and status', () => {
-    esprimaParser.addInfoToCollection(callee, expression, info, status)
+  it('should call getAffectedElements with caller, callee, and status', () => {
+    esprimaParser.addInfoToCollection(caller, callee, info, status)
 
     expect(
       esprimaParser.getAffectedElements
-        .calledWithExactly(callee, expression, status)
+        .calledWithExactly(caller, callee, status)
     ).to.be.true
   })
 
-  it('should call addInfoToElements with info, result from getAffectedElements and status', () => {
-    esprimaParser.addInfoToCollection(callee, expression, info, status)
+  it('should call addInfoToElements with result from getAffectedElements, info and status', () => {
+    esprimaParser.addInfoToCollection(caller, callee, info, status)
 
     expect(
       esprimaParser.addInfoToElements

@@ -8,8 +8,8 @@ describe('EsprimaParser tests', () => {
     expect(true).to.be.true
   })
 
-  describe('parsers tests', () => {
-    const PARSERS_PATH = './test/lib/EsprimaParser/parsers/'
+  describe.only('parsers tests', () => {
+    const PARSERS_PATH = __dirname + '/lib/EsprimaParser/parsers'
     const EsprimaParser = require('../lib/EsprimaParser')
     const esprimaParserHelpers = require('./lib/EsprimaParser/helpers')
 
@@ -30,7 +30,7 @@ describe('EsprimaParser tests', () => {
   })
 
   describe('structures tests', () => {
-    const STRUCTURES_PATH = './test/lib/EsprimaParser/structures/'
+    const STRUCTURES_PATH = __dirname + '/lib/EsprimaParser/structures'
 
     importAllFrom(STRUCTURES_PATH)
   })

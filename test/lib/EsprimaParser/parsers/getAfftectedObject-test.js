@@ -1,8 +1,8 @@
 describe('getAfftectedObject tests', () => {
-  const callee = {
+  const caller = {
     parent: 'parent'
   }
-  const expression = {
+  const callee = {
     arguments: ['arg1', 'arg2', 'arg3']
   }
 
@@ -14,39 +14,39 @@ describe('getAfftectedObject tests', () => {
     const status = {
       passive: 1
     }
-    const result = esprimaParser.getAfftectedObject(callee, expression, status)
+    const result = esprimaParser.getAfftectedObject(caller, callee, status)
 
-    expect(result).to.be.equal(expression.arguments[status.passive])
+    expect(result).to.be.equal(callee.arguments[status.passive])
   })
 
-  it('should call isStyleOrDOMTokenList with callee given status has no passive property', () => {
+  it('should call isStyleOrDOMTokenList with caller given status has no passive property', () => {
     const status = {}
 
-    esprimaParser.getAfftectedObject(callee, expression, status)
+    esprimaParser.getAfftectedObject(caller, callee, status)
 
     expect(
       esprimaParser.isStyleOrDOMTokenList
-        .calledWithExactly(callee)
+        .calledWithExactly(caller)
     ).to.be.true
   })
 
-  it('should return parent of callee given isStyleOrDOMTokenList returns true', () => {
+  it('should return parent of caller given isStyleOrDOMTokenList returns true', () => {
     const status = {}
 
     esprimaParser.isStyleOrDOMTokenList.returns(true)
 
-    const result = esprimaParser.getAfftectedObject(callee, expression, status)
+    const result = esprimaParser.getAfftectedObject(caller, callee, status)
 
-    expect(result).to.be.equal(callee.parent)
+    expect(result).to.be.equal(caller.parent)
   })
 
-  it('should return callee given isStyleOrDOMTokenList returns false', () => {
+  it('should return caller given isStyleOrDOMTokenList returns false', () => {
     const status = {}
 
     esprimaParser.isStyleOrDOMTokenList.returns(false)
 
-    const result = esprimaParser.getAfftectedObject(callee, expression, status)
+    const result = esprimaParser.getAfftectedObject(caller, callee, status)
 
-    expect(result).to.be.equal(callee)
+    expect(result).to.be.equal(caller)
   })
 })

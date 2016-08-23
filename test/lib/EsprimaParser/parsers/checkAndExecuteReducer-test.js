@@ -1,7 +1,7 @@
 describe('checkAndExecuteReducer tests', () => {
   const info = {}
+  const caller = 'caller'
   const callee = 'callee'
-  const expression = 'expression'
   const statusStub = {}
 
   beforeEach(() => {
@@ -9,43 +9,43 @@ describe('checkAndExecuteReducer tests', () => {
       dispatch: sandbox.stub().returns(statusStub)
     })
     sandbox.stub(esprimaParser, 'addInfoToCollection')
-    sandbox.stub(esprimaParser, 'getNextCallee')
-      .returns('resultFromGetNextCallee')
+    sandbox.stub(esprimaParser, 'getNextCaller')
+      .returns('resultFromGetNextCaller')
   })
 
-  it('should call dispatch of callChecker with callee and expression', () => {
-    esprimaParser.checkAndExecuteReducer(info, callee, expression)
+  it('should call dispatch of callChecker with caller and callee', () => {
+    esprimaParser.checkAndExecuteReducer(info, caller, callee)
 
     expect(
       esprimaParser.callChecker.dispatch
-        .calledWithExactly(callee, expression)
+        .calledWithExactly(caller, callee)
     ).to.be.true
   })
 
-  it('should call addInfoToCollection with callee, expression status and info given non-undefined status', () => {
-    esprimaParser.checkAndExecuteReducer(info, callee, expression)
+  it('should call addInfoToCollection with caller, callee, info and status given non-undefined status', () => {
+    esprimaParser.checkAndExecuteReducer(info, caller, callee)
 
     expect(
       esprimaParser.addInfoToCollection
-        .calledWithExactly(callee, expression, info, statusStub)
+        .calledWithExactly(caller, callee, info, statusStub)
     ).to.be.true
   })
 
   it('should not call addInfoToCollection given undefined status', () => {
     esprimaParser.callChecker.dispatch.returns(undefined)
 
-    esprimaParser.checkAndExecuteReducer(info, callee, expression)
+    esprimaParser.checkAndExecuteReducer(info, caller, callee)
 
     expect(esprimaParser.addInfoToCollection.called).to.be.false
   })
 
-  it('should call getNextCallee with callee, expression and status then return', () => {
-    const result = esprimaParser.checkAndExecuteReducer(info, callee, expression)
+  it('should call getNextCallee with caller, callee and status then return', () => {
+    const result = esprimaParser.checkAndExecuteReducer(info, caller, callee)
 
     expect(
-      esprimaParser.getNextCallee
-        .calledWithExactly(callee, expression, statusStub)
+      esprimaParser.getNextCaller
+        .calledWithExactly(caller, callee, statusStub)
     ).to.be.true
-    expect(result).to.be.equal('resultFromGetNextCallee')
+    expect(result).to.be.equal('resultFromGetNextCaller')
   })
 })

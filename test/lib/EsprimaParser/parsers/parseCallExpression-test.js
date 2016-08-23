@@ -1,24 +1,22 @@
 describe('parseCallExpression tests', () => {
-  const callee = ['string', ['array']]
+  const caller = ['string', ['array']]
 
-  let callExpression, method
+  let callExpression, callee
 
   beforeEach(() => {
     callExpression = createAstNode('CallExpression', {
       callee: createAstNode('Expression'),
       arguments: [createAstNode('Expression')]
     })
-
-    method = {
+    callee = {
       addArguments: sandbox.spy()
     }
-
     sandbox.stub(esprimaParser, 'parseArguments')
       .returns('resultFromParseArguments')
     sandbox.stub(esprimaParser, 'parseCallee')
       .returns({
-        callee: callee,
-        method: method
+        caller: caller,
+        callee: callee
       })
   })
 
@@ -40,30 +38,30 @@ describe('parseCallExpression tests', () => {
     ).to.be.true
   })
 
-  it('should call addArguments of method got from parseCallee with parsedArguments', () => {
+  it('should call addArguments of callee got from parseCallee with parsedArguments', () => {
     esprimaParser.parseCallExpression(callExpression)
 
     expect(
-      method.addArguments
+      callee.addArguments
         .calledWithExactly('resultFromParseArguments')
     ).to.be.true
   })
 
-  it('should return an array containing destructed callee and method given valid callee', () => {
+  it('should return an array containing destructed caller and callee given valid caller', () => {
     const result = esprimaParser.parseCallExpression(callExpression)
 
-    expect(result).to.be.eql([...callee, method])
+    expect(result).to.be.eql([...caller, callee])
   })
 
-  it('should return an array containing only method given undefined callee', () => {
+  it('should return an array containing only callee given undefined caller', () => {
     esprimaParser.parseCallee
       .returns({
-        callee: undefined,
-        method: method
+        caller: undefined,
+        callee: callee
       })
 
     const result = esprimaParser.parseCallExpression(callExpression)
 
-    expect(result).to.be.eql([method])
+    expect(result).to.be.eql([callee])
   })
 })

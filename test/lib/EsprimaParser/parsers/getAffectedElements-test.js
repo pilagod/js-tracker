@@ -1,6 +1,6 @@
 describe('getAffectedElements tests', () => {
-  const callee = 'callee'
-  const expression = {
+  const caller = 'caller'
+  const callee = {
     arguments: ['arg1', 'arg2', 'arg3']
   }
   const status = {type: 'STATE'}
@@ -12,17 +12,17 @@ describe('getAffectedElements tests', () => {
       .returns('resultFromGetElementsFromAffectedObject')
   })
 
-  it('should call getAfftectedObject with callee, expression and status', () => {
-    esprimaParser.getAffectedElements(callee, expression, status)
+  it('should call getAfftectedObject with caller, callee and status', () => {
+    esprimaParser.getAffectedElements(caller, callee, status)
 
     expect(
       esprimaParser.getAfftectedObject
-        .calledWithExactly(callee, expression, status)
+        .calledWithExactly(caller, callee, status)
     ).to.be.true
   })
 
   it('should call getElementsFromAffectedObject with result from getAfftectedObject and return', () => {
-    const result = esprimaParser.getAffectedElements(callee, expression, status)
+    const result = esprimaParser.getAffectedElements(caller, callee, status)
 
     expect(
       esprimaParser.getElementsFromAffectedObject

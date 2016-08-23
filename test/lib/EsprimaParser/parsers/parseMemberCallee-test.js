@@ -47,9 +47,9 @@ describe('parseMemberCallee', () => {
   })
 
   it('should return callee from getObjectAsExpressionArray and method from getMethodInstance', () => {
-    const {callee, method} = esprimaParser.parseMemberCallee(calleeExpression)
+    const {caller, callee} = esprimaParser.parseMemberCallee(calleeExpression)
 
-    expect(callee).to.be.equal('resultFromGetObjectAsExpressionArray')
-    expect(method).to.be.equal('resultFromGetMethodInstance')
+    expect(caller).to.be.equal('resultFromGetObjectAsExpressionArray')
+    expect(callee).to.be.equal('resultFromGetMethodInstance')
   })
 })

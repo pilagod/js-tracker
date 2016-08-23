@@ -28,10 +28,10 @@ describe('parseOtherCallee tests', () => {
   })
 
   it('should return undefined callee and method from result of getMethodInstance', () => {
-    const {callee, method} =
+    const {caller, callee} =
       esprimaParser.parseOtherCallee(calleeExpression)
 
-    expect(callee).to.be.undefined
-    expect(method).to.be.equal('resultFromGetMethodInstance')
+    expect(caller).to.be.undefined
+    expect(callee).to.be.equal('resultFromGetMethodInstance')
   })
 })
