@@ -2,9 +2,12 @@ describe('checkAndExecuteReducer tests', () => {
   const info = {}
   const caller = 'caller'
   const callee = 'callee'
+  // stub results
+  const contextStub = 'contextStub'
   const statusStub = {}
 
   beforeEach(() => {
+    sandbox.stub(esprimaParser, 'context', contextStub)
     sandbox.stub(esprimaParser, 'callChecker', {
       dispatch: sandbox.stub().returns(statusStub)
     })
@@ -13,12 +16,16 @@ describe('checkAndExecuteReducer tests', () => {
       .returns('resultFromGetNextCaller')
   })
 
-  it('should call dispatch of callChecker with caller and callee', () => {
+  it('should call dispatch of callChecker with an object containing context, caller and callee', () => {
     esprimaParser.checkAndExecuteReducer(info, caller, callee)
 
     expect(
       esprimaParser.callChecker.dispatch
-        .calledWithExactly(caller, callee)
+        .calledWithExactly({
+          caller,
+          callee,
+          context: esprimaParser.context
+        })
     ).to.be.true
   })
 

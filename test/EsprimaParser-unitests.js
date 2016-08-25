@@ -1,5 +1,4 @@
 const importAllFrom = require('import-all-from')
-
 const registerHelpers = require('./helpers/registerHelpers')
 const unregisterHelpers = require('./helpers/unregisterHelpers')
 

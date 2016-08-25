@@ -1,16 +1,16 @@
 describe('addInfoToElements tests', () => {
   const elements = 'elements'
   const info = {}
-  
-  let CallChecker
+
+  let Collection
 
   before(() => {
-    CallChecker = require('../../../../lib/EsprimaParser/structures/CallChecker')
+    Collection = require('../../../../lib/EsprimaParser/structures/Collection')
   })
 
   it('should call addEvent of collection with elements and info given status type CallChecker.EVENT', () => {
     const status = {
-      type: CallChecker.EVENT
+      type: Collection.EVENT
     }
     sandbox.stub(esprimaParser, 'collection', {
       addEvent: sandbox.spy()
@@ -25,7 +25,7 @@ describe('addInfoToElements tests', () => {
 
   it('should call addManipulation of collection with elements and info given status type CallChecker.MANIPULATION', () => {
     const status = {
-      type: CallChecker.MANIPULATION
+      type: Collection.MANIPULATION
     }
     sandbox.stub(esprimaParser, 'collection', {
       addManipulation: sandbox.spy()

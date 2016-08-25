@@ -7,9 +7,12 @@ describe('AssignmentOperators tests', () => {
     info: {}
   }
   const value = 'value'
+  // stub results
+  const contextStub = 'contextStub'
   const statusStub = {}
-  
+
   beforeEach(() => {
+    sandbox.stub(esprimaParser, 'context', contextStub)
     sandbox.stub(esprimaParser, 'callChecker', {
       dispatch: sandbox.stub().returns(statusStub)
     })
@@ -17,12 +20,16 @@ describe('AssignmentOperators tests', () => {
     sandbox.stub(esprimaParser, 'handleAssignOperation')
   })
 
-  it('should call dispatch of callChecker with object and property', () => {
+  it('should call dispatch of callChecker with an object containing context, caller (object) and callee (property)', () => {
     esprimaParser.assignmentOperators['='](target, value)
 
     expect(
       esprimaParser.callChecker.dispatch
-        .calledWithExactly(target.object, target.property)
+        .calledWithExactly({
+          caller: target.object,
+          callee: target.property,
+          context: esprimaParser.context
+        })
     ).to.be.true
   })
 

@@ -1,9 +1,8 @@
 describe('Collection tests', () => {
-  let Collection, CallChecker
+  let Collection
 
   before(() => {
     Collection = require('../../../../lib/EsprimaParser/structures/Collection')
-    CallChecker = require('../../../../lib/EsprimaParser/structures/CallChecker')
   })
 
   describe('constructor tests', () => {
@@ -17,6 +16,24 @@ describe('Collection tests', () => {
       const collection = new Collection()
 
       expect(collection.data).to.be.eql({})
+    })
+  })
+
+  describe('static tests', () => {
+    describe('getter of EVENT', () => {
+      const EVENT = 'EVENT'
+
+      it('should return string \'EVENT\'', () => {
+        expect(Collection.EVENT).to.be.equal(EVENT)
+      })
+    })
+
+    describe('getter of MANIPULATION', () => {
+      const MANIPULATION = 'MANIPULATION'
+
+      it('should return string \'MANIPULATION\'', () => {
+        expect(Collection.MANIPULATION).to.be.equal(MANIPULATION)
+      })
     })
   })
 
@@ -35,12 +52,12 @@ describe('Collection tests', () => {
         sandbox.stub(collection, 'addFromElements')
       })
 
-      it('should call addFromElements with given elements, info and type CallChecker.EVENT', () => {
+      it('should call addFromElements with given elements, info and type Collection.EVENT', () => {
         collection.addEvent(elements, info)
 
         expect(
           collection.addFromElements
-            .calledWithExactly(elements, info, CallChecker.EVENT)
+            .calledWithExactly(elements, info, Collection.EVENT)
         ).to.be.true
       })
     })
@@ -53,12 +70,12 @@ describe('Collection tests', () => {
         sandbox.stub(collection, 'addFromElements')
       })
 
-      it('should call addFromElements with given elements, info and type CallChecker.MANIPULATION', () => {
+      it('should call addFromElements with given elements, info and type Collection.MANIPULATION', () => {
         collection.addManipulation(elements, info)
 
         expect(
           collection.addFromElements
-            .calledWithExactly(elements, info, CallChecker.MANIPULATION)
+            .calledWithExactly(elements, info, Collection.MANIPULATION)
         ).to.be.true
       })
     })
@@ -177,8 +194,8 @@ describe('Collection tests', () => {
       it('should add and init a new collection with new id as key', () => {
         const expectedCollection = {
           '1': {
-            [CallChecker.MANIPULATION]: {},
-            [CallChecker.EVENT]: {}
+            [Collection.MANIPULATION]: {},
+            [Collection.EVENT]: {}
           }
         }
         collection.createElementCollection()
@@ -218,7 +235,7 @@ describe('Collection tests', () => {
         groupStub = {}
         data = {
           id: 1,
-          type: CallChecker.EVENT,
+          type: Collection.EVENT,
           key: 'script.js:2:10',
           code: 'code'
         }
@@ -258,14 +275,14 @@ describe('Collection tests', () => {
       beforeEach(() => {
         collection.data = {
           '1': {
-            [CallChecker.MANIPULATION]: {},
-            [CallChecker.EVENT]: {}
+            [Collection.MANIPULATION]: {},
+            [Collection.EVENT]: {}
           }
         }
       })
 
       it('should return the group from collection data indexed by given id and type', () => {
-        const type = CallChecker.EVENT
+        const type = Collection.EVENT
 
         const result = collection.getCollectionGroup(id, type)
 
@@ -273,7 +290,7 @@ describe('Collection tests', () => {
       })
 
       it('should return the group from collection data indexed by given id and type', () => {
-        const type = CallChecker.MANIPULATION
+        const type = Collection.MANIPULATION
 
         const result = collection.getCollectionGroup(id, type)
 
