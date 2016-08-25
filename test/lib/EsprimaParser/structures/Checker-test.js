@@ -1,21 +1,21 @@
 describe('Checker tests', () => {
   const importAllFrom = require('import-all-from')
   const libDir = '../../../../lib/EsprimaParser'
-  const checkerDir = `${__dirname}/${libDir}/checkers`
+  const checkersDir = `${__dirname}/${libDir}/checkers`
   const Checker = require(`${libDir}/structures/Checker`)
 
   describe('constructor tests', () => {
     const callback = function () {}
 
-    it('should set property check to given checkCallback', () => {
-      const checker = new Checker(callback, checkerDir)
+    it('should set property check to given callback', () => {
+      const checker = new Checker(callback, checkersDir)
 
       expect(checker.check).to.be.equal(callback)
     })
 
     it('should import all checkers under given dir path to checkers', () => {
-      const checker = new Checker(callback, checkerDir)
-      const checkers = importAllFrom(checkerDir)
+      const checker = new Checker(callback, checkersDir)
+      const checkers = importAllFrom(checkersDir)
 
       expect(checker.checkers).to.be.eql(checkers)
     })
@@ -24,8 +24,8 @@ describe('Checker tests', () => {
       const options = {
         dir: false
       }
-      const checker = new Checker(callback, checkerDir, options)
-      const checkers = importAllFrom(checkerDir, options)
+      const checker = new Checker(callback, checkersDir, options)
+      const checkers = importAllFrom(checkersDir, options)
 
       expect(checker.checkers).to.be.eql(checkers)
     })
@@ -38,7 +38,7 @@ describe('Checker tests', () => {
 
     beforeEach(() => {
       callback = sandbox.stub()
-      checker = new Checker(callback, checkerDir)
+      checker = new Checker(callback, checkersDir)
     })
 
     describe('dispatch tests', () => {

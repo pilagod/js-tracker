@@ -7,8 +7,8 @@ describe('createAddEventListenerFromPropEvent tests', () => {
   beforeEach(() => {
     addArgumentsSpy = sandbox.spy()
 
-    sandbox.stub(esprimaParser, 'CalleeAgent', function (callee) {
-      this.callee = callee
+    sandbox.stub(esprimaParser, 'Callee', function (method) {
+      this.method = method
       this.addArguments = addArgumentsSpy
     })
     sandbox.stub(esprimaParser, 'getEventFromPropEvent')
@@ -19,7 +19,7 @@ describe('createAddEventListenerFromPropEvent tests', () => {
     esprimaParser.createAddEventListenerFromPropEvent(propEvent, handler)
 
     expect(
-      esprimaParser.CalleeAgent
+      esprimaParser.Callee
         .calledWithExactly('addEventListener')
     ).to.be.true
   })
@@ -33,7 +33,7 @@ describe('createAddEventListenerFromPropEvent tests', () => {
     ).to.be.true
   })
 
-  it('should call addArguments of CalleeAgent with an array containing result from getEventFromPropEvent and handler', () => {
+  it('should call addArguments of Callee with an array containing result from getEventFromPropEvent and handler', () => {
     esprimaParser.createAddEventListenerFromPropEvent(propEvent, handler)
 
     expect(
@@ -42,10 +42,10 @@ describe('createAddEventListenerFromPropEvent tests', () => {
     ).to.be.true
   })
 
-  it('should return addEventListener CalleeAgent instance', () => {
+  it('should return addEventListener Callee instance', () => {
     const result = esprimaParser.createAddEventListenerFromPropEvent(propEvent, handler)
 
-    expect(result).to.be.instanceof(esprimaParser.CalleeAgent)
-    expect(result.callee).to.be.equal('addEventListener')
+    expect(result).to.be.instanceof(esprimaParser.Callee)
+    expect(result.method).to.be.equal('addEventListener')
   })
 })
