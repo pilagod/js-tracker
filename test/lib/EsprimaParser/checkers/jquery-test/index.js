@@ -1,13 +1,13 @@
-describe('jquery checker tests', () => {
+describe('jQuery checker tests', () => {
   const importAllFrom = require('import-all-from')
   const libDir = '../../../../../lib/EsprimaParser'
-  const jqueryChecker = require(`${libDir}/checkers/jquery`)
+  const jQueryChecker = require(`${libDir}/checkers/jQuery`)
 
   describe('checkers tests', () => {
-    it('should import all checkers in dir under /checkers/jquery to checkers', () => {
-      const checkers = importAllFrom(`${__dirname}/${libDir}/checkers/jquery`, {file: false})
+    it('should import all checkers in dir under /checkers/jQuery to checkers', () => {
+      const checkers = importAllFrom(`${__dirname}/${libDir}/checkers/jQuery`, {file: false})
 
-      expect(jqueryChecker.checkers).to.be.eql(checkers)
+      expect(jQueryChecker.checkers).to.be.eql(checkers)
     })
   })
 
@@ -16,7 +16,7 @@ describe('jquery checker tests', () => {
       const data = {
         context: {}
       }
-      const result = jqueryChecker.check(data)
+      const result = jQueryChecker.check(data)
 
       expect(result).to.be.false
     })
@@ -27,7 +27,7 @@ describe('jquery checker tests', () => {
         context: {jQuery},
         caller: new jQuery()
       }
-      const result = jqueryChecker.check(data)
+      const result = jQueryChecker.check(data)
 
       expect(result).to.be.true
     })
@@ -38,7 +38,7 @@ describe('jquery checker tests', () => {
         context: {jQuery},
         caller: {}
       }
-      const result = jqueryChecker.check(data)
+      const result = jQueryChecker.check(data)
 
       expect(result).to.be.false
     })
