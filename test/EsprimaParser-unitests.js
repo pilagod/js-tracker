@@ -29,13 +29,13 @@ describe('EsprimaParser tests', () => {
     importAllFrom(PARSERS_PATH)
   })
 
-  describe.only('structures tests', () => {
+  describe('structures tests', () => {
     const STRUCTURES_PATH = `${__dirname}/lib/EsprimaParser/structures`
 
     importAllFrom(STRUCTURES_PATH)
   })
 
-  describe.only('checkers tests', () => {
+  describe.skip('checkers tests', () => {
     const CHECKERS_PATH = `${__dirname}/lib/EsprimaParser/checkers`
 
     importAllFrom(CHECKERS_PATH)

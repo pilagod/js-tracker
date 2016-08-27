@@ -12,8 +12,9 @@ describe('HTMLElement checker tests', () => {
   })
 
   describe('check callback tests', () => {
+    const HTMLElement = function () {}
+
     it('should return true given data.caller is instanceof data.context.HTMLElement', () => {
-      const HTMLElement = function () {}
       const data = {
         context: {HTMLElement},
         caller: new HTMLElement()
@@ -24,7 +25,6 @@ describe('HTMLElement checker tests', () => {
     })
 
     it('should return false given data.caller is not instanceof data.context.HTMLElement', () => {
-      const HTMLElement = function () {}
       const data = {
         context: {HTMLElement},
         caller: {}
