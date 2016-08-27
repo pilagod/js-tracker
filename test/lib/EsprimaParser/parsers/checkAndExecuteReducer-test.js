@@ -8,7 +8,7 @@ describe('checkAndExecuteReducer tests', () => {
 
   beforeEach(() => {
     sandbox.stub(esprimaParser, 'context', contextStub)
-    sandbox.stub(esprimaParser, 'callChecker', {
+    sandbox.stub(esprimaParser, 'checkerDispatcher', {
       dispatch: sandbox.stub().returns(statusStub)
     })
     sandbox.stub(esprimaParser, 'addInfoToCollection')
@@ -16,11 +16,11 @@ describe('checkAndExecuteReducer tests', () => {
       .returns('resultFromGetNextCaller')
   })
 
-  it('should call dispatch of callChecker with an object containing context, caller and callee', () => {
+  it('should call dispatch of checkerDispatcher with an object containing context, caller and callee', () => {
     esprimaParser.checkAndExecuteReducer(info, caller, callee)
 
     expect(
-      esprimaParser.callChecker.dispatch
+      esprimaParser.checkerDispatcher.dispatch
         .calledWithExactly({
           caller,
           callee,
@@ -39,7 +39,7 @@ describe('checkAndExecuteReducer tests', () => {
   })
 
   it('should not call addInfoToCollection given undefined status', () => {
-    esprimaParser.callChecker.dispatch.returns(undefined)
+    esprimaParser.checkerDispatcher.dispatch.returns(undefined)
 
     esprimaParser.checkAndExecuteReducer(info, caller, callee)
 
