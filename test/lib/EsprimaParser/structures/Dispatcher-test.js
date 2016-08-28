@@ -1,5 +1,6 @@
+const importAllFrom = require('import-all-from')
+
 describe('Dispatcher tests', () => {
-  const importAllFrom = require('import-all-from')
   let Dispatcher, info
 
   before(() => {

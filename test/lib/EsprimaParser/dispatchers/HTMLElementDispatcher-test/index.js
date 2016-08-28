@@ -1,12 +1,15 @@
+const importAllFrom = require('import-all-from')
+
 describe('HTMLElementDispatcher tests', () => {
-  let HTMLElementDispatcher
+  let HTMLElementDispatcher, workDir
 
   before(() => {
-    HTMLElementDispatcher = require(`${libDir}/dispatchers/HTMLElementDispatcher`)
+    workDir = `../${global.libDir}/dispatchers/HTMLElementDispatcher`
+    HTMLElementDispatcher = require(`${workDir}`)
   })
 
   it('should import all other handlers in /HTMLElementDispatcher', () => {
-    const path = `${__dirname}/${libDir}/dispatchers/HTMLElementDispatcher`
+    const path = `${__dirname}/${workDir}`
     const handlers = importAllFrom(path, {file: false})
 
     expect(HTMLElementDispatcher.handlers).to.be.eql(handlers)
@@ -41,5 +44,9 @@ describe('HTMLElementDispatcher tests', () => {
     const result = HTMLElementDispatcher.test(data)
 
     expect(result).to.be.true
+  })
+
+  importAllFrom(__dirname, {
+    regexp: /^((?!index.js).)*$/
   })
 })
