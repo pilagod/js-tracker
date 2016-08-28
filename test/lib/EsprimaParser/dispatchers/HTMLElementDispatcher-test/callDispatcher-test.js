@@ -2,7 +2,7 @@ describe('callDispatcher tests', () => {
   let callDispatcher, workDir
 
   before(() => {
-    workDir = `../${global.libDir}/dispatchers/HTMLElementDispatcher/callDispatcher`
+    workDir = `../${libDir}/dispatchers/HTMLElementDispatcher/callDispatcher`
     callDispatcher = require(`${workDir}`)
   })
 
