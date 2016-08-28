@@ -2,11 +2,10 @@ describe('FlowState tests', () => {
   const RETURN = 'RETURN'
   const BREAK = 'BREAK'
   const CONTINUE = 'CONTINUE'
-
   let FlowState
 
   before(() => {
-    FlowState = require('../../../../lib/EsprimaParser/structures/FlowState')
+    FlowState = require(`${libDir}/structures/FlowState`)
   })
 
   describe('constructor tests', () => {

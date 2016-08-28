@@ -8,11 +8,7 @@ describe('FunctionAgent tests', () => {
   let FunctionAgent
 
   before(() => {
-    FunctionAgent = require('../../../../lib/EsprimaParser/structures/FunctionAgent')
-  })
-
-  it('should pass this canary test', () => {
-    expect(true).to.be.true
+    FunctionAgent = require(`${libDir}/structures/FunctionAgent`)
   })
 
   describe('constructor tests', () => {

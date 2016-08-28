@@ -2,7 +2,7 @@ describe('Closure tests', () => {
   let Closure
 
   before(() => {
-    Closure = require('../../../../lib/EsprimaParser/structures/Closure')
+    Closure = require(`${libDir}/structures/Closure`)
   })
 
   describe('constructor tests', () => {

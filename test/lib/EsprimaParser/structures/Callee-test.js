@@ -1,14 +1,9 @@
 describe('Callee tests', () => {
   const method = 'method'
-
   let Callee
 
   before(() => {
-    Callee = require('../../../../lib/EsprimaParser/structures/Callee')
-  })
-
-  it('should pass this canary test', () => {
-    expect(true).to.be.true
+    Callee = require(`${libDir}/structures/Callee`)
   })
 
   describe('constructor tests', () => {

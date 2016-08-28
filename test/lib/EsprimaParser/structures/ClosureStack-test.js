@@ -2,8 +2,8 @@ describe('ClosureStack tests', () => {
   let Closure, ClosureStack
 
   beforeEach(() => {
-    Closure = require('../../../../lib/EsprimaParser/structures/Closure')
-    ClosureStack = require('../../../../lib/EsprimaParser/structures/ClosureStack')
+    Closure = require(`${libDir}/structures/Closure`)
+    ClosureStack = require(`${libDir}/structures/ClosureStack`)
   })
 
   describe('constructor tests', () => {

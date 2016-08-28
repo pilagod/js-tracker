@@ -2,7 +2,7 @@ describe('Collection tests', () => {
   let Collection
 
   before(() => {
-    Collection = require('../../../../lib/EsprimaParser/structures/Collection')
+    Collection = require(`${libDir}/structures/Collection`)
   })
 
   describe('constructor tests', () => {

@@ -1,13 +1,16 @@
 describe('Dispatcher tests', () => {
   const importAllFrom = require('import-all-from')
+  let Dispatcher, info
 
-  const libDir = '../../../../lib/EsprimaParser'
-  const Dispatcher = require(`${libDir}/structures/Dispatcher`)
+  before(() => {
+    Dispatcher = require(`${libDir}/structures/Dispatcher`)
 
-  const info = {
-    path: `${__dirname}/${libDir}/dispatchers`,
-    options: {}
-  }
+    info = {
+      path: `${__dirname}/${libDir}/dispatchers`,
+      options: {}
+    }
+  })
+
   describe('constructor tests', () => {
     it('should import all modules from given info object (first argument) to property handlers', () => {
       const handlers = importAllFrom(info.path, info.options)
@@ -36,7 +39,11 @@ describe('Dispatcher tests', () => {
 
   describe('methods tests', () => {
     const data = {}
-    const dispatcher = new Dispatcher(info)
+    let dispatcher
+
+    before(() => {
+      dispatcher = new Dispatcher(info)
+    })
 
     describe('dispatch tests', () => {
       it('should call dispatchToHandlers with given data and return given test called with data returns true', () => {
@@ -127,7 +134,7 @@ describe('Dispatcher tests', () => {
       it('should call handler with data and return given handler has no dispatch property', () => {
         const handler = sandbox.stub()
           .withArgs(data).returns('resultFromHandler')
-          
+
         const result = dispatcher.invoke(handler, data)
 
         expect(
