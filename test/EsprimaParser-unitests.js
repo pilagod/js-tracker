@@ -43,8 +43,16 @@ describe('EsprimaParser tests', () => {
     importAllFrom(STRUCTURES_PATH)
   })
 
-  describe('dispatchers tests', () => {
+  describe.only('dispatchers tests', () => {
     const DISPATCHERS_PATH = `${__dirname}/lib/EsprimaParser/dispatchers`
+
+    before(() => {
+      global.importAllFrom = require('import-all-from')
+    })
+
+    after(() => {
+      delete global.importAllFrom
+    })
 
     importAllFrom(DISPATCHERS_PATH)
   })
