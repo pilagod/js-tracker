@@ -1,11 +1,14 @@
 describe('parseLoopBody tests', () => {
   const body = 'body'
+  // stub results
+  const result = 'resultFromParseNode'
+  const state = 'resultFromResetLoopState'
 
   beforeEach(() => {
     sandbox.stub(esprimaParser, 'parseNode')
-      .returns('resultFromParseNode')
+      .returns(result)
     sandbox.stub(esprimaParser, 'resetLoopState')
-      .returns('resultFromResetLoopState')
+      .returns(state)
   })
 
   it('should call parseNode with body', () => {
@@ -26,12 +29,9 @@ describe('parseLoopBody tests', () => {
     ).to.be.true
   })
 
-  it('should return an array containing result from parseNode and resetLoopState', () => {
-    const result = esprimaParser.parseLoopBody(body)
+  it('should return an object containing result from parseNode and resetLoopState', () => {
+    const object = esprimaParser.parseLoopBody(body)
 
-    expect(result).to.be.eql([
-      'resultFromParseNode',
-      'resultFromResetLoopState'
-    ])
+    expect(object).to.be.eql({result, state})
   })
 })

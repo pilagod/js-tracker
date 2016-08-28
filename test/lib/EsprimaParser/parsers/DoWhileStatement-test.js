@@ -2,6 +2,7 @@
 
 describe('DoWhileStatement tests', () => {
   const resultStub = 'resultFromParseLoopBody'
+  const parseLoopBodyStub = {}
 
   let doWhileStatement, FlowState
 
@@ -16,7 +17,7 @@ describe('DoWhileStatement tests', () => {
     })
 
     sandbox.stub(esprimaParser, 'parseLoopBody')
-      .returns([resultStub])
+      .returns(parseLoopBodyStub)
     sandbox.stub(esprimaParser, 'WhileStatement')
       .returns('resultFromWhileStatement')
   })
@@ -30,25 +31,19 @@ describe('DoWhileStatement tests', () => {
     ).to.be.true
   })
 
-  it('should not call WhileStatement given parseLoopBody return state FlowState.BREAK', () => {
+  it('should not call WhileStatement given parseLoopBody return state FlowState.BREAK and return result from parseLoopBody', () => {
     esprimaParser.parseLoopBody
-      .returns([resultStub, FlowState.BREAK])
-
-    esprimaParser.DoWhileStatement(doWhileStatement)
-
-    expect(esprimaParser.WhileStatement.called).to.be.false
-  })
-
-  it('should return result from parseLoopBody given parseLoopBody return state FlowState.BREAK', () => {
-    esprimaParser.parseLoopBody
-      .returns([resultStub, FlowState.BREAK])
-
+      .returns({
+        result: resultStub,
+        state: FlowState.BREAK
+      })
     const result = esprimaParser.DoWhileStatement(doWhileStatement)
 
+    expect(esprimaParser.WhileStatement.called).to.be.false
     expect(result).to.be.equal(resultStub)
   })
 
-  it('should return result from WhileStatement given parseLoopBody return state not FlowState.BREAK', () => {
+  it('should return result from WhileStatement given state from parseLoopBody is not FlowState.BREAK', () => {
     const result = esprimaParser.DoWhileStatement(doWhileStatement)
 
     expect(result).to.be.equal('resultFromWhileStatement')

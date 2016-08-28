@@ -2,7 +2,8 @@
 
 describe('ForInStatement', () => {
   const resultStub = 'resultFromParseLoopBody'
-  const leftStub = 'name of left'
+  const parseLoopBodyStub = {}
+  const leftStub = 'leftStub'
   const rightStub = {
     'a': 1,
     'b': 2,
@@ -27,7 +28,7 @@ describe('ForInStatement', () => {
       .returns(rightStub)
     sandbox.stub(esprimaParser, 'updateVariables')
     sandbox.stub(esprimaParser, 'parseLoopBody')
-      .returns([resultStub])
+      .returns(parseLoopBodyStub)
   })
 
   it('should call getIteratorName with left', () => {
@@ -76,17 +77,24 @@ describe('ForInStatement', () => {
     ).to.be.true
   })
 
-  it('should break loop given parseLoopBody return state FlowState.BREAK', () => {
+  it('should break loop given parseLoopBody return state FlowState.BREAK and return result from parseLoopBody', () => {
     esprimaParser.parseLoopBody
-      .onCall(1).returns([resultStub, FlowState.BREAK])
-
-    esprimaParser.ForInStatement(forInStatement)
+      .onCall(1).returns({
+        result: resultStub,
+        state: FlowState.BREAK
+      })
+    const result = esprimaParser.ForInStatement(forInStatement)
 
     expect(esprimaParser.updateVariables.calledTwice).to.be.true
     expect(esprimaParser.parseLoopBody.calledTwice).to.be.true
+    expect(result).to.be.equal(resultStub)
   })
 
-  it('should return parsed body result', () => {
+  it('should return last parseLoopBody result given no FlowState.BREAK signal', () => {
+    esprimaParser.parseLoopBody
+      .onCall(2).returns({
+        result: resultStub
+      })
     const result = esprimaParser.ForInStatement(forInStatement)
 
     expect(result).to.be.equal(resultStub)

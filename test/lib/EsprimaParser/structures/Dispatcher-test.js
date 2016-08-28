@@ -39,19 +39,19 @@ describe('Dispatcher tests', () => {
     const dispatcher = new Dispatcher(info)
 
     describe('dispatch tests', () => {
-      it('should call dispatchDataToHandlers with given data and return given test called with data returns true', () => {
+      it('should call dispatchToHandlers with given data and return given test called with data returns true', () => {
         sandbox.stub(dispatcher, 'test')
           .withArgs(data).returns(true)
-        sandbox.stub(dispatcher, 'dispatchDataToHandlers')
-          .withArgs(data).returns('resultFromDispatchDataToHandlers')
+        sandbox.stub(dispatcher, 'dispatchToHandlers')
+          .withArgs(data).returns('resultFromDispatchToHandlers')
 
         const result = dispatcher.dispatch(data)
 
         expect(
-          dispatcher.dispatchDataToHandlers
+          dispatcher.dispatchToHandlers
             .calledWithExactly(data)
         ).to.be.true
-        expect(result).to.be.equal('resultFromDispatchDataToHandlers')
+        expect(result).to.be.equal('resultFromDispatchToHandlers')
       })
 
       it('should return undefined given test called with data returns false', () => {
@@ -64,56 +64,77 @@ describe('Dispatcher tests', () => {
       })
     })
 
-    describe('dispatchDataToHandlers tests', () => {
-      let handler
-
-      const getHandlersWithResults = (results) => {
-        for (const [index, result] of results.entries()) {
-          handler.dispatch.onCall(index).returns(result)
+    describe('dispatchToHandlers tests', () => {
+      const handlers = [() => 1, () => 2, () => 3]
+      const setInvokeResults = (values) => {
+        for (const [index, value] of values.entries()) {
+          dispatcher.invoke.onCall(index).returns(value)
         }
-        return new Array(results.length).fill(handler)
       }
       beforeEach(() => {
-        handler = {
-          dispatch: sandbox.stub()
-        }
+        sandbox.stub(dispatcher, 'handlers', handlers)
+        sandbox.stub(dispatcher, 'invoke')
       })
 
-      it('should call dispatch of each handler in handlers with data and return undefined, given no handlers returns valid result', () => {
-        const handlerResults = [undefined, undefined, undefined]
-        const handlers = getHandlersWithResults(handlerResults)
+      it('should call invoke with each handler and data then return undefined given all results from invoke are undefined', () => {
+        setInvokeResults([undefined, undefined, undefined])
 
-        sandbox.stub(dispatcher, 'handlers', handlers)
+        const result = dispatcher.dispatch(data)
 
-        const result = dispatcher.dispatchDataToHandlers(data)
-
-        for (const index of handlerResults.keys()) {
+        for (const index of [0, 1, 2]) {
           expect(
-            handler.dispatch.getCall(index)
-              .calledWithExactly(data)
+            dispatcher.invoke.getCall(index)
+              .calledWithExactly(handlers[index], data)
           ).to.be.true
         }
-        expect(handler.dispatch.calledThrice).to.be.true
+        expect(dispatcher.invoke.calledThrice).to.be.true
         expect(result).to.be.undefined
       })
 
-      it('should call dispatch of handlers until first one returning valid result and return that result', () => {
-        const handlerValidResult = {}
-        const handlerResults = [undefined, handlerValidResult, undefined]
-        const handlers = getHandlersWithResults(handlerResults)
+      it('should call invoke until getting first valid result and return it', () => {
+        const status = {type: 'TYPE'}
 
-        sandbox.stub(dispatcher, 'handlers', handlers)
+        setInvokeResults([undefined, status, undefined])
 
-        const result = dispatcher.dispatchDataToHandlers(data)
+        const result = dispatcher.dispatch(data)
 
         for (const index of [0, 1]) {
           expect(
-            handler.dispatch.getCall(index)
-              .calledWithExactly(data)
+            dispatcher.invoke.getCall(index)
+              .calledWithExactly(handlers[index], data)
           ).to.be.true
         }
-        expect(handler.dispatch.calledTwice).to.be.true
-        expect(result).to.be.equal(handlerValidResult)
+        expect(dispatcher.invoke.calledTwice).to.be.true
+        expect(result).to.be.equal(status)
+      })
+    })
+
+    describe('invoke tests',() => {
+      it('should call dispatch of handler with data and return given handler has dispatch property', () => {
+        const handler = {
+          dispatch: sandbox.stub()
+            .withArgs(data).returns('resultFromDispatch')
+        }
+        const result = dispatcher.invoke(handler, data)
+
+        expect(
+          handler.dispatch
+            .calledWithExactly(data)
+        ).to.be.true
+        expect(result).to.be.equal('resultFromDispatch')
+      })
+
+      it('should call handler with data and return given handler has no dispatch property', () => {
+        const handler = sandbox.stub()
+          .withArgs(data).returns('resultFromHandler')
+          
+        const result = dispatcher.invoke(handler, data)
+
+        expect(
+          handler
+            .calledWithExactly(data)
+        ).to.be.true
+        expect(result).to.be.equal('resultFromHandler')
       })
     })
   })
