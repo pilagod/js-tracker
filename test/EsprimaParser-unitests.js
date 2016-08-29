@@ -17,9 +17,9 @@ describe('EsprimaParser tests', () => {
   })
 
   describe('parsers tests', () => {
-    const PARSERS_PATH = `${__dirname}/lib/EsprimaParser/parsers`
+    const PARSERS_PATH = `${__dirname}/lib/EsprimaParser-unitests/parsers`
     const EsprimaParser = require('../lib/EsprimaParser')
-    const esprimaParserHelpers = require('./lib/EsprimaParser/helpers')
+    const esprimaParserHelpers = require('./lib/EsprimaParser-unitests/helpers')
 
     before(() => {
       registerHelpers(esprimaParserHelpers)
@@ -38,13 +38,13 @@ describe('EsprimaParser tests', () => {
   })
 
   describe('structures tests', () => {
-    const STRUCTURES_PATH = `${__dirname}/lib/EsprimaParser/structures`
+    const STRUCTURES_PATH = `${__dirname}/lib/EsprimaParser-unitests/structures`
 
     importAllFrom(STRUCTURES_PATH)
   })
 
   describe.only('dispatchers tests', () => {
-    const DISPATCHERS_PATH = `${__dirname}/lib/EsprimaParser/dispatchers`
+    const DISPATCHERS_PATH = `${__dirname}/lib/EsprimaParser-unitests/dispatchers`
 
     before(() => {
       global.importAllFrom = importAllFrom
