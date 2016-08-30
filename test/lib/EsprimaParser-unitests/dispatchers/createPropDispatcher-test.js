@@ -1,5 +1,5 @@
 describe('createPropDispatcher tests', () => {
-  let Dispatcher, createPropDispatcher, info, callDispatcher
+  let Dispatcher, createPropDispatcher, info, propDispatcher
 
   before(() => {
     Dispatcher = require(`${libDir}/structures/Dispatcher`)
