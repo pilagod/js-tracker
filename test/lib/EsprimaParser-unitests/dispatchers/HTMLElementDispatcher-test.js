@@ -4,7 +4,7 @@ describe('HTMLElementDispatcher tests', () => {
   let HTMLElementDispatcher, workDir
 
   before(() => {
-    workDir = `../${global.libDir}/dispatchers/HTMLElementDispatcher`
+    workDir = `${libDir}/dispatchers/HTMLElementDispatcher`
     HTMLElementDispatcher = require(`${workDir}`)
   })
 
@@ -44,9 +44,5 @@ describe('HTMLElementDispatcher tests', () => {
     const result = HTMLElementDispatcher.test(data)
 
     expect(result).to.be.true
-  })
-
-  importAllFrom(__dirname, {
-    regexp: /^((?!index.js).)*$/
   })
 })
