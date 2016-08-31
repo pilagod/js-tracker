@@ -4,6 +4,10 @@ const DISPATCHERS = [
     type: 'HTMLElement',
     call: {event: true, mani: true},
     prop: {event: true, mani: true}
+  },
+  {
+    type: 'DOMTokenList',
+    call: {mani: true}
   }
 ]
 

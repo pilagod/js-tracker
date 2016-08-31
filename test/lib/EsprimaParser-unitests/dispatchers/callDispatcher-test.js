@@ -3,7 +3,7 @@ const proxyquire = require('proxyquire')
 for (const DISPATCHER of global.DISPATCHERS) {
   if (DISPATCHER.call) {
     const type = DISPATCHER.type
-    
+
     describe(`${type} callDispatcher tests`, () => {
       let callDispatcher, createCallDispatcherStub, workDir
 
