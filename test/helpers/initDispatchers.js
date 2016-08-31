@@ -8,6 +8,10 @@ const DISPATCHERS = [
   {
     type: 'DOMTokenList',
     call: {mani: true}
+  },
+  {
+    type: 'Attr',
+    prop: {mani: true}
   }
 ]
 
