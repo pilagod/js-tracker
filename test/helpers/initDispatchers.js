@@ -2,16 +2,16 @@
 const DISPATCHERS = [
   {
     type: 'HTMLElement',
-    call: {event: true, mani: true},
-    prop: {event: true, mani: true}
+    Call: {event: true, mani: true},
+    Prop: {event: true, mani: true}
   },
   {
     type: 'DOMTokenList',
-    call: {mani: true}
+    Call: {mani: true}
   },
   {
     type: 'Attr',
-    prop: {mani: true}
+    Prop: {mani: true}
   }
 ]
 

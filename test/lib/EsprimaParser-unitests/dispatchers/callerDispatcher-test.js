@@ -11,9 +11,9 @@ for (const DISPATCHER of global.DISPATCHERS) {
       callerDispatcher = require(workDir)
     })
 
-    it(`should import all other handlers in /${type}Dispatcher`, () => {
+    it(`should import all other dispatchers in /${type}Dispatcher`, () => {
       const path = `${__dirname}/${workDir}`
-      const handlers = importAllFrom(path, {file: false})
+      const handlers = importAllFrom(path, {regexp: /Dispatcher.js$/})
 
       expect(callerDispatcher.handlers).to.be.eql(handlers)
     })
