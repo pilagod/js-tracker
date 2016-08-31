@@ -43,7 +43,7 @@ describe('EsprimaParser tests', () => {
     importAllFrom(STRUCTURES_PATH)
   })
 
-  describe('dispatchers', () => {
+  describe.skip('dispatchers', () => {
     const DISPATCHERS_PATH = `${__dirname}/lib/EsprimaParser-unitests/dispatchers`
 
     /* init dispatchers */
@@ -59,6 +59,12 @@ describe('EsprimaParser tests', () => {
     })
 
     importAllFrom(DISPATCHERS_PATH)
+  })
+
+  describe('checkers', () => {
+    const CHECKERS_PATH = `${__dirname}/lib/EsprimaParser-unitests/checkers`
+
+    importAllFrom(CHECKERS_PATH)
   })
 
   // describe('checkers', () => {
