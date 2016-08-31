@@ -9,9 +9,9 @@ for (const type of ['call', 'prop']) {
         checker = require(`../${libDir}/checkers/helpers/${type}${subType}Checker`)
       })
 
-      it(`should return status {type: Collection.${subType === 'Event' ? 'EVENT' : 'MANIPULATION'} concated with statusData when given callee.method is in given criteria`, () => {
+      it(`should return status {type: Collection.${subType === 'Event' ? 'EVENT' : 'MANIPULATION'} concated with statusData when callee.method is in criteria`, () => {
         const data = {
-          criteria: {method: true},
+          criteria: {[method]: true},
           callee: (type === 'call') ? new Callee(method) : method,
           statusData: {
             execute: 'execute',
@@ -27,9 +27,22 @@ for (const type of ['call', 'prop']) {
         })
       })
 
-      it('should return undefined when when given callee.method is not in given criteria', () => {
+      it('should return status with property type and existing property in statusData when callee.method is in criteria', () => {
         const data = {
-          criteria: {method: true},
+          criteria: {[method]: true},
+          callee: (type === 'call') ? new Callee(method) : method,
+          statusData: {execute: undefined}
+        }
+        const result = checker(data)
+
+        expect(result).to.have.property('type')
+        expect(result).to.have.property('execute')
+        expect(result).to.not.have.property('passive')
+      })
+
+      it('should return undefined when when callee.method is not in criteria', () => {
+        const data = {
+          criteria: {[method]: true},
           callee: (type === 'call') ? new Callee(otherMethod) : otherMethod
         }
         const result = checker(data)

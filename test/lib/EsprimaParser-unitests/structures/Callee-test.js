@@ -24,14 +24,14 @@ describe('Callee tests', () => {
 
     describe('addArguments tests', () => {
       it('should push each element in given array to property arguments', () => {
-        callee.setArguments([1, 2, 3])
+        callee.addArguments([1, 2, 3])
 
         expect(callee.arguments).to.be.eql([1, 2, 3])
       })
 
       it('should concat results from different calls', () => {
-        callee.setArguments([1, 2, 3])
-        callee.setArguments([4, 5, 6])
+        callee.addArguments([1, 2, 3])
+        callee.addArguments([4, 5, 6])
 
         expect(callee.arguments).to.be.eql([1, 2, 3, 4, 5, 6])
       })

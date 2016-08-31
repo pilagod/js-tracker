@@ -43,7 +43,7 @@ describe('EsprimaParser tests', () => {
     importAllFrom(STRUCTURES_PATH)
   })
 
-  describe.skip('dispatchers', () => {
+  describe('dispatchers', () => {
     const DISPATCHERS_PATH = `${__dirname}/lib/EsprimaParser-unitests/dispatchers`
 
     /* init dispatchers */
@@ -66,20 +66,4 @@ describe('EsprimaParser tests', () => {
 
     importAllFrom(CHECKERS_PATH)
   })
-
-  // describe('checkers', () => {
-  //   const CHECKERS_PATH = `${__dirname}/lib/EsprimaParser-unitests/checkers`
-  //
-  //   before(() => {
-  //     global.Callee = require('../lib/EsprimaParser/structures/Callee')
-  //     global.Collection = require('../lib/EsprimaParser/structures/Collection')
-  //   })
-  //
-  //   after(() => {
-  //     delete global.Callee
-  //     delete global.Collection
-  //   })
-  //
-  //   importAllFrom(CHECKERS_PATH)
-  // })
 })

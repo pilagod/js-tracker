@@ -9,8 +9,8 @@ for (const DISPATCHER of global.DISPATCHERS) {
         let workDir, checkerDir, createDispatcherStub, dispatcher
 
         before(() => {
-          workDir = `${libDir}/dispatchers/${callerType}Dispatcher/${calleeType}Dispatcher`
-          checkerDir = `${libDir}/checkers/${callerType}/${calleeType}`
+          workDir = `${libDir}/dispatchers/${callerType}Dispatcher/${calleeType.toLowerCase()}Dispatcher`
+          checkerDir = `${libDir}/checkers/${callerType}/${calleeType.toLowerCase()}`
         })
 
         beforeEach(() => {

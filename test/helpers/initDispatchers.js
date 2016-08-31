@@ -1,5 +1,6 @@
 /* dispatchers type declarations */
 const DISPATCHERS = [
+  /* Native */
   {
     type: 'HTMLElement',
     Call: {event: true, mani: true},
@@ -12,6 +13,12 @@ const DISPATCHERS = [
   {
     type: 'Attr',
     Prop: {mani: true}
+  },
+
+  /* jQuery */
+  {
+    type: 'jQuery',
+    Call: {}
   }
 ]
 
