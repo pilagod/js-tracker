@@ -9,7 +9,7 @@ for (const type of ['call', 'prop']) {
         checker = require(`../${libDir}/checkers/helpers/${type}${subType}Checker`)
       })
 
-      it(`should return status {type: Collection.${subType === 'Event' ? 'EVENT' : 'MANIPULATION'} concated with statusData when callee.method is in criteria`, () => {
+      it(`should return status type: ${subType === 'Event' ? 'EVENT' : 'MANIPULATION'} concated with statusData when callee.method is in criteria`, () => {
         const data = {
           criteria: {[method]: true},
           callee: (type === 'call') ? new Callee(method) : method,
@@ -27,7 +27,7 @@ for (const type of ['call', 'prop']) {
         })
       })
 
-      it('should return status with property type and existing property in statusData when callee.method is in criteria', () => {
+      it('should return status only with type and properties in statusData when callee.method is in criteria', () => {
         const data = {
           criteria: {[method]: true},
           callee: (type === 'call') ? new Callee(method) : method,

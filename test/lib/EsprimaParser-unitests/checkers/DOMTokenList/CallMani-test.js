@@ -1,6 +1,6 @@
 const proxyquire = require('proxyquire')
 
-describe('callManiChecker tests', () => {
+describe('callMani checker tests', () => {
   const criteria = {}
   const callee = 'callee'
   const statusData = {execute: undefined}

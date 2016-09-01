@@ -1,6 +1,6 @@
 const proxyquire = require('proxyquire')
 
-describe('propManiChecker tests', () => {
+describe('propMani checker tests', () => {
   const criteria = {}
   const callee = 'callee'
   let checkerStub, checker

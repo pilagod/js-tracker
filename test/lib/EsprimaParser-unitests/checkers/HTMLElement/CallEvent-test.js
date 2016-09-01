@@ -1,6 +1,6 @@
 const proxyquire = require('proxyquire')
 
-describe('callEventChecker tests', () => {
+describe('callEvent checker tests', () => {
   const criteria = {}
   const callee = 'callee'
   let checkerStub, checker
