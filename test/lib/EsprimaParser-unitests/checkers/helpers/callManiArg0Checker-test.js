@@ -8,35 +8,14 @@ describe('callManiArg0Checker tests', () => {
     callManiArg0Checker = require(`../${libDir}/checkers/helpers/callManiArg0Checker`)
   })
 
-  it('should return status type MANIPULATION concated statusData when callee.method is in criteria and callee.arguments.length === 0', () => {
+  it('should return valid status given callee.method is in criteria and callee.arguments.length === 0', () => {
     const data = {
       criteria: {[method]: true},
       callee: new Callee(method),
-      statusData: {
-        execute: 'execute',
-        passive: 'passive'
-      }
     }
     const result = callManiArg0Checker(data)
 
-    expect(result).to.be.eql({
-      type: Collection.EVENT,
-      execute: 'execute',
-      passive: 'passive'
-    })
-  })
-
-  it('should return status only with type and properties in statusData when callee.method is in criteria and callee.arguments.length === 0', () => {
-    const data = {
-      criteria: {[method]: true},
-      callee: new Callee(method),
-      statusData: {execute: undefined}
-    }
-    const result = callManiArg0Checker(data)
-
-    expect(result).to.have.property('type')
-    expect(result).to.have.property('execute')
-    expect(result).to.not.have.property('passive')
+    expect(result).to.be.eql({type: Collection.MANIPULATION})
   })
 
   it('should return undefined when callee.method is in criteria but callee.arguments.length > 0', () => {
@@ -49,6 +28,37 @@ describe('callManiArg0Checker tests', () => {
     const result = callManiArg0Checker(data)
 
     expect(result).to.be.undefined
+  })
+
+  it('should return status type MANIPULATION concated statusData when all criteria matched', () => {
+    const data = {
+      criteria: {[method]: true},
+      callee: new Callee(method),
+      statusData: {
+        execute: 'execute',
+        passive: 'passive'
+      }
+    }
+    const result = callManiArg0Checker(data)
+
+    expect(result).to.be.eql({
+      type: Collection.MANIPULATION,
+      execute: 'execute',
+      passive: 'passive'
+    })
+  })
+
+  it('should return status only with type and properties in statusData when all criteria matched', () => {
+    const data = {
+      criteria: {[method]: true},
+      callee: new Callee(method),
+      statusData: {execute: undefined}
+    }
+    const result = callManiArg0Checker(data)
+
+    expect(result).to.have.property('type')
+    expect(result).to.have.property('execute')
+    expect(result).to.not.have.property('passive')
   })
 
   it('should return undefined when callee.method is not in criteria', () => {

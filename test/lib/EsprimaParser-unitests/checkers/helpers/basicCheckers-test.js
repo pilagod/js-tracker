@@ -9,7 +9,19 @@ for (const type of ['call', 'prop']) {
         checker = require(`../${libDir}/checkers/helpers/${type}${subType}Checker`)
       })
 
-      it(`should return status type: ${subType === 'Event' ? 'EVENT' : 'MANIPULATION'} concated with statusData when callee.method is in criteria`, () => {
+      it('should return valid status given callee.method is in criteria', () => {
+        const data = {
+          criteria: {[method]: true},
+          callee: (type === 'call') ? new Callee(method) : method,
+        }
+        const result = checker(data)
+
+        expect(result).to.be.eql({
+          type: (subType === 'Event') ? Collection.EVENT : Collection.MANIPULATION
+        })
+      })
+
+      it(`should return status type: ${subType === 'Event' ? 'EVENT' : 'MANIPULATION'} concated with statusData when all criteria matched`, () => {
         const data = {
           criteria: {[method]: true},
           callee: (type === 'call') ? new Callee(method) : method,
@@ -27,7 +39,7 @@ for (const type of ['call', 'prop']) {
         })
       })
 
-      it('should return status only with type and properties in statusData when callee.method is in criteria', () => {
+      it('should return status only with type and properties in statusData when all criteria matched', () => {
         const data = {
           criteria: {[method]: true},
           callee: (type === 'call') ? new Callee(method) : method,
