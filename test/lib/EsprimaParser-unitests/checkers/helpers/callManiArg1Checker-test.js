@@ -1,36 +1,36 @@
-describe('callEventArg1Checker tests', () => {
+describe('callManiArg1Checker tests', () => {
   const method = 'method'
   const otherMethod = 'otherMethod'
   const argument = 'argument'
-  let callEventArg1Checker
+  let callManiArg1Checker
 
   before(() => {
-    callEventArg1Checker = require(`../${libDir}/checkers/helpers/callEventArg1Checker`)
+    callManiArg1Checker = require(`../${libDir}/checkers/helpers/callManiArg1Checker`)
   })
 
-  it('should return valid status given callee.method is in criteria and callee.arguments.length >= 1', () => {
+  it('should return valid status given callee.method is in criteria and callee.arguments.length === 1', () => {
     const data = {
       criteria: {[method]: true},
       callee: new Callee(method),
     }
     data.callee.addArguments([argument])
 
-    const result = callEventArg1Checker(data)
+    const result = callManiArg1Checker(data)
 
-    expect(result).to.be.eql({type: Collection.EVENT})
+    expect(result).to.be.eql({type: Collection.MANIPULATION})
   })
 
-  it('should return undefined when callee.method is in criteria but callee.arguments.length < 1', () => {
+  it('should return undefined when callee.method is in criteria but callee.arguments.length !== 1', () => {
     const data = {
       criteria: {[method]: true},
       callee: new Callee(method),
     }
-    const result = callEventArg1Checker(data)
+    const result = callManiArg1Checker(data)
 
     expect(result).to.be.undefined
   })
 
-  it('should return status type EVENT concated statusData when all criteria matched', () => {
+  it('should return status type MANIPULATION concated statusData when all criteria matched', () => {
     const data = {
       criteria: {[method]: true},
       callee: new Callee(method),
@@ -41,10 +41,10 @@ describe('callEventArg1Checker tests', () => {
     }
     data.callee.addArguments([argument])
 
-    const result = callEventArg1Checker(data)
+    const result = callManiArg1Checker(data)
 
     expect(result).to.be.eql({
-      type: Collection.EVENT,
+      type: Collection.MANIPULATION,
       execute: 'execute',
       passive: 'passive'
     })
@@ -58,7 +58,7 @@ describe('callEventArg1Checker tests', () => {
     }
     data.callee.addArguments([argument])
 
-    const result = callEventArg1Checker(data)
+    const result = callManiArg1Checker(data)
 
     expect(result).to.have.property('type')
     expect(result).to.have.property('execute')
@@ -70,7 +70,7 @@ describe('callEventArg1Checker tests', () => {
       criteria: {[method]: true},
       callee: new Callee(otherMethod),
     }
-    const result = callEventArg1Checker(data)
+    const result = callManiArg1Checker(data)
 
     expect(result).to.be.undefined
   })
