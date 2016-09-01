@@ -5,10 +5,10 @@ describe('parseExpressionInfo tests', () => {
     expression.loc = {}
 
     sandbox.stub(esprimaParser, 'scriptUrl', 'scriptUrl')
-    sandbox.stub(esprimaParser, 'escodegen')
-      .withArgs(expression)
-        .returns('resultFromEscodegen')
-
+    sandbox.stub(esprimaParser, 'escodegen', {
+      generate: sandbox.stub()
+        .withArgs(expression).returns('resultFromEscodegen')
+    })
     const result = esprimaParser.parseExpressionInfo(expression)
 
     expect(result).to.be.eql({
