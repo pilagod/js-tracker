@@ -31,7 +31,7 @@ describe('EsprimaParser tests', () => {
     importAllFrom(CONSTRUCTOR_PATH)
   })
 
-  describe('parsers', () => {
+  describe.only('parsers', () => {
     const PARSERS_PATH = `${__dirname}/lib/EsprimaParser-unitests/parsers`
     const EsprimaParser = require('../lib/EsprimaParser')
     const esprimaParserHelpers = require('./lib/EsprimaParser-unitests/helpers')
@@ -52,13 +52,13 @@ describe('EsprimaParser tests', () => {
     importAllFrom(PARSERS_PATH)
   })
 
-  describe.skip('structures', () => {
+  describe('structures', () => {
     const STRUCTURES_PATH = `${__dirname}/lib/EsprimaParser-unitests/structures`
 
     importAllFrom(STRUCTURES_PATH)
   })
 
-  describe.skip('dispatchers', () => {
+  describe('dispatchers', () => {
     const DISPATCHERS_PATH = `${__dirname}/lib/EsprimaParser-unitests/dispatchers`
 
     /* init dispatchers */
@@ -76,7 +76,7 @@ describe('EsprimaParser tests', () => {
     importAllFrom(DISPATCHERS_PATH)
   })
 
-  describe.skip('checkers', () => {
+  describe('checkers', () => {
     const CHECKERS_PATH = `${__dirname}/lib/EsprimaParser-unitests/checkers`
 
     importAllFrom(CHECKERS_PATH)
