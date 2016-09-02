@@ -1,3 +1,5 @@
+require('./helpers/init')
+
 const importAllFrom = require('import-all-from')
 
 const registerHelpers = require('./helpers/registerHelpers')
@@ -16,8 +18,8 @@ describe('EsprimaParser tests', () => {
     delete global.libDir
   })
 
-  describe.only('constructor', () => {
-    const CONSTRUCTOR_PATH = `${__dirname}/lib/EsprimaParser-unitests/constructor`
+  describe('constructor', () => {
+    const CONSTRUCTOR_PATH = `${__dirname}/lib/EsprimaParser-unit/constructor`
     const EsprimaParser = require('../lib/EsprimaParser')
 
     before(() => {
@@ -31,10 +33,10 @@ describe('EsprimaParser tests', () => {
     importAllFrom(CONSTRUCTOR_PATH)
   })
 
-  describe.only('parsers', () => {
-    const PARSERS_PATH = `${__dirname}/lib/EsprimaParser-unitests/parsers`
+  describe('parsers', () => {
+    const PARSERS_PATH = `${__dirname}/lib/EsprimaParser-unit/parsers`
     const EsprimaParser = require('../lib/EsprimaParser')
-    const esprimaParserHelpers = require('./lib/EsprimaParser-unitests/helpers')
+    const esprimaParserHelpers = require('./lib/EsprimaParser-unit/helpers')
 
     before(() => {
       registerHelpers(esprimaParserHelpers)
@@ -53,13 +55,13 @@ describe('EsprimaParser tests', () => {
   })
 
   describe('structures', () => {
-    const STRUCTURES_PATH = `${__dirname}/lib/EsprimaParser-unitests/structures`
+    const STRUCTURES_PATH = `${__dirname}/lib/EsprimaParser-unit/structures`
 
     importAllFrom(STRUCTURES_PATH)
   })
 
   describe('dispatchers', () => {
-    const DISPATCHERS_PATH = `${__dirname}/lib/EsprimaParser-unitests/dispatchers`
+    const DISPATCHERS_PATH = `${__dirname}/lib/EsprimaParser-unit/dispatchers`
 
     /* init dispatchers */
     require('./helpers/initDispatchers')(global)
@@ -77,7 +79,7 @@ describe('EsprimaParser tests', () => {
   })
 
   describe('checkers', () => {
-    const CHECKERS_PATH = `${__dirname}/lib/EsprimaParser-unitests/checkers`
+    const CHECKERS_PATH = `${__dirname}/lib/EsprimaParser-unit/checkers`
 
     importAllFrom(CHECKERS_PATH)
   })
