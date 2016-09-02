@@ -1,5 +1,3 @@
-const importAllFrom = require('import-all-from')
-
 for (const DISPATCHER of global.DISPATCHERS) {
   const type = DISPATCHER.type
 

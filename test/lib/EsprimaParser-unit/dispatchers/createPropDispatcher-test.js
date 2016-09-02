@@ -1,24 +1,19 @@
 describe('createPropDispatcher tests', () => {
-  let Dispatcher, createPropDispatcher, info, propDispatcher
+  const handlers = [() => 1, () => 2]
+  let createPropDispatcher, info, propDispatcher
 
   before(() => {
-    Dispatcher = require(`${libDir}/structures/Dispatcher`)
     createPropDispatcher = require(`${libDir}/dispatchers/createPropDispatcher`)
-
-    info = {
-      path: `${__dirname}/${libDir}/dispatchers`,
-      options: {dir: false}
-    }
-    propDispatcher = createPropDispatcher(info)
+    propDispatcher = createPropDispatcher(handlers)
   })
 
   it('should return a Dispatcher instance', () => {
+    const Dispatcher = require(`${libDir}/structures/Dispatcher`)
+
     expect(propDispatcher).to.be.instanceof(Dispatcher)
   })
 
-  it('should import all handlers to Dispatcher from given path and options', () => {
-    const handlers = importAllFrom(info.path, info.options)
-
+  it('should set propDispatcher handlers to given handlers', () => {
     expect(propDispatcher.handlers).to.be.eql(handlers)
   })
 

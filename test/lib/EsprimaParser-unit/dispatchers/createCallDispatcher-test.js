@@ -1,29 +1,24 @@
 describe('createCallDispatcher tests', () => {
-  let Callee, Dispatcher, createCallDispatcher, info, callDispatcher
+  const handlers = [() => 1, () => 2]
+  let createCallDispatcher, callDispatcher
 
   before(() => {
-    Callee = require(`${libDir}/structures/Callee`)
-    Dispatcher = require(`${libDir}/structures/Dispatcher`)
     createCallDispatcher = require(`${libDir}/dispatchers/createCallDispatcher`)
-
-    info = {
-      path: `${__dirname}/${libDir}/dispatchers`,
-      options: {dir: false}
-    }
-    callDispatcher = createCallDispatcher(info)
+    callDispatcher = createCallDispatcher(handlers)
   })
 
   it('should return a Dispatcher instance', () => {
+    const Dispatcher = require(`${libDir}/structures/Dispatcher`)
+
     expect(callDispatcher).to.be.instanceof(Dispatcher)
   })
 
-  it('should import all handlers to Dispatcher from given path and options', () => {
-    const handlers = importAllFrom(info.path, info.options)
-
-    expect(callDispatcher.handlers).to.be.eql(handlers)
+  it('should set callDispatcher handlers to given handlers', () => {
+    expect(callDispatcher.handlers).to.be.equal(handlers)
   })
 
   it('should return true when test called with data whose callee is instanceof Callee', () => {
+    const Callee = require(`${libDir}/structures/Callee`)
     const data = {
       callee: new Callee('method')
     }
