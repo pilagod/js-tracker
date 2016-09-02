@@ -26,7 +26,6 @@ describe('getPropertyKeyValue tests', () => {
         sandbox.stub(esprimaParser, 'parseNode')
           .returns('b')
       }
-
       const result = esprimaParser.getPropertyKeyValue(key, computed)
 
       expect(result).to.be.equal(computed ? 'b' : 'a')
@@ -39,7 +38,6 @@ describe('getPropertyKeyValue tests', () => {
         sandbox.stub(esprimaParser, 'parseNode')
           .returns('b')
       }
-
       const result = esprimaParser.getPropertyKeyValue(key, computed)
 
       expect(result).to.be.equal('b')

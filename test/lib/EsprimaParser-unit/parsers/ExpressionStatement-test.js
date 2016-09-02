@@ -7,7 +7,6 @@ describe('ExpressionStatement tests', () => {
     expressionStatement = createAstNode('ExpressionStatement', {
       expression: createAstNode('Expression')
     })
-
     sandbox.stub(esprimaParser, 'parseNode')
   })
 

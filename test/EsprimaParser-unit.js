@@ -18,7 +18,7 @@ describe('EsprimaParser tests', () => {
     delete global.libDir
   })
 
-  describe('constructor', () => {
+  describe.only('constructor', () => {
     const CONSTRUCTOR_PATH = `${__dirname}/lib/EsprimaParser-unit/constructor`
     const EsprimaParser = require('../lib/EsprimaParser')
 

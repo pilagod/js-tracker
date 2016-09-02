@@ -97,4 +97,18 @@ describe('constructor tests', () => {
     expect(ClosureStackSpy.calledWithExactly(context)).to.be.true
     expect(esprimaParser.closureStack).to.be.instanceof(ClosureStackSpy)
   })
+
+  it('should set executeReducer to itself bound with EsprimaParser', () => {
+    /* Replaces object.method with a func, wrapped in a spy */
+    sandbox.stub(EsprimaParser.prototype.executeReducer, 'bind', () => {
+      return 'resultFromBind'
+    })
+    const esprimaParser = new EsprimaParser(context)
+
+    expect(
+      EsprimaParser.prototype.executeReducer.bind
+        .calledWithExactly(esprimaParser)
+    ).to.be.true
+    expect(esprimaParser.executeReducer).to.be.equal('resultFromBind')
+  })
 })

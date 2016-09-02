@@ -9,7 +9,6 @@ describe('getNameFromVariableDeclaration tests', () => {
         })
       ]
     })
-
     sandbox.stub(esprimaParser, 'parseNode')
     sandbox.stub(esprimaParser, 'getNameFromPattern')
       .returns('resultFromGetNameFromPattern')

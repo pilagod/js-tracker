@@ -1,10 +1,5 @@
-const expect = require('chai').expect
-const sinon = require('sinon')
-
-before(() => {
-  global.expect = expect
-  global.sinon = sinon
-})
+global.expect = require('chai').expect
+global.sinon = require('sinon')
 
 beforeEach(() => {
   global.sandbox = sinon.sandbox.create()

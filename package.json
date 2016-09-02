@@ -6,7 +6,7 @@
   "scripts": {
     "test": "mocha",
     "test-unit": "node node_modules/istanbul/lib/cli.js cover node_modules/mocha/bin/_mocha test/EsprimaParser-unit.js",
-    "test-integration": "karma start --reporters dots,coverage",
+    "test-integration": "karma start --reporters mocha",
     "dev": "watchify lib/EsprimaParser/index-es6.js -o lib/EsprimaParser/index.js"
   },
   "repository": {
@@ -45,6 +45,7 @@
     "karma-cli": "^1.0.1",
     "karma-coverage": "^1.1.1",
     "karma-mocha": "^1.1.1",
+    "karma-mocha-reporter": "^2.1.0",
     "mocha": "^3.0.2",
     "proxyquire": "^1.7.10",
     "sinon": "^1.17.4",
