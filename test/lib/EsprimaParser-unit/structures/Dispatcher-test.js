@@ -1,40 +1,39 @@
-const importAllFrom = require('import-all-from')
-
 describe('Dispatcher tests', () => {
-  let Dispatcher, info
+  let Dispatcher
 
   before(() => {
     Dispatcher = require(`${libDir}/structures/Dispatcher`)
-
-    info = {
-      path: `${__dirname}/${libDir}/dispatchers`,
-      options: {}
-    }
   })
 
   describe('constructor tests', () => {
-    it('should import all modules from given info object (first argument) to property handlers', () => {
-      const handlers = importAllFrom(info.path, info.options)
-      const dispatcher = new Dispatcher(info)
+    it('should set handlers to first given argument', () => {
+      const handlers = [() => 1, () => 2]
+      const dispatcher = new Dispatcher(handlers)
 
-      expect(dispatcher.handlers).to.be.eql(handlers)
+      expect(dispatcher.handlers).to.be.equal(handlers)
     })
 
-    it('should set test to a function always returns true given no test function passed as second argument', () => {
-      const dispatcher = new Dispatcher(info)
+    it('should set handlers to empty array by default', () => {
+      const dispatcher = new Dispatcher()
 
-      expect(dispatcher.test).to.be.instanceof(Function)
+      expect(dispatcher.handlers).to.be.eql([])
+    })
+
+    it('should set test to the function of second given argument', () => {
+      const test = () => false
+      const dispatcher = new Dispatcher([], test)
+
+      expect(dispatcher.test).to.be.equal(test)
+    })
+
+    it('should set test to a function always returns true by default', () => {
+      const dispatcher = new Dispatcher()
+
+      expect(dispatcher.test).to.be.a('function')
 
       const result = dispatcher.test()
 
       expect(result).to.be.true
-    })
-
-    it('should set test to the function of given second argument', () => {
-      const test = () => false
-      const dispatcher = new Dispatcher(info, test)
-
-      expect(dispatcher.test).to.be.equal(test)
     })
   })
 
@@ -43,11 +42,11 @@ describe('Dispatcher tests', () => {
     let dispatcher
 
     before(() => {
-      dispatcher = new Dispatcher(info)
+      dispatcher = new Dispatcher()
     })
 
     describe('dispatch tests', () => {
-      it('should call dispatchToHandlers with given data and return given test called with data returns true', () => {
+      it('should call dispatchToHandlers with data and return when test called with data returns true', () => {
         sandbox.stub(dispatcher, 'test')
           .withArgs(data).returns(true)
         sandbox.stub(dispatcher, 'dispatchToHandlers')
@@ -62,7 +61,7 @@ describe('Dispatcher tests', () => {
         expect(result).to.be.equal('resultFromDispatchToHandlers')
       })
 
-      it('should return undefined given test called with data returns false', () => {
+      it('should return undefined when test called with data returns false', () => {
         sandbox.stub(dispatcher, 'test')
           .withArgs(data).returns(false)
 
