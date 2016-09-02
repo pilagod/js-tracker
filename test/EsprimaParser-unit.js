@@ -60,7 +60,7 @@ describe('EsprimaParser tests', () => {
     importAllFrom(STRUCTURES_PATH)
   })
 
-  describe.only('dispatchers', () => {
+  describe('dispatchers', () => {
     const DISPATCHERS_PATH = `${__dirname}/lib/EsprimaParser-unit/dispatchers`
 
     /* init dispatchers */
