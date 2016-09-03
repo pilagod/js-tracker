@@ -55,4 +55,25 @@ describe('choice', () => {
       expect(closureStack.get('c')).to.be.equal('case other')
     })
   })
+
+  describe('condition tests', () => {
+    it('should execute proper expression', () => {
+      const ast = esprima.parse(`
+        var test = function (num) {
+          return num === 1 ? num + 1 :
+            (num === 2 ? num + 2 : num - 1)
+        }
+        var a = test(1);
+        var b = test(a);
+        var c = test(b);
+        var d = test(c);
+      `)
+      esprimaParser.parseAst(ast)
+
+      expect(closureStack.get('a')).to.be.equal(2)
+      expect(closureStack.get('b')).to.be.equal(4)
+      expect(closureStack.get('c')).to.be.equal(3)
+      expect(closureStack.get('d')).to.be.equal(2)
+    })
+  })
 })
