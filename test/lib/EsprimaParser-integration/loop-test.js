@@ -72,10 +72,10 @@ describe('loop', () => {
   })
 
   /*************************/
-  /*        dowhile        */
+  /*        do while       */
   /*************************/
 
-  describe('dowhile tests', () => {
+  describe('do while tests', () => {
     it('should loop until test fails', () => {
       const ast = esprima.parse(`
         var a = 10;
