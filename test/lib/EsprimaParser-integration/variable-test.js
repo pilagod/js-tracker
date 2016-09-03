@@ -77,4 +77,15 @@ describe('variable tests', () => {
     expect(closureStack.get('a')(1)).to.be.equal(1)
     expect(closureStack.get('b')).to.be.equal(2)
   })
+
+  it('should set function declaration properly', () => {
+    const ast = esprima.parse(`
+      function test () {
+        return true
+      }
+    `)
+    esprimaParser.parseAst(ast)
+
+    expect(closureStack.get('test')()).to.be.true
+  })
 })
