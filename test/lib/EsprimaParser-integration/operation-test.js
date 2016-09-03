@@ -1,4 +1,4 @@
-describe('operations', () => {
+describe('operation', () => {
   let closureStack
 
   beforeEach(() => {
