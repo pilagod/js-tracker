@@ -1,12 +1,13 @@
 describe('getNextCaller tests', () => {
-  const caller = 'caller'
-  const callee = 'callee'
-
+  const target = {
+    caller: {},
+    callee: {}
+  }
   it('should return status.execute given status has property execute', () => {
     const status = {
       execute: 'execute'
     }
-    const result = esprimaParser.getNextCaller(caller, callee, status)
+    const result = esprimaParser.getNextCaller(target, status)
 
     expect(result).to.be.equal(status.execute)
   })
@@ -17,11 +18,11 @@ describe('getNextCaller tests', () => {
     sandbox.stub(esprimaParser, 'execute')
       .returns('resultFromExecute')
 
-    const result = esprimaParser.getNextCaller(caller, callee, status)
+    const result = esprimaParser.getNextCaller(target, status)
 
     expect(
       esprimaParser.execute
-        .calledWithExactly([caller, callee])
+        .calledWithExactly([target.caller, target.callee])
     ).to.be.true
     expect(result).to.be.equal('resultFromExecute')
   })

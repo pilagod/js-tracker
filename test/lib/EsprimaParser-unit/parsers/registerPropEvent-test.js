@@ -1,6 +1,7 @@
 describe('registerPropertyEvent tests', () => {
-  const object = 'object'
-  const property = 'property'
+  const caller = {}
+  const callee = 'prop'
+  const target = {caller, callee}
   const value = 'value'
 
   beforeEach(() => {
@@ -9,21 +10,21 @@ describe('registerPropertyEvent tests', () => {
     sandbox.stub(esprimaParser, 'execute')
   })
 
-  it('should call createAddEventListenerFromPropEvent with property and value', () => {
-    esprimaParser.registerPropEvent(object, property, value)
+  it('should call createAddEventListenerFromPropEvent with callee and value', () => {
+    esprimaParser.registerPropEvent(target, value)
 
     expect(
       esprimaParser.createAddEventListenerFromPropEvent
-        .calledWithExactly(property, value)
+        .calledWithExactly(callee, value)
     ).to.be.true
   })
 
-  it('should call execute with an array containing object and result from createAddEventListenerFromPropEvent', () => {
-    esprimaParser.registerPropEvent(object, property, value)
+  it('should call execute with an array containing caller and result from createAddEventListenerFromPropEvent', () => {
+    esprimaParser.registerPropEvent(target, value)
 
     expect(
       esprimaParser.execute
-        .calledWithExactly([object, 'resultFromCreateAddEventListenerFromPropEvent'])
+        .calledWithExactly([caller, 'resultFromCreateAddEventListenerFromPropEvent'])
     ).to.be.true
   })
 })

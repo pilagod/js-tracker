@@ -49,8 +49,8 @@ describe('UnaryOperator tests', () => {
         sandbox.stub(esprimaParser, 'context', windowStub)
       })
 
-      it('should delete global property given no object referecne', () => {
-        target = {property: 'a'}
+      it('should delete global property callee given no caller referecne', () => {
+        target = {callee: 'a'}
 
         const result = esprimaParser.unaryOperators.delete(target)
 
@@ -58,8 +58,8 @@ describe('UnaryOperator tests', () => {
         expect(result).to.be.true
       })
 
-      it('should do nothing given non-existing property of global', () => {
-        target = {property: 'b'}
+      it('should do nothing given non-existing property callee of global', () => {
+        target = {callee: 'b'}
 
         const result = esprimaParser.unaryOperators.delete(target)
 
@@ -71,25 +71,25 @@ describe('UnaryOperator tests', () => {
     describe('Object', () => {
       beforeEach(() => {
         target = {
-          object: {a: 'delete property'}
+          caller: {a: 'delete property'}
         }
       })
 
-      it('should delete object property given property name', () => {
-        target.property = 'a'
+      it('should delete caller property given property callee name', () => {
+        target.callee = 'a'
 
         const result = esprimaParser.unaryOperators.delete(target)
 
-        expect(target.object).to.be.eql({})
+        expect(target.caller).to.be.eql({})
         expect(result).to.be.true
       })
 
-      it('should do nothing given non-existing property of object', () => {
-        target.property = 'b'
+      it('should do nothing given non-existing property callee of caller', () => {
+        target.callee = 'b'
 
         const result = esprimaParser.unaryOperators.delete(target)
 
-        expect(target.object).to.be.eql({a: 'delete property'})
+        expect(target.caller).to.be.eql({a: 'delete property'})
         expect(result).to.be.true
       })
     })
@@ -97,25 +97,25 @@ describe('UnaryOperator tests', () => {
     describe('Array', () => {
       beforeEach(() => {
         target = {
-          object: [1, 2, 3]
+          caller: [1, 2, 3]
         }
       })
 
-      it('should delete array element given index', () => {
-        target.property = 1
+      it('should delete array caller\'s element given index callee', () => {
+        target.callee = 1
 
         const result = esprimaParser.unaryOperators.delete(target)
 
-        expect(target.object[1]).to.be.undefined
+        expect(target.caller[1]).to.be.undefined
         expect(result).to.be.true
       })
 
-      it('should do nothing given non-existing index of array', () => {
-        target.property = 3
+      it('should do nothing given non-existing index callee of array caller', () => {
+        target.callee = 3
 
         const result = esprimaParser.unaryOperators.delete(target)
 
-        expect(target.object).to.be.eql([1, 2, 3])
+        expect(target.caller).to.be.eql([1, 2, 3])
         expect(result).to.be.true
       })
     })

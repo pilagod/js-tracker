@@ -1,6 +1,6 @@
 describe('executeExpression tests', () => {
   const getReferenceStub = {
-    object: 'object'
+    caller: {}
   }
   let reduceStub, data
 
@@ -43,12 +43,12 @@ describe('executeExpression tests', () => {
     ).to.be.true
   })
 
-  it('should set parent of result from reduce to object of result from getReference given isValidStyleOrDOMTokenList returns true', () => {
+  it('should set parent of result from reduce to caller of result from getReference given isValidStyleOrDOMTokenList returns true', () => {
     esprimaParser.isValidStyleOrDOMTokenList.returns(true)
 
     esprimaParser.executeExpression(data)
 
-    expect(reduceStub.parent).to.be.equal(getReferenceStub.object)
+    expect(reduceStub.parent).to.be.equal(getReferenceStub.caller)
   })
 
   it('should return result from reduce of data', () => {

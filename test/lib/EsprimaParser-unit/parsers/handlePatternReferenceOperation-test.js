@@ -19,14 +19,14 @@ describe('handlePatternReferenceOperation tests', () => {
     ).to.be.true
   })
 
-  it('should call operation with {property: ${resultFromGetNameFromPattern}} and remaining args and return', () => {
+  it('should call operation with {callee: ${resultFromGetNameFromPattern}} and remaining args and return', () => {
     const result =
       esprimaParser.handlePatternReferenceOperation(pattern, operationStub, ...args)
 
     expect(
       operationStub
         .calledWithExactly({
-          property: 'resultFromGetNameFromPattern'
+          callee: 'resultFromGetNameFromPattern'
         }, ...args)
     ).to.be.true
     expect(result).to.be.equal('resultFromOperation')

@@ -1,35 +1,35 @@
 describe('handleAssignOperation tests', () => {
   const value = 'new value'
 
-  it('should call updateVariables with property and value given no object reference', () => {
-    const object = undefined
-    const property = 'a'
+  it('should call updateVariables with callee and value given no caller reference', () => {
+    const caller = undefined
+    const callee = 'a'
 
     sandbox.stub(esprimaParser, 'updateVariables')
 
-    esprimaParser.handleAssignOperation(object, property, value)
+    esprimaParser.handleAssignOperation({caller, callee}, value)
 
     expect(
       esprimaParser.updateVariables
-        .calledWithExactly(property, value)
+        .calledWithExactly(callee, value)
     ).to.be.true
   })
 
-  it('should update object given object\'s property', () => {
-    const object = {a: 'old value'}
-    const property = 'a'
+  it('should update object caller given caller\'s property callee', () => {
+    const caller = {a: 'old value'}
+    const callee = 'a'
 
-    esprimaParser.handleAssignOperation(object, property, value)
+    esprimaParser.handleAssignOperation({caller, callee}, value)
 
-    expect(object.a).to.be.equal('new value')
+    expect(caller.a).to.be.equal('new value')
   })
 
-  it('should update array given array\'s index', () => {
-    const object = [1, 2, 3]
-    const property = 1
+  it('should update array caller given array\'s index callee', () => {
+    const caller = [1, 2, 3]
+    const callee = 1
 
-    esprimaParser.handleAssignOperation(object, property, value)
+    esprimaParser.handleAssignOperation({caller, callee}, value)
 
-    expect(object).to.be.eql([1, 'new value', 3])
+    expect(caller).to.be.eql([1, 'new value', 3])
   })
 })

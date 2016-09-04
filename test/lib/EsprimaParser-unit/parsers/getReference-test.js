@@ -7,7 +7,7 @@ describe('getReference tests', () => {
         .returns('resultFromExecute')
   })
 
-  it('should return an object containing object with result of execute data first length - 1 elements and property with data last element', () => {
+  it('should return an object containing caller with result of execute data first length - 1 elements and callee with data last element', () => {
     const result = esprimaParser.getReference(data)
 
     expect(
@@ -15,8 +15,8 @@ describe('getReference tests', () => {
         .calledWithExactly(data.slice(0, data.length - 1))
     ).to.be.true
     expect(result).to.be.eql({
-      object: 'resultFromExecute',
-      property: data.slice(-1)[0]
+      caller: 'resultFromExecute',
+      callee: data.slice(-1)[0]
     })
   })
 })

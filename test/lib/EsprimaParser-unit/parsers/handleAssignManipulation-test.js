@@ -1,7 +1,9 @@
 describe('handleAssignManipulation tests', () => {
-  const object = 'object'
-  const property = 'property'
-  const info = {}
+  const target = {
+    caller: {},
+    callee: {},
+    info: {}
+  }
   const value = 'value'
 
   let status, Collection
@@ -18,29 +20,29 @@ describe('handleAssignManipulation tests', () => {
     sandbox.stub(esprimaParser, 'registerPropEvent')
   })
 
-  it('should call addInfoToCollection with object, property, info and status', () => {
-    esprimaParser.handleAssignManipulation(object, property, info, value, status)
+  it('should call addInfoToCollection with target and status', () => {
+    esprimaParser.handleAssignManipulation(target, value, status)
 
     expect(
       esprimaParser.addInfoToCollection
-        .calledWithExactly(object, property, info, status)
+        .calledWithExactly(target, status)
     ).to.be.true
   })
 
-  it('should call registerPropEvent with object, property, and value given Collection.EVENT type status', () => {
+  it('should call registerPropEvent with target and value given Collection.EVENT type status', () => {
     status.type = Collection.EVENT
 
-    esprimaParser.handleAssignManipulation(object, property, info, value, status)
+    esprimaParser.handleAssignManipulation(target, value, status)
 
     expect(
       esprimaParser.registerPropEvent
-        .calledWithExactly(object, property, value)
+        .calledWithExactly(target, value)
     ).to.be.true
   })
 
   it('should not call registerPropertyEvent given Collection.MANIPULATION type status', () => {
     status.type = Collection.MANIPULATION
-    esprimaParser.handleAssignManipulation(object, property, info, value, status)
+    esprimaParser.handleAssignManipulation(target, value, status)
 
     expect(esprimaParser.registerPropEvent.called).to.be.false
   })

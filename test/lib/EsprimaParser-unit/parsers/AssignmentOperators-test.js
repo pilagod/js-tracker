@@ -2,54 +2,38 @@
 
 describe('AssignmentOperators tests', () => {
   const target = {
-    object: 'object',
-    property: 'property',
+    caller: {},
+    callee: {},
     info: {}
   }
   const value = 'value'
   // stub results
-  const contextStub = 'contextStub'
-  const statusStub = {}
+  const context = {}
+  const status = {}
 
   beforeEach(() => {
-    sandbox.stub(esprimaParser, 'context', contextStub)
+    sandbox.stub(esprimaParser, 'context', context)
     sandbox.stub(esprimaParser, 'checkerDispatcher', {
-      dispatch: sandbox.stub().returns(statusStub)
+      dispatch: sandbox.stub().returns(status)
     })
-    sandbox.stub(esprimaParser, 'handleAssignManipulation')
-    sandbox.stub(esprimaParser, 'handleAssignOperation')
+    sandbox.stub(esprimaParser, 'handleAssignment')
   })
 
-  it('should call dispatch of checkerDispatcher with an object containing context, caller (object) and callee (property)', () => {
+  it('should call dispatch of checkerDispatcher with an object containing context and {caller, callee, info}', () => {
     esprimaParser.assignmentOperators['='](target, value)
 
     expect(
       esprimaParser.checkerDispatcher.dispatch
-        .calledWithExactly({
-          caller: target.object,
-          callee: target.property,
-          context: esprimaParser.context
-        })
+        .calledWithExactly(Object.assign({context}, target))
     ).to.be.true
   })
 
-  it('should call handleAssignManipulation with object, property, status and info given non-undefined status', () => {
+  it('should call handleAssigment with target, value and status', () => {
     esprimaParser.assignmentOperators['='](target, value)
 
     expect(
-      esprimaParser.handleAssignManipulation
-        .calledWithExactly(target.object, target.property, target.info, value, statusStub)
-    ).to.be.true
-  })
-
-  it('should call handleAssignOperation with object, property and value given undefined status', () => {
-    esprimaParser.checkerDispatcher.dispatch.returns(undefined)
-
-    esprimaParser.assignmentOperators['='](target, value)
-
-    expect(
-      esprimaParser.handleAssignOperation
-        .calledWithExactly(target.object, target.property, value)
+      esprimaParser.handleAssignment
+        .calledWithExactly(target, value, status)
     ).to.be.true
   })
 })

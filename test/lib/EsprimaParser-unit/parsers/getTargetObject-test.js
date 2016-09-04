@@ -1,10 +1,11 @@
-describe('getAfftectedObject tests', () => {
+describe('getTargetObject tests', () => {
   const caller = {
     parent: 'parent'
   }
   const callee = {
     arguments: ['arg1', 'arg2', 'arg3']
   }
+  const target = {caller, callee}
 
   beforeEach(() => {
     sandbox.stub(esprimaParser, 'isStyleOrDOMTokenList')
@@ -14,7 +15,7 @@ describe('getAfftectedObject tests', () => {
     const status = {
       passive: 1
     }
-    const result = esprimaParser.getAfftectedObject(caller, callee, status)
+    const result = esprimaParser.getTargetObject(target, status)
 
     expect(result).to.be.equal(callee.arguments[status.passive])
   })
@@ -22,7 +23,7 @@ describe('getAfftectedObject tests', () => {
   it('should call isStyleOrDOMTokenList with caller given status has no passive property', () => {
     const status = {}
 
-    esprimaParser.getAfftectedObject(caller, callee, status)
+    esprimaParser.getTargetObject(target, status)
 
     expect(
       esprimaParser.isStyleOrDOMTokenList
@@ -35,7 +36,7 @@ describe('getAfftectedObject tests', () => {
 
     esprimaParser.isStyleOrDOMTokenList.returns(true)
 
-    const result = esprimaParser.getAfftectedObject(caller, callee, status)
+    const result = esprimaParser.getTargetObject(target, status)
 
     expect(result).to.be.equal(caller.parent)
   })
@@ -45,7 +46,7 @@ describe('getAfftectedObject tests', () => {
 
     esprimaParser.isStyleOrDOMTokenList.returns(false)
 
-    const result = esprimaParser.getAfftectedObject(caller, callee, status)
+    const result = esprimaParser.getTargetObject(target, status)
 
     expect(result).to.be.equal(caller)
   })
