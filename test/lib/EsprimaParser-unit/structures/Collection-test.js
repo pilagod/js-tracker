@@ -44,6 +44,10 @@ describe('Collection tests', () => {
       collection = new Collection()
     })
 
+    /*************************/
+    /*        addEvent       */
+    /*************************/
+
     describe('addEvent tests', () => {
       const info = {
         elements: [],
@@ -63,6 +67,10 @@ describe('Collection tests', () => {
       })
     })
 
+    /*************************/
+    /*    addManipulation    */
+    /*************************/
+
     describe('addManipulation tests', () => {
       const info = {
         elements: [],
@@ -81,6 +89,10 @@ describe('Collection tests', () => {
         ).to.be.true
       })
     })
+
+    /*************************/
+    /*    addFromElements    */
+    /*************************/
 
     describe('addFromElements tests', () => {
       const info = {
@@ -105,6 +117,10 @@ describe('Collection tests', () => {
         }
       })
     })
+
+    /*************************/
+    /*          add          */
+    /*************************/
 
     describe('add tests', () => {
       const element = 'element'
@@ -161,6 +177,10 @@ describe('Collection tests', () => {
       })
     })
 
+    /*************************/
+    /*  getCollectionIdFrom  */
+    /*************************/
+
     describe('getCollectionIdFrom tests', () => {
       let element
 
@@ -194,6 +214,10 @@ describe('Collection tests', () => {
         expect(collection.createElementCollection.called).to.be.false
       })
     })
+
+    /*************************/
+    /*createElementCollection*/
+    /*************************/
 
     describe('createElementCollection tests', () => {
       it('should increment 1 to id', () => {
