@@ -14,6 +14,7 @@ describe('loop', () => {
     it('should loop until test fails', () => {
       const ast = esprima.parse(`
         var a = 0;
+
         while (++a < 10);
       `)
       esprimaParser.parseAst(ast)

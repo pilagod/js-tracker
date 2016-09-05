@@ -3,6 +3,7 @@ require('./helpers/init')
 /* init variables */
 global.esprima = require('esprima')
 global.EsprimaParser = require('../lib/EsprimaParser')
+global.resetVariables = require('./lib/EsprimaParser-integration/helpers/resetVariables')
 
 /* init esprimaParser */
 beforeEach(() => {
