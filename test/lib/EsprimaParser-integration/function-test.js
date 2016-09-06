@@ -48,8 +48,8 @@ describe('function', () => {
     })
   })
 
-  describe('bind, call, apply tests', () => {
-    it('should bind context properly', () => {
+  describe.only('bind, call, apply tests', () => {
+    it('should bind context properly (1)', () => {
       const ast = esprima.parse(`
         this.a = 9;
 
@@ -72,6 +72,23 @@ describe('function', () => {
       expect(closureStack.get('result1')).to.be.equal(81)
       expect(closureStack.get('result2')).to.be.equal(9)
       expect(closureStack.get('result3')).to.be.equal(81)
+    })
+
+    it('should bind context properly (2)', () => {
+      const ast = esprima.parse(`
+        var list = function () {
+          return Array.prototype.slice.call(arguments)
+        }
+        var list1 = list(1, 2, 3);
+        var leadingThirtysevenList = list.bind(undefined, 37);
+        var list2 = leadingThirtysevenList();
+        var list3 = leadingThirtysevenList(1, 2, 3);
+      `)
+      esprimaParser.parseAst(ast)
+
+      expect(closureStack.get('list1')).to.be.eql([1, 2, 3])
+      expect(closureStack.get('list2')).to.be.eql([37])
+      expect(closureStack.get('list3')).to.be.eql([37, 1, 2, 3])
     })
   })
 })

@@ -1,4 +1,5 @@
 describe('parseFunctionInfo tests', () => {
+  const paramNames = ['param1', 'param2', 'param3']
   let functionExpression
 
   beforeEach(() => {
@@ -6,16 +7,15 @@ describe('parseFunctionInfo tests', () => {
       body: 'body',
       params: 'params'
     })
-
-    sandbox.stub(esprimaParser, 'parseParams')
-      .returns('resultFromParseParams')
+    sandbox.stub(esprimaParser, 'parseFunctionParamsName')
+      .returns(paramNames)
   })
 
-  it('should call parseParams with functionExpression params', () => {
+  it('should call parseFunctionParamsName with functionExpression params', () => {
     esprimaParser.parseFunctionInfo(functionExpression)
 
     expect(
-      esprimaParser.parseParams
+      esprimaParser.parseFunctionParamsName
         .calledWithExactly(functionExpression.params)
     ).to.be.true
   })
@@ -25,7 +25,7 @@ describe('parseFunctionInfo tests', () => {
 
     expect(result).to.be.eql({
       body: functionExpression.body,
-      params: 'resultFromParseParams'
+      params: paramNames
     })
   })
 })

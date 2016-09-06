@@ -1,4 +1,4 @@
-describe('setFunctionArguments tests', () => {
+describe('setCalledArguments tests', () => {
   const params = {
     keys: ['param1', 'param2', 'param3'],
     values: ['arg1', 'arg2', 'arg3']
@@ -9,7 +9,7 @@ describe('setFunctionArguments tests', () => {
   })
 
   it('should call setVariables with each param\'s keys and values', () => {
-    esprimaParser.setFunctionArguments(params)
+    esprimaParser.setCalledArguments(params)
 
     const length = params.keys.length
 

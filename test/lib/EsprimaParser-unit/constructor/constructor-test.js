@@ -3,10 +3,16 @@ const proxyquire = require('proxyquire')
 describe('constructor tests', () => {
   const context = {}
 
-  it('should set context to given context and scriptUrl to null', () => {
+  it('should set context to given context with \'this\' points to context', () => {
     const esprimaParser = new EsprimaParser(context)
 
     expect(esprimaParser.context).to.be.equal(context)
+    expect(esprimaParser.context.this).to.be.equal(context)
+  })
+
+  it('should set scriptUrl to null', () => {
+    const esprimaParser = new EsprimaParser(context)
+
     expect(esprimaParser.scriptUrl).to.be.null
   })
 

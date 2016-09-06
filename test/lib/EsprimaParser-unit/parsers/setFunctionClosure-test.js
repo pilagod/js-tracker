@@ -1,6 +1,9 @@
 describe('setFunctionClosure tests', () => {
-  const context = 'context'
-  const params = {
+  const builtInArguments = {
+    this: {},
+    arguments: {}
+  }
+  const calledArguments = {
     keys: 'keys',
     values: 'values'
   }
@@ -9,38 +12,38 @@ describe('setFunctionClosure tests', () => {
     sandbox.stub(esprimaParser, 'closureStack', {
       createClosure: sandbox.stub()
     })
-    sandbox.stub(esprimaParser, 'setFunctionContext')
-    sandbox.stub(esprimaParser, 'setFunctionArguments')
+    sandbox.stub(esprimaParser, 'setBuiltInArguments')
+    sandbox.stub(esprimaParser, 'setCalledArguments')
   })
 
   it('should call createClosure of closureStack', () => {
-    esprimaParser.setFunctionClosure(context, params)
+    esprimaParser.setFunctionClosure(builtInArguments, calledArguments)
 
     expect(esprimaParser.closureStack.createClosure.called).to.be.true
   })
 
-  it('should call setFunctionContext with context after createClosure', () => {
-    esprimaParser.setFunctionClosure(context, params)
+  it('should call setBuiltInArguments with builtInArguments after createClosure', () => {
+    esprimaParser.setFunctionClosure(builtInArguments, calledArguments)
 
     expect(
-      esprimaParser.setFunctionContext
-        .calledWithExactly(context)
+      esprimaParser.setBuiltInArguments
+        .calledWithExactly(builtInArguments)
     ).to.be.true
     expect(
-      esprimaParser.setFunctionContext
+      esprimaParser.setBuiltInArguments
         .calledAfter(esprimaParser.closureStack.createClosure)
     ).to.be.true
   })
 
-  it('should call setFunctionArguments with params after createClosure', () => {
-    esprimaParser.setFunctionClosure(context, params)
+  it('should call setCalledArguments with params after createClosure', () => {
+    esprimaParser.setFunctionClosure(builtInArguments, calledArguments)
 
     expect(
-      esprimaParser.setFunctionArguments
-        .calledWithExactly(params)
+      esprimaParser.setCalledArguments
+        .calledWithExactly(calledArguments)
     ).to.be.true
     expect(
-      esprimaParser.setFunctionArguments
+      esprimaParser.setCalledArguments
         .calledAfter(esprimaParser.closureStack.createClosure)
     ).to.be.true
   })
