@@ -21,7 +21,6 @@ describe('ArrayExpression tests', () => {
       createAstNode('Expression2'),
       createAstNode('Expression3')
     ]
-
     esprimaParser.ArrayExpression(arrayExpression)
 
     arrayExpression.elements.forEach((node, index) => {
@@ -40,7 +39,6 @@ describe('ArrayExpression tests', () => {
       createAstNode('Expression2'),
       createAstNode('Expression3')
     ]
-
     const result = esprimaParser.ArrayExpression(arrayExpression)
 
     expect(result).to.be.eql([
@@ -49,4 +47,19 @@ describe('ArrayExpression tests', () => {
       'parsedExpression3'
     ])
   });
+
+  it('should delete null node', () => {
+    arrayExpression.elements = [
+      createAstNode('Expression1'),
+      null,
+      createAstNode('Expression3')
+    ]
+    const result = esprimaParser.ArrayExpression(arrayExpression)
+
+    expect(result).to.be.eql([
+      'parsedExpression1',
+      ,
+      'parsedExpression3'
+    ])
+  })
 })

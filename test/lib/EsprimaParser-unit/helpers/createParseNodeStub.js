@@ -1,5 +1,5 @@
 module.exports = () => {
   return (node) => {
-    return `parsed${node.type}`
+    return node ? `parsed${node.type}` : undefined
   }
 }
