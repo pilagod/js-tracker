@@ -1,9 +1,9 @@
 describe('addInfoToCollection tests', () => {
   const target = {
     caller: {},
-    callee: {}
+    callee: {},
+    info: {}
   }
-  const info = {}
   const status = {}
   // stub results
   const object = {}
@@ -16,7 +16,7 @@ describe('addInfoToCollection tests', () => {
   })
 
   it('should call getTargetObject with target and status', () => {
-    esprimaParser.addInfoToCollection(target, info, status)
+    esprimaParser.addInfoToCollection(target, status)
 
     expect(
       esprimaParser.getTargetObject
@@ -25,7 +25,7 @@ describe('addInfoToCollection tests', () => {
   })
 
   it('should call getTargetElements with result from getTargetObject', () => {
-    esprimaParser.addInfoToCollection(target, info, status)
+    esprimaParser.addInfoToCollection(target, status)
 
     expect(
       esprimaParser.getTargetElements
@@ -34,11 +34,14 @@ describe('addInfoToCollection tests', () => {
   })
 
   it('should call addInfoByStatus with {elements, info} and status', () => {
-    esprimaParser.addInfoToCollection(target, info, status)
+    esprimaParser.addInfoToCollection(target, status)
 
     expect(
       esprimaParser.addInfoByStatus
-        .calledWithExactly({elements, info}, status)
+        .calledWithExactly({
+          elements,
+          info: target.info
+        }, status)
     ).to.be.true
   })
 })

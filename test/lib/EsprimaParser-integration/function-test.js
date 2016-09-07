@@ -197,7 +197,7 @@ describe('function', () => {
     })
   })
 
-  describe.only('callback', () => {
+  describe('callback', () => {
     /* Array.prototype.forEach() https://goo.gl/TZdUU */
     describe('forEach tests', () => {
       it('should execute properly (1)', () => {

@@ -22,6 +22,8 @@ describe('constructor tests', () => {
     /* import structures */
     const Callee = require(libDir + '/structures/Callee')
     const FunctionAgent = require(libDir + '/structures/FunctionAgent')
+    const Collection = require(libDir + '/structures/Collection')
+
     /* import operators */
     const binaryOperators = require(libDir + '/operators/binaryOperators')
     const logicalOperators = require(libDir + '/operators/logicalOperators')
@@ -32,6 +34,7 @@ describe('constructor tests', () => {
 
     expect(esprimaParser.escodegen).to.be.equal(escodegen)
     expect(esprimaParser.Callee).to.be.equal(Callee)
+    expect(esprimaParser.Collection).to.be.equal(Collection)
     expect(esprimaParser.FunctionAgent).to.be.equal(FunctionAgent)
     expect(esprimaParser.binaryOperators).to.be.equal(binaryOperators)
     expect(esprimaParser.logicalOperators).to.be.equal(logicalOperators)
