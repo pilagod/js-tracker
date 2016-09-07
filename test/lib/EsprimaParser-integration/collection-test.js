@@ -26,8 +26,68 @@ describe.only('collection', () => {
       ).returns(element)
     })
 
+    /*************************/
+    /*         Attr          */
+    /*************************/
+
     describe("Attr tests", () => {
-      
+      const AttrStub = function () {
+        this.ownerElement = element
+      }
+      beforeEach(() => {
+        element.attributes = [
+          new AttrStub(),
+          new AttrStub(),
+          new AttrStub()
+        ]
+        sandbox.stub(esprimaParser.context, 'Attr', AttrStub)
+      })
+
+      it('should add code info to collection', () => {
+        const ast = esprima.parse(`
+          var element = document.getElementById('element');
+          var attrs = element.attributes;
+
+          attrs[0].value = 'new element id'
+        `, {loc: true})
+
+        esprimaParser.parseAst(ast, scriptUrl)
+
+        expect(element).to.have.property('CollectionId')
+        expect(element.attributes[0]).to.not.have.property('value')
+
+        const id = element.CollectionId
+
+        expect(id).to.be.equal(collection.id).and.equal(1)
+
+        expect(Object.keys(collection.data)).to.have.lengthOf(1)
+        expect(Object.keys(collection.data[id][M])).to.have.lengthOf(1)
+        expect(Object.keys(collection.data[id][E])).to.have.lengthOf(0)
+
+        expect(collection.data[id][M]).to.have.property(`${scriptUrl}:5:10`, 'attrs[0].value')
+      })
+
+      it('should not add code info to collection', () => {
+        element.attributes[0].value = 'element'
+
+        const ast = esprima.parse(`
+          var element = document.getElementById('element');
+          var attrs = element.attributes;
+          var value = attrs[0].value
+
+          attrs[0].name = 'new element'
+          value = attrs[0].value
+        `, {loc: true})
+
+        esprimaParser.parseAst(ast, scriptUrl)
+
+        expect(element).to.not.have.property('CollectionId')
+        expect(element.attributes[0].name).to.be.equal('new element')
+        expect(closureStack.get('value')).to.be.equal(element.attributes[0].value)
+
+        expect(collection.id).to.be.equal(0)
+        expect(Object.keys(collection.data)).to.have.lengthOf(0)
+      })
     })
 
     /*************************/
