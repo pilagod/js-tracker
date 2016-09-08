@@ -5,12 +5,7 @@ describe('handleAssignManipulation tests', () => {
     info: {}
   }
   const value = 'value'
-
-  let status, Collection
-
-  before(() => {
-    Collection = require('../../../../lib/EsprimaParser/structures/Collection')
-  })
+  let status
 
   beforeEach(() => {
     status = {
@@ -30,7 +25,7 @@ describe('handleAssignManipulation tests', () => {
   })
 
   it('should call registerPropEvent with target and value given Collection.EVENT type status', () => {
-    status.type = Collection.EVENT
+    status.type = esprimaParser.Collection.EVENT
 
     esprimaParser.handleAssignManipulation(target, value, status)
 
@@ -41,7 +36,8 @@ describe('handleAssignManipulation tests', () => {
   })
 
   it('should not call registerPropertyEvent given Collection.MANIPULATION type status', () => {
-    status.type = Collection.MANIPULATION
+    status.type = esprimaParser.Collection.MANIPULATION
+
     esprimaParser.handleAssignManipulation(target, value, status)
 
     expect(esprimaParser.registerPropEvent.called).to.be.false

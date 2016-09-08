@@ -2,16 +2,58 @@
   (1) esprima.parse should set option loc to true
   (2) esprimaParser.parseAst should set valid scriptUrl string
 */
-describe.only('collection', () => {
+describe('collection', () => {
   const scriptUrl = 'scriptUrl'
   let M, E, closureStack, collection
 
-  beforeEach(() => {
+  before(() => {
     M = esprimaParser.Collection.MANIPULATION
     E = esprimaParser.Collection.EVENT
+  })
+
+  beforeEach(() => {
     closureStack = esprimaParser.closureStack
     collection = esprimaParser.collection
   })
+
+  const checkEmptyCollection = (elements) => {
+    for (const element of elements) {
+      expect(element).to.not.have.property('CollectionId')
+    }
+    checkCollectionIds([])
+  }
+
+  const checkCollectionIds = (elements) => {
+    const num = elements.length
+
+    for (const [index, element] of elements.entries()) {
+      expect(element).to.have.property('CollectionId', index + 1)
+    }
+    expect(collection.id).to.be.equal(num)
+    expect(Object.keys(collection.data)).to.have.lengthOf(num)
+  }
+
+  const checkCollectionDataById = (id, mInfo = {}, eInfo = {}) => {
+    const group = collection.data[id]
+
+    if (!mInfo.ignore) {
+      expect(Object.keys(group[M])).to.have.lengthOf(mInfo.num || 0)
+    }
+    if (!eInfo.ignore) {
+      expect(Object.keys(group[E])).to.have.lengthOf(eInfo.num || 0)
+    }
+    for (const type of [M, E]) {
+      const info = (type === M ? mInfo.info : eInfo.info) || []
+
+      for (const {loc, code} of info) {
+        expect(group[type]).to.have.property(loc, code)
+      }
+    }
+  }
+
+  /*************************/
+  /*        DOM API        */
+  /*************************/
 
   describe('DOM API', () => {
     const HTMLElementStub = function () {}
@@ -30,63 +72,57 @@ describe.only('collection', () => {
     /*         Attr          */
     /*************************/
 
-    describe("Attr tests", () => {
+    describe('Attr tests', () => {
       const AttrStub = function () {
         this.ownerElement = element
       }
       beforeEach(() => {
         element.attributes = [
-          new AttrStub(),
-          new AttrStub(),
           new AttrStub()
         ]
         sandbox.stub(esprimaParser.context, 'Attr', AttrStub)
       })
 
-      it('should add code info to collection', () => {
-        const ast = esprima.parse(`
-          var element = document.getElementById('element');
-          var attrs = element.attributes;
+      describe('MANIPULATION tests', () => {
+        it('should add code info to collection', () => {
+          const ast = esprima.parse(`
+            var element = document.getElementById('element');
+            var attrs = element.attributes;
 
-          attrs[0].value = 'new element id'
-        `, {loc: true})
+            attrs[0].value = 'new element'
+          `, {loc: true})
 
-        esprimaParser.parseAst(ast, scriptUrl)
+          esprimaParser.parseAst(ast, scriptUrl)
 
-        expect(element).to.have.property('CollectionId')
-        expect(element.attributes[0]).to.not.have.property('value')
+          expect(element.attributes[0]).to.not.have.property('value')
 
-        const id = element.CollectionId
+          checkCollectionIds([element])
+          checkCollectionDataById(1, {
+            num: 1, info: [
+              {loc: `${scriptUrl}:5:12`, code: 'attrs[0].value'}
+            ]
+          })
+        })
 
-        expect(id).to.be.equal(collection.id).and.equal(1)
+        it('should not add code info to collection', () => {
+          element.attributes[0].value = 'element'
 
-        expect(Object.keys(collection.data)).to.have.lengthOf(1)
-        expect(Object.keys(collection.data[id][M])).to.have.lengthOf(1)
-        expect(Object.keys(collection.data[id][E])).to.have.lengthOf(0)
+          const ast = esprima.parse(`
+            var element = document.getElementById('element');
+            var attrs = element.attributes;
+            var value = attrs[0].value;
 
-        expect(collection.data[id][M]).to.have.property(`${scriptUrl}:5:10`, 'attrs[0].value')
-      })
+            value = attrs[0].value
+            attrs[0].name = 'id'
+          `, {loc: true})
 
-      it('should not add code info to collection', () => {
-        element.attributes[0].value = 'element'
+          esprimaParser.parseAst(ast, scriptUrl)
 
-        const ast = esprima.parse(`
-          var element = document.getElementById('element');
-          var attrs = element.attributes;
-          var value = attrs[0].value
+          expect(closureStack.get('value')).to.be.equal('element')
+          expect(element.attributes[0].name).to.be.equal('id')
 
-          attrs[0].name = 'new element'
-          value = attrs[0].value
-        `, {loc: true})
-
-        esprimaParser.parseAst(ast, scriptUrl)
-
-        expect(element).to.not.have.property('CollectionId')
-        expect(element.attributes[0].name).to.be.equal('new element')
-        expect(closureStack.get('value')).to.be.equal(element.attributes[0].value)
-
-        expect(collection.id).to.be.equal(0)
-        expect(Object.keys(collection.data)).to.have.lengthOf(0)
+          checkEmptyCollection([element])
+        })
       })
     })
 
@@ -107,45 +143,40 @@ describe.only('collection', () => {
         )
       })
 
-      it('should add call info to collection', () => {
-        const ast = esprima.parse(`
-          var element = document.getElementById('element');
-          var style = element.style;
+      describe('MANIPULATION tests', () => {
+        it('should add call info to collection', () => {
+          const ast = esprima.parse(`
+            var element = document.getElementById('element');
+            var style = element.style;
 
-          element.style.color = 'red';
-          style.backgroundColor = 'red';
-        `, {loc: true})
+            element.style.color = 'red';
+            style.backgroundColor = 'red';
+          `, {loc: true})
 
-        esprimaParser.parseAst(ast, scriptUrl)
+          esprimaParser.parseAst(ast, scriptUrl)
 
-        expect(element).to.have.property('CollectionId')
-        expect(element.style).to.not.have.property('color') // should not change view
-        expect(element.style).to.not.have.property('backgroundColor') // should not change view
+          expect(element.style).to.not.have.property('color') // should not change view
+          expect(element.style).to.not.have.property('backgroundColor') // should not change view
 
-        const id = element.CollectionId
+          checkCollectionIds([element]);
+          checkCollectionDataById(1, {
+            num: 2, info: [
+              {loc: `${scriptUrl}:5:12`, code: 'element.style.color'},
+              {loc: `${scriptUrl}:6:12`, code: 'style.backgroundColor'}
+            ]
+          })
+        })
 
-        expect(id).to.be.equal(collection.id).and.equal(1)
+        it('should not add call info to collection for getting style property', () => {
+          const ast = esprima.parse(`
+            var style = document.getElementById('element').style;
+            var color = style.color;
+          `, {loc: true})
 
-        expect(Object.keys(collection.data)).to.have.lengthOf(1)
-        expect(Object.keys(collection.data[id][M])).to.have.lengthOf(2)
-        expect(Object.keys(collection.data[id][E])).to.have.lengthOf(0)
+          esprimaParser.parseAst(ast, scriptUrl)
 
-        expect(collection.data[id][M]).to.have.property(`${scriptUrl}:5:10`, 'element.style.color')
-        expect(collection.data[id][M]).to.have.property(`${scriptUrl}:6:10`, 'style.backgroundColor')
-      })
-
-      it('should not add call info to collection for getting style property', () => {
-        const ast = esprima.parse(`
-          var style = document.getElementById('element').style;
-          var color = style.color;
-        `, {loc: true})
-
-        esprimaParser.parseAst(ast, scriptUrl)
-
-        expect(element).to.not.have.property('CollectionId')
-
-        expect(collection.id).to.be.equal(0)
-        expect(Object.keys(collection.data)).to.have.lengthOf(0)
+          checkEmptyCollection([element])
+        })
       })
     })
 
@@ -162,71 +193,68 @@ describe.only('collection', () => {
         sandbox.stub(esprimaParser.context, 'DOMTokenList', DOMTokenListStub)
       })
 
-      it('should add code info to collection (add, remove, toggle)', () => {
-        const classList = element.classList
+      describe('MANIPULATION tests', () => {
+        it('should add code info to collection (add, remove, toggle)', () => {
+          const classList = element.classList
 
-        classList.add = sandbox.spy()
-        classList.remove = sandbox.spy()
-        classList.toggle = sandbox.spy()
+          classList.add = sandbox.spy()
+          classList.remove = sandbox.spy()
+          classList.toggle = sandbox.spy()
 
-        const ast = esprima.parse(`
-          var element = document.getElementById('element');
-          var classList = element.classList
+          const ast = esprima.parse(`
+            var element = document.getElementById('element');
+            var classList = element.classList
 
-          var result1 = element.classList.add('class1');
-          var result2 = classList.remove('class2');
-          var result3 = classList.toggle('class3');
-        `, {loc: true})
+            var result1 = element.classList.add('class1');
+            var result2 = classList.remove('class2');
+            var result3 = classList.toggle('class3');
+          `, {loc: true})
 
-        esprimaParser.parseAst(ast, scriptUrl)
+          esprimaParser.parseAst(ast, scriptUrl)
 
-        expect(element).to.have.property('CollectionId')
-        expect(classList.add.called).to.be.false
-        expect(classList.remove.called).to.be.false
-        expect(classList.toggle.called).to.be.false
+          for (const index of [1, 2, 3]) {
+            expect(closureStack.get(`result${index}`)).to.be.undefined
+          }
+          expect(classList.parent).to.be.equal(element)
+          expect(classList.add.called).to.be.false
+          expect(classList.remove.called).to.be.false
+          expect(classList.toggle.called).to.be.false
 
-        expect(closureStack.get('result1')).to.be.undefined
-        expect(closureStack.get('result2')).to.be.undefined
-        expect(closureStack.get('result3')).to.be.undefined
+          checkCollectionIds([element])
+          checkCollectionDataById(1, {
+            num: 3, info: [
+              {loc: `${scriptUrl}:5:26`, code: 'element.classList.add(\'class1\')'},
+              {loc: `${scriptUrl}:6:26`, code: 'classList.remove(\'class2\')'},
+              {loc: `${scriptUrl}:7:26`, code: 'classList.toggle(\'class3\')'}
+            ]
+          })
+        })
 
-        const id = element.CollectionId
+        it('should not add code info to collection (item, contains)', () => {
+          const classList = element.classList
 
-        expect(id).to.be.equal(collection.id).and.equal(1)
+          classList.item = sandbox.stub().returns('class1')
+          classList.contains = sandbox.stub().returns(true)
 
-        expect(Object.keys(collection.data)).to.have.lengthOf(1)
-        expect(Object.keys(collection.data[id][M])).to.have.lengthOf(3)
-        expect(Object.keys(collection.data[id][E])).to.have.lengthOf(0)
+          const ast = esprima.parse(`
+            var element = document.getElementById('element');
+            var classList = element.classList
 
-        expect(collection.data[id][M]).to.have.property(`${scriptUrl}:5:24`, 'element.classList.add(\'class1\')')
-        expect(collection.data[id][M]).to.have.property(`${scriptUrl}:6:24`, 'classList.remove(\'class2\')')
-        expect(collection.data[id][M]).to.have.property(`${scriptUrl}:7:24`, 'classList.toggle(\'class3\')')
-      })
+            var result1 = classList.item(1);
+            var result2 = element.classList.contains('class1');
+          `, {loc: true})
 
-      it('should not add code info to collection (item, contains)', () => {
-        const classList = element.classList
+          esprimaParser.parseAst(ast, scriptUrl)
 
-        classList.item = sandbox.stub().returns('class1')
-        classList.contains = sandbox.stub().returns(true)
+          expect(classList.parent).to.be.equal(element)
+          expect(classList.item.calledWith(1)).to.be.true
+          expect(classList.contains.calledWith('class1')).to.be.true
 
-        const ast = esprima.parse(`
-          var element = document.getElementById('element');
-          var classList = element.classList
+          expect(closureStack.get('result1')).to.be.equal('class1')
+          expect(closureStack.get('result2')).to.be.true
 
-          var result1 = element.classList.contains('class1');
-          var result2 = classList.item(1);
-        `, {loc: true})
-
-        esprimaParser.parseAst(ast, scriptUrl)
-
-        expect(element).to.not.have.property('CollectionId')
-        expect(classList.contains.calledWith('class1')).to.be.true
-        expect(classList.item.calledWith(1)).to.be.true
-
-        expect(closureStack.get('result1')).to.be.true
-        expect(closureStack.get('result2')).to.be.equal('class1')
-
-        expect(collection.id).to.be.equal(0)
-        expect(Object.keys(collection.data)).to.have.lengthOf(0)
+          checkEmptyCollection([element])
+        })
       })
     })
 
@@ -239,118 +267,107 @@ describe.only('collection', () => {
         sandbox.stub(esprimaParser.context, 'HTMLElement', HTMLElementStub)
       })
 
-      it('should add code info to collection (MANIPULATION)', () => {
-        element.append = sandbox.spy()
+      describe('MANIPULATION tests', () => {
+        it('should add code info to collection', () => {
+          element.append = sandbox.spy()
 
-        const ast = esprima.parse(`
-          var element = document.getElementById('element');
-          var result = element.append('Some Text');
+          const ast = esprima.parse(`
+            var element = document.getElementById('element');
+            var result = element.append('Some Text');
 
-          element.innerHTML = 'Hello World';
-        `, {loc: true})
+            element.innerHTML = 'Hello World';
+          `, {loc: true})
 
-        esprimaParser.parseAst(ast, scriptUrl)
+          esprimaParser.parseAst(ast, scriptUrl)
 
-        expect(element).to.have.property('CollectionId')
-        expect(element).to.not.have.property('innerHTML')
-        expect(element.append.called).to.be.false
+          expect(closureStack.get('result')).to.be.undefined
 
-        expect(closureStack.get('result')).to.be.undefined
+          expect(element).to.not.have.property('innerHTML')
+          expect(element.append.called).to.be.false
 
-        const id = element.CollectionId
+          checkCollectionIds([element])
+          checkCollectionDataById(1, {
+            num: 2, info: [
+              {loc: `${scriptUrl}:3:25`, code: 'element.append(\'Some Text\')'},
+              {loc: `${scriptUrl}:5:12`, code: 'element.innerHTML'}
+            ]
+          })
+        })
 
-        expect(id).to.be.equal(collection.id).and.equal(1)
+        it('should not add code info to collection for getting property value', () => {
+          element.id = 'element'
+          element.innerHTML = 'Hello World'
 
-        expect(Object.keys(collection.data)).to.have.lengthOf(1)
-        expect(Object.keys(collection.data[id][M])).to.have.lengthOf(2)
-        expect(Object.keys(collection.data[id][E])).to.have.lengthOf(0)
+          const ast = esprima.parse(`
+            var element = document.getElementById('element');
+            var id = element.id;
+            var innerHTML = element.innerHTML;
 
-        expect(collection.data[id][M]).to.have.property(`${scriptUrl}:3:23`, 'element.append(\'Some Text\')')
-        expect(collection.data[id][M]).to.have.property(`${scriptUrl}:5:10`, 'element.innerHTML')
+            id = element.id;
+            innerHTML = element.innerHTML;
+          `, {loc: true})
+
+          esprimaParser.parseAst(ast, scriptUrl)
+
+          expect(closureStack.get('id')).to.be.equal(element.id)
+          expect(closureStack.get('innerHTML')).to.be.equal(element.innerHTML)
+
+          checkEmptyCollection([element])
+        })
       })
 
-      it('should not add code info to collection for getting property value', () => {
-        element.id = 'element'
-        element.innerHTML = 'Hello World'
+      describe('EVENT tests', () => {
+        it('should add code info to collection (call)', () => {
+          element.addEventListener = sandbox.spy()
+          element.removeEventListener = sandbox.spy()
 
-        const ast = esprima.parse(`
-          var element = document.getElementById('element');
-          var id = element.id;
-          var innerHTML = element.innerHTML;
+          const ast = esprima.parse(`
+            var element = document.getElementById('element');
+            var clickHandler = function () {};
 
-          id = element.id;
-          innerHTML = element.innerHTML;
-        `, {loc: true})
+            element.addEventListener('click', clickHandler);
+            element.removeEventListener('click', clickHandler);
+          `, {loc: true})
 
-        esprimaParser.parseAst(ast, scriptUrl)
+          esprimaParser.parseAst(ast, scriptUrl)
 
-        expect(element).to.not.have.property('CollectionId')
+          const clickHandler = closureStack.get('clickHandler')
 
-        expect(closureStack.get('id')).to.be.equal(element.id)
-        expect(closureStack.get('innerHTML')).to.be.equal(element.innerHTML)
+          expect(element.addEventListener.calledWith('click', clickHandler)).to.be.true
+          expect(element.removeEventListener.calledWith('click', clickHandler)).to.be.true
 
-        expect(collection.id).to.be.equal(0)
-        expect(Object.keys(collection.data)).to.have.lengthOf(0)
-      })
+          checkCollectionIds([element])
+          checkCollectionDataById(1, undefined, {
+            num: 2, info: [
+              {loc: `${scriptUrl}:5:12`, code: 'element.addEventListener(\'click\', clickHandler)'},
+              {loc: `${scriptUrl}:6:12`, code: 'element.removeEventListener(\'click\', clickHandler)'}
+            ]
+          })
+        })
 
-      it('should add code info to collection (EVENT call)', () => {
-        element.addEventListener = sandbox.spy()
-        element.removeEventListener = sandbox.spy()
+        it('should add code info to collection (prop)', () => {
+          element.addEventListener = sandbox.spy()
 
-        const ast = esprima.parse(`
-          var element = document.getElementById('element');
-          var clickHandler = function () {};
+          const ast = esprima.parse(`
+            var element = document.getElementById('element');
+            var clickHandler = function () {};
 
-          element.addEventListener('click', clickHandler);
-          element.removeEventListener('click', clickHandler);
-        `, {loc: true})
+            element.onclick = clickHandler;
+          `, {loc: true})
 
-        esprimaParser.parseAst(ast, scriptUrl)
+          esprimaParser.parseAst(ast, scriptUrl)
 
-        const clickHandler = closureStack.get('clickHandler')
+          const clickHandler = closureStack.get('clickHandler')
 
-        expect(element).to.have.property('CollectionId')
-        expect(element.addEventListener.calledWith('click', clickHandler)).to.be.true
-        expect(element.removeEventListener.calledWith('click', clickHandler)).to.be.true
+          expect(element.addEventListener.calledWith('click', clickHandler)).to.be.true
 
-        const id = element.CollectionId
-
-        expect(id).to.be.equal(collection.id).and.equal(1)
-
-        expect(Object.keys(collection.data)).to.have.lengthOf(1)
-        expect(Object.keys(collection.data[id][M])).to.have.lengthOf(0)
-        expect(Object.keys(collection.data[id][E])).to.have.lengthOf(2)
-
-        expect(collection.data[id][E]).to.have.property(`${scriptUrl}:5:10`, 'element.addEventListener(\'click\', clickHandler)')
-        expect(collection.data[id][E]).to.have.property(`${scriptUrl}:6:10`, 'element.removeEventListener(\'click\', clickHandler)')
-      })
-
-      it('should add code info to collection (EVENT prop)', () => {
-        element.addEventListener = sandbox.spy()
-
-        const ast = esprima.parse(`
-          var element = document.getElementById('element');
-          var clickHandler = function () {};
-
-          element.onclick = clickHandler;
-        `, {loc: true})
-
-        esprimaParser.parseAst(ast, scriptUrl)
-
-        const clickHandler = closureStack.get('clickHandler')
-
-        expect(element).to.have.property('CollectionId')
-        expect(element.addEventListener.calledWith('click', clickHandler)).to.be.true
-
-        const id = element.CollectionId
-
-        expect(id).to.be.equal(collection.id).and.equal(1)
-
-        expect(Object.keys(collection.data)).to.have.lengthOf(1)
-        expect(Object.keys(collection.data[id][M])).to.have.lengthOf(0)
-        expect(Object.keys(collection.data[id][E])).to.have.lengthOf(1)
-
-        expect(collection.data[id][E]).to.have.property(`${scriptUrl}:5:10`, 'element.onclick')
+          checkCollectionIds([element])
+          checkCollectionDataById(1, undefined, {
+            num: 1, info: [
+              {loc: `${scriptUrl}:5:12`, code: 'element.onclick'}
+            ]
+          })
+        })
       })
     })
   })
@@ -359,7 +376,309 @@ describe.only('collection', () => {
   /*        jQuery         */
   /*************************/
 
-  describe('jQuery', () => {
+  const checkCollectionDataByElements = (elements, mInfo, eInfo) => {
+    for (const element of elements) {
+      checkCollectionDataById(element.CollectionId, mInfo, eInfo)
+    }
+  }
 
+  describe('jQuery', () => {
+    let $element, elements
+
+    const jQueryStub = function () {
+      if (!(this instanceof jQueryStub)) {
+        return $element
+      }
+      this.elements = elements
+
+      return this
+    }
+
+    jQueryStub.prototype.get = function () {
+      return this.elements
+    }
+
+    before(() => {
+      esprimaParser.context.jQuery = jQueryStub
+    })
+
+    beforeEach(() => {
+      elements = [{}, {}]
+      $element = new jQueryStub(elements)
+    })
+
+    describe('MANIPULATION', () => {
+      describe('mani tests', () => {
+        it('should add code info to collection', () => {
+          $element.addClass = sandbox.spy()
+
+          const ast = esprima.parse(`
+            var $element = jQuery('#element');
+            var result = $element.addClass('class1');
+          `, {loc: true})
+
+          esprimaParser.parseAst(ast, scriptUrl)
+
+          expect(closureStack.get('result')).to.be.equal($element)
+
+          expect($element.addClass.called).to.be.false
+
+          checkCollectionIds(elements)
+          checkCollectionDataByElements(elements, {
+            num: 1, info: [
+              {loc: `${scriptUrl}:3:25`, code: '$element.addClass(\'class1\')'}
+            ]
+          })
+        })
+      })
+
+      describe('mani arg0 tests', () => {
+        beforeEach(() => {
+          $element.click = sandbox.spy()
+        })
+
+        it('should add code info to collection', () => {
+          const ast = esprima.parse(`
+            var $element = jQuery('#element');
+            var result = $element.click();
+          `, {loc: true})
+
+          esprimaParser.parseAst(ast, scriptUrl)
+
+          expect(closureStack.get('result')).to.be.equal($element)
+
+          expect($element.click.called).to.be.false
+
+          checkCollectionIds(elements)
+          checkCollectionDataByElements(elements, {
+            num: 1, info: [
+              {loc: `${scriptUrl}:3:25`, code: '$element.click()'}
+            ]
+          })
+        })
+
+        it('should not add code info to collection given args.length > 0', () => {
+          const ast = esprima.parse(`
+            var $element = jQuery('#element');
+
+            $element.click(function () {});
+          `, {loc: true})
+
+          esprimaParser.parseAst(ast, scriptUrl)
+
+          // this case would add event to collection data,
+          // use checkCollectionDataByElements instead of checkEmptyCollection
+          checkCollectionDataByElements(elements, undefined, {ignore: true})
+        })
+      })
+
+      describe('mani arg1 tests', () => {
+        beforeEach(() => {
+          $element.height = sandbox.stub()
+            .withArgs(sinon.match.string)
+              .returns('100px')
+        })
+
+        it('should add code info to collection', () => {
+          const ast = esprima.parse(`
+            var $element = jQuery('#element');
+            var result = $element.height('100px');
+          `, {loc: true})
+
+          esprimaParser.parseAst(ast, scriptUrl)
+
+          expect(closureStack.get('result')).to.be.equal($element)
+
+          checkCollectionIds(elements)
+          checkCollectionDataByElements(elements, {
+            num: 1, info: [
+              {loc: `${scriptUrl}:3:25`, code: '$element.height(\'100px\')'}
+            ]
+          })
+        })
+
+        it('should not add code info to collection', () => {
+          const ast = esprima.parse(`
+            var $element = jQuery('#element');
+            var result = $element.height();
+          `, {loc: true})
+
+          esprimaParser.parseAst(ast, scriptUrl)
+
+          expect(closureStack.get('result')).to.be.equal('100px')
+
+          checkEmptyCollection(elements)
+        })
+      })
+
+      describe('mani arg2 or object tests', () => {
+        it('should add code info to collection for args.length === 2', () => {
+          $element.css = sandbox.spy()
+
+          const ast = esprima.parse(`
+            var $element = jQuery('#element');
+            var result = $element.css('color', 'red');
+          `, {loc: true})
+
+          esprimaParser.parseAst(ast, scriptUrl)
+
+          expect(closureStack.get('result')).to.be.equal($element)
+
+          expect($element.css.called).to.be.false
+
+          checkCollectionIds(elements)
+          checkCollectionDataByElements(elements, {
+            num: 1, info: [
+              {loc: `${scriptUrl}:3:25`, code: '$element.css(\'color\', \'red\')'}
+            ]
+          })
+        })
+
+        it('should add code info to collection for object type args[0]', () => {
+          $element.css = sandbox.spy()
+
+          const ast = esprima.parse(`
+            var $element = jQuery('#element');
+            var result = $element.css({'background-color': 'red'});
+          `, {loc: true})
+
+          esprimaParser.parseAst(ast, scriptUrl)
+
+          expect(closureStack.get('result')).to.be.equal($element)
+
+          expect($element.css.called).to.be.false
+
+          checkCollectionIds(elements)
+          checkCollectionDataByElements(elements, {
+            num: 1, info: [
+              // escodegen.generate would add blank before and after an object
+              {loc: `${scriptUrl}:3:25`, code: '$element.css({ \'background-color\': \'red\' })'}
+            ]
+          })
+        })
+
+        it('should not add code info to collection for getter usage', () => {
+          $element.css = sandbox.stub().returns('red')
+
+          const ast = esprima.parse(`
+            var $element = jQuery('#element');
+            var result = $element.css('color');
+          `, {loc: true})
+
+          esprimaParser.parseAst(ast, scriptUrl)
+
+          expect(closureStack.get('result')).to.be.equal('red')
+
+          expect($element.css.calledWith('color')).to.be.true
+
+          checkEmptyCollection(elements)
+        })
+      })
+
+      describe('mani passive tests', () => {
+        it('should add code info to collection', () => {
+          const appendElements = [{}, {}]
+          const $appendElement = new jQueryStub(appendElements)
+
+          $appendElement.appendTo = sandbox.spy()
+          // pre-set append elements
+          esprimaParser.closureStack.set('$appendElement', $appendElement)
+
+          const ast = esprima.parse(`
+            var result = $appendElement.appendTo('#element');
+          `, {loc: true})
+
+          esprimaParser.parseAst(ast, scriptUrl)
+
+          expect(closureStack.get('result')).to.be.equal($appendElement)
+
+          expect($appendElement.appendTo.called).to.be.false
+
+          checkCollectionIds(elements)
+          checkCollectionDataByElements(elements, {
+            num: 1, info: [
+              {loc: `${scriptUrl}:2:25`, code: '$appendElement.appendTo(\'#element\')'}
+            ]
+          })
+        })
+      })
+    })
+
+    describe('EVENT', () => {
+      describe('event tests', () => {
+        it('should add code info to collection', () => {
+          $element.on = sandbox.stub().returns($element)
+
+          const ast = esprima.parse(`
+            var $element = jQuery('#element');
+            var clickHandler = function () {};
+            var result1 = $element.on('click', clickHandler);
+            var result2 = $element.on({
+              click: clickHandler
+            })
+          `, {loc: true})
+
+          esprimaParser.parseAst(ast, scriptUrl)
+
+          for (const index of [1, 2]) {
+            expect(closureStack.get(`result${index}`)).to.be.equal($element)
+          }
+          const clickHandler = closureStack.get('clickHandler')
+
+          expect($element.on.calledTwice).to.be.true
+          expect($element.on.getCall(0).calledWith('click', clickHandler)).to.be.true
+          expect($element.on.getCall(1).calledWith({click: clickHandler})).to.be.true
+
+          checkCollectionIds(elements)
+          checkCollectionDataByElements(elements, undefined, {
+            num: 2, info: [
+              {loc: `${scriptUrl}:4:26`, code: '$element.on(\'click\', clickHandler)'},
+              {loc: `${scriptUrl}:5:26`, code: '$element.on({ click: clickHandler })'}
+            ]
+          })
+        })
+      })
+
+      describe('event arg > 1 tests', () => {
+        it('should add code info to collection', () => {
+          $element.click = sandbox.stub().returns($element)
+
+          const ast = esprima.parse(`
+            var $element = jQuery('#element');
+            var clickHandler = function () {};
+            var result = $element.click(clickHandler);
+          `, {loc: true})
+
+          esprimaParser.parseAst(ast, scriptUrl)
+
+          expect(closureStack.get('result')).to.be.equal($element)
+
+          const clickHandler = closureStack.get('clickHandler')
+
+          expect($element.click.calledWith(clickHandler)).to.be.true
+
+          checkCollectionIds(elements)
+          checkCollectionDataByElements(elements, undefined, {
+            num: 1, info: [
+              {loc: `${scriptUrl}:4:25`, code: '$element.click(clickHandler)'}
+            ]
+          })
+        })
+
+        it('should not add code info to collection', () => {
+          const ast = esprima.parse(`
+            var $element = jQuery('#element');
+
+            $element.click();
+          `, {loc: true})
+
+          esprimaParser.parseAst(ast, scriptUrl)
+
+          // this case would add manipulation to collection data,
+          // use checkCollectionDataByElements instead of checkEmptyCollection
+          checkCollectionDataByElements(elements, {ignore: true})
+        })
+      })
+    })
   })
 })

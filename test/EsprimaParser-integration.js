@@ -5,6 +5,10 @@ global.esprima = require('esprima')
 global.EsprimaParser = require('../lib/EsprimaParser')
 global.resetVariables = require('./lib/EsprimaParser-integration/helpers/resetVariables')
 
+before(() => {
+  global.esprimaParser = new EsprimaParser(global)
+})
+
 /* init esprimaParser */
 beforeEach(() => {
   global.esprimaParser = new EsprimaParser(global)

@@ -1,4 +1,4 @@
-describe.only('isAttr tests', () => {
+describe('isAttr tests', () => {
   const AttrStub = class {}
   const contextStub = {
     Attr: AttrStub

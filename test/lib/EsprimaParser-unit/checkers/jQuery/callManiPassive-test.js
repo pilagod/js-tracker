@@ -2,14 +2,11 @@ const proxyquire = require('proxyquire')
 
 describe('callManiPassive checker tests', () => {
   const criteria = {}
+  const context = {}
   const caller = {}
   const callee = {
     method: 'callee',
     arguments: ['argument']
-  }
-  const statusData = {
-    execute: caller,
-    passive: callee.arguments[0]
   }
   let checkerStub, checker
 
@@ -21,10 +18,23 @@ describe('callManiPassive checker tests', () => {
     })
   })
 
-  it('should call callManiPassiveChecker with an object containing proper criteria, callee and statusData (execute -> caller, passive -> callee.argument[0]) then return', () => {
-    const result = checker({caller, callee})
+  it('should call callManiPassiveChecker with an object containing proper criteria, callee and statusData (execute -> caller, passive -> jQuery(callee.argument[0])) then return', () => {
+    const $element = [callee.arguments[0]]
+    const statusData = {
+      execute: caller,
+      passive: $element
+    }
+    context.jQuery = sandbox.stub()
+      .withArgs(callee.arguments[0])
+        .returns($element)
+
+    const result = checker({context, caller, callee})
 
     expect(checkerStub.calledOnce).to.be.true
+    expect(
+      context.jQuery
+        .calledWithExactly(callee.arguments[0])
+    ).to.be.true
     expect(
       checkerStub
         .calledWithExactly({criteria, callee, statusData})

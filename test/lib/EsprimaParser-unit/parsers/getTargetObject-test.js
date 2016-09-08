@@ -1,4 +1,4 @@
-describe.only('getTargetObject tests', () => {
+describe('getTargetObject tests', () => {
   const caller = {
     parent: 'parent',
     ownerElement: 'ownerElement'

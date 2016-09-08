@@ -3,15 +3,9 @@ describe('addInfoToElements tests', () => {
     elements: [],
     info: {}
   }
-  let Collection
-
-  before(() => {
-    Collection = require('../../../../lib/EsprimaParser/structures/Collection')
-  })
-
   it('should call addEvent of collection with info given status type CallChecker.EVENT', () => {
     const status = {
-      type: Collection.EVENT
+      type: esprimaParser.Collection.EVENT
     }
     sandbox.stub(esprimaParser, 'collection', {
       addEvent: sandbox.spy()
@@ -26,7 +20,7 @@ describe('addInfoToElements tests', () => {
 
   it('should call addManipulation of collection with info given status type CallChecker.MANIPULATION', () => {
     const status = {
-      type: Collection.MANIPULATION
+      type: esprimaParser.Collection.MANIPULATION
     }
     sandbox.stub(esprimaParser, 'collection', {
       addManipulation: sandbox.spy()
