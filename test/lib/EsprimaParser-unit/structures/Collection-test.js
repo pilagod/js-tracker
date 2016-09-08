@@ -45,6 +45,24 @@ describe('Collection tests', () => {
     })
 
     /*************************/
+    /*          get          */
+    /*************************/
+
+    describe('get tests', () => {
+      it('should get code info from given id', () => {
+        const data = {
+          [collection.MANIPULATION]: {},
+          [collection.EVENT]: {}
+        }
+        collection.data[1] = data
+
+        const result = collection.get(1)
+
+        expect(result).to.be.equal(data)
+      })
+    })
+
+    /*************************/
     /*        addEvent       */
     /*************************/
 

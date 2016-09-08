@@ -4,10 +4,10 @@
   "description": "A chrome extension tracking the behavior of javascript manipulating html elements on web",
   "main": "index.js",
   "scripts": {
-    "test": "mocha",
     "test-unit": "node node_modules/istanbul/lib/cli.js cover node_modules/mocha/bin/_mocha test/EsprimaParser-unit.js",
     "test-integration": "karma start --reporters mocha",
-    "dev": "watchify lib/EsprimaParser/index-es6.js -o lib/EsprimaParser/index.js"
+    "build": "browserify contentscript.js -o contentscript-dist.js",
+    "dev": "watchify contentscript.js -o contentscript-dist.js"
   },
   "repository": {
     "type": "git",
@@ -26,9 +26,10 @@
   "license": "ISC",
   "homepage": "https://bitbucket.org/pilagod/js-tracking#readme",
   "dependencies": {
+    "es6-promise": "^3.2.1",
     "escodegen": "^1.8.0",
     "esprima": "^2.7.2",
-    "import-all-from": "^1.0.0",
+    "isomorphic-fetch": "^2.2.1",
     "jquery": "^3.0.0"
   },
   "devDependencies": {
@@ -37,6 +38,7 @@
     "brfs": "^1.4.3",
     "browserify": "^13.1.0",
     "chai": "^3.5.0",
+    "import-all-from": "^1.0.1",
     "istanbul": "^0.4.5",
     "karma": "^1.2.0",
     "karma-browserify": "^5.1.0",

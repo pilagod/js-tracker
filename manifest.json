@@ -1,0 +1,21 @@
+{
+  "manifest_version": 2,
+
+  "name": "js-tracking",
+  "description": "This extension tracks all Javascript codes (DOM, jQuery API) which manipulating elements on the page.",
+  "version": "0.0",
+
+  "browser_action": {
+
+  },
+
+  "background": {
+    "scripts": ["background.js"]
+  },
+
+  "devtools_page": "devtools.html",
+
+  "permissions": [
+    "activeTab"
+  ]
+}
