@@ -1,54 +1,36 @@
 // spec: https://github.com/estree/estree/blob/master/spec.md#memberexpression
 
 describe('MemberExpression tests', () => {
-  // stub results
-  const resultFromParseNode = 'resultFromParseNode'
-  const resultFromGetPropertyKey = 'resultFromGetPropertyKey'
-  const resultFromExecute = 'resultFromExecute'
   let memberExpression
+  // stub results
+  const resultFromGetMemberExp = 'resultFromGetMemberExp'
+  const resultFromParseMemberExp = 'resultFromParseMemberExp'
 
   beforeEach(() => {
-    memberExpression = createAstNode('MemberExpression', {
-      object: createAstNode('Expression'),
-      property: createAstNode('Expression || Identifier'),
-      computed: 'Boolean'
-    })
-    sandbox.stub(esprimaParser, 'parseNode')
-      .returns(resultFromParseNode)
-    sandbox.stub(esprimaParser, 'getPropertyKey')
-      .returns(resultFromGetPropertyKey)
-    sandbox.stub(esprimaParser, 'execute')
-      .returns(resultFromExecute)
+    memberExpression = createAstNode('MemberExpression')
+
+    sandbox.stub(esprimaParser, 'getMemberExp')
+      .returns(resultFromGetMemberExp)
+    sandbox.stub(esprimaParser, 'parseMemberExp')
+      .returns(resultFromParseMemberExp)
   })
 
-  it('should call parseNode with object', () => {
+  it('should call getMemberExp with memberExpression', () => {
     esprimaParser.MemberExpression(memberExpression)
 
     expect(
-      esprimaParser.parseNode
-        .calledWithExactly(memberExpression.object)
+      esprimaParser.getMemberExp
+        .calledWithExactly(memberExpression)
     ).to.be.true
   })
 
-  it('should call getPropertyKey with property and computed', () => {
-    esprimaParser.MemberExpression(memberExpression)
-
-    expect(
-      esprimaParser.getPropertyKey
-        .calledWithExactly(memberExpression.property, memberExpression.computed)
-    ).to.be.true
-  })
-
-  it('should call execute with an object containing caller of result from parseNode and callee of result from getPropertyKey', () => {
+  it('should call parseMemberExp with result from getMemberExp and return', () => {
     const result = esprimaParser.MemberExpression(memberExpression)
 
     expect(
-      esprimaParser.execute
-        .calledWithExactly({
-          caller: resultFromParseNode,
-          callee: resultFromGetPropertyKey
-        })
-    ).to.be.true
-    expect(result).to.be.equal(resultFromExecute)
+      esprimaParser.parseMemberExp
+        .calledWithExactly(resultFromGetMemberExp)
+    )
+    expect(result).to.be.equal(resultFromParseMemberExp)
   })
 })

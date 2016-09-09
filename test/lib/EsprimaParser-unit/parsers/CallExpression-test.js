@@ -1,46 +1,103 @@
 // spec: https://github.com/estree/estree/blob/master/spec.md#callexpression
 
 describe('CallExpression tests', () => {
-  const expression = {
-    data: 'data',
-    info: 'info'
-  }
   let callExpression
+  // stub results
+  const exp = {
+    caller: {},
+    callee: {},
+    info: {}
+  }
+  // const checkFlag = {}
 
   beforeEach(() => {
-    callExpression = createAstNode('CallExpression', {
-      callee: createAstNode('Expression'),
-      arguments: [createAstNode('Expression')]
-    })
+    callexpression = createAstNode('CallExpression')
 
-    sandbox.stub(esprimaParser, 'parseExpression')
-      .returns(expression)
-    sandbox.stub(esprimaParser, 'checkAndExecute')
-      .returns('resultFromCheckAndExecute')
+    sandbox.stub(esprimaParser, 'getCallExp')
+      .returns(exp)
+    sandbox.stub(esprimaParser, 'parseCallExp')
+    // sandbox.stub(esprimaParser, 'createCheckFlag')
+    //   .returns(checkFlag)
+    // sandbox.stub(esprimaParser, 'setCheckFlag')
+    // sandbox.stub(esprimaParser, 'execute')
+    // sandbox.stub(esprimaParser, 'resetCheckFlag')
   })
 
-  it('should call parseExpression with callExpression', () => {
+  it('should call getCallExp with callExpression', () => {
     esprimaParser.CallExpression(callExpression)
 
     expect(
-      esprimaParser.parseExpression
+      esprimaParser.getCallExp
         .calledWithExactly(callExpression)
     ).to.be.true
   })
 
-  it('should call checkAndExecute with expression data and info returned from parseExpression', () => {
-    esprimaParser.CallExpression(callExpression)
+  it('should call parseCallExp with exp and return', () => {
+    const resultFromParseCallExp = 'resultFromParseCallExp'
 
-    expect(esprimaParser.checkAndExecute.calledOnce).to.be.true
-    expect(
-      esprimaParser.checkAndExecute
-        .calledWithExactly(expression.data, expression.info)
-    ).to.be.true
-  })
+    esprimaParser.parseCallExp
+      .returns(resultFromParseCallExp)
 
-  it('should return result from checkAndExecute', () => {
     const result = esprimaParser.CallExpression(callExpression)
 
-    expect(result).to.be.equal('resultFromCheckAndExecute')
+    expect(
+      esprimaParser.parseCallExp
+        .calledWithExactly(exp)
+    ).to.be.true
+    expect(result).to.be.equal(resultFromParseCallExp)
   })
+
+  // it('should call createCheckFlag with exp', () => {
+  //   esprimaParser.CallExpression(callExpression)
+  //
+  //   expect(
+  //     esprimaParser.createCheckFlag
+  //       .calledWithExactly(exp)
+  //   ).to.be.true
+  // })
+  //
+  // it('should call setCheckFlag with exp and checkFlag', () => {
+  //   esprimaParser.CallExpression(callExpression)
+  //
+  //   expect(
+  //     esprimaParser.setCheckFlag
+  //       .calledWithExactly(exp, checkFlag)
+  //   ).to.be.true
+  // })
+  //
+  // it('should call execute with exp after setCheckFlag', () => {
+  //   esprimaParser.CallExpression(callExpression)
+  //
+  //   expect(
+  //     esprimaParser.execute
+  //       .calledAfter(esprimaParser.setCheckFlag)
+  //   ).to.be.true
+  //   expect(
+  //     esprimaParser.execute
+  //       .calledWithExactly(exp)
+  //   ).to.be.true
+  // })
+  //
+  // it('should call resetCheckFlag with checkFlag after execute', () => {
+  //   esprimaParser.CallExpression(callExpression)
+  //
+  //   expect(
+  //     esprimaParser.resetCheckFlag
+  //       .calledAfter(esprimaParser.execute)
+  //   ).to.be.true
+  //   expect(
+  //     esprimaParser.resetCheckFlag
+  //       .calledWithExactly(checkFlag)
+  //   ).to.be.true
+  // })
+  //
+  // it('should return result from execute', () => {
+  //   const resultFromExecute = 'resultFromExecute'
+  //
+  //   esprimaParser.execute.returns(resultFromExecute)
+  //
+  //   const result = esprimaParser.CallExpression(callExpression)
+  //
+  //   expect(result).to.be.equal(resultFromExecute)
+  // })
 })

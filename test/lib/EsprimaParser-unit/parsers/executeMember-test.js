@@ -1,4 +1,4 @@
-describe.only('executeMember tests', () => {
+describe('executeMember tests', () => {
   it('should return caller[callee]', () => {
     const caller = {
       callee: 'value'
