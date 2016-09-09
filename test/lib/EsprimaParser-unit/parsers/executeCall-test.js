@@ -1,34 +1,36 @@
 describe('executeCall tests', () => {
-  const pre = 'pre'
-  const cur = {
-    arguments: ['arg1', 'arg2', 'arg3']
+  const caller = {}
+  const callee = {
+    arguments: ['arg1', 'arg2']
   }
-  let methodStub
+  // stub results
+  const resultFromApply = 'resultFromApply'
+  let calledMethodStub
 
   beforeEach(() => {
-    methodStub = {
-      apply: sandbox.stub().returns('resultFromApply')
+    calledMethodStub = {
+      apply: sandbox.stub().returns(resultFromApply)
     }
-    sandbox.stub(esprimaParser, 'getMethod')
-      .returns(methodStub)
+    sandbox.stub(esprimaParser, 'getCalledMethod')
+      .returns(calledMethodStub)
   })
 
-  it('should call getMethod with pre and cur', () => {
-    esprimaParser.executeCall(pre, cur)
+  it('should call getCalledMethod with an object containing caller and callee', () => {
+    esprimaParser.executeCall({caller, callee})
 
     expect(
-      esprimaParser.getMethod
-        .calledWithExactly(pre, cur)
+      esprimaParser.getCalledMethod
+        .calledWithExactly({caller, callee})
     ).to.be.true
   })
 
-  it('should call apply of result from getMethod with pre and cur.arguments then return', () => {
-    const result = esprimaParser.executeCall(pre, cur)
+  it('should call apply from result of getCalledMethod with caller and callee.arguments then return', () => {
+    const result = esprimaParser.executeCall({caller, callee})
 
     expect(
-      methodStub.apply
-        .calledWithExactly(pre, cur.arguments)
+      calledMethodStub.apply
+        .calledWithExactly(caller, callee.arguments)
     ).to.be.true
-    expect(result).to.be.equal('resultFromApply')
+    expect(result).to.be.equal(resultFromApply)
   })
 })

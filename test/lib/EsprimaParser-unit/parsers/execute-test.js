@@ -1,33 +1,30 @@
 describe('execute tests', () => {
-  const data = ['data']
-
+  const exp = {
+    caller: 'caller',
+    callee: 'callee'
+  }
   beforeEach(() => {
-    sandbox.stub(esprimaParser, 'executeExpression')
+    sandbox.stub(esprimaParser, 'executeExp')
   })
 
-  it('should call executeExpression with data', () => {
-    esprimaParser.execute(data)
+  it('should call executeExp with exp and return', () => {
+    const resultFromExecuteExp = 'resultFromExecuteExp'
+
+    esprimaParser.executeExp.returns(resultFromExecuteExp)
+
+    const result = esprimaParser.execute(exp)
 
     expect(
-      esprimaParser.executeExpression
-        .calledWithExactly(data)
+      esprimaParser.executeExp
+        .calledWithExactly(exp)
     ).to.be.true
+    expect(result).to.be.equal(resultFromExecuteExp)
   })
 
-  it('should return result from executeExpression given no error threw', () => {
-    esprimaParser.executeExpression
-      .returns('resultFromExecuteExpression')
+  it('should return undefined given error threw from executeExp', () => {
+    esprimaParser.executeExp.throws(new Error())
 
-    const result = esprimaParser.execute(data)
-
-    expect(result).to.be.equal('resultFromExecuteExpression')
-  })
-
-  it('should return undefined given error threw from executeExpression', () => {
-    esprimaParser.executeExpression
-      .throws(new Error('errorFromExecuteExpression'))
-
-    const result = esprimaParser.execute(data)
+    const result = esprimaParser.execute(exp)
 
     expect(result).to.be.undefined
   })

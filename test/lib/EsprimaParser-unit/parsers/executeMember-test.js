@@ -1,21 +1,12 @@
-describe('executeMember tests', () => {
-  it('should return cur given undefined pre', () => {
-    const pre = undefined
-    const cur = 'cur'
-
-    const result = esprimaParser.executeMember(pre, cur)
-
-    expect(result).to.be.equal(cur)
-  })
-
-  it('should return pre[cur] given valid pre', () => {
-    const pre = {
-      cur: 'cur in pre'
+describe.only('executeMember tests', () => {
+  it('should return caller[callee]', () => {
+    const caller = {
+      callee: 'value'
     }
-    const cur = 'cur'
+    const callee = 'callee'
 
-    const result = esprimaParser.executeMember(pre, cur)
+    const result = esprimaParser.executeMember({caller, callee})
 
-    expect(result).to.be.equal(pre.cur)
+    expect(result).to.be.equal(caller[callee])
   })
 })

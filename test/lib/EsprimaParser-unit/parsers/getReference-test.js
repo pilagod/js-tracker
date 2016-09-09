@@ -1,4 +1,4 @@
-describe.only('getReference tests', () => {
+describe('getReference tests', () => {
   const data = ['data1', 'data2', 'data3']
 
   beforeEach(() => {
