@@ -48,6 +48,27 @@ describe('function', () => {
     })
   })
 
+  describe('priority tests', () => {
+    it('should add function declarations first', () => {
+      const ast = esprima.parse(`
+        var result = test();
+
+        function test() {
+          var result = test2();
+
+          return result;
+
+          function test2() {
+            return 'resultFromTest2';
+          }
+        }
+      `)
+      esprimaParser.parseAst(ast)
+
+      expect(closureStack.get('result')).to.be.equal('resultFromTest2')
+    })
+  })
+
   describe('invoke', () => {
     /* Function.prototype.bind() https://goo.gl/Josco */
     describe('bind tests', () => {
