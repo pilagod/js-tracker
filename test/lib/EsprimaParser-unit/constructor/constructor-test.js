@@ -1,6 +1,6 @@
 const proxyquire = require('proxyquire')
 
-describe.only('constructor tests', () => {
+describe('constructor tests', () => {
   const context = {}
 
   it('should set context to given context with \'this\' points to context', () => {

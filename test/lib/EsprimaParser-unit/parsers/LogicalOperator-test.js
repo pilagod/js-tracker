@@ -1,31 +1,80 @@
 // spec: https://github.com/estree/estree/blob/master/spec.md#logicaloperator
 
 describe('LogicalOperator tests', () => {
-  let getLogicalOperatorResult
+  let left, right
 
   before(() => {
-    getLogicalOperatorResult = (left, right, operator) => {
-      switch (operator) {
-        case '||':
-          return left || right
-        case '&&':
-          return left && right
-        default:
-      }
-    }
+    left = createAstNode('ExpressionLeft')
+    right = createAstNode('ExpressionRight')
   })
 
-  for (const operator of ['||', '&&']) {
-    describe(`'${operator}' operator`, () => {
-      it('should return correct result', () => {
-        for (const left of ['string', 1, true, null, undefined]) {
-          for (const right of ['string', 1, true, null, undefined]) {
-            const result = esprimaParser.logicalOperators[operator](left, right)
+  beforeEach(() => {
+    sandbox.stub(esprimaParser, 'parseNode')
+  })
 
-            expect(result).to.be.eql(getLogicalOperatorResult(left, right, operator))
-          }
-        }
-      })
+  describe('|| tests', () => {
+    it('should call parseNode with left only given the result is true', () => {
+      esprimaParser.parseNode.withArgs(left).returns(true)
+
+      const result = esprimaParser.logicalOperators['||'](left, right)
+
+      expect(esprimaParser.parseNode.calledOnce).to.be.true
+      expect(
+        esprimaParser.parseNode
+          .calledWithExactly(left)
+      ).to.be.true
+      expect(result).to.be.true
     })
-  }
+
+    it('should call parseNode with right and return given the result of parseNode called with left is false', () => {
+      esprimaParser.parseNode.withArgs(left).returns(false)
+      esprimaParser.parseNode.withArgs(right).returns('resultFromRight')
+
+      const result = esprimaParser.logicalOperators['||'](left, right)
+
+      expect(esprimaParser.parseNode.calledTwice).to.be.true
+      expect(
+        esprimaParser.parseNode
+          .calledWithExactly(left)
+      ).to.be.true
+      expect(
+        esprimaParser.parseNode
+          .calledWithExactly(right)
+      ).to.be.true
+      expect(result).to.be.equal('resultFromRight')
+    })
+  })
+
+  describe('&& tests', () => {
+    it('should call parseNode with left only given the result is false', () => {
+      esprimaParser.parseNode.withArgs(left).returns(false)
+
+      const result = esprimaParser.logicalOperators['&&'](left, right)
+
+      expect(esprimaParser.parseNode.calledOnce).to.be.true
+      expect(
+        esprimaParser.parseNode
+          .calledWithExactly(left)
+      ).to.be.true
+      expect(result).to.be.false
+    })
+  })
+
+  it('should call parseNode with right and return given the result of parseNode called with left is true', () => {
+    esprimaParser.parseNode.withArgs(left).returns(true)
+    esprimaParser.parseNode.withArgs(right).returns('resultFromRight')
+
+    const result = esprimaParser.logicalOperators['&&'](left, right)
+
+    expect(esprimaParser.parseNode.calledTwice).to.be.true
+    expect(
+      esprimaParser.parseNode
+        .calledWithExactly(left)
+    ).to.be.true
+    expect(
+      esprimaParser.parseNode
+        .calledWithExactly(right)
+    ).to.be.true
+    expect(result).to.be.equal('resultFromRight')
+  })
 })

@@ -1,4 +1,4 @@
-describe.only('initLogicalOperators tests', () => {
+describe('initLogicalOperators tests', () => {
   const context = {}
   let esprimaParser
 
