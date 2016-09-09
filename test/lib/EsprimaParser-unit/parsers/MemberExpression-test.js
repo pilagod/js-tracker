@@ -1,13 +1,10 @@
 // spec: https://github.com/estree/estree/blob/master/spec.md#memberexpression
 
-describe('MemberExpression tests', () => {
-  let expression, memberExpression
-
-  before(() => {
-    expression = {
-      data: ['data']
-    }
-  })
+describe.only('MemberExpression tests', () => {
+  const expression = {
+    data: ['data']
+  }
+  let memberExpression
 
   beforeEach(() => {
     memberExpression = createAstNode('MemberExpression')

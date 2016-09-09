@@ -2,7 +2,7 @@
   (1) esprima.parse should set option loc to true
   (2) esprimaParser.parseAst should set valid scriptUrl string
 */
-describe('collection', () => {
+describe.only('collection', () => {
   const scriptUrl = 'scriptUrl'
   let M, E, closureStack, collection
 
@@ -112,8 +112,8 @@ describe('collection', () => {
             var attrs = element.attributes;
             var value = attrs[0].value;
 
-            value = attrs[0].value
-            attrs[0].name = 'id'
+            value = attrs[0].value;
+            attrs[0].name = 'id';
           `, {loc: true})
 
           esprimaParser.parseAst(ast, scriptUrl)

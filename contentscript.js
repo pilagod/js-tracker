@@ -44,7 +44,6 @@ p.then(() => {
   asts.forEach((ast) => {
     esprimaParser.parseAst(ast.root, ast.url)
   })
-  console.log(typeof module);
 })
 
 if (!window.onDevtoolsSelectionChanged) {

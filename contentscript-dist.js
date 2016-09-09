@@ -1,8 +1,6 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
-
 console.log('excuting content script');
 
 module.exports = undefined;
@@ -49,7 +47,6 @@ p.then(function () {
   asts.forEach(function (ast) {
     esprimaParser.parseAst(ast.root, ast.url);
   });
-  console.log(typeof module === 'undefined' ? 'undefined' : _typeof(module));
 });
 
 if (!window.onDevtoolsSelectionChanged) {
@@ -169,6 +166,7 @@ module.exports = {
   setPointerCapture: true,
 
   /* Node https://goo.gl/Eh0utX */
+  /* @TODO: should return inserted node (not return undefined) */
   appendChild: true,
   insertBefore: true,
   normalize: true,
@@ -864,7 +862,7 @@ var EsprimaParser = function () {
           var status = _this3.checkerDispatcher.dispatch(Object.assign({
             context: _this3.context
           }, target));
-          // console.log('asign status:', status);
+          console.log('asign status:', status);
           _this3.handleAssignment(target, value, status);
         }
       };
@@ -1459,20 +1457,13 @@ var EsprimaParser = function () {
     key: 'Property',
     value: function Property(property) {
       return {
-        key: this.getPropertyKeyAsString(property.key, property.computed),
+        key: this.getPropertyKey(property.key, property.computed),
         value: this.parseNode(property.value)
       };
     }
   }, {
-    key: 'getPropertyKeyAsString',
-    value: function getPropertyKeyAsString(key, computed) {
-      var propertyKey = this.getPropertyKeyValue(key, computed);
-
-      return '' + propertyKey;
-    }
-  }, {
-    key: 'getPropertyKeyValue',
-    value: function getPropertyKeyValue(key, computed) {
+    key: 'getPropertyKey',
+    value: function getPropertyKey(key, computed) {
       if (computed) {
         return this.parseNode(key);
       }
@@ -1641,7 +1632,7 @@ var EsprimaParser = function () {
     key: 'parseMemberExpression',
     value: function parseMemberExpression(memberExpression) {
       var object = this.getObjectAsExpressionArray(memberExpression.object);
-      var property = this.getPropertyKeyAsString(memberExpression.property, memberExpression.computed);
+      var property = this.getPropertyKey(memberExpression.property, memberExpression.computed);
       return [].concat(_toConsumableArray(object), [property]);
     }
   }, {
@@ -1685,7 +1676,7 @@ var EsprimaParser = function () {
     key: 'parseMemberCallee',
     value: function parseMemberCallee(calleeExpression) {
       var caller = this.getObjectAsExpressionArray(calleeExpression.object);
-      var method = this.getPropertyKeyAsString(calleeExpression.property, calleeExpression.computed);
+      var method = this.getPropertyKey(calleeExpression.property, calleeExpression.computed);
       return {
         caller: caller,
         callee: this.getCallee(method)
@@ -1785,7 +1776,7 @@ var EsprimaParser = function () {
   }, {
     key: 'AssignmentExpression',
     value: function AssignmentExpression(assignmentExpression) {
-      console.log(this.escodegen.generate(assignmentExpression));
+      // console.log(this.escodegen.generate(assignmentExpression));
 
       var assignmentValue = this.getAssignmentValue(assignmentExpression);
 
@@ -1827,12 +1818,13 @@ var EsprimaParser = function () {
     key: 'execute',
     value: function execute(data) {
       // @TODO: take out try and catch
-      console.log(data);
-      // try {
-      return this.executeExpression(data);
-      // } catch (e) {
-      // return undefined
-      // }
+      // console.log(data);
+      try {
+        return this.executeExpression(data);
+      } catch (e) {
+        console.log(e);
+        return undefined;
+      }
     }
   }, {
     key: 'executeExpression',
@@ -1938,7 +1930,7 @@ var EsprimaParser = function () {
       var status = this.checkerDispatcher.dispatch(Object.assign({
         context: this.context
       }, target));
-      // console.log('call status:', status);
+      console.log('call status:', status);
       if (status) {
         this.addInfoToCollection(target, status);
       }

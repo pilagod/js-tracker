@@ -1,21 +1,21 @@
-describe('getReference tests', () => {
+describe.only('getReference tests', () => {
   const data = ['data1', 'data2', 'data3']
 
   beforeEach(() => {
-    sandbox.stub(esprimaParser, 'execute')
+    sandbox.stub(esprimaParser, 'checkAndExecute')
       .withArgs(data.slice(0, data.length - 1))
-        .returns('resultFromExecute')
+        .returns('resultFromCheckAndExecute')
   })
 
-  it('should return an object containing caller with result of execute data first length - 1 elements and callee with data last element', () => {
+  it('should return an object containing caller with result of checkAndExecuted data first length - 1 elements and callee with data last element', () => {
     const result = esprimaParser.getReference(data)
 
     expect(
-      esprimaParser.execute
+      esprimaParser.checkAndExecute
         .calledWithExactly(data.slice(0, data.length - 1))
     ).to.be.true
     expect(result).to.be.eql({
-      caller: 'resultFromExecute',
+      caller: 'resultFromCheckAndExecute',
       callee: data.slice(-1)[0]
     })
   })
