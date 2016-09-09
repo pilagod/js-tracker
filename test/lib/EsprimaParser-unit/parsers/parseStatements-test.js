@@ -1,63 +1,39 @@
 describe('parseStatements tests', () => {
-  const setStateStub = (results) => {
-    sandbox.stub(esprimaParser, 'flowState', {
-      isEitherState: sandbox.spy(
-        createResultsGenerator(results)
-      )
-    })
-  }
-  let body
+  let statements, otherStatements
 
-  beforeEach(() => {
-    body = [
+  before(() => {
+    statements = [
       createAstNode('Statement1'),
       createAstNode('Statement2'),
-      createAstNode('Statement3')
     ]
-    sandbox.stub(esprimaParser, 'parseNode', createParseNodeStub())
   })
 
-  it('should call isEitherState of flowState each loop given no flow control statement', () => {
-    setStateStub([false, false, false])
+  beforeEach(() => {
+    otherStatements = [statements[1]]
 
-    esprimaParser.parseStatements(body)
-
-    expect(esprimaParser.flowState.isEitherState.calledThrice).to.be.true
+    sandbox.stub(esprimaParser, 'parseFunctionDeclaration')
+      .returns(otherStatements)
+    sandbox.stub(esprimaParser, 'parseOtherStatements')
+      .returns('resultFromParseOtherStatements')
   })
 
-  it('should call parseNode with each body node given no flow control statement, and return last parsed result', () => {
-    setStateStub([false, false, false])
+  it('should call parseFunctionDeclaration with statements', () => {
+    esprimaParser.parseStatements(statements)
 
-    const result = esprimaParser.parseStatements(body)
-
-    body.forEach((node, index) => {
-      expect(
-        esprimaParser.parseNode
-          .getCall(index)
-          .calledWithExactly(node)
-      ).to.be.true
-    })
-    expect(result).to.be.equal('parsedStatement3')
-  })
-
-  it('should call isEitherState of flowState until first flow control statement', () => {
-    setStateStub([false, true, false])
-
-    esprimaParser.parseStatements(body)
-
-    expect(esprimaParser.flowState.isEitherState.calledTwice).to.be.true
-  })
-
-  it('should call parseNode with node until first flow control statement and return the result', () => {
-    setStateStub([false, true, false])
-
-    const result = esprimaParser.parseStatements(body)
-
-    expect(esprimaParser.parseNode.calledTwice).to.be.true
     expect(
-      esprimaParser.parseNode
-        .neverCalledWith(body[2])
+      esprimaParser.parseFunctionDeclaration
+        .calledWithExactly(statements)
     ).to.be.true
-    expect(result).to.be.equal('parsedStatement2')
   })
+
+  it('should call parseOtherStatements with result from parseFunctionDeclaration and return', () => {
+    const result = esprimaParser.parseStatements(statements)
+
+    expect(
+      esprimaParser.parseOtherStatements
+        .calledWithExactly(otherStatements)
+    ).to.be.true
+    expect(result).to.be.equal('resultFromParseOtherStatements')
+  })
+
 })
