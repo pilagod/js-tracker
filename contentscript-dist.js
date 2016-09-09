@@ -970,7 +970,6 @@ var EsprimaParser = function () {
   }, {
     key: 'ExpressionStatement',
     value: function ExpressionStatement(expressionStatement) {
-      console.log(this.escodegen.generate(expressionStatement));
       this.parseNode(expressionStatement.expression);
     }
   }, {
@@ -1051,8 +1050,6 @@ var EsprimaParser = function () {
     key: 'IfStatement',
     value: function IfStatement(ifStatement) {
       var testPass = this.parseNode(ifStatement.test);
-
-      console.log(testPass, this.escodegen.generate(ifStatement.test));
 
       return testPass ? this.parseNode(ifStatement.consequent) : this.parseNode(ifStatement.alternate);
     }
@@ -1350,7 +1347,6 @@ var EsprimaParser = function () {
     value: function VariableDeclaration(variableDeclaration) {
       var _this4 = this;
 
-      console.log(this.escodegen.generate(variableDeclaration));
       variableDeclaration.declarations.forEach(function (node) {
         _this4.parseNode(node);
       });
@@ -1730,6 +1726,7 @@ var EsprimaParser = function () {
   }, {
     key: 'BinaryExpression',
     value: function BinaryExpression(binaryExpression) {
+      // @TODO: can not calculate left and right together
       var left = this.parseNode(binaryExpression.left);
       var right = this.parseNode(binaryExpression.right);
       var binaryOperation = this.binaryOperators[binaryExpression.operator];
@@ -1780,7 +1777,7 @@ var EsprimaParser = function () {
   }, {
     key: 'execute',
     value: function execute(data) {
-      console.log(data);
+      // @TODO: take out try and catch
       // try {
       return this.executeExpression(data);
       // } catch (e) {

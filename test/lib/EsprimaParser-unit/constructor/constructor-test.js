@@ -1,6 +1,6 @@
 const proxyquire = require('proxyquire')
 
-describe('constructor tests', () => {
+describe.only('constructor tests', () => {
   const context = {}
 
   it('should set context to given context with \'this\' points to context', () => {
@@ -26,7 +26,6 @@ describe('constructor tests', () => {
 
     /* import operators */
     const binaryOperators = require(libDir + '/operators/binaryOperators')
-    const logicalOperators = require(libDir + '/operators/logicalOperators')
     /* for variables init */
     const checkerDispatcher = require(libDir + '/dispatchers/checkerDispatcher')
 
@@ -37,7 +36,6 @@ describe('constructor tests', () => {
     expect(esprimaParser.Collection).to.be.equal(Collection)
     expect(esprimaParser.FunctionAgent).to.be.equal(FunctionAgent)
     expect(esprimaParser.binaryOperators).to.be.equal(binaryOperators)
-    expect(esprimaParser.logicalOperators).to.be.equal(logicalOperators)
     expect(esprimaParser.checkerDispatcher).to.be.equal(checkerDispatcher)
   })
 
@@ -57,6 +55,15 @@ describe('constructor tests', () => {
         .calledWithExactly(unaryOperatorsStub)
     ).to.be.true
     expect(esprimaParser.unaryOperators).to.be.equal('resultFromInitUnaryOperators')
+  })
+
+  it('should set logicalOperators to the result from initLogicalOperators', () => {
+    sandbox.stub(EsprimaParser.prototype, 'initLogicalOperators')
+      .returns('resultFromInitLogicalOperators')
+
+    const esprimaParser = new EsprimaParser(context)
+
+    expect(esprimaParser.logicalOperators).to.be.equal('resultFromInitLogicalOperators')
   })
 
   it('should set assignmentOperators to the result from initAssignmentOperators', () => {
