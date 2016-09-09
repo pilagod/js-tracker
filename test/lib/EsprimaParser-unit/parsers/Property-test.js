@@ -9,7 +9,7 @@ describe('Property tests', () => {
       value: createAstNode('Expression')
     })
 
-    sandbox.stub(esprimaParser, 'getPropertyKeyAsString')
+    sandbox.stub(esprimaParser, 'getPropertyKey')
     sandbox.stub(esprimaParser, 'parseNode')
   })
 
@@ -20,11 +20,11 @@ describe('Property tests', () => {
     expect(result).to.have.property('value')
   })
 
-  it('should call getPropertyAsString with key and computed', () => {
+  it('should call getPropertyKey with key and computed', () => {
     esprimaParser.Property(property)
 
     expect(
-      esprimaParser.getPropertyKeyAsString
+      esprimaParser.getPropertyKey
         .calledWithExactly(property.key, property.computed)
     ).to.be.true
   })
@@ -39,7 +39,7 @@ describe('Property tests', () => {
   })
 
   it('should return {key: \'a\', value: 1} given property key \'a\' and value 1', () => {
-    esprimaParser.getPropertyKeyAsString.returns('a')
+    esprimaParser.getPropertyKey.returns('a')
     esprimaParser.parseNode.returns(1)
 
     const result = esprimaParser.Property(property)

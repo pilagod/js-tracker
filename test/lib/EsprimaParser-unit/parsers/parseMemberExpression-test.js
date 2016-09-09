@@ -17,7 +17,7 @@ describe('parseMemberExpression tests', () => {
     })
 
     setGetObjectAsExpressionArrayReturn(['object'])
-    sandbox.stub(esprimaParser, 'getPropertyKeyAsString')
+    sandbox.stub(esprimaParser, 'getPropertyKey')
       .returns('property')
   })
 
@@ -34,7 +34,7 @@ describe('parseMemberExpression tests', () => {
     esprimaParser.parseMemberExpression(memberExpression)
 
     expect(
-      esprimaParser.getPropertyKeyAsString
+      esprimaParser.getPropertyKey
         .calledWithExactly(
           memberExpression.property,
           memberExpression.computed

@@ -1,11 +1,11 @@
-describe('getPropertyKeyValue tests', () => {
+describe('getPropertyKey tests', () => {
   for (const computed of [false, true]) {
     it(`should ${computed ? '' : 'not '}call parseNode ${computed ? 'with key ' : ''}given computed ${computed}`, () => {
       const key = createAstNode('Expression')
 
       sandbox.stub(esprimaParser, 'parseNode')
 
-      esprimaParser.getPropertyKeyValue(key, computed)
+      esprimaParser.getPropertyKey(key, computed)
 
       if (computed) {
         // should call with key given computed true
@@ -26,7 +26,7 @@ describe('getPropertyKeyValue tests', () => {
         sandbox.stub(esprimaParser, 'parseNode')
           .returns('b')
       }
-      const result = esprimaParser.getPropertyKeyValue(key, computed)
+      const result = esprimaParser.getPropertyKey(key, computed)
 
       expect(result).to.be.equal(computed ? 'b' : 'a')
     })
@@ -38,7 +38,7 @@ describe('getPropertyKeyValue tests', () => {
         sandbox.stub(esprimaParser, 'parseNode')
           .returns('b')
       }
-      const result = esprimaParser.getPropertyKeyValue(key, computed)
+      const result = esprimaParser.getPropertyKey(key, computed)
 
       expect(result).to.be.equal('b')
     })
