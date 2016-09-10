@@ -10,15 +10,15 @@ describe('parseCallee tests', () => {
   beforeEach(() => {
     callee = createAstNode('Expression')
 
-    sandbox.stub(esprimaParser, 'getCallExpFromCallee').returns(exp)
+    sandbox.stub(esprimaParser, 'getExp').returns(exp)
     sandbox.stub(esprimaParser, 'createCallee').returns(calleeInstance)
   })
 
-  it('should call getCallExpFromCallee with callee', () => {
+  it('should call getExp with callee', () => {
     esprimaParser.parseCallee(callee)
 
     expect(
-      esprimaParser.getCallExpFromCallee
+      esprimaParser.getExp
         .calledWithExactly(callee)
     ).to.be.true
   })

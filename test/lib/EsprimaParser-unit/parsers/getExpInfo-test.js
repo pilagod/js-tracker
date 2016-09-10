@@ -1,4 +1,4 @@
-describe('parseExpressionInfo tests', () => {
+describe('getExpInfo tests', () => {
   it('should return an object containing code from escodegen called with expression, loc from expression.loc and scriptUrl from EsprimaParser', () => {
     const expression = createAstNode('MemberOrCallExpression')
 
@@ -9,7 +9,7 @@ describe('parseExpressionInfo tests', () => {
       generate: sandbox.stub()
         .withArgs(expression).returns('resultFromEscodegen')
     })
-    const result = esprimaParser.parseExpressionInfo(expression)
+    const result = esprimaParser.getExpInfo(expression)
 
     expect(result).to.be.eql({
       code: 'resultFromEscodegen',

@@ -2,10 +2,11 @@ describe('getCallExp tests', () => {
   let callExpression
   // stub results
   const exp = {
-    caller: {},
-    callee: {}
+    caller: {caller: 'caller'},
+    callee: {callee: 'callee'}
   }
   const calleeArguments = ['arg1', 'arg2']
+  const info = {info: 'info'}
 
   beforeEach(() => {
     callExpression = createAstNode('CallExpression', {
@@ -16,8 +17,11 @@ describe('getCallExp tests', () => {
       ]
     })
     exp.callee.addArguments = sandbox.spy()
+    delete exp.info
+
     sandbox.stub(esprimaParser, 'parseCallee').returns(exp)
     sandbox.stub(esprimaParser, 'parseArguments').returns(calleeArguments)
+    sandbox.stub(esprimaParser, 'getExpInfo').returns(info)
   })
 
   it('should call parseCallee with callExpression callee', () => {
@@ -45,6 +49,16 @@ describe('getCallExp tests', () => {
       exp.callee.addArguments
         .calledWithExactly(calleeArguments)
     ).to.be.true
+  })
+
+  it('should set exp.info to result of getExpInfo called with callExpression', () => {
+    esprimaParser.getCallExp(callExpression)
+
+    expect(
+      esprimaParser.getExpInfo
+        .calledWithExactly(callExpression)
+    ).to.be.true
+    expect(exp.info).to.be.equal(info)
   })
 
   it('should return exp (from parseCallee)', () => {
