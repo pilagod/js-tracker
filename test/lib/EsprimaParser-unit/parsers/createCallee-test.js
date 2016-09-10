@@ -1,4 +1,4 @@
-describe('getCallee tests', () => {
+describe('createCallee tests', () => {
   const method = 'method'
 
   beforeEach(() => {
@@ -8,7 +8,7 @@ describe('getCallee tests', () => {
   })
 
   it('should return an new instance of CalleeAgent init with argument method', () => {
-    const result = esprimaParser.getCallee(method)
+    const result = esprimaParser.createCallee(method)
 
     expect(result).to.be.instanceof(esprimaParser.Callee)
     expect(result.method).to.be.equal(method)

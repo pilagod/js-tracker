@@ -1,41 +1,55 @@
 describe('getCallExp tests', () => {
   let callExpression
+  // stub results
+  const exp = {
+    caller: {},
+    callee: {}
+  }
+  const calleeArguments = ['arg1', 'arg2']
 
   beforeEach(() => {
-    callExpression = createAstNode('CallExpression')
+    callExpression = createAstNode('CallExpression', {
+      callee: createAstNode('Expression'),
+      arguments: [
+        createAstNode('Expression'),
+        createAstNode('Expression')
+      ]
+    })
+    exp.callee.addArguments = sandbox.spy()
+    sandbox.stub(esprimaParser, 'parseCallee').returns(exp)
+    sandbox.stub(esprimaParser, 'parseArguments').returns(calleeArguments)
   })
 
-  it('should call parseMemberCallee with callExpression given callee is MemberExpression', () => {
-    const resultFromParseMemberCallee = 'resultFromParseMemberCallee'
-
-    callExpression.callee = createAstNode('MemberExpression')
-
-    sandbox.stub(esprimaParser, 'parseMemberCallee')
-      .returns(resultFromParseMemberCallee)
-
-    const result = esprimaParser.getCallExp(callExpression)
+  it('should call parseCallee with callExpression callee', () => {
+    esprimaParser.getCallExp(callExpression)
 
     expect(
-      esprimaParser.parseMemberCallee
-        .calledWithExactly(callExpression)
+      esprimaParser.parseCallee
+        .calledWithExactly(callExpression.callee)
     ).to.be.true
-    expect(result).to.be.equal(resultFromParseMemberCallee)
   })
 
-  it('should call parseOtherCallee with callExpression given callee is not MemberExpression', () => {
-    const resultFromParseOtherCallee = 'resultFromParseOtherCallee'
-
-    callExpression.callee = createAstNode('OtherExpression')
-
-    sandbox.stub(esprimaParser, 'parseOtherCallee')
-      .returns(resultFromParseOtherCallee)
-
-    const result = esprimaParser.getCallExp(callExpression)
+  it('should call parseArguments with arguments', () => {
+    esprimaParser.getCallExp(callExpression)
 
     expect(
-      esprimaParser.parseOtherCallee
-        .calledWithExactly(callExpression)
+      esprimaParser.parseArguments
+        .calledWithExactly(callExpression.arguments)
     ).to.be.true
-    expect(result).to.be.equal(resultFromParseOtherCallee)
+  })
+
+  it('should call addArguments of exp.callee (from parseCallee) with calleeArguments (from parseArguments)', () => {
+    esprimaParser.getCallExp(callExpression)
+
+    expect(
+      exp.callee.addArguments
+        .calledWithExactly(calleeArguments)
+    ).to.be.true
+  })
+
+  it('should return exp (from parseCallee)', () => {
+    const result = esprimaParser.getCallExp(callExpression)
+
+    expect(result).to.be.equal(exp)
   })
 })
