@@ -2,7 +2,7 @@
   (1) esprima.parse should set option loc to true
   (2) esprimaParser.parseAst should set valid scriptUrl string
 */
-describe.only('collection', () => {
+describe('collection', () => {
   const scriptUrl = 'scriptUrl'
   let M, E, closureStack, collection
 
@@ -89,17 +89,17 @@ describe.only('collection', () => {
             var element = document.getElementById('element');
             var attrs = element.attributes;
 
-            attrs[0].value = 'new element'
+            attrs[0].value = 'new value'
           `, {loc: true})
 
           esprimaParser.parseAst(ast, scriptUrl)
 
-          expect(element.attributes[0]).to.not.have.property('value')
+          expect(element.attributes[0]).to.have.property('value', 'new value')
 
           checkCollectionIds([element])
           checkCollectionDataById(1, {
             num: 1, info: [
-              {loc: `${scriptUrl}:5:12`, code: 'attrs[0].value'}
+              {loc: `${scriptUrl}:5:12`, code: 'attrs[0].value = \'new value\''}
             ]
           })
         })
@@ -155,14 +155,14 @@ describe.only('collection', () => {
 
           esprimaParser.parseAst(ast, scriptUrl)
 
-          expect(element.style).to.not.have.property('color') // should not change view
-          expect(element.style).to.not.have.property('backgroundColor') // should not change view
+          expect(element.style).to.have.property('color', 'red')
+          expect(element.style).to.have.property('backgroundColor', 'red')
 
           checkCollectionIds([element]);
           checkCollectionDataById(1, {
             num: 2, info: [
-              {loc: `${scriptUrl}:5:12`, code: 'element.style.color'},
-              {loc: `${scriptUrl}:6:12`, code: 'style.backgroundColor'}
+              {loc: `${scriptUrl}:5:12`, code: 'element.style.color = \'red\''},
+              {loc: `${scriptUrl}:6:12`, code: 'style.backgroundColor = \'red\''}
             ]
           })
         })
@@ -216,9 +216,9 @@ describe.only('collection', () => {
             expect(closureStack.get(`result${index}`)).to.be.undefined
           }
           expect(classList.parent).to.be.equal(element)
-          expect(classList.add.called).to.be.false
-          expect(classList.remove.called).to.be.false
-          expect(classList.toggle.called).to.be.false
+          expect(classList.add.calledWith('class1')).to.be.true
+          expect(classList.remove.calledWith('class2')).to.be.true
+          expect(classList.toggle.calledWith('class3')).to.be.true
 
           checkCollectionIds([element])
           checkCollectionDataById(1, {
@@ -273,7 +273,7 @@ describe.only('collection', () => {
 
           const ast = esprima.parse(`
             var element = document.getElementById('element');
-            var result = element.append('Some Text');
+            var result = element.append('text');
 
             element.innerHTML = 'Hello World';
           `, {loc: true})
@@ -282,14 +282,14 @@ describe.only('collection', () => {
 
           expect(closureStack.get('result')).to.be.undefined
 
-          expect(element).to.not.have.property('innerHTML')
-          expect(element.append.called).to.be.false
+          expect(element).to.have.property('innerHTML', 'Hello World')
+          expect(element.append.calledWith('text')).to.be.true
 
           checkCollectionIds([element])
           checkCollectionDataById(1, {
             num: 2, info: [
-              {loc: `${scriptUrl}:3:25`, code: 'element.append(\'Some Text\')'},
-              {loc: `${scriptUrl}:5:12`, code: 'element.innerHTML'}
+              {loc: `${scriptUrl}:3:25`, code: 'element.append(\'text\')'},
+              {loc: `${scriptUrl}:5:12`, code: 'element.innerHTML = \'Hello World\''}
             ]
           })
         })
@@ -359,12 +359,12 @@ describe.only('collection', () => {
 
           const clickHandler = closureStack.get('clickHandler')
 
-          expect(element.addEventListener.calledWith('click', clickHandler)).to.be.true
+          expect(element).to.have.property('onclick', clickHandler)
 
           checkCollectionIds([element])
           checkCollectionDataById(1, undefined, {
             num: 1, info: [
-              {loc: `${scriptUrl}:5:12`, code: 'element.onclick'}
+              {loc: `${scriptUrl}:5:12`, code: 'element.onclick = clickHandler'}
             ]
           })
         })
@@ -414,19 +414,18 @@ describe.only('collection', () => {
 
           const ast = esprima.parse(`
             var $element = jQuery('#element');
-            var result = $element.addClass('class1');
+
+            $element.addClass('class1');
           `, {loc: true})
 
           esprimaParser.parseAst(ast, scriptUrl)
 
-          expect(closureStack.get('result')).to.be.equal($element)
-
-          expect($element.addClass.called).to.be.false
+          expect($element.addClass.calledWith('class1')).to.be.true
 
           checkCollectionIds(elements)
           checkCollectionDataByElements(elements, {
             num: 1, info: [
-              {loc: `${scriptUrl}:3:25`, code: '$element.addClass(\'class1\')'}
+              {loc: `${scriptUrl}:4:12`, code: '$element.addClass(\'class1\')'}
             ]
           })
         })
@@ -440,19 +439,18 @@ describe.only('collection', () => {
         it('should add code info to collection', () => {
           const ast = esprima.parse(`
             var $element = jQuery('#element');
-            var result = $element.click();
+
+            $element.click();
           `, {loc: true})
 
           esprimaParser.parseAst(ast, scriptUrl)
 
-          expect(closureStack.get('result')).to.be.equal($element)
-
-          expect($element.click.called).to.be.false
+          expect($element.click.calledWith()).to.be.true
 
           checkCollectionIds(elements)
           checkCollectionDataByElements(elements, {
             num: 1, info: [
-              {loc: `${scriptUrl}:3:25`, code: '$element.click()'}
+              {loc: `${scriptUrl}:4:12`, code: '$element.click()'}
             ]
           })
         })
@@ -466,6 +464,7 @@ describe.only('collection', () => {
 
           esprimaParser.parseAst(ast, scriptUrl)
 
+          expect($element.click.calledWith(function () {}))
           // this case would add event to collection data,
           // use checkCollectionDataByElements instead of checkEmptyCollection
           checkCollectionDataByElements(elements, undefined, {ignore: true})
@@ -482,17 +481,18 @@ describe.only('collection', () => {
         it('should add code info to collection', () => {
           const ast = esprima.parse(`
             var $element = jQuery('#element');
-            var result = $element.height('100px');
+
+            $element.height('100px');
           `, {loc: true})
 
           esprimaParser.parseAst(ast, scriptUrl)
 
-          expect(closureStack.get('result')).to.be.equal($element)
+          expect($element.height.calledWith('100px')).to.be.true
 
           checkCollectionIds(elements)
           checkCollectionDataByElements(elements, {
             num: 1, info: [
-              {loc: `${scriptUrl}:3:25`, code: '$element.height(\'100px\')'}
+              {loc: `${scriptUrl}:4:12`, code: '$element.height(\'100px\')'}
             ]
           })
         })
@@ -505,6 +505,7 @@ describe.only('collection', () => {
 
           esprimaParser.parseAst(ast, scriptUrl)
 
+          expect($element.height.calledWith()).to.be.true
           expect(closureStack.get('result')).to.be.equal('100px')
 
           checkEmptyCollection(elements)
@@ -517,19 +518,18 @@ describe.only('collection', () => {
 
           const ast = esprima.parse(`
             var $element = jQuery('#element');
-            var result = $element.css('color', 'red');
+
+            $element.css('color', 'red');
           `, {loc: true})
 
           esprimaParser.parseAst(ast, scriptUrl)
 
-          expect(closureStack.get('result')).to.be.equal($element)
-
-          expect($element.css.called).to.be.false
+          expect($element.css.calledWith('color', 'red')).to.be.true
 
           checkCollectionIds(elements)
           checkCollectionDataByElements(elements, {
             num: 1, info: [
-              {loc: `${scriptUrl}:3:25`, code: '$element.css(\'color\', \'red\')'}
+              {loc: `${scriptUrl}:4:12`, code: '$element.css(\'color\', \'red\')'}
             ]
           })
         })
@@ -539,20 +539,21 @@ describe.only('collection', () => {
 
           const ast = esprima.parse(`
             var $element = jQuery('#element');
-            var result = $element.css({'background-color': 'red'});
+
+            $element.css({'background-color': 'red'});
           `, {loc: true})
 
           esprimaParser.parseAst(ast, scriptUrl)
 
-          expect(closureStack.get('result')).to.be.equal($element)
-
-          expect($element.css.called).to.be.false
+          expect($element.css.calledWith({
+            'background-color': 'red'
+          })).to.be.true
 
           checkCollectionIds(elements)
           checkCollectionDataByElements(elements, {
             num: 1, info: [
               // escodegen.generate would add blank before and after an object
-              {loc: `${scriptUrl}:3:25`, code: '$element.css({ \'background-color\': \'red\' })'}
+              {loc: `${scriptUrl}:4:12`, code: '$element.css({ \'background-color\': \'red\' })'}
             ]
           })
         })
@@ -585,19 +586,17 @@ describe.only('collection', () => {
           esprimaParser.closureStack.set('$appendElement', $appendElement)
 
           const ast = esprima.parse(`
-            var result = $appendElement.appendTo('#element');
+            $appendElement.appendTo('#element');
           `, {loc: true})
 
           esprimaParser.parseAst(ast, scriptUrl)
 
-          expect(closureStack.get('result')).to.be.equal($appendElement)
-
-          expect($appendElement.appendTo.called).to.be.false
+          expect($appendElement.appendTo.calledWith('#element')).to.be.true
 
           checkCollectionIds(elements)
           checkCollectionDataByElements(elements, {
             num: 1, info: [
-              {loc: `${scriptUrl}:2:25`, code: '$appendElement.appendTo(\'#element\')'}
+              {loc: `${scriptUrl}:2:12`, code: '$appendElement.appendTo(\'#element\')'}
             ]
           })
         })
