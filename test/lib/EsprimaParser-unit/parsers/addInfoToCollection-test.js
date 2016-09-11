@@ -1,47 +1,41 @@
 describe('addInfoToCollection tests', () => {
-  const target = {
+  const exp =  {
     caller: {},
-    callee: {},
+    callee: 'callee',
     info: {}
   }
-  const status = {}
+  const status = {
+    type: 'type'
+  }
   // stub results
-  const object = {}
-  const elements = []
+  const elements = ['element1', 'element2', 'element3']
 
   beforeEach(() => {
-    sandbox.stub(esprimaParser, 'getTargetObject').returns(object)
     sandbox.stub(esprimaParser, 'getTargetElements').returns(elements)
-    sandbox.stub(esprimaParser, 'addInfoByStatus')
+    sandbox.stub(esprimaParser, 'collection', {
+      addInfoToElements: sandbox.spy()
+    })
   })
 
-  it('should call getTargetObject with target and status', () => {
-    esprimaParser.addInfoToCollection(target, status)
-
-    expect(
-      esprimaParser.getTargetObject
-        .calledWithExactly(target, status)
-    ).to.be.true
-  })
-
-  it('should call getTargetElements with result from getTargetObject', () => {
-    esprimaParser.addInfoToCollection(target, status)
+  it('should call getTargetElements with exp.caller and status', () => {
+    esprimaParser.addInfoToCollection(exp, status)
 
     expect(
       esprimaParser.getTargetElements
-        .calledWithExactly(object)
+        .calledWithExactly(exp.caller, status)
     ).to.be.true
   })
 
-  it('should call addInfoByStatus with {elements, info} and status', () => {
-    esprimaParser.addInfoToCollection(target, status)
+  it('should call collection.addInfoToElements with and object containing elements of result from getTargetElements, type of status.type and info of exp.info', () => {
+    esprimaParser.addInfoToCollection(exp, status)
 
     expect(
-      esprimaParser.addInfoByStatus
+      esprimaParser.collection.addInfoToElements
         .calledWithExactly({
-          elements,
-          info: target.info
-        }, status)
+          elements: elements,
+          type: status.type,
+          info: exp.info
+        })
     ).to.be.true
   })
 })

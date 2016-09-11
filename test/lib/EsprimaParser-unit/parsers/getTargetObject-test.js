@@ -3,10 +3,6 @@ describe('getTargetObject tests', () => {
     parent: 'parent',
     ownerElement: 'ownerElement'
   }
-  const callee = {
-    arguments: ['arg1', 'arg2', 'arg3']
-  }
-  const target = {caller, callee}
   let status
 
   beforeEach(() => {
@@ -19,13 +15,13 @@ describe('getTargetObject tests', () => {
   it('should return status.passive given status has property passive', () => {
     status.passive = {}
 
-    const result = esprimaParser.getTargetObject(target, status)
+    const result = esprimaParser.getTargetObject(caller, status)
 
     expect(result).to.be.equal(status.passive)
   })
 
   it('should call isStyleOrDOMTokenList with caller given status has no passive property', () => {
-    esprimaParser.getTargetObject(target, status)
+    esprimaParser.getTargetObject(caller, status)
 
     expect(
       esprimaParser.isStyleOrDOMTokenList
@@ -36,7 +32,7 @@ describe('getTargetObject tests', () => {
   it('should return parent of caller given isStyleOrDOMTokenList returns true', () => {
     esprimaParser.isStyleOrDOMTokenList.returns(true)
 
-    const result = esprimaParser.getTargetObject(target, status)
+    const result = esprimaParser.getTargetObject(caller, status)
 
     expect(result).to.be.equal(caller.parent)
   })
@@ -44,7 +40,7 @@ describe('getTargetObject tests', () => {
   it('should call isAttr with caller given isStyleOrDOMTokenList returns false', () => {
     esprimaParser.isStyleOrDOMTokenList.returns(false)
 
-    esprimaParser.getTargetObject(target, status)
+    esprimaParser.getTargetObject(caller, status)
 
     expect(
       esprimaParser.isAttr
@@ -56,7 +52,7 @@ describe('getTargetObject tests', () => {
     esprimaParser.isStyleOrDOMTokenList.returns(false)
     esprimaParser.isAttr.returns(true)
 
-    const result = esprimaParser.getTargetObject(target, status)
+    const result = esprimaParser.getTargetObject(caller, status)
 
     expect(result).to.be.equal(caller.ownerElement)
   })
@@ -65,7 +61,7 @@ describe('getTargetObject tests', () => {
     esprimaParser.isStyleOrDOMTokenList.returns(false)
     esprimaParser.isAttr.returns(false)
 
-    const result = esprimaParser.getTargetObject(target, status)
+    const result = esprimaParser.getTargetObject(caller, status)
 
     expect(result).to.be.equal(caller)
   })

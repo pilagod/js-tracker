@@ -63,74 +63,27 @@ describe('Collection tests', () => {
     })
 
     /*************************/
-    /*        addEvent       */
+    /*    addInfoToElements  */
     /*************************/
 
-    describe('addEvent tests', () => {
-      const info = {
-        elements: [],
-        info: {}
-      }
-      beforeEach(() => {
-        sandbox.stub(collection, 'addFromElements')
-      })
-
-      it('should call addFromElements with given info and type Collection.EVENT', () => {
-        collection.addEvent(info)
-
-        expect(
-          collection.addFromElements
-            .calledWithExactly(info, Collection.EVENT)
-        ).to.be.true
-      })
-    })
-
-    /*************************/
-    /*    addManipulation    */
-    /*************************/
-
-    describe('addManipulation tests', () => {
-      const info = {
-        elements: [],
-        info: {}
-      }
-      beforeEach(() => {
-        sandbox.stub(collection, 'addFromElements')
-      })
-
-      it('should call addFromElements with given info and type Collection.MANIPULATION', () => {
-        collection.addManipulation(info)
-
-        expect(
-          collection.addFromElements
-            .calledWithExactly(info, Collection.MANIPULATION)
-        ).to.be.true
-      })
-    })
-
-    /*************************/
-    /*    addFromElements    */
-    /*************************/
-
-    describe('addFromElements tests', () => {
-      const info = {
-        elements: ['element1', 'element2', 'element3'],
-        info: {}
-      }
+    describe('addInfoToElements tests', () => {
+      const elements = ['element1', 'element2', 'element3']
       const type = 'type'
+      const info = {}
+      const data = {elements, type, info}
 
       beforeEach(() => {
         sandbox.stub(collection, 'add')
       })
 
       it('should call add with each element and info and type', () => {
-        collection.addFromElements(info, type)
+        collection.addInfoToElements(data)
 
-        for (const [index, element] of info.elements.entries()) {
+        for (const [index, element] of elements.entries()) {
           expect(
             collection.add
               .getCall(index)
-                .calledWithExactly(element, info.info, type)
+                .calledWithExactly(element, type, info)
           ).to.be.true
         }
       })
@@ -142,10 +95,11 @@ describe('Collection tests', () => {
 
     describe('add tests', () => {
       const element = 'element'
+      const type = 'type'
       const info = {
         code: 'code'
       }
-      const type = 'type'
+      const data = {element, type, info}
       // stub results
       const id = 'id'
       const group = {}
@@ -159,7 +113,7 @@ describe('Collection tests', () => {
       })
 
       it('should call getCollectionIdFrom with element', () => {
-        collection.add(element, info, type)
+        collection.add(data)
 
         expect(
           collection.getCollectionIdFrom
@@ -168,7 +122,7 @@ describe('Collection tests', () => {
       })
 
       it('should call getCollectionGroup with id from getCollectionIdFrom and type', () => {
-        collection.add(element, info, type)
+        collection.add(data)
 
         expect(
           collection.getCollectionGroup
@@ -177,7 +131,7 @@ describe('Collection tests', () => {
       })
 
       it('should call getKeyFrom with info', () => {
-        collection.add(element, info, type)
+        collection.add(data)
 
         expect(
           collection.getKeyFrom
@@ -186,7 +140,7 @@ describe('Collection tests', () => {
       })
 
       it('should call addCodeToCollectionGroup with group, key and code', () => {
-        collection.add(element, info, type)
+        collection.add(data)
 
         expect(
           collection.addCodeToCollectionGroup
