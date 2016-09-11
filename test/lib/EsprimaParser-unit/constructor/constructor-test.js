@@ -16,6 +16,12 @@ describe('constructor tests', () => {
     expect(esprimaParser.scriptUrl).to.be.null
   })
 
+  it('should set checkFlag to false', () => {
+    const esprimaParser = new EsprimaParser(context)
+
+    expect(esprimaParser.checkFlag).to.be.false
+  })
+
   it('should set static imported modules properly', () => {
     /* import libs */
     const escodegen = require('escodegen')
@@ -112,19 +118,5 @@ describe('constructor tests', () => {
     expect(ClosureStackSpy.calledWithNew()).to.be.true
     expect(ClosureStackSpy.calledWithExactly(context)).to.be.true
     expect(esprimaParser.closureStack).to.be.instanceof(ClosureStackSpy)
-  })
-
-  it('should set executeReducer to itself bound with EsprimaParser', () => {
-    /* Replaces object.method with a func, wrapped in a spy */
-    sandbox.stub(EsprimaParser.prototype.executeReducer, 'bind', () => {
-      return 'resultFromBind'
-    })
-    const esprimaParser = new EsprimaParser(context)
-
-    expect(
-      EsprimaParser.prototype.executeReducer.bind
-        .calledWithExactly(esprimaParser)
-    ).to.be.true
-    expect(esprimaParser.executeReducer).to.be.equal('resultFromBind')
   })
 })
