@@ -1,4 +1,4 @@
-describe('handleAssignOperation tests', () => {
+describe('handleAssign tests', () => {
   const value = 'new value'
 
   it('should call updateVariables with callee and value given no caller reference', () => {
@@ -7,7 +7,7 @@ describe('handleAssignOperation tests', () => {
 
     sandbox.stub(esprimaParser, 'updateVariables')
 
-    esprimaParser.handleAssignOperation({caller, callee}, value)
+    esprimaParser.handleAssign({caller, callee}, value)
 
     expect(
       esprimaParser.updateVariables
@@ -19,7 +19,7 @@ describe('handleAssignOperation tests', () => {
     const caller = {a: 'old value'}
     const callee = 'a'
 
-    esprimaParser.handleAssignOperation({caller, callee}, value)
+    esprimaParser.handleAssign({caller, callee}, value)
 
     expect(caller.a).to.be.equal('new value')
   })
@@ -28,7 +28,7 @@ describe('handleAssignOperation tests', () => {
     const caller = [1, 2, 3]
     const callee = 1
 
-    esprimaParser.handleAssignOperation({caller, callee}, value)
+    esprimaParser.handleAssign({caller, callee}, value)
 
     expect(caller).to.be.eql([1, 'new value', 3])
   })

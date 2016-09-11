@@ -5,20 +5,20 @@ describe('parseUnaryArgument tests', () => {
     argument = createAstNode('Expression')
   })
 
-  it('should call getReference with argument and return given operator is delete', () => {
+  it('should call getRefExp with argument and return given operator is delete', () => {
     const operator = 'delete'
 
-    sandbox.stub(esprimaParser, 'getReference')
+    sandbox.stub(esprimaParser, 'getRefExp')
       .withArgs(argument)
-        .returns('resultFromGetReference')
+        .returns('resultFromGetRefExp')
 
     const result = esprimaParser.parseUnaryArgument(argument, operator)
 
     expect(
-      esprimaParser.getReference
+      esprimaParser.getRefExp
         .calledWithExactly(argument)
     ).to.be.true
-    expect(result).to.be.equal('resultFromGetReference')
+    expect(result).to.be.equal('resultFromGetRefExp')
   })
 
   it('should call parseNode with argument and return given operator is unary except delete', () => {

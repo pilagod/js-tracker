@@ -1,4 +1,4 @@
-describe('getReference tests', () => {
+describe('getRefExp tests', () => {
   it('should call getMemberExp with expression and return given expression is MemberExpression', () => {
     const expression = createAstNode('MemberExpression')
 
@@ -6,7 +6,7 @@ describe('getReference tests', () => {
       .withArgs(expression)
         .returns('resultFromGetMemberExp')
 
-    const result = esprimaParser.getReference(expression)
+    const result = esprimaParser.getRefExp(expression)
 
     expect(
       esprimaParser.getMemberExp
@@ -22,7 +22,7 @@ describe('getReference tests', () => {
       .withArgs(expression)
         .returns('resultFromGetPatternExp')
 
-    const result = esprimaParser.getReference(expression)
+    const result = esprimaParser.getRefExp(expression)
 
     expect(
       esprimaParser.getPatternExp

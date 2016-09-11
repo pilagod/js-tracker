@@ -1,39 +1,62 @@
 // spec: https://github.com/estree/estree/blob/master/spec.md#assignmentoperator
 
 describe('AssignmentOperators tests', () => {
-  const target = {
+  let assign
+  // stub results
+  const exp = {
     caller: {},
-    callee: {},
+    callee: 'callee',
     info: {}
   }
   const value = 'value'
-  // stub results
-  const context = {}
-  const status = {}
+  const success = 'boolean'
 
   beforeEach(() => {
-    sandbox.stub(esprimaParser, 'context', context)
-    sandbox.stub(esprimaParser, 'checkerDispatcher', {
-      dispatch: sandbox.stub().returns(status)
-    })
-    sandbox.stub(esprimaParser, 'handleAssignment')
+    assign = esprimaParser.assignmentOperators['=']
+
+    sandbox.stub(esprimaParser, 'setCheckFlag').returns(success)
+    sandbox.stub(esprimaParser, 'handleAssign')
+    sandbox.stub(esprimaParser, 'resetCheckFlag')
   })
 
-  it('should call dispatch of checkerDispatcher with an object containing context and {caller, callee, info}', () => {
-    esprimaParser.assignmentOperators['='](target, value)
+  it('should call setCheckFlag with exp', () => {
+    assign(exp, value)
 
     expect(
-      esprimaParser.checkerDispatcher.dispatch
-        .calledWithExactly(Object.assign({context}, target))
+      esprimaParser.setCheckFlag
+        .calledWithExactly(exp)
     ).to.be.true
   })
 
-  it('should call handleAssigment with target, value and status', () => {
-    esprimaParser.assignmentOperators['='](target, value)
+  it('should call handleAssign with exp after setCheckFlag', () => {
+    assign(exp, value)
 
     expect(
-      esprimaParser.handleAssignment
-        .calledWithExactly(target, value, status)
+      esprimaParser.handleAssign
+        .calledAfter(esprimaParser.setCheckFlag)
     ).to.be.true
+    expect(
+      esprimaParser.handleAssign
+        .calledWithExactly(exp, value)
+    ).to.be.true
+  })
+
+  it('should call resetCheckFlag with success (from setCheckFlag) after handleAssign', () => {
+    assign(exp, value)
+
+    expect(
+      esprimaParser.resetCheckFlag
+        .calledAfter(esprimaParser.handleAssign)
+    ).to.be.true
+    expect(
+      esprimaParser.resetCheckFlag
+        .calledWithExactly(success)
+    ).to.be.true
+  })
+
+  it('should return value', () => {
+    const result = assign(exp, value)
+
+    expect(result).to.be.equal(value)
   })
 })

@@ -5,8 +5,8 @@ describe('getCallExp tests', () => {
     caller: {caller: 'caller'},
     callee: {callee: 'callee'}
   }
-  const calleeArguments = ['arg1', 'arg2']
   const info = {info: 'info'}
+  const calleeArguments = ['arg1', 'arg2']
 
   beforeEach(() => {
     callExpression = createAstNode('CallExpression', {
@@ -49,16 +49,6 @@ describe('getCallExp tests', () => {
       exp.callee.addArguments
         .calledWithExactly(calleeArguments)
     ).to.be.true
-  })
-
-  it('should set exp.info to result of getExpInfo called with callExpression', () => {
-    esprimaParser.getCallExp(callExpression)
-
-    expect(
-      esprimaParser.getExpInfo
-        .calledWithExactly(callExpression)
-    ).to.be.true
-    expect(exp.info).to.be.equal(info)
   })
 
   it('should return exp (from parseCallee)', () => {
