@@ -1,4 +1,4 @@
-describe('getAssignmentValue tests', () => {
+describe('getAssignValue tests', () => {
   const binaryExpressionStub = {
     left: 'left',
     right: 'right'
@@ -12,7 +12,7 @@ describe('getAssignmentValue tests', () => {
       right: createAstNode('ExpressionRight')
     })
 
-    sandbox.stub(esprimaParser, 'transformAssignmentToBinary')
+    sandbox.stub(esprimaParser, 'transAssignmentToBinary')
       .returns(binaryExpressionStub)
     sandbox.stub(esprimaParser, 'BinaryExpression')
       .returns('resultFromBinaryExpression')
@@ -20,19 +20,19 @@ describe('getAssignmentValue tests', () => {
       .returns('resultFromParseNode')
   })
 
-  it('should call transformAssignmentToBinary with assignmentExpression', () => {
-    esprimaParser.getAssignmentValue(assignmentExpression)
+  it('should call transAssignmentToBinary with assignmentExpression', () => {
+    esprimaParser.getAssignValue(assignmentExpression)
 
     expect(
-      esprimaParser.transformAssignmentToBinary
+      esprimaParser.transAssignmentToBinary
         .calledWithExactly(assignmentExpression)
     ).to.be.true
   })
 
-  it('should return result from BinaryExpression called with result from transformAssignmentToBinary given non-empty operator string', () => {
+  it('should return result from BinaryExpression called with result from transAssignmentToBinary given non-empty operator string', () => {
     binaryExpressionStub.operator = '+'
 
-    const result = esprimaParser.getAssignmentValue(assignmentExpression)
+    const result = esprimaParser.getAssignValue(assignmentExpression)
 
     expect(
       esprimaParser.BinaryExpression
@@ -41,10 +41,10 @@ describe('getAssignmentValue tests', () => {
     expect(result).to.be.equal('resultFromBinaryExpression')
   })
 
-  it('should return result from parseNode called with right of result from transformAssignmentToBinary given empty operator string', () => {
+  it('should return result from parseNode called with right of result from transAssignmentToBinary given empty operator string', () => {
     binaryExpressionStub.operator = ''
 
-    const result = esprimaParser.getAssignmentValue(assignmentExpression)
+    const result = esprimaParser.getAssignValue(assignmentExpression)
 
     expect(
       esprimaParser.parseNode

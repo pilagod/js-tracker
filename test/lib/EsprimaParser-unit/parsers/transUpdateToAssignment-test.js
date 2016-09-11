@@ -1,4 +1,4 @@
-describe('transformUpdateToAssignment tests', () => {
+describe('transUpdateToAssignment tests', () => {
   for (const operator of [['++', '+='], ['--', '-=']]) {
     it(`should return AssignmentExpression \'${operator[1]}\' format from UpdateExpression \'${operator[0]}\'`, () => {
       const updateExpression = createAstNode('UpdateExpression', {
@@ -6,7 +6,7 @@ describe('transformUpdateToAssignment tests', () => {
         argument: createAstNode('Expression')
       })
 
-      const result = esprimaParser.transformUpdateToAssignment(updateExpression)
+      const result = esprimaParser.transUpdateToAssignment(updateExpression)
 
       expect(result).to.be.eql(createAstNode('AssignmentExpression', {
         operator: operator[1],

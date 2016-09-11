@@ -1,4 +1,4 @@
-describe('transformAssignmentToBinary tests', () => {
+describe('transAssignmentToBinary tests', () => {
   let assignmentExpression
 
   beforeEach(() => {
@@ -10,7 +10,7 @@ describe('transformAssignmentToBinary tests', () => {
   })
 
   it('should return an BinaryExpression with replaced operator from assignmentOperator to binaryOperator', () => {
-    const result = esprimaParser.transformAssignmentToBinary(assignmentExpression)
+    const result = esprimaParser.transAssignmentToBinary(assignmentExpression)
 
     expect(result).to.be.eql({
       type: 'BinaryExpression',

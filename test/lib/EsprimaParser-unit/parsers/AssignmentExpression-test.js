@@ -1,43 +1,56 @@
 describe('AssignmentExpression tests', () => {
-  let assignmentExpression
-
+  let assignmentExpression, assignSpy
+  // stub results
+  const value = 'value'
+  const reference = {
+    caller: {},
+    callee: 'callee'
+  }
   beforeEach(() => {
     assignmentExpression = createAstNode('AssignmentExpression', {
       operator: 'assignmentOperator',
       left: createAstNode('ExpressionLeft'),
       right: createAstNode('ExpressionRight')
     })
+    assignSpy = sandbox.spy()
 
-    sandbox.stub(esprimaParser, 'getAssignmentValue')
-      .returns('resultFromGetAssignmentValue')
-    sandbox.stub(esprimaParser, 'handleReferenceOperation')
+    sandbox.stub(esprimaParser, 'getAssignValue')
+      .returns(value)
+    sandbox.stub(esprimaParser, 'getReference')
+      .returns(reference)
+    sandbox.stub(esprimaParser.assignmentOperators, '=', assignSpy)
   })
 
-  it('should call getAssignmentValue with assignmentExpression', () => {
+  it('should call getAssignValue with assignmentExpression', () => {
     esprimaParser.AssignmentExpression(assignmentExpression)
 
     expect(
-      esprimaParser.getAssignmentValue
+      esprimaParser.getAssignValue
         .calledWithExactly(assignmentExpression)
     ).to.be.true
   })
-  
-  it('should call handleReferenceOperation with left, handleAssignment and result from getAssignmentValue', () => {
+
+  it('should call getReference with assignmentExpression.left', () => {
     esprimaParser.AssignmentExpression(assignmentExpression)
 
     expect(
-      esprimaParser.handleReferenceOperation
-        .calledWithExactly(
-          assignmentExpression.left,
-          esprimaParser.assignmentOperators['='],
-          'resultFromGetAssignmentValue'
-        )
+      esprimaParser.getReference
+        .calledWithExactly(assignmentExpression.left)
     ).to.be.true
   })
 
-  it('should return result from getAssignmentValue', () => {
+  it('should call assign operation with reference (from getReference) and value (from getAssignValue)', () => {
+    esprimaParser.AssignmentExpression(assignmentExpression)
+
+    expect(
+      assignSpy
+        .calledWithExactly(reference, value)
+    ).to.be.true
+  })
+
+  it('should return result from getAssignValue', () => {
     const result = esprimaParser.AssignmentExpression(assignmentExpression)
 
-    expect(result).to.be.equal('resultFromGetAssignmentValue')
+    expect(result).to.be.equal(value)
   })
 })

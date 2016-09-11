@@ -8,27 +8,27 @@ describe('getUpdateValue tests', () => {
       prefix: 'boolean'
     })
 
-    sandbox.stub(esprimaParser, 'transformUpdateToAssignment')
-      .returns('resultFromTransformUpdateToAssignment')
+    sandbox.stub(esprimaParser, 'transUpdateToAssignment')
+      .returns('resultFromTransUpdateToAssignment')
     sandbox.stub(esprimaParser, 'AssignmentExpression')
       .returns('resultFromAssignmentExpression')
   })
 
-  it('should call transformUpdateToAssignment with updateExpression', () => {
+  it('should call transUpdateToAssignment with updateExpression', () => {
     esprimaParser.getUpdateValue(updateExpression)
 
     expect(
-      esprimaParser.transformUpdateToAssignment
+      esprimaParser.transUpdateToAssignment
         .calledWithExactly(updateExpression)
     ).to.be.true
   })
 
-  it('should return result from AssignmentExpression called with result from transformUpdateToAssignment', () => {
+  it('should return result from AssignmentExpression called with result from transUpdateToAssignment', () => {
     const result = esprimaParser.getUpdateValue(updateExpression)
 
     expect(
       esprimaParser.AssignmentExpression
-        .calledWithExactly('resultFromTransformUpdateToAssignment')
+        .calledWithExactly('resultFromTransUpdateToAssignment')
     ).to.be.true
     expect(result).to.be.equal('resultFromAssignmentExpression')
   })
