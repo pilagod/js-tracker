@@ -1,22 +1,33 @@
 describe('getReference tests', () => {
-  const data = ['data1', 'data2', 'data3']
+  it('should call getMemberExp with expression and return given expression is MemberExpression', () => {
+    const expression = createAstNode('MemberExpression')
 
-  beforeEach(() => {
-    sandbox.stub(esprimaParser, 'checkAndExecute')
-      .withArgs(data.slice(0, data.length - 1))
-        .returns('resultFromCheckAndExecute')
-  })
+    sandbox.stub(esprimaParser, 'getMemberExp')
+      .withArgs(expression)
+        .returns('resultFromGetMemberExp')
 
-  it('should return an object containing caller with result of checkAndExecuted data first length - 1 elements and callee with data last element', () => {
-    const result = esprimaParser.getReference(data)
+    const result = esprimaParser.getReference(expression)
 
     expect(
-      esprimaParser.checkAndExecute
-        .calledWithExactly(data.slice(0, data.length - 1))
+      esprimaParser.getMemberExp
+        .calledWithExactly(expression)
     ).to.be.true
-    expect(result).to.be.eql({
-      caller: 'resultFromCheckAndExecute',
-      callee: data.slice(-1)[0]
-    })
+    expect(result).to.be.equal('resultFromGetMemberExp')
+  })
+
+  it('should call getPatternExp with expression and return given expression is other expression', () => {
+    const expression = createAstNode('OtherExpression')
+
+    sandbox.stub(esprimaParser, 'getPatternExp')
+      .withArgs(expression)
+        .returns('resultFromGetPatternExp')
+
+    const result = esprimaParser.getReference(expression)
+
+    expect(
+      esprimaParser.getPatternExp
+        .calledWithExactly(expression)
+    ).to.be.true
+    expect(result).to.be.equal('resultFromGetPatternExp')
   })
 })

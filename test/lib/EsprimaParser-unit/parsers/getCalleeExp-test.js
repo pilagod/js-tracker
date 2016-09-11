@@ -1,4 +1,4 @@
-describe('getExp tests', () => {
+describe('getCalleeExp tests', () => {
   let expression
   // stub results
   const exp = {}
@@ -8,7 +8,7 @@ describe('getExp tests', () => {
 
     sandbox.stub(esprimaParser, 'getMemberExp').returns(exp)
 
-    const result = esprimaParser.getExp(expression)
+    const result = esprimaParser.getCalleeExp(expression)
 
     expect(
       esprimaParser.getMemberExp
@@ -22,7 +22,7 @@ describe('getExp tests', () => {
 
     sandbox.stub(esprimaParser, 'getOtherExp').returns(exp)
 
-    const result = esprimaParser.getExp(expression)
+    const result = esprimaParser.getCalleeExp(expression)
 
     expect(
       esprimaParser.getOtherExp

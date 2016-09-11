@@ -2,68 +2,59 @@
 
 describe('UnaryExpression tests', () => {
   let unaryExpression
+  // stub results
+  const argument = 'argument'
 
   beforeEach(() => {
     unaryExpression = createAstNode('UnaryExpression', {
-      argument: createAstNode('Expression'),
-      prefix: 'boolean'
+      argument: createAstNode('Expression')
     })
-
-    sandbox.stub(esprimaParser, 'unaryOperators', {
-      'delete': () => 'delete',
-      'otherOperators': () => 'otherOperators'
-    })
-    sandbox.stub(esprimaParser, 'handleUnaryOperation')
-      .returns('resultFromHandleUnaryOperation')
-    sandbox.stub(esprimaParser, 'handleReferenceOperation')
-      .returns('resultFromHandleReferenceOperation')
+    sandbox.stub(esprimaParser, 'parseUnaryArgument')
+      .returns(argument)
   })
 
-  describe('operations other than delete', () => {
-    beforeEach(() => {
-      unaryExpression.operator = 'otherOperators'
-    })
-    // operators other than delete
-    it('should call handleUnaryOperation with argument and proper operation', () => {
-      esprimaParser.UnaryExpression(unaryExpression)
+  it('should call parseUnaryArgument with unaryExpression.argument and unaryExpression.operator', () => {
+    unaryExpression.operator = 'unary'
+    esprimaParser.unaryOperators.unary = function () {}
 
-      expect(
-        esprimaParser.handleUnaryOperation
-          .calledWithExactly(
-            unaryExpression.argument,
-            esprimaParser.unaryOperators.otherOperators
-          )
-      ).to.be.true
-    })
+    esprimaParser.UnaryExpression(unaryExpression)
 
-    it('should return result from handleUnaryOperation', () => {
-      const result = esprimaParser.UnaryExpression(unaryExpression)
-
-      expect(result).to.be.equal('resultFromHandleUnaryOperation')
-    })
+    expect(
+      esprimaParser.parseUnaryArgument
+        .calledWithExactly(
+          unaryExpression.argument,
+          unaryExpression.operator
+        )
+    ).to.be.true
   })
 
-  describe('operation delete', () => {
-    beforeEach(() => {
-      unaryExpression.operator = 'delete'
-    })
-    // operator delete
-    it('should call handleReferenceOperation with argument and delete operation', () => {
-      esprimaParser.UnaryExpression(unaryExpression)
+  it('should call delete operation with argument from parseUnaryArgument and return given delete operator', () => {
+    const deleteStub = sandbox.stub().returns('resultFromDelete')
 
-      expect(
-        esprimaParser.handleReferenceOperation
-          .calledWithExactly(
-            unaryExpression.argument,
-            esprimaParser.unaryOperators.delete
-          )
-      ).to.be.true
-    })
+    unaryExpression.operator = 'delete'
+    esprimaParser.unaryOperators.delete = deleteStub
 
-    it('should return result from handleReferenceOperation', () => {
-      const result = esprimaParser.UnaryExpression(unaryExpression)
+    const result = esprimaParser.UnaryExpression(unaryExpression)
 
-      expect(result).to.be.equal('resultFromHandleReferenceOperation')
-    })
+    expect(
+      deleteStub
+        .calledWithExactly(argument)
+    ).to.be.true
+    expect(result).to.be.equal('resultFromDelete')
+  })
+
+  it('should call unary operation with argument from parseUnaryArgument and return given unary operator', () => {
+    const unaryStub = sandbox.stub().returns('resultFromUnary')
+
+    unaryExpression.operator = 'unary'
+    esprimaParser.unaryOperators.unary = unaryStub
+
+    const result = esprimaParser.UnaryExpression(unaryExpression)
+
+    expect(
+      unaryStub
+        .calledWithExactly(argument)
+    ).to.be.true
+    expect(result).to.be.equal('resultFromUnary')
   })
 })
