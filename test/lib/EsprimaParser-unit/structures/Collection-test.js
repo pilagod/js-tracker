@@ -1,4 +1,4 @@
-describe('Collection tests', () => {
+describe.only('Collection tests', () => {
   let Collection
 
   before(() => {
@@ -73,127 +73,182 @@ describe('Collection tests', () => {
       const data = {elements, type, info}
 
       beforeEach(() => {
-        sandbox.stub(collection, 'add')
+        sandbox.stub(collection, 'addInfoToElement')
       })
 
-      it('should call add with each element and info and type', () => {
+      it('should call addInfoToElement with an object containing element, type and info', () => {
         collection.addInfoToElements(data)
 
         for (const [index, element] of elements.entries()) {
           expect(
-            collection.add
+            collection.addInfoToElement
               .getCall(index)
-                .calledWithExactly(element, type, info)
+                .calledWithExactly({element, type, info})
           ).to.be.true
         }
       })
     })
 
     /*************************/
-    /*          add          */
+    /*    addInfoToElement   */
     /*************************/
 
-    describe('add tests', () => {
-      const element = 'element'
+    describe('addInfoToElement tests', () => {
+      const element = {}
       const type = 'type'
       const info = {
         code: 'code'
       }
       const data = {element, type, info}
       // stub results
-      const id = 'id'
-      const group = {}
       const key = 'key'
+      const group = {}
 
       beforeEach(() => {
-        sandbox.stub(collection, 'getCollectionIdFrom').returns(id)
-        sandbox.stub(collection, 'getCollectionGroup').returns(group)
-        sandbox.stub(collection, 'getKeyFrom').returns(key)
-        sandbox.stub(collection, 'addCodeToCollectionGroup')
+        sandbox.stub(collection, 'getKey').returns(key)
+        sandbox.stub(collection, 'getGroup').returns(group)
+        sandbox.stub(collection, 'addInfoToGroup')
       })
 
-      it('should call getCollectionIdFrom with element', () => {
-        collection.add(data)
+      it('should call getKey with info', () => {
+        collection.addInfoToElement(data)
 
         expect(
-          collection.getCollectionIdFrom
-            .calledWithExactly(element)
-        ).to.be.true
-      })
-
-      it('should call getCollectionGroup with id from getCollectionIdFrom and type', () => {
-        collection.add(data)
-
-        expect(
-          collection.getCollectionGroup
-            .calledWithExactly(id, type)
-        ).to.be.true
-      })
-
-      it('should call getKeyFrom with info', () => {
-        collection.add(data)
-
-        expect(
-          collection.getKeyFrom
+          collection.getKey
             .calledWithExactly(info)
         ).to.be.true
       })
 
-      it('should call addCodeToCollectionGroup with group, key and code', () => {
-        collection.add(data)
+      it('should call getGroup with element and type', () => {
+        collection.addInfoToElement(data)
 
         expect(
-          collection.addCodeToCollectionGroup
-            .calledWithExactly(group, key, info.code)
+          collection.getGroup
+            .calledWithExactly(element, type)
+        ).to.be.true
+      })
+
+      it('should call addInfoToGroup with group and an object containing key of result from getKey and code of info.code', () => {
+        collection.addInfoToElement(data)
+
+        expect(
+          collection.addInfoToGroup
+            .calledWithExactly(group, {
+              key,
+              code: info.code
+            })
         ).to.be.true
       })
     })
 
     /*************************/
-    /*  getCollectionIdFrom  */
+    /*         getKey        */
     /*************************/
 
-    describe('getCollectionIdFrom tests', () => {
-      let element
+    describe('getKey tests', () => {
+      const info = {
+        loc: {
+          start: {
+            line: 2,
+            column: 10
+          }
+        },
+        scriptUrl: 'script.js'
+      }
+      it('should return a string of the format: {scriptUrl}:{startline}:{startColumn}', () => {
+        const result = collection.getKey(info)
 
-      beforeEach(() => {
-        element = {}
-
-        sandbox.stub(collection, 'createElementCollection')
-      })
-
-      it('should call createElementCollection given element has no CollectionId', () => {
-        collection.getCollectionIdFrom(element)
-
-        expect(collection.createElementCollection.called).to.be.true
-      })
-
-      it('should set element CollectionId to the result from createElementCollection and return given element has no CollectionId', () => {
-        collection.createElementCollection.returns(1)
-
-        const result = collection.getCollectionIdFrom(element)
-
-        expect(element.CollectionId).to.be.equal(1)
-        expect(result).to.be.equal(1)
-      })
-
-      it('should not call createElementCollection and return element CollectionId given element has CollectionId', () => {
-        element.CollectionId = 3
-
-        const result = collection.getCollectionIdFrom(element)
-
-        expect(result).to.be.equal(3)
-        expect(collection.createElementCollection.called).to.be.false
+        expect(result).to.be.equal('script.js:2:10')
       })
     })
 
     /*************************/
-    /*createElementCollection*/
+    /*        getGroup       */
     /*************************/
 
-    describe('createElementCollection tests', () => {
-      it('should increment 1 to id', () => {
-        collection.createElementCollection()
+    describe('getGroup tests', () => {
+      const element = {}
+      const type = 'type'
+      // stub results
+      const id = 'id'
+      const group = {}
+
+      beforeEach(() => {
+        collection.data = {
+          id: {
+            type: group
+          }
+        }
+        sandbox.stub(collection, 'getIdFromElement').returns(id)
+      })
+
+      it('should call getIdFromElement with element', () => {
+        collection.getGroup(element, type)
+
+        expect(
+          collection.getIdFromElement
+            .calledWithExactly(element)
+        ).to.be.true
+      })
+
+      it('should return the group in data filtered by id and type', () => {
+        const result = collection.getGroup(element, type)
+
+        expect(result).to.be.equal(group)
+      })
+    })
+
+    /*************************/
+    /*    getIdFromElement   */
+    /*************************/
+
+    describe('getIdFromElement tests', () => {
+      let element
+
+      beforeEach(() => {
+        element = {
+          dataset: {}
+        }
+        sandbox.stub(collection, 'createCollection')
+      })
+
+      it('should call createCollection given element.dataset has no property collectionId', () => {
+        collection.getIdFromElement(element)
+
+        expect(collection.createCollection.calledOnce).to.be.true
+        expect(collection.createCollection.calledWith()).to.be.true
+      })
+
+      it('should set element.dataset.collectionId to result from createCollection and return given element.dataset has no property collectionId', () => {
+        const collectionId = 1
+
+        collection.createCollection.returns(collectionId)
+
+        const result = collection.getIdFromElement(element)
+
+        expect(element.dataset.collectionId).to.be.equal(collectionId)
+        expect(result).to.be.equal(collectionId)
+      })
+
+      it('should directly return element.dataset.collectionId given element.dataset has property collectionId', () => {
+        const collectionId = 2
+
+        element.dataset.collectionId = collectionId
+
+        const result = collection.getIdFromElement(element)
+
+        expect(collection.createCollection.called).to.be.false
+        expect(result).to.be.equal(collectionId)
+      })
+    })
+
+    /*************************/
+    /*    createCollection   */
+    /*************************/
+
+    describe('createCollection tests', () => {
+      it('should increment id by 1', () => {
+        collection.createCollection()
 
         expect(collection.id).to.be.equal(1)
       })
@@ -205,96 +260,43 @@ describe('Collection tests', () => {
             [Collection.EVENT]: {}
           }
         }
-        collection.createElementCollection()
+        collection.createCollection()
 
         expect(collection.data).to.be.eql(expectedCollection)
       })
 
       it('should return new id', () => {
-        const result = collection.createElementCollection()
+        const result = collection.createCollection()
 
         expect(result).to.be.equal(1)
       })
     })
 
-    /*************************/
-    /*   getCollectionGroup  */
-    /*************************/
-
-    describe('getCollectionGroup tests', () => {
-      const id = 1
-
-      beforeEach(() => {
-        collection.data = {
-          '1': {
-            [Collection.MANIPULATION]: {},
-            [Collection.EVENT]: {}
-          }
-        }
-      })
-
-      it('should return the group from collection data indexed by given id and type', () => {
-        const type = Collection.EVENT
-
-        const result = collection.getCollectionGroup(id, type)
-
-        expect(result).to.be.equal(collection.data[id][type])
-      })
-
-      it('should return the group from collection data indexed by given id and type', () => {
-        const type = Collection.MANIPULATION
-
-        const result = collection.getCollectionGroup(id, type)
-
-        expect(result).to.be.equal(collection.data[id][type])
-      })
-    })
-
-    /*************************/
-    /*      getKeyFrom       */
-    /*************************/
-
-    describe('getKeyFrom tests', () => {
-      const info = {
-        loc: {
-          start: {
-            line: 2,
-            column: 10
-          }
-        },
-        scriptUrl: 'script.js'
-      }
-      it('should return a string of the format: {scriptUrl}:{startline}:{startColumn}', () => {
-        const result = collection.getKeyFrom(info)
-
-        expect(result).to.be.equal('script.js:2:10')
-      })
-    })
-
     /****************************/
-    /* addCodeToCollectionGroup */
+    /*      addInfoToGroup      */
     /****************************/
 
-    describe('addCodeToCollectionGroup tests', () => {
+    describe('addInfoToGroup tests', () => {
       const key = 'script.js:2:10'
       const code = 'code'
+      const info = {key, code}
       let group
 
       beforeEach(() => {
         group = {}
       })
 
-      it('should set {key: code} to group get from getCollectionGroup given key not exists in it', () => {
-        collection.addCodeToCollectionGroup(group, key, code)
+      it('should set {key: code} to group given key not exists in it', () => {
+        collection.addInfoToGroup(group, info)
 
         expect(Object.keys(group).length).to.be.equal(1)
         expect(group[key]).to.be.equal(code)
       })
 
-      it('should not set {key: code} to group get from getCollectionGroup given key exists in it', () => {
+      it('should not set {key: code} to group given key exists in it', () => {
         group[key] = 'other code'
 
-        collection.addCodeToCollectionGroup(group, key, code)
+        collection.addInfoToGroup(group, info)
 
         expect(Object.keys(group).length).to.be.equal(1)
         expect(group[key]).to.be.equal('other code')
