@@ -37,10 +37,10 @@ describe('MANIPULATION of collection', () => {
     const arr = [].concat(elements)
 
     for (const element of arr) {
-      const group = collection.data[element.dataset.collectionId][M]
+      const mGroup = collection.data[element.dataset.collectionId][M]
 
       for (const {loc, code} of info) {
-        expect(group).to.have.property(loc, code)
+        expect(mGroup).to.have.property(loc, code)
       }
     }
   }
@@ -196,16 +196,13 @@ describe('MANIPULATION of collection', () => {
           var element = document.getElementById('element');
           var classList = element.classList
 
-          var result1 = element.classList.add('class1');
-          var result2 = classList.remove('class2');
-          var result3 = classList.toggle('class3');
+          element.classList.add('class1');
+          classList.remove('class2');
+          classList.toggle('class3');
         `, {loc: true})
 
         esprimaParser.parseAst(ast, scriptUrl)
 
-        for (const index of [1, 2, 3]) {
-          expect(closureStack.get(`result${index}`)).to.be.undefined
-        }
         expect(classList.parent).to.be.equal(element)
         expect(classList.add.calledWith('class1')).to.be.true
         expect(classList.remove.calledWith('class2')).to.be.true
@@ -213,9 +210,9 @@ describe('MANIPULATION of collection', () => {
 
         checkCollectionIds(element)
         checkCollectionDataByElements(element, [
-          {loc: `${scriptUrl}:5:24`, code: 'element.classList.add(\'class1\')'},
-          {loc: `${scriptUrl}:6:24`, code: 'classList.remove(\'class2\')'},
-          {loc: `${scriptUrl}:7:24`, code: 'classList.toggle(\'class3\')'}
+          {loc: `${scriptUrl}:5:10`, code: 'element.classList.add(\'class1\')'},
+          {loc: `${scriptUrl}:6:10`, code: 'classList.remove(\'class2\')'},
+          {loc: `${scriptUrl}:7:10`, code: 'classList.toggle(\'class3\')'}
         ])
       })
 
@@ -387,11 +384,11 @@ describe('MANIPULATION of collection', () => {
         expect($element.click.calledWith(function () {}))
 
         // this case would add event to collection data,
-        // use checkCollectionDataByElements instead of checkEmptyCollection
+        // so only test MANIPULATION is empty here
         for (const element of elements) {
-          const id = element.dataset.collectionId
+          const mGroup = collection.data[element.dataset.collectionId][M]
 
-          expect(Object.keys(collection.data[id][M])).to.have.lengthOf(0)
+          expect(Object.keys(mGroup)).to.have.lengthOf(0)
         }
       })
     })

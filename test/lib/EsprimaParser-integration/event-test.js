@@ -1,4 +1,4 @@
-describe.only('EVENT of collection', () => {
+describe('EVENT of collection', () => {
   const scriptUrl = 'scriptUrl'
   let E, closureStack, collection
 
@@ -37,10 +37,10 @@ describe.only('EVENT of collection', () => {
     const arr = [].concat(elements)
 
     for (const element of arr) {
-      const group = collection.data[element.dataset.collectionId][E]
+      const eGroup = collection.data[element.dataset.collectionId][E]
 
       for (const {loc, code} of info) {
-        expect(group).to.have.property(loc, code)
+        expect(eGroup).to.have.property(loc, code)
       }
     }
   }
@@ -140,6 +140,104 @@ describe.only('EVENT of collection', () => {
   /*************************/
 
   describe('jQuery', () => {
-    
+    let $element, elements
+
+    const jQueryStub = function () {
+      if (!(this instanceof jQueryStub)) {
+        return $element
+      }
+      this.elements = elements
+
+      return this
+    }
+
+    jQueryStub.prototype.get = function () {
+      return this.elements
+    }
+
+    before(() => {
+      esprimaParser.context.jQuery = jQueryStub
+    })
+
+    beforeEach(() => {
+      elements = [
+        new HTMLElementStub(),
+        new HTMLElementStub()
+      ]
+      $element = new jQueryStub(elements)
+    })
+
+    describe('event tests', () => {
+      it('should add code info to collection', () => {
+        $element.on = sandbox.spy()
+
+        const ast = esprima.parse(`
+          var $element = jQuery('#element');
+          var clickHandler = function () {};
+
+          $element.on('click', clickHandler);
+          $element.on({
+            click: clickHandler
+          })
+        `, {loc: true})
+
+        esprimaParser.parseAst(ast, scriptUrl)
+
+        const clickHandler = closureStack.get('clickHandler')
+
+        expect($element.on.calledTwice).to.be.true
+        expect($element.on.getCall(0).calledWith('click', clickHandler)).to.be.true
+        expect($element.on.getCall(1).calledWith({click: clickHandler})).to.be.true
+
+        checkCollectionIds(elements)
+        checkCollectionDataByElements(elements, [
+          {loc: `${scriptUrl}:5:10`, code: '$element.on(\'click\', clickHandler)'},
+          {loc: `${scriptUrl}:6:10`, code: '$element.on({ click: clickHandler })'}
+        ])
+      })
+    })
+
+    describe('event arg > 1 tests', () => {
+      it('should add code info to collection', () => {
+        $element.click = sandbox.spy()
+
+        const ast = esprima.parse(`
+          var $element = jQuery('#element');
+          var clickHandler = function () {};
+
+          $element.click(clickHandler);
+        `, {loc: true})
+
+        esprimaParser.parseAst(ast, scriptUrl)
+
+        const clickHandler = closureStack.get('clickHandler')
+
+        expect($element.click.calledOnce).to.be.true
+        expect($element.click.calledWith(clickHandler)).to.be.true
+
+        checkCollectionIds(elements)
+        checkCollectionDataByElements(elements, [
+          {loc: `${scriptUrl}:5:10`, code: '$element.click(clickHandler)'}
+        ])
+      })
+
+      it('should not add code info to collection', () => {
+        const ast = esprima.parse(`
+          var $element = jQuery('#element');
+
+          $element.click();
+        `, {loc: true})
+
+        esprimaParser.parseAst(ast, scriptUrl)
+
+        // this case would add manipulation to collection data,
+        // so only test EVENT group is empty here
+        for (const element of elements) {
+          const eGroup = collection.data[element.dataset.collectionId][E]
+
+          expect(Object.keys(eGroup)).to.have.lengthOf(0)
+        }
+      })
+    })
   })
 })
