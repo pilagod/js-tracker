@@ -37,10 +37,10 @@ describe('MANIPULATION of collection', () => {
     const arr = [].concat(elements)
 
     for (const element of arr) {
-      const mGroup = collection.data[element.dataset.collectionId][M]
+      const group = collection.data[element.dataset.collectionId][M][scriptUrl]
 
       for (const {loc, code} of info) {
-        expect(mGroup).to.have.property(loc, code)
+        expect(group).to.have.property(loc, code)
       }
     }
   }
@@ -59,8 +59,10 @@ describe('MANIPULATION of collection', () => {
     beforeEach(() => {
       element = new HTMLElementStub()
 
-      sandbox.stub(esprimaParser.context.document, 'getElementById')
-        .returns(element)
+      sandbox.stub(
+        esprimaParser.context.document,
+        'getElementById'
+      ).returns(element)
     })
 
     /*************************/
@@ -91,7 +93,7 @@ describe('MANIPULATION of collection', () => {
 
         checkCollectionIds(element)
         checkCollectionDataByElements(element, [
-          {loc: `${scriptUrl}:5:10`, code: 'attrs[0].value = \'new value\''}
+          {loc: `[5:10]-[5:38]`, code: 'attrs[0].value = \'new value\''}
         ])
       })
 
@@ -149,8 +151,8 @@ describe('MANIPULATION of collection', () => {
 
         checkCollectionIds(element);
         checkCollectionDataByElements(element, [
-          {loc: `${scriptUrl}:5:10`, code: 'element.style.color = \'red\''},
-          {loc: `${scriptUrl}:6:10`, code: 'style.backgroundColor = \'red\''}
+          {loc: `[5:10]-[5:37]`, code: 'element.style.color = \'red\''},
+          {loc: `[6:10]-[6:39]`, code: 'style.backgroundColor = \'red\''}
         ])
       })
 
@@ -210,9 +212,9 @@ describe('MANIPULATION of collection', () => {
 
         checkCollectionIds(element)
         checkCollectionDataByElements(element, [
-          {loc: `${scriptUrl}:5:10`, code: 'element.classList.add(\'class1\')'},
-          {loc: `${scriptUrl}:6:10`, code: 'classList.remove(\'class2\')'},
-          {loc: `${scriptUrl}:7:10`, code: 'classList.toggle(\'class3\')'}
+          {loc: `[5:10]-[5:41]`, code: 'element.classList.add(\'class1\')'},
+          {loc: `[6:10]-[6:36]`, code: 'classList.remove(\'class2\')'},
+          {loc: `[7:10]-[7:36]`, code: 'classList.toggle(\'class3\')'}
         ])
       })
 
@@ -269,8 +271,8 @@ describe('MANIPULATION of collection', () => {
 
         checkCollectionIds(element)
         checkCollectionDataByElements(element, [
-          {loc: `${scriptUrl}:4:10`, code: 'element.append(\'text\')'},
-          {loc: `${scriptUrl}:5:10`, code: 'element.innerHTML = \'Hello World\''}
+          {loc: `[4:10]-[4:32]`, code: 'element.append(\'text\')'},
+          {loc: `[5:10]-[5:43]`, code: 'element.innerHTML = \'Hello World\''}
         ])
       })
 
@@ -345,7 +347,7 @@ describe('MANIPULATION of collection', () => {
 
         checkCollectionIds(elements)
         checkCollectionDataByElements(elements, [
-          {loc: `${scriptUrl}:4:10`, code: '$element.addClass(\'class1\')'}
+          {loc: `[4:10]-[4:37]`, code: '$element.addClass(\'class1\')'}
         ])
       })
     })
@@ -368,7 +370,7 @@ describe('MANIPULATION of collection', () => {
 
         checkCollectionIds(elements)
         checkCollectionDataByElements(elements, [
-          {loc: `${scriptUrl}:4:10`, code: '$element.click()'}
+          {loc: `[4:10]-[4:26]`, code: '$element.click()'}
         ])
       })
 
@@ -413,7 +415,7 @@ describe('MANIPULATION of collection', () => {
 
         checkCollectionIds(elements)
         checkCollectionDataByElements(elements, [
-          {loc: `${scriptUrl}:4:10`, code: '$element.height(\'100px\')'}
+          {loc: `[4:10]-[4:34]`, code: '$element.height(\'100px\')'}
         ])
       })
 
@@ -448,7 +450,7 @@ describe('MANIPULATION of collection', () => {
 
         checkCollectionIds(elements)
         checkCollectionDataByElements(elements, [
-          {loc: `${scriptUrl}:4:10`, code: '$element.css(\'color\', \'red\')'}
+          {loc: `[4:10]-[4:38]`, code: '$element.css(\'color\', \'red\')'}
         ])
       })
 
@@ -470,7 +472,7 @@ describe('MANIPULATION of collection', () => {
         checkCollectionIds(elements)
         checkCollectionDataByElements(elements, [
           // escodegen.generate would add blank before and after an object
-          {loc: `${scriptUrl}:4:10`, code: '$element.css({ \'background-color\': \'red\' })'}
+          {loc: `[4:10]-[4:51]`, code: '$element.css({ \'background-color\': \'red\' })'}
         ])
       })
 
@@ -511,7 +513,7 @@ describe('MANIPULATION of collection', () => {
 
         checkCollectionIds(elements)
         checkCollectionDataByElements(elements, [
-          {loc: `${scriptUrl}:2:10`, code: '$appendElement.appendTo(\'#element\')'}
+          {loc: `[2:10]-[2:45]`, code: '$appendElement.appendTo(\'#element\')'}
         ])
       })
     })

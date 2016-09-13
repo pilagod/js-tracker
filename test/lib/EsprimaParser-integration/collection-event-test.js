@@ -37,10 +37,10 @@ describe('EVENT of collection', () => {
     const arr = [].concat(elements)
 
     for (const element of arr) {
-      const eGroup = collection.data[element.dataset.collectionId][E]
+      const group = collection.data[element.dataset.collectionId][E][scriptUrl]
 
       for (const {loc, code} of info) {
-        expect(eGroup).to.have.property(loc, code)
+        expect(group).to.have.property(loc, code)
       }
     }
   }
@@ -93,8 +93,8 @@ describe('EVENT of collection', () => {
 
         checkCollectionIds(element)
         checkCollectionDataByElements(element, [
-          {loc: `${scriptUrl}:5:10`, code: 'element.addEventListener(\'click\', clickHandler)'},
-          {loc: `${scriptUrl}:6:10`, code: 'element.removeEventListener(\'click\', clickHandler)'}
+          {loc: `[5:10]-[5:57]`, code: 'element.addEventListener(\'click\', clickHandler)'},
+          {loc: `[6:10]-[6:60]`, code: 'element.removeEventListener(\'click\', clickHandler)'}
         ])
       })
 
@@ -114,7 +114,7 @@ describe('EVENT of collection', () => {
 
         checkCollectionIds(element)
         checkCollectionDataByElements(element, [
-          {loc: `${scriptUrl}:5:10`, code: 'element.onclick = clickHandler'}
+          {loc: `[5:10]-[5:40]`, code: 'element.onclick = clickHandler'}
         ])
       })
 
@@ -191,8 +191,8 @@ describe('EVENT of collection', () => {
 
         checkCollectionIds(elements)
         checkCollectionDataByElements(elements, [
-          {loc: `${scriptUrl}:5:10`, code: '$element.on(\'click\', clickHandler)'},
-          {loc: `${scriptUrl}:6:10`, code: '$element.on({ click: clickHandler })'}
+          {loc: `[5:10]-[5:44]`, code: '$element.on(\'click\', clickHandler)'},
+          {loc: `[6:10]-[8:12]`, code: '$element.on({ click: clickHandler })'}
         ])
       })
     })
@@ -217,7 +217,7 @@ describe('EVENT of collection', () => {
 
         checkCollectionIds(elements)
         checkCollectionDataByElements(elements, [
-          {loc: `${scriptUrl}:5:10`, code: '$element.click(clickHandler)'}
+          {loc: `[5:10]-[5:38]`, code: '$element.click(clickHandler)'}
         ])
       })
 

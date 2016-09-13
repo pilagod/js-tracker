@@ -29,9 +29,9 @@ describe('Collection tests', () => {
     })
 
     describe('getter of MANIPULATION', () => {
-      const MANIPULATION = 'MANIPULATION'
+      const MANIPULATION = 'MANIP'
 
-      it('should return string \'MANIPULATION\'', () => {
+      it('should return string \'MANIP\'', () => {
         expect(Collection.MANIPULATION).to.be.equal(MANIPULATION)
       })
     })
@@ -98,7 +98,9 @@ describe('Collection tests', () => {
       const element = {}
       const type = 'type'
       const info = {
-        code: 'code'
+        code: 'code',
+        loc: {},
+        scriptUrl: 'scriptUrl'
       }
       const data = {element, type, info}
       // stub results
@@ -111,21 +113,25 @@ describe('Collection tests', () => {
         sandbox.stub(collection, 'addInfoToGroup')
       })
 
-      it('should call getKey with info', () => {
+      it('should call getKey with info.loc', () => {
         collection.addInfoToElement(data)
 
         expect(
           collection.getKey
-            .calledWithExactly(info)
+            .calledWithExactly(info.loc)
         ).to.be.true
       })
 
-      it('should call getGroup with element and type', () => {
+      it('should call getGroup with an object containing element of element, type of type and scriptUrl of info.scriptUrl', () => {
         collection.addInfoToElement(data)
 
         expect(
           collection.getGroup
-            .calledWithExactly(element, type)
+            .calledWithExactly({
+              element,
+              type,
+              scriptUrl: info.scriptUrl
+            })
         ).to.be.true
       })
 
@@ -147,19 +153,20 @@ describe('Collection tests', () => {
     /*************************/
 
     describe('getKey tests', () => {
-      const info = {
-        loc: {
-          start: {
-            line: 2,
-            column: 10
-          }
+      const loc = {
+        start: {
+          line: 2,
+          column: 10
         },
-        scriptUrl: 'script.js'
+        end: {
+          line: 3,
+          column: 12
+        }
       }
-      it('should return a string of the format: {scriptUrl}:{startline}:{startColumn}', () => {
-        const result = collection.getKey(info)
+      it('should return a string of the format: [{start.line}:{start.column}]-[{end.line}:{end.column}]', () => {
+        const result = collection.getKey(loc)
 
-        expect(result).to.be.equal('script.js:2:10')
+        expect(result).to.be.equal('[2:10]-[3:12]')
       })
     })
 
@@ -169,22 +176,26 @@ describe('Collection tests', () => {
 
     describe('getGroup tests', () => {
       const element = {}
-      const type = 'type'
+      const scriptUrl = 'scriptUrl'
       // stub results
-      const id = 'id'
-      const group = {}
+      const id = 1
+      let type, data, group
 
       beforeEach(() => {
+        type = Collection.EVENT
+        data = {element, type, scriptUrl}
+        group = {}
+
         collection.data = {
-          id: {
-            type: group
+          [id]: {
+            [type]: group
           }
         }
         sandbox.stub(collection, 'getIdFromElement').returns(id)
       })
 
       it('should call getIdFromElement with element', () => {
-        collection.getGroup(element, type)
+        collection.getGroup(data)
 
         expect(
           collection.getIdFromElement
@@ -192,10 +203,28 @@ describe('Collection tests', () => {
         ).to.be.true
       })
 
-      it('should return the group in data filtered by id and type', () => {
-        const result = collection.getGroup(element, type)
+      it('should set data[id][type][scriptUrl] to empty object if it had not been set', () => {
+        collection.getGroup(data)
 
-        expect(result).to.be.equal(group)
+        expect(group).to.have.property(scriptUrl).and.be.eql({})
+      })
+
+      it('should not set data[id][type][scriptUrl] given it had been set', () => {
+        const groupData = {
+          '[1:2]-[3:4]': 'some code'
+        }
+        group[scriptUrl] = groupData
+
+        collection.getGroup(data)
+
+        expect(group).to.have.property(scriptUrl).and.be.equal(groupData)
+      })
+
+      it('should return the group in data filtered by id, type and scriptUrl', () => {
+        const result = collection.getGroup(data)
+
+        expect(group).to.have.property(scriptUrl)
+        expect(result).to.be.equal(group[scriptUrl])
       })
     })
 
@@ -278,29 +307,56 @@ describe('Collection tests', () => {
     /****************************/
 
     describe('addInfoToGroup tests', () => {
-      const key = 'script.js:2:10'
+      const key = '[2:10]-[3:11]'
       const code = 'code'
       const info = {key, code}
       let group
+      // stub results
+      const normalizedCode = 'normalizedCode'
 
       beforeEach(() => {
         group = {}
+
+        sandbox.stub(collection, 'normalizeCode')
+          .withArgs(code)
+            .returns(normalizedCode)
       })
 
-      it('should set {key: code} to group given key not exists in it', () => {
+      it('should set key to result from normalizeCode called with code in group given key not exists in it', () => {
         collection.addInfoToGroup(group, info)
 
-        expect(Object.keys(group).length).to.be.equal(1)
-        expect(group[key]).to.be.equal(code)
+        expect(
+          collection.normalizeCode
+            .calledWithExactly(code)
+        ).to.be.true
+        expect(group).to.have.property(key, normalizedCode)
       })
 
-      it('should not set {key: code} to group given key exists in it', () => {
-        group[key] = 'other code'
+      it('should not set key and code to group given key already exists in it', () => {
+        group[key] = 'someOtherNormalizedCode'
 
         collection.addInfoToGroup(group, info)
 
-        expect(Object.keys(group).length).to.be.equal(1)
-        expect(group[key]).to.be.equal('other code')
+        expect(collection.normalizeCode.called).to.be.false
+        expect(group).to.have.property(key, 'someOtherNormalizedCode')
+      })
+    })
+
+    /*************************/
+    /*     normalizeCode     */
+    /*************************/
+
+    describe('normalizeCode tests', () => {
+      it('should return a sub string of given string to max length 50, with ... for remaining not show string', () => {
+        const result = collection.normalizeCode('document.getElementById(\'demo\').classList.add(\'demoHightlight\')')
+
+        expect(result).to.be.equal('document.getElementById(\'demo\').classList.add(\'dem...')
+      })
+
+      it('should return same string given string does not have max length greater than 50', () => {
+        const result = collection.normalizeCode('element.style.color = \'red\'')
+
+        expect(result).to.be.equal('element.style.color = \'red\'')
       })
     })
   })
