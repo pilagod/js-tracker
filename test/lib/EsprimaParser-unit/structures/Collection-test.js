@@ -1,4 +1,4 @@
-describe.only('Collection tests', () => {
+describe('Collection tests', () => {
   let Collection
 
   before(() => {
@@ -207,7 +207,7 @@ describe.only('Collection tests', () => {
 
       it('should return true when given id\'s EVENT group is empty', () => {
         collection.data = {
-          1: {
+          '1': {
             [Collection.EVENT]: {}
           }
         }
@@ -218,7 +218,7 @@ describe.only('Collection tests', () => {
 
       it('should return false given id\'s EVENT group is not empty', () => {
         collection.data = {
-          1: {
+          '1': {
             [Collection.EVENT]: {
               key: 'code'
             }
@@ -234,7 +234,7 @@ describe.only('Collection tests', () => {
     /*      stubElement      */
     /*************************/
 
-    describe.only('stubElement tests', () => {
+    describe('stubElement tests', () => {
       let element, childNodes, stubElement
 
       beforeEach(() => {
