@@ -73,19 +73,222 @@ describe.only('Collection tests', () => {
       const data = {elements, type, info}
 
       beforeEach(() => {
+        sandbox.stub(collection, 'stubElementIfNeeded')
         sandbox.stub(collection, 'addInfoToElement')
       })
 
-      it('should call addInfoToElement with an object containing element, type and info', () => {
+      it('should call stubElementIfNeeded each iteration with element and type', () => {
         collection.addInfoToElements(data)
 
         for (const [index, element] of elements.entries()) {
           expect(
-            collection.addInfoToElement
+            collection.stubElementIfNeeded
               .getCall(index)
-                .calledWithExactly({element, type, info})
+                .calledWithExactly(element, type)
           ).to.be.true
         }
+      })
+
+      it('should call addInfoToElement after stubElementIfNeeded each iteration with an object containing each element, type and info', () => {
+        collection.addInfoToElements(data)
+
+        for (const [index, element] of elements.entries()) {
+          const addInfoToElementCall =
+            collection.addInfoToElement.getCall(index)
+
+          expect(
+            addInfoToElementCall
+              .calledAfter(collection.stubElementIfNeeded.getCall(index))
+          ).to.be.true
+          expect(
+            addInfoToElementCall
+              .calledWithExactly({element, type, info})
+          ).to.be.true
+        }
+      })
+    })
+
+    /*************************/
+    /*  stubElementIfNeeded  */
+    /*************************/
+
+    describe('stubElementIfNeeded tests', () => {
+      const element = {}
+
+      beforeEach(() => {
+        sandbox.stub(collection, 'isNeededToStub')
+        sandbox.stub(collection, 'stubElement')
+      })
+
+      it('should call stubElement with element given type is Collection.EVENT and isNeededToStub called with element returns true', () => {
+        collection.isNeededToStub.withArgs(element).returns(true)
+
+        collection.stubElementIfNeeded(element, Collection.EVENT)
+
+        expect(
+          collection.stubElement
+            .calledWithExactly(element)
+        ).to.be.true
+      })
+
+      it('should not call stubElement given type is not Collection.EVENT', () => {
+        collection.stubElementIfNeeded(element, Collection.MANIPULATION)
+
+        expect(collection.stubElement.called).to.be.false
+      })
+
+      it('should not call stubElement given isNeededToStub returns false', () => {
+        collection.isNeededToStub.withArgs(element).returns(false)
+
+        collection.stubElementIfNeeded(element, Collection.EVENT)
+
+        expect(collection.stubElement.called).to.be.false
+      })
+    })
+
+    /*************************/
+    /*     isNeededToStub    */
+    /*************************/
+
+    describe('isNeededToStub tests', () => {
+      let element
+
+      beforeEach(() => {
+        element = {
+          dataset: {}
+        }
+      })
+
+      beforeEach(() => {
+        sandbox.stub(collection, 'isEventEmpty')
+      })
+
+      it('should return false given element has no parentNode', () => {
+        const result = collection.isNeededToStub(element)
+
+        expect(result).to.be.false
+      })
+
+      it('should return false given element.dataset has collectionId and isEventEmpty called with collectionId returns false', () => {
+        element.parentNode = {}
+        element.dataset.collectionId = 1
+        collection.isEventEmpty.withArgs(1).returns(false)
+
+        const result = collection.isNeededToStub(element)
+
+        expect(result).to.be.false
+      })
+
+      it('should return true given element has parentNode and its dataset has no collectionId', () => {
+        element.parentNode = {}
+
+        const result = collection.isNeededToStub(element)
+
+        expect(result).to.be.true
+      })
+
+      it('should return true given element has parentNode and its dataset has collectionId but isEventEmpty returns true', () => {
+        element.parentNode = {}
+        element.dataset.collectionId = 1
+        collection.isEventEmpty.withArgs(1).returns(true)
+
+        const result = collection.isNeededToStub(element)
+
+        expect(result).to.be.true
+      })
+    })
+
+    /*************************/
+    /*     isEventEmpty      */
+    /*************************/
+
+    describe('isEventEmpty tests', () => {
+      const collectionId = 1
+
+      it('should return true when given id\'s EVENT group is empty', () => {
+        collection.data = {
+          1: {
+            [Collection.EVENT]: {}
+          }
+        }
+        const result = collection.isEventEmpty(collectionId)
+
+        expect(result).to.be.true
+      })
+
+      it('should return false given id\'s EVENT group is not empty', () => {
+        collection.data = {
+          1: {
+            [Collection.EVENT]: {
+              key: 'code'
+            }
+          }
+        }
+        const result = collection.isEventEmpty(collectionId)
+
+        expect(result).to.be.false
+      })
+    })
+
+    /*************************/
+    /*      stubElement      */
+    /*************************/
+
+    describe.only('stubElement tests', () => {
+      let element, childNodes, stubElement
+
+      beforeEach(() => {
+        childNodes = ['element1', 'element2', 'element3']
+        stubElement = {
+          appendChild: sandbox.spy((child) => {
+            childNodes.splice(childNodes.indexOf(child), 1)
+          })
+        }
+        element = {
+          cloneNode: sandbox.stub().returns(stubElement),
+          childNodes,
+          parentNode: {
+            replaceChild: sandbox.spy()
+          }
+        }
+      })
+
+      it('should call cloneNode of given element', () => {
+        collection.stubElement(element)
+
+        expect(element.cloneNode.calledWith()).to.be.true
+      })
+
+      it('should call appendChild of stub element with each childNodes of given element', () => {
+        collection.stubElement(element)
+
+        for (let i = 0; i < 3; i += 1) {
+          expect(
+            stubElement.appendChild
+              .getCall(i)
+                .calledWithExactly(`element${i + 1}`)
+          ).to.be.true
+        }
+      })
+
+      it('should call replaceChild of element.parentNode with stubElement and element', () => {
+        const parentNode = element.parentNode
+
+        collection.stubElement(element)
+
+        expect(
+          parentNode.replaceChild
+            .calledAfter(element.cloneNode)
+        ).to.be.true
+        expect(
+          parentNode.replaceChild
+            .calledAfter(stubElement.appendChild)
+        ).to.be.true
+        expect(childNodes).to.be.eql([])
+        expect(
+          parentNode.replaceChild
+            .calledWithExactly(stubElement, element)
+        ).to.be.true
       })
     })
 
