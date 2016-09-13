@@ -3,8 +3,9 @@
 
 console.log('excuting content script');
 
-module.exports = undefined;
-module = undefined;
+var body = document.getElementsByTagName('body')[0];
+var stubBody = body.cloneNode(true);
+body.parentNode.replaceChild(stubBody, body);
 
 require('es6-promise').polyfill();
 require('isomorphic-fetch');
@@ -12,6 +13,7 @@ require('isomorphic-fetch');
 if (!window.esprimaParser) {
   window.esprimaParser = new (require('./lib/EsprimaParser'))(window);
 }
+
 var esprima = require('esprima');
 
 var url = window.location.href;
@@ -52,8 +54,8 @@ p.then(function () {
 if (!window.onDevtoolsSelectionChanged) {
   window.onDevtoolsSelectionChanged = function (element) {
     console.log('onSelectionChanged', element);
-
-    var info = element.CollectionId ? esprimaParser.collection.get(element.CollectionId) : {};
+    var id = element.dataset.collectionId;
+    var info = id ? esprimaParser.collection.get(id) : {};
 
     chrome.runtime.sendMessage(info, function (response) {
       console.log(response);
@@ -99,10 +101,7 @@ var callManiChecker = require('../../../helpers/callManiChecker');
 module.exports = function (_ref) {
   var callee = _ref.callee;
 
-  var statusData = {
-    execute: undefined
-  };
-  return callManiChecker({ criteria: criteria, callee: callee, statusData: statusData });
+  return callManiChecker({ criteria: criteria, callee: callee });
 };
 
 },{"../../../helpers/callManiChecker":19,"./criteria":4}],6:[function(require,module,exports){
@@ -501,10 +500,7 @@ module.exports = function (_ref) {
   var caller = _ref.caller;
   var callee = _ref.callee;
 
-  var statusData = {
-    execute: caller
-  };
-  return callManiChecker({ criteria: criteria, callee: callee, statusData: statusData });
+  return callManiChecker({ criteria: criteria, callee: callee });
 };
 
 },{"../../../helpers/callManiChecker":19,"./criteria":26}],28:[function(require,module,exports){
@@ -519,10 +515,7 @@ module.exports = function (_ref) {
   var caller = _ref.caller;
   var callee = _ref.callee;
 
-  var statusData = {
-    execute: caller
-  };
-  return callManiArg0Checker({ criteria: criteria, callee: callee, statusData: statusData });
+  return callManiArg0Checker({ criteria: criteria, callee: callee });
 };
 
 },{"../../../helpers/callManiArg0Checker":16,"./criteria":28}],30:[function(require,module,exports){
@@ -552,10 +545,7 @@ module.exports = function (_ref) {
   var caller = _ref.caller;
   var callee = _ref.callee;
 
-  var statusData = {
-    execute: caller
-  };
-  return callManiArg1Checker({ criteria: criteria, callee: callee, statusData: statusData });
+  return callManiArg1Checker({ criteria: criteria, callee: callee });
 };
 
 },{"../../../helpers/callManiArg1Checker":17,"./criteria":30}],32:[function(require,module,exports){
@@ -578,10 +568,7 @@ module.exports = function (_ref) {
   var caller = _ref.caller;
   var callee = _ref.callee;
 
-  var statusData = {
-    execute: caller
-  };
-  return callManiArg2ObjectChecker({ criteria: criteria, callee: callee, statusData: statusData });
+  return callManiArg2ObjectChecker({ criteria: criteria, callee: callee });
 };
 
 },{"../../../helpers/callManiArg2ObjectChecker":18,"./criteria":32}],34:[function(require,module,exports){
@@ -608,7 +595,6 @@ module.exports = function (_ref) {
   var callee = _ref.callee;
 
   var statusData = {
-    execute: caller,
     passive: context.jQuery(callee.arguments[0])
   };
   return callManiChecker({ criteria: criteria, callee: callee, statusData: statusData });
@@ -810,14 +796,12 @@ var EsprimaParser = function () {
     context.this = context;
     this.context = context;
     this.scriptUrl = null;
+    this.checkFlag = false;
 
     this.collection = new Collection();
     this.flowState = new FlowState();
     this.closureStack = new ClosureStack(context);
     this.checkerDispatcher = checkerDispatcher;
-
-    /* init binding */
-    this.executeReducer = this.executeReducer.bind(this);
   }
 
   _createClass(EsprimaParser, [{
@@ -832,7 +816,7 @@ var EsprimaParser = function () {
           var caller = _ref.caller;
           var callee = _ref.callee;
 
-          var target = caller ? caller : _this.context;
+          var target = caller === undefined ? _this.context : caller;
 
           return delete target[callee];
         }
@@ -858,64 +842,21 @@ var EsprimaParser = function () {
       var _this3 = this;
 
       return {
-        '=': function _(target, value) {
-          var status = _this3.checkerDispatcher.dispatch(Object.assign({
-            context: _this3.context
-          }, target));
-          console.log('asign status:', status);
-          _this3.handleAssignment(target, value, status);
+        '=': function _(exp, value) {
+          var success = _this3.setCheckFlag(exp);
+
+          _this3.handleAssign(exp, value);
+          _this3.resetCheckFlag(success);
+
+          return value;
         }
       };
     }
   }, {
-    key: 'handleAssignment',
-    value: function handleAssignment(target, value, status) {
-      if (status) {
-        this.handleAssignManipulation(target, value, status);
-      } else {
-        this.handleAssignOperation(target, value);
-      }
-    }
-  }, {
-    key: 'handleAssignManipulation',
-    value: function handleAssignManipulation(target, value, status) {
-      // addInfoToCollection is at the bottom of this file
-      this.addInfoToCollection(target, status);
-
-      if (status.type === this.Collection.EVENT) {
-        this.registerPropEvent(target, value);
-      }
-    }
-  }, {
-    key: 'registerPropEvent',
-    value: function registerPropEvent(_ref2, value) {
+    key: 'handleAssign',
+    value: function handleAssign(_ref2, value) {
       var caller = _ref2.caller;
       var callee = _ref2.callee;
-
-      var addEventListener = this.createAddEventListenerFromPropEvent(callee, value);
-
-      this.execute([caller, addEventListener]);
-    }
-  }, {
-    key: 'createAddEventListenerFromPropEvent',
-    value: function createAddEventListenerFromPropEvent(propEvent, handler) {
-      var addEventListener = new this.Callee('addEventListener');
-      var event = this.getEventFromPropEvent(propEvent);
-
-      addEventListener.addArguments([event, handler]);
-
-      return addEventListener;
-    }
-  }, {
-    key: 'getEventFromPropEvent',
-    value: function getEventFromPropEvent(propEvent) {
-      return propEvent.replace(/^on/, '');
-    }
-  }, {
-    key: 'handleAssignOperation',
-    value: function handleAssignOperation(_ref3, value) {
-      var caller = _ref3.caller;
-      var callee = _ref3.callee;
 
       if (caller === undefined) {
         this.updateVariables(callee, value);
@@ -942,7 +883,7 @@ var EsprimaParser = function () {
   }, {
     key: 'parseNode',
     value: function parseNode(node) {
-      return node ? this[node.type](node) : undefined;
+      return node === null ? undefined : this[node.type](node);
     }
   }, {
     key: 'Identifier',
@@ -1567,9 +1508,9 @@ var EsprimaParser = function () {
     }
   }, {
     key: 'setCalledArguments',
-    value: function setCalledArguments(_ref4) {
-      var keys = _ref4.keys;
-      var values = _ref4.values;
+    value: function setCalledArguments(_ref3) {
+      var keys = _ref3.keys;
+      var values = _ref3.values;
 
       var length = keys.length;
 
@@ -1580,164 +1521,40 @@ var EsprimaParser = function () {
   }, {
     key: 'UnaryExpression',
     value: function UnaryExpression(unaryExpression) {
-      var unaryOperation = this.unaryOperators[unaryExpression.operator];
+      var argument = this.parseUnaryArgument(unaryExpression.argument, unaryExpression.operator);
+      var operation = this.unaryOperators[unaryExpression.operator];
 
-      if (unaryExpression.operator === 'delete') {
-        return this.handleReferenceOperation(unaryExpression.argument, unaryOperation);
-      }
-      return this.handleUnaryOperation(unaryExpression.argument, unaryOperation);
+      return operation(argument);
     }
   }, {
-    key: 'handleReferenceOperation',
-    value: function handleReferenceOperation(argument, operation) {
-      for (var _len2 = arguments.length, args = Array(_len2 > 2 ? _len2 - 2 : 0), _key2 = 2; _key2 < _len2; _key2++) {
-        args[_key2 - 2] = arguments[_key2];
-      }
-
-      switch (argument.type) {
-        case 'MemberExpression':
-          return this.handleMemberReferenceOperation.apply(this, [argument, operation].concat(args));
-        default:
-          return this.handlePatternReferenceOperation.apply(this, [argument, operation].concat(args));
-      }
-    }
-  }, {
-    key: 'handleMemberReferenceOperation',
-    value: function handleMemberReferenceOperation(memberExpression, operation) {
-      var expression = this.parseExpression(memberExpression);
-      var reference = this.getReference(expression.data);
-
-      for (var _len3 = arguments.length, args = Array(_len3 > 2 ? _len3 - 2 : 0), _key3 = 2; _key3 < _len3; _key3++) {
-        args[_key3 - 2] = arguments[_key3];
-      }
-
-      return operation.apply(undefined, [Object.assign(reference, {
-        info: expression.info
-      })].concat(args));
-    }
-  }, {
-    key: 'parseExpression',
-    value: function parseExpression(expression) {
-      return {
-        data: this.transformExpressionToData(expression),
-        info: this.parseExpressionInfo(expression)
-      };
-    }
-  }, {
-    key: 'transformExpressionToData',
-    value: function transformExpressionToData(expression) {
-      return this['parse' + expression.type](expression);
-    }
-  }, {
-    key: 'parseMemberExpression',
-    value: function parseMemberExpression(memberExpression) {
-      var object = this.getObjectAsExpressionArray(memberExpression.object);
-      var property = this.getPropertyKey(memberExpression.property, memberExpression.computed);
-      return [].concat(_toConsumableArray(object), [property]);
-    }
-  }, {
-    key: 'getObjectAsExpressionArray',
-    value: function getObjectAsExpressionArray(object) {
-      switch (object.type) {
-        case 'MemberExpression':
-        case 'CallExpression':
-          return this['parse' + object.type](object);
+    key: 'parseUnaryArgument',
+    value: function parseUnaryArgument(argument, operator) {
+      switch (operator) {
+        case 'delete':
+          return this.getRefExp(argument);
 
         default:
-          return [this.parseNode(object)];
+          return this.parseNode(argument);
       }
     }
   }, {
-    key: 'parseCallExpression',
-    value: function parseCallExpression(callExpression) {
-      var _parseCallee = this.parseCallee(callExpression.callee);
-
-      var caller = _parseCallee.caller;
-      var callee = _parseCallee.callee;
-
-      var parsedArguments = this.parseArguments(callExpression.arguments);
-
-      callee.addArguments(parsedArguments);
-
-      return caller ? [].concat(_toConsumableArray(caller), [callee]) : [callee];
-    }
-  }, {
-    key: 'parseCallee',
-    value: function parseCallee(calleeExpression) {
-      switch (calleeExpression.type) {
+    key: 'getRefExp',
+    value: function getRefExp(expression) {
+      switch (expression.type) {
         case 'MemberExpression':
-          return this.parseMemberCallee(calleeExpression);
+          return this.getMemberExp(expression);
 
         default:
-          return this.parseOtherCallee(calleeExpression);
+          return this.getPatternExp(expression);
       }
     }
   }, {
-    key: 'parseMemberCallee',
-    value: function parseMemberCallee(calleeExpression) {
-      var caller = this.getObjectAsExpressionArray(calleeExpression.object);
-      var method = this.getPropertyKey(calleeExpression.property, calleeExpression.computed);
-      return {
-        caller: caller,
-        callee: this.getCallee(method)
-      };
-    }
-  }, {
-    key: 'getCallee',
-    value: function getCallee(method) {
-      return new this.Callee(method);
-    }
-  }, {
-    key: 'parseOtherCallee',
-    value: function parseOtherCallee(calleeExpression) {
-      var method = this.parseNode(calleeExpression);
-
+    key: 'getPatternExp',
+    value: function getPatternExp(pattern) {
       return {
         caller: undefined,
-        callee: this.getCallee(method)
+        callee: this.getNameFromPattern(pattern)
       };
-    }
-  }, {
-    key: 'parseArguments',
-    value: function parseArguments(calledArguments) {
-      var _this8 = this;
-
-      return calledArguments.map(function (argument) {
-        return _this8.parseNode(argument);
-      });
-    }
-  }, {
-    key: 'parseExpressionInfo',
-    value: function parseExpressionInfo(expression) {
-      return {
-        loc: expression.loc,
-        code: this.escodegen.generate(expression),
-        scriptUrl: this.scriptUrl
-      };
-    }
-  }, {
-    key: 'getReference',
-    value: function getReference(data) {
-      return {
-        caller: this.execute(data.slice(0, data.length - 1)),
-        callee: data.slice(-1)[0]
-      };
-    }
-  }, {
-    key: 'handlePatternReferenceOperation',
-    value: function handlePatternReferenceOperation(pattern, operation) {
-      var callee = this.getNameFromPattern(pattern);
-
-      for (var _len4 = arguments.length, args = Array(_len4 > 2 ? _len4 - 2 : 0), _key4 = 2; _key4 < _len4; _key4++) {
-        args[_key4 - 2] = arguments[_key4];
-      }
-
-      return operation.apply(undefined, [{ callee: callee }].concat(args));
-    }
-  }, {
-    key: 'handleUnaryOperation',
-    value: function handleUnaryOperation(argument, operation) {
-      return operation(this.parseNode(argument));
     }
   }, {
     key: 'UpdateExpression',
@@ -1750,13 +1567,13 @@ var EsprimaParser = function () {
   }, {
     key: 'getUpdateValue',
     value: function getUpdateValue(updateExpression) {
-      var assignmentExpression = this.transformUpdateToAssignment(updateExpression);
+      var assignmentExpression = this.transUpdateToAssignment(updateExpression);
 
       return this.AssignmentExpression(assignmentExpression);
     }
   }, {
-    key: 'transformUpdateToAssignment',
-    value: function transformUpdateToAssignment(updateExpression) {
+    key: 'transUpdateToAssignment',
+    value: function transUpdateToAssignment(updateExpression) {
       return {
         type: 'AssignmentExpression',
         operator: updateExpression.operator[0] + '=', // transform ['++', '--'] to ['+=', '-=']
@@ -1769,30 +1586,32 @@ var EsprimaParser = function () {
     value: function BinaryExpression(binaryExpression) {
       var left = this.parseNode(binaryExpression.left);
       var right = this.parseNode(binaryExpression.right);
-      var binaryOperation = this.binaryOperators[binaryExpression.operator];
+      var operation = this.binaryOperators[binaryExpression.operator];
 
-      return binaryOperation(left, right);
+      return operation(left, right);
     }
   }, {
     key: 'AssignmentExpression',
     value: function AssignmentExpression(assignmentExpression) {
-      // console.log(this.escodegen.generate(assignmentExpression));
+      // {caller, callee}
+      var exp = this.getRefExp(assignmentExpression.left);
+      var value = this.getAssignValue(assignmentExpression);
+      var operation = this.assignmentOperators['='];
 
-      var assignmentValue = this.getAssignmentValue(assignmentExpression);
+      exp.info = this.getExpInfo(assignmentExpression);
 
-      this.handleReferenceOperation(assignmentExpression.left, this.assignmentOperators['='], assignmentValue);
-      return assignmentValue;
+      return operation(exp, value);
     }
   }, {
-    key: 'getAssignmentValue',
-    value: function getAssignmentValue(assignmentExpression) {
-      var binaryExpression = this.transformAssignmentToBinary(assignmentExpression);
+    key: 'getAssignValue',
+    value: function getAssignValue(assignmentExpression) {
+      var binaryExpression = this.transAssignmentToBinary(assignmentExpression);
 
       return binaryExpression.operator ? this.BinaryExpression(binaryExpression) : this.parseNode(binaryExpression.right);
     }
   }, {
-    key: 'transformAssignmentToBinary',
-    value: function transformAssignmentToBinary(assignmentExpression) {
+    key: 'transAssignmentToBinary',
+    value: function transAssignmentToBinary(assignmentExpression) {
       return {
         type: 'BinaryExpression',
         operator: assignmentExpression.operator.replace(/\=$/, ''),
@@ -1803,64 +1622,81 @@ var EsprimaParser = function () {
   }, {
     key: 'LogicalExpression',
     value: function LogicalExpression(logicalExpression) {
-      var logicalOperation = this.logicalOperators[logicalExpression.operator];
+      var operation = this.logicalOperators[logicalExpression.operator];
 
-      return logicalOperation(logicalExpression.left, logicalExpression.right);
+      return operation(logicalExpression.left, logicalExpression.right);
     }
   }, {
     key: 'MemberExpression',
     value: function MemberExpression(memberExpression) {
-      var expression = this.parseExpression(memberExpression);
+      // {caller, callee}
+      var exp = this.getMemberExp(memberExpression);
 
-      return this.execute(expression.data);
+      return this.parseMemberExp(exp);
     }
   }, {
-    key: 'execute',
-    value: function execute(data) {
-      // @TODO: take out try and catch
-      // console.log(data);
-      try {
-        return this.executeExpression(data);
-      } catch (e) {
-        console.log(e);
-        return undefined;
-      }
+    key: 'getMemberExp',
+    value: function getMemberExp(memberExpression) {
+      return {
+        caller: this.parseNode(memberExpression.object),
+        callee: this.getPropertyKey(memberExpression.property, memberExpression.computed)
+      };
     }
   }, {
-    key: 'executeExpression',
-    value: function executeExpression(data) {
-      var result = data.reduce(this.executeReducer, undefined);
-      // definition of valid here are
-      // (1) result has no parent property, and
-      // (2) result is Style or DOMTokenList
+    key: 'parseMemberExp',
+    value: function parseMemberExp(exp) {
+      var result = this.execute(exp);
+      // definition of valid Style / DOMTokenList here is:
+      // (1) result have no parent property
+      // (2) result is CSSStyleDeclaration / DOMTokenList instance
       if (this.isValidStyleOrDOMTokenList(result)) {
-        result.parent = this.getReference(data).caller;
+        result.parent = exp.caller;
       }
       return result;
     }
   }, {
-    key: 'executeReducer',
-    value: function executeReducer(pre, cur) {
-      return cur instanceof this.Callee ? this.executeCall(pre, cur) : this.executeMember(pre, cur);
+    key: 'execute',
+    value: function execute(exp) {
+      try {
+        return this.executeExp(exp);
+      } catch (e) {
+        console.log(e);
+        console.log(exp);
+        return undefined;
+      }
+    }
+  }, {
+    key: 'executeExp',
+    value: function executeExp(exp) {
+      return exp.callee instanceof this.Callee ? this.executeCall(exp) : this.executeMember(exp);
     }
   }, {
     key: 'executeCall',
-    value: function executeCall(pre, cur) {
+    value: function executeCall(_ref4) {
+      var caller = _ref4.caller;
+      var callee = _ref4.callee;
+
       // a function had been bound can not change context by bind, call and apply
       // a function call or apply with non-object context would be ignored
-      var method = this.getMethod(pre, cur);
+      var calledMethod = this.getCalledMethod({ caller: caller, callee: callee });
 
-      return method.apply(pre, cur.arguments);
+      return calledMethod.apply(caller, callee.arguments);
     }
   }, {
-    key: 'getMethod',
-    value: function getMethod(pre, cur) {
-      return pre === undefined ? cur.method : pre[cur.method];
+    key: 'getCalledMethod',
+    value: function getCalledMethod(_ref5) {
+      var caller = _ref5.caller;
+      var callee = _ref5.callee;
+
+      return caller === undefined ? callee.method : caller[callee.method];
     }
   }, {
     key: 'executeMember',
-    value: function executeMember(pre, cur) {
-      return pre === undefined ? cur : pre[cur];
+    value: function executeMember(_ref6) {
+      var caller = _ref6.caller;
+      var callee = _ref6.callee;
+
+      return caller[callee];
     }
   }, {
     key: 'isValidStyleOrDOMTokenList',
@@ -1897,61 +1733,131 @@ var EsprimaParser = function () {
   }, {
     key: 'CallExpression',
     value: function CallExpression(callExpression) {
-      var expression = this.parseExpression(callExpression);
+      console.log(this.escodegen.generate(callExpression));
+      // {caller, callee}
+      var exp = this.getCallExp(callExpression);
 
-      return this.checkAndExecute(expression.data, expression.info);
+      exp.info = this.getExpInfo(callExpression);
+
+      return this.parseCallExp(exp);
     }
   }, {
-    key: 'checkAndExecute',
-    value: function checkAndExecute(data, info) {
-      var caller = this.execute(data.splice(0, 1));
-      var checkAndExecuteReducer = this.createCheckAndExecuteReducer(info);
-      // reduce on data[1] to data[length - 1]
-      return data.reduce(checkAndExecuteReducer, caller);
+    key: 'getCallExp',
+    value: function getCallExp(callExpression) {
+      var exp = this.parseCallee(callExpression.callee);
+      var calleeArguments = this.parseArguments(callExpression.arguments);
+
+      exp.callee.addArguments(calleeArguments);
+
+      return exp;
     }
   }, {
-    key: 'createCheckAndExecuteReducer',
-    value: function createCheckAndExecuteReducer(info) {
-      var _this9 = this;
+    key: 'parseCallee',
+    value: function parseCallee(callee) {
+      var exp = this.getCalleeExp(callee);
 
-      return function () {
-        for (var _len5 = arguments.length, args = Array(_len5), _key5 = 0; _key5 < _len5; _key5++) {
-          args[_key5] = arguments[_key5];
-        }
-
-        return _this9.checkAndExecuteReducer.apply(_this9, [info].concat(args));
+      return {
+        caller: exp.caller,
+        callee: this.createCallee(exp.callee)
       };
     }
   }, {
-    key: 'checkAndExecuteReducer',
-    value: function checkAndExecuteReducer(info, caller, callee) {
-      var target = { caller: caller, callee: callee, info: info };
-      // status: {type, execute, passive}
-      var status = this.checkerDispatcher.dispatch(Object.assign({
-        context: this.context
-      }, target));
-      console.log('call status:', status);
-      if (status) {
-        this.addInfoToCollection(target, status);
+    key: 'getCalleeExp',
+    value: function getCalleeExp(callee) {
+      switch (callee.type) {
+        case 'MemberExpression':
+          return this.getMemberExp(callee);
+
+        default:
+          return this.getOtherExp(callee);
       }
-      return this.getNextCaller(target, status);
+    }
+  }, {
+    key: 'getOtherExp',
+    value: function getOtherExp(expression) {
+      return {
+        caller: undefined,
+        callee: this.parseNode(expression)
+      };
+    }
+  }, {
+    key: 'createCallee',
+    value: function createCallee(method) {
+      return new this.Callee(method);
+    }
+  }, {
+    key: 'parseArguments',
+    value: function parseArguments(calledArguments) {
+      var _this8 = this;
+
+      return calledArguments.map(function (argument) {
+        return _this8.parseNode(argument);
+      });
+    }
+  }, {
+    key: 'getExpInfo',
+    value: function getExpInfo(expression) {
+      return {
+        loc: expression.loc,
+        code: this.escodegen.generate(expression),
+        scriptUrl: this.scriptUrl
+      };
+    }
+  }, {
+    key: 'parseCallExp',
+    value: function parseCallExp(exp) {
+      // {caller, callee, info}
+      var success = this.setCheckFlag(exp);
+      var result = this.execute(exp);
+
+      this.resetCheckFlag(success);
+
+      return result;
+    }
+  }, {
+    key: 'setCheckFlag',
+    value: function setCheckFlag(exp) {
+      if (!this.checkFlag && exp.caller) {
+        var status = this.checkerDispatcher.dispatch({
+          context: this.context,
+          caller: exp.caller,
+          callee: exp.callee
+        });
+        return this.tryToSetCheckFlag(exp, status);
+      }
+      return false;
+    }
+  }, {
+    key: 'tryToSetCheckFlag',
+    value: function tryToSetCheckFlag(exp, status) {
+      if (status) {
+        this.checkFlag = true;
+        this.addInfoToCollection(exp, status);
+      }
+      return !!status;
     }
   }, {
     key: 'addInfoToCollection',
-    value: function addInfoToCollection(target, status) {
-      var object = this.getTargetObject(target, status);
-      var elements = this.getTargetElements(object);
+    value: function addInfoToCollection(exp, status) {
+      var elements = this.getTargetElements(exp.caller, status);
 
-      this.addInfoByStatus({
+      this.collection.addInfoToElements({
         elements: elements,
-        info: target.info
-      }, status);
+        type: status.type,
+        info: exp.info
+      });
+    }
+  }, {
+    key: 'getTargetElements',
+    value: function getTargetElements(caller, status) {
+      var object = this.getTargetObject(caller, status);
+      var elements = this.isJquery(object) ? object.get() : object;
+      // @NOTE: passive could be an array for future use
+      return [].concat(elements);
     }
   }, {
     key: 'getTargetObject',
-    value: function getTargetObject(_ref5, status) {
-      var caller = _ref5.caller;
-
+    value: function getTargetObject(caller, status) {
       if (status.hasOwnProperty('passive')) {
         return status.passive;
       } else if (this.isStyleOrDOMTokenList(caller)) {
@@ -1967,11 +1873,6 @@ var EsprimaParser = function () {
       return object instanceof this.context.Attr;
     }
   }, {
-    key: 'getTargetElements',
-    value: function getTargetElements(object) {
-      return this.isJquery(object) ? object.get() : [object];
-    }
-  }, {
     key: 'isJquery',
     value: function isJquery(object) {
       var jQuery = this.context.jQuery;
@@ -1979,30 +1880,11 @@ var EsprimaParser = function () {
       return !!jQuery && object instanceof jQuery;
     }
   }, {
-    key: 'addInfoByStatus',
-    value: function addInfoByStatus(info, status) {
-      switch (status.type) {
-        case this.Collection.EVENT:
-          this.collection.addEvent(info);
-          break;
-
-        case this.Collection.MANIPULATION:
-          this.collection.addManipulation(info);
-          break;
-
-        default:
+    key: 'resetCheckFlag',
+    value: function resetCheckFlag(success) {
+      if (success) {
+        this.checkFlag = false;
       }
-    }
-  }, {
-    key: 'getNextCaller',
-    value: function getNextCaller(_ref6, status) {
-      var caller = _ref6.caller;
-      var callee = _ref6.callee;
-
-      if (status && status.hasOwnProperty('execute')) {
-        return status.execute;
-      }
-      return this.execute([caller, callee]);
     }
   }, {
     key: 'NewExpression',
@@ -2015,13 +1897,13 @@ var EsprimaParser = function () {
   }, {
     key: 'SequenceExpression',
     value: function SequenceExpression(sequenceExpression) {
-      var _this10 = this;
+      var _this9 = this;
 
       var result = void 0;
 
       sequenceExpression.expressions.forEach(function (expression) {
         // all here are expressions, no need to check flow control status
-        result = _this10.parseNode(expression);
+        result = _this9.parseNode(expression);
       });
       return result;
     }
@@ -2306,7 +2188,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var EVENT = 'EVENT';
-var MANIPULATION = 'MANIPULATION';
+var MANIPULATION = 'MANIP';
 
 var Collection = function () {
   function Collection() {
@@ -2322,19 +2204,10 @@ var Collection = function () {
       return this.data[id];
     }
   }, {
-    key: 'addEvent',
-    value: function addEvent(info) {
-      this.addFromElements(info, Collection.EVENT);
-    }
-  }, {
-    key: 'addManipulation',
-    value: function addManipulation(info) {
-      this.addFromElements(info, Collection.MANIPULATION);
-    }
-  }, {
-    key: 'addFromElements',
-    value: function addFromElements(_ref, type) {
+    key: 'addInfoToElements',
+    value: function addInfoToElements(_ref) {
       var elements = _ref.elements;
+      var type = _ref.type;
       var info = _ref.info;
       var _iteratorNormalCompletion = true;
       var _didIteratorError = false;
@@ -2344,7 +2217,7 @@ var Collection = function () {
         for (var _iterator = elements[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
           var element = _step.value;
 
-          this.add(element, info, type);
+          this.addInfoToElement({ element: element, type: type, info: info });
         }
       } catch (err) {
         _didIteratorError = true;
@@ -2362,47 +2235,75 @@ var Collection = function () {
       }
     }
   }, {
-    key: 'add',
-    value: function add(element, info, type) {
-      var id = this.getCollectionIdFrom(element);
-      var group = this.getCollectionGroup(id, type);
-      var key = this.getKeyFrom(info);
+    key: 'addInfoToElement',
+    value: function addInfoToElement(_ref2) {
+      var element = _ref2.element;
+      var type = _ref2.type;
+      var info = _ref2.info;
 
-      this.addCodeToCollectionGroup(group, key, info.code);
+      var key = this.getKey(info.loc);
+      var group = this.getGroup({
+        element: element,
+        type: type,
+        scriptUrl: info.scriptUrl
+      });
+      this.addInfoToGroup(group, {
+        key: key,
+        code: info.code
+      });
     }
   }, {
-    key: 'getCollectionIdFrom',
-    value: function getCollectionIdFrom(element) {
-      // @TODO: repeat use in same page
-      if (!element.hasOwnProperty('CollectionId')) {
-        element.CollectionId = this.createElementCollection();
+    key: 'getKey',
+    value: function getKey(loc) {
+      return '[' + loc.start.line + ':' + loc.start.column + ']-[' + loc.end.line + ':' + loc.end.column + ']';
+    }
+  }, {
+    key: 'getGroup',
+    value: function getGroup(_ref3) {
+      var element = _ref3.element;
+      var type = _ref3.type;
+      var scriptUrl = _ref3.scriptUrl;
+
+      var id = this.getIdFromElement(element);
+      var group = this.data[id][type];
+
+      if (!group[scriptUrl]) {
+        group[scriptUrl] = {};
       }
-      return element.CollectionId;
+      return group[scriptUrl];
     }
   }, {
-    key: 'createElementCollection',
-    value: function createElementCollection() {
+    key: 'getIdFromElement',
+    value: function getIdFromElement(element) {
+      var dataset = element.dataset;
+
+      if (!dataset.hasOwnProperty('collectionId')) {
+        dataset.collectionId = this.createCollection();
+      }
+      return dataset.collectionId;
+    }
+  }, {
+    key: 'createCollection',
+    value: function createCollection() {
       var _data;
 
       this.data[++this.id] = (_data = {}, _defineProperty(_data, Collection.MANIPULATION, {}), _defineProperty(_data, Collection.EVENT, {}), _data);
       return this.id;
     }
   }, {
-    key: 'getCollectionGroup',
-    value: function getCollectionGroup(id, type) {
-      return this.data[id][type];
-    }
-  }, {
-    key: 'getKeyFrom',
-    value: function getKeyFrom(info) {
-      return info.scriptUrl + ':' + info.loc.start.line + ':' + info.loc.start.column;
-    }
-  }, {
-    key: 'addCodeToCollectionGroup',
-    value: function addCodeToCollectionGroup(group, key, code) {
+    key: 'addInfoToGroup',
+    value: function addInfoToGroup(group, _ref4) {
+      var key = _ref4.key;
+      var code = _ref4.code;
+
       if (!group.hasOwnProperty(key)) {
-        group[key] = code;
+        group[key] = this.normalizeCode(code);
       }
+    }
+  }, {
+    key: 'normalizeCode',
+    value: function normalizeCode(code) {
+      return code.substr(0, 50) + (code.length > 50 ? '...' : '');
     }
   }], [{
     key: 'EVENT',

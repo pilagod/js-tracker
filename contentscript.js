@@ -1,6 +1,8 @@
 console.log('excuting content script')
 
-// @TODO: stub whole body
+const body = document.getElementsByTagName('body')[0]
+const stubBody = body.cloneNode(true)
+body.parentNode.replaceChild(stubBody, body)
 
 require('es6-promise').polyfill()
 require('isomorphic-fetch')
@@ -8,6 +10,7 @@ require('isomorphic-fetch')
 if (!window.esprimaParser) {
   window.esprimaParser = new (require('./lib/EsprimaParser'))(window)
 }
+
 const esprima = require('esprima')
 
 const url = window.location.href
@@ -48,9 +51,8 @@ p.then(() => {
 if (!window.onDevtoolsSelectionChanged) {
   window.onDevtoolsSelectionChanged = (element) => {
     console.log('onSelectionChanged', element);
-
-    const info = element.CollectionId ?
-      esprimaParser.collection.get(element.CollectionId) : {}
+    const id = element.dataset.collectionId
+    const info = id ? esprimaParser.collection.get(id) : {}
 
     chrome.runtime.sendMessage(info, (response) => {
       console.log(response)
