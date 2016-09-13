@@ -1733,7 +1733,7 @@ var EsprimaParser = function () {
   }, {
     key: 'CallExpression',
     value: function CallExpression(callExpression) {
-      console.log(this.escodegen.generate(callExpression));
+      // console.log(this.escodegen.generate(callExpression));
       // {caller, callee}
       var exp = this.getCallExp(callExpression);
 
