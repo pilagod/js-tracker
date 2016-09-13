@@ -1,7 +1,6 @@
 console.log('excuting content script')
 
-module.exports = undefined
-module = undefined
+// @TODO: stub whole body
 
 require('es6-promise').polyfill()
 require('isomorphic-fetch')

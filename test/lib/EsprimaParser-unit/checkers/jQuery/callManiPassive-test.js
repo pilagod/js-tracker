@@ -21,7 +21,6 @@ describe('callManiPassive checker tests', () => {
   it('should call callManiPassiveChecker with an object containing proper criteria, callee and statusData (execute -> caller, passive -> jQuery(callee.argument[0])) then return', () => {
     const $element = [callee.arguments[0]]
     const statusData = {
-      execute: caller,
       passive: $element
     }
     context.jQuery = sandbox.stub()

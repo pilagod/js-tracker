@@ -3,7 +3,6 @@ const proxyquire = require('proxyquire')
 describe('callMani checker tests', () => {
   const criteria = {}
   const callee = 'callee'
-  const statusData = {execute: undefined}
   let checkerStub, checker
 
   before(() => {
@@ -20,7 +19,7 @@ describe('callMani checker tests', () => {
     expect(checkerStub.calledOnce).to.be.true
     expect(
       checkerStub
-        .calledWithExactly({criteria, callee, statusData})
+        .calledWithExactly({criteria, callee})
     ).to.be.true
     expect(result).to.be.eql('resultFromChecker')
   })

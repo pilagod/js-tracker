@@ -4,7 +4,6 @@ describe('callManiArg1 checker tests', () => {
   const criteria = {}
   const caller = {}
   const callee = 'callee'
-  const statusData = {execute: caller}
   let checkerStub, checker
 
   before(() => {
@@ -21,7 +20,7 @@ describe('callManiArg1 checker tests', () => {
     expect(checkerStub.calledOnce).to.be.true
     expect(
       checkerStub
-        .calledWithExactly({criteria, callee, statusData})
+        .calledWithExactly({criteria, callee})
     ).to.be.true
     expect(result).to.be.eql('resultFromChecker')
   })
