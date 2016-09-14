@@ -168,7 +168,7 @@ describe('EVENT of collection', () => {
     })
 
     describe('event tests', () => {
-      it('should add code info to collection', () => {
+      it('should add code to collection', () => {
         $element.on = sandbox.spy()
 
         const ast = esprima.parse(`
@@ -198,9 +198,11 @@ describe('EVENT of collection', () => {
     })
 
     describe('event arg > 1 tests', () => {
-      it('should add code info to collection', () => {
+      beforeEach(() => {
         $element.click = sandbox.spy()
+      })
 
+      it('should add code to collection', () => {
         const ast = esprima.parse(`
           var $element = jQuery('#element');
           var clickHandler = function () {};
@@ -212,8 +214,7 @@ describe('EVENT of collection', () => {
 
         const clickHandler = closureStack.get('clickHandler')
 
-        expect($element.click.calledOnce).to.be.true
-        expect($element.click.calledWith(clickHandler)).to.be.true
+        expect($element.click.withArgs(clickHandler).calledOnce).to.be.true
 
         checkCollectionIds(elements)
         checkCollectionDataByElements(elements, [
@@ -221,7 +222,7 @@ describe('EVENT of collection', () => {
         ])
       })
 
-      it('should not add code info to collection', () => {
+      it('should not add code to collection', () => {
         const ast = esprima.parse(`
           var $element = jQuery('#element');
 
@@ -230,6 +231,7 @@ describe('EVENT of collection', () => {
 
         esprimaParser.parseAst(ast, scriptUrl)
 
+        expect($element.click.withArgs().calledOnce).to.be.true
         // this case would add manipulation to collection data,
         // so only test EVENT group is empty here
         for (const element of elements) {
@@ -237,6 +239,30 @@ describe('EVENT of collection', () => {
 
           expect(Object.keys(eGroup)).to.have.lengthOf(0)
         }
+      })
+    })
+
+    describe('document (has no dataset) tests', () => {
+      it('should not add code to collection', () => {
+        elements = [{}]
+        $element = new jQueryStub(elements)
+        $element.ready = sandbox.spy()
+
+        const ast = esprima.parse(`
+          var $element = jQuery('#element');
+          var readyHandler = function () {};
+
+          $element.ready(readyHandler)
+        `, {loc: true})
+
+        esprimaParser.parseAst(ast, scriptUrl)
+
+        const readyHandler = closureStack.get('readyHandler')
+
+        expect($element.ready.withArgs(readyHandler).calledOnce).to.be.true
+
+        expect(collection.id).to.be.equal(0)
+        expect(Object.keys(collection.data)).to.have.lengthOf(0)
       })
     })
   })

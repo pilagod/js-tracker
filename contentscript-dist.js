@@ -1,8 +1,9 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
 
-console.log('excuting content script');
+console.log('<==== init tracking ====>');
 
+// stub whole body (remove all event listener)
 var body = document.getElementsByTagName('body')[0];
 var stubBody = body.cloneNode(true);
 body.parentNode.replaceChild(stubBody, body);
@@ -15,6 +16,7 @@ if (!window.esprimaParser) {
 }
 
 var esprima = require('esprima');
+var mimetypes = require('./mimetypes');
 
 var url = window.location.href;
 var asts = [];
@@ -23,32 +25,36 @@ var scripts = Array.prototype.slice.call(document.getElementsByTagName('script')
 var p = Promise.resolve(true);
 
 scripts.forEach(function (script) {
-  p = p.then(function () {
-    if (script.src) {
-      return fetch(script.src).then(function (response) {
-        return response.text();
-      }).then(function (scriptText) {
-        asts.push({
-          url: script.src,
-          root: esprima.parse(scriptText, { loc: true })
+  if (!script.type || mimetypes.hasOwnProperty(script.type)) {
+    // parse only valid type of scripts
+    p = p.then(function () {
+      if (script.src) {
+        return fetch(script.src).then(function (response) {
+          return response.text();
+        }).then(function (scriptText) {
+          asts.push({
+            url: script.src,
+            root: esprima.parse(scriptText, { loc: true })
+          });
         });
-      });
-    } else if (script.innerHTML) {
-      asts.push({
-        url: url,
-        root: esprima.parse(script.innerHTML, { loc: true })
-      });
-    }
-    return Promise.resolve(true);
-  });
+      } else if (script.innerHTML) {
+        asts.push({
+          url: url,
+          root: esprima.parse(script.innerHTML, { loc: true })
+        });
+      }
+      return Promise.resolve(true);
+    });
+  }
 });
 
-console.log(asts);
-
 p.then(function () {
+  console.log(asts);
+
   asts.forEach(function (ast) {
     esprimaParser.parseAst(ast.root, ast.url);
   });
+  console.log('<==== start tracking ====>');
 });
 
 if (!window.onDevtoolsSelectionChanged) {
@@ -63,7 +69,7 @@ if (!window.onDevtoolsSelectionChanged) {
   };
 }
 
-},{"./lib/EsprimaParser":49,"es6-promise":59,"esprima":80,"isomorphic-fetch":81}],2:[function(require,module,exports){
+},{"./lib/EsprimaParser":49,"./mimetypes":59,"es6-promise":60,"esprima":81,"isomorphic-fetch":82}],2:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -1657,13 +1663,13 @@ var EsprimaParser = function () {
   }, {
     key: 'execute',
     value: function execute(exp) {
-      try {
-        return this.executeExp(exp);
-      } catch (e) {
-        console.log(e);
-        console.log(exp);
-        return undefined;
-      }
+      // try {
+      return this.executeExp(exp);
+      // } catch (e) {
+      // console.log(e);
+      // console.log(exp, this.scriptUrl);
+      // return undefined
+      // }
     }
   }, {
     key: 'executeExp',
@@ -1733,7 +1739,6 @@ var EsprimaParser = function () {
   }, {
     key: 'CallExpression',
     value: function CallExpression(callExpression) {
-      // console.log(this.escodegen.generate(callExpression));
       // {caller, callee}
       var exp = this.getCallExp(callExpression);
 
@@ -1914,7 +1919,7 @@ var EsprimaParser = function () {
 
 module.exports = EsprimaParser;
 
-},{"./dispatchers/checkerDispatcher":44,"./operators/binaryOperators":50,"./operators/unaryOperators":51,"./structures/Callee":52,"./structures/ClosureStack":54,"./structures/Collection":55,"./structures/FlowState":57,"./structures/FunctionAgent":58,"escodegen":60}],50:[function(require,module,exports){
+},{"./dispatchers/checkerDispatcher":44,"./operators/binaryOperators":50,"./operators/unaryOperators":51,"./structures/Callee":52,"./structures/ClosureStack":54,"./structures/Collection":55,"./structures/FlowState":57,"./structures/FunctionAgent":58,"escodegen":61}],50:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -2217,6 +2222,7 @@ var Collection = function () {
         for (var _iterator = elements[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
           var element = _step.value;
 
+          console.log(element, type, info);
           this.addInfoToElement({ element: element, type: type, info: info });
         }
       } catch (err) {
@@ -2275,6 +2281,8 @@ var Collection = function () {
   }, {
     key: 'getIdFromElement',
     value: function getIdFromElement(element) {
+      console.log(element);
+      // @TODO: document has no data set
       var dataset = element.dataset;
 
       if (!dataset.hasOwnProperty('collectionId')) {
@@ -2485,6 +2493,14 @@ var FunctionAgent = function FunctionAgent(init) {
 module.exports = FunctionAgent;
 
 },{}],59:[function(require,module,exports){
+module.exports={
+  "text/javascript": true,
+  "text/ecmascript": true,
+  "application/javascript": true,
+  "application/ecmascript": true
+}
+
+},{}],60:[function(require,module,exports){
 (function (process,global){
 /*!
  * @overview es6-promise - a tiny implementation of Promises/A+.
@@ -3447,7 +3463,7 @@ module.exports = FunctionAgent;
 
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"_process":83}],60:[function(require,module,exports){
+},{"_process":84}],61:[function(require,module,exports){
 (function (global){
 /*
   Copyright (C) 2012-2014 Yusuke Suzuki <utatane.tea@gmail.com>
@@ -6050,7 +6066,7 @@ module.exports = FunctionAgent;
 /* vim: set sw=4 ts=4 et tw=80 : */
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./package.json":79,"estraverse":61,"esutils":65,"source-map":66}],61:[function(require,module,exports){
+},{"./package.json":80,"estraverse":62,"esutils":66,"source-map":67}],62:[function(require,module,exports){
 /*
   Copyright (C) 2012-2013 Yusuke Suzuki <utatane.tea@gmail.com>
   Copyright (C) 2012 Ariya Hidayat <ariya.hidayat@gmail.com>
@@ -6897,7 +6913,7 @@ module.exports = FunctionAgent;
 }));
 /* vim: set sw=4 ts=4 et tw=80 : */
 
-},{}],62:[function(require,module,exports){
+},{}],63:[function(require,module,exports){
 /*
   Copyright (C) 2013 Yusuke Suzuki <utatane.tea@gmail.com>
 
@@ -7043,7 +7059,7 @@ module.exports = FunctionAgent;
 }());
 /* vim: set sw=4 ts=4 et tw=80 : */
 
-},{}],63:[function(require,module,exports){
+},{}],64:[function(require,module,exports){
 /*
   Copyright (C) 2013-2014 Yusuke Suzuki <utatane.tea@gmail.com>
   Copyright (C) 2014 Ivan Nikulin <ifaaan@gmail.com>
@@ -7180,7 +7196,7 @@ module.exports = FunctionAgent;
 }());
 /* vim: set sw=4 ts=4 et tw=80 : */
 
-},{}],64:[function(require,module,exports){
+},{}],65:[function(require,module,exports){
 /*
   Copyright (C) 2013 Yusuke Suzuki <utatane.tea@gmail.com>
 
@@ -7347,7 +7363,7 @@ module.exports = FunctionAgent;
 }());
 /* vim: set sw=4 ts=4 et tw=80 : */
 
-},{"./code":63}],65:[function(require,module,exports){
+},{"./code":64}],66:[function(require,module,exports){
 /*
   Copyright (C) 2013 Yusuke Suzuki <utatane.tea@gmail.com>
 
@@ -7382,7 +7398,7 @@ module.exports = FunctionAgent;
 }());
 /* vim: set sw=4 ts=4 et tw=80 : */
 
-},{"./ast":62,"./code":63,"./keyword":64}],66:[function(require,module,exports){
+},{"./ast":63,"./code":64,"./keyword":65}],67:[function(require,module,exports){
 /*
  * Copyright 2009-2011 Mozilla Foundation and contributors
  * Licensed under the New BSD license. See LICENSE.txt or:
@@ -7392,7 +7408,7 @@ exports.SourceMapGenerator = require('./source-map/source-map-generator').Source
 exports.SourceMapConsumer = require('./source-map/source-map-consumer').SourceMapConsumer;
 exports.SourceNode = require('./source-map/source-node').SourceNode;
 
-},{"./source-map/source-map-consumer":74,"./source-map/source-map-generator":75,"./source-map/source-node":76}],67:[function(require,module,exports){
+},{"./source-map/source-map-consumer":75,"./source-map/source-map-generator":76,"./source-map/source-node":77}],68:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -7491,7 +7507,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"./util":77,"amdefine":78}],68:[function(require,module,exports){
+},{"./util":78,"amdefine":79}],69:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -7635,7 +7651,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"./base64":69,"amdefine":78}],69:[function(require,module,exports){
+},{"./base64":70,"amdefine":79}],70:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -7679,7 +7695,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"amdefine":78}],70:[function(require,module,exports){
+},{"amdefine":79}],71:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -8101,7 +8117,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"./array-set":67,"./base64-vlq":68,"./binary-search":71,"./source-map-consumer":74,"./util":77,"amdefine":78}],71:[function(require,module,exports){
+},{"./array-set":68,"./base64-vlq":69,"./binary-search":72,"./source-map-consumer":75,"./util":78,"amdefine":79}],72:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -8183,7 +8199,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"amdefine":78}],72:[function(require,module,exports){
+},{"amdefine":79}],73:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -8488,7 +8504,7 @@ define(function (require, exports, module) {
   exports.IndexedSourceMapConsumer = IndexedSourceMapConsumer;
 });
 
-},{"./basic-source-map-consumer":70,"./binary-search":71,"./source-map-consumer":74,"./util":77,"amdefine":78}],73:[function(require,module,exports){
+},{"./basic-source-map-consumer":71,"./binary-search":72,"./source-map-consumer":75,"./util":78,"amdefine":79}],74:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2014 Mozilla Foundation and contributors
@@ -8576,7 +8592,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"./util":77,"amdefine":78}],74:[function(require,module,exports){
+},{"./util":78,"amdefine":79}],75:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -8800,7 +8816,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"./basic-source-map-consumer":70,"./indexed-source-map-consumer":72,"./util":77,"amdefine":78}],75:[function(require,module,exports){
+},{"./basic-source-map-consumer":71,"./indexed-source-map-consumer":73,"./util":78,"amdefine":79}],76:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -9202,7 +9218,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"./array-set":67,"./base64-vlq":68,"./mapping-list":73,"./util":77,"amdefine":78}],76:[function(require,module,exports){
+},{"./array-set":68,"./base64-vlq":69,"./mapping-list":74,"./util":78,"amdefine":79}],77:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -9618,7 +9634,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"./source-map-generator":75,"./util":77,"amdefine":78}],77:[function(require,module,exports){
+},{"./source-map-generator":76,"./util":78,"amdefine":79}],78:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -9939,7 +9955,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"amdefine":78}],78:[function(require,module,exports){
+},{"amdefine":79}],79:[function(require,module,exports){
 (function (process,__filename){
 /** vim: et:ts=4:sw=4:sts=4
  * @license amdefine 1.0.0 Copyright (c) 2011-2015, The Dojo Foundation All Rights Reserved.
@@ -10244,7 +10260,7 @@ function amdefine(module, requireFn) {
 module.exports = amdefine;
 
 }).call(this,require('_process'),"/node_modules/escodegen/node_modules/source-map/node_modules/amdefine/amdefine.js")
-},{"_process":83,"path":82}],79:[function(require,module,exports){
+},{"_process":84,"path":83}],80:[function(require,module,exports){
 module.exports={
   "name": "escodegen",
   "description": "ECMAScript code generator",
@@ -10331,7 +10347,7 @@ module.exports={
   "_resolved": "http://registry.npm.vmfive.com/escodegen/-/escodegen-1.8.0.tgz"
 }
 
-},{}],80:[function(require,module,exports){
+},{}],81:[function(require,module,exports){
 /*
   Copyright (c) jQuery Foundation, Inc. and Contributors, All Rights Reserved.
 
@@ -16072,7 +16088,7 @@ module.exports={
 }));
 /* vim: set sw=4 ts=4 et tw=80 : */
 
-},{}],81:[function(require,module,exports){
+},{}],82:[function(require,module,exports){
 // the whatwg-fetch polyfill installs the fetch() function
 // on the global object (window or self)
 //
@@ -16080,7 +16096,7 @@ module.exports={
 require('whatwg-fetch');
 module.exports = self.fetch.bind(self);
 
-},{"whatwg-fetch":84}],82:[function(require,module,exports){
+},{"whatwg-fetch":85}],83:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -16308,7 +16324,7 @@ var substr = 'ab'.substr(-1) === 'b'
 ;
 
 }).call(this,require('_process'))
-},{"_process":83}],83:[function(require,module,exports){
+},{"_process":84}],84:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -16490,7 +16506,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],84:[function(require,module,exports){
+},{}],85:[function(require,module,exports){
 (function(self) {
   'use strict';
 

@@ -1,5 +1,6 @@
-console.log('excuting content script')
+console.log('<==== init tracking ====>')
 
+// stub whole body (remove all event listener)
 const body = document.getElementsByTagName('body')[0]
 const stubBody = body.cloneNode(true)
 body.parentNode.replaceChild(stubBody, body)
@@ -12,6 +13,7 @@ if (!window.esprimaParser) {
 }
 
 const esprima = require('esprima')
+const mimetypes = require('./mimetypes')
 
 const url = window.location.href
 const asts = []
@@ -20,32 +22,36 @@ const scripts = Array.prototype.slice.call(document.getElementsByTagName('script
 let p = Promise.resolve(true);
 
 scripts.forEach((script) => {
-  p = p.then(() => {
-    if (script.src) {
-      return fetch(script.src)
-        .then((response) => response.text())
-        .then((scriptText) => {
-          asts.push({
-            url: script.src,
-            root: esprima.parse(scriptText, {loc: true})
+  if (!script.type || mimetypes.hasOwnProperty(script.type)) {
+    // parse only valid type of scripts
+    p = p.then(() => {
+      if (script.src) {
+        return fetch(script.src)
+          .then((response) => response.text())
+          .then((scriptText) => {
+            asts.push({
+              url: script.src,
+              root: esprima.parse(scriptText, {loc: true})
+            })
           })
+      } else if (script.innerHTML) {
+        asts.push({
+          url,
+          root: esprima.parse(script.innerHTML, {loc: true})
         })
-    } else if (script.innerHTML) {
-      asts.push({
-        url,
-        root: esprima.parse(script.innerHTML, {loc: true})
-      })
-    }
-    return Promise.resolve(true)
-  })
+      }
+      return Promise.resolve(true)
+    })
+  }
 })
 
-console.log(asts);
-
 p.then(() => {
+  console.log(asts)
+
   asts.forEach((ast) => {
     esprimaParser.parseAst(ast.root, ast.url)
   })
+  console.log('<==== start tracking ====>')
 })
 
 if (!window.onDevtoolsSelectionChanged) {

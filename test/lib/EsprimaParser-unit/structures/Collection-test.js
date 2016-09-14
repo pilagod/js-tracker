@@ -67,7 +67,7 @@ describe('Collection tests', () => {
     /*************************/
 
     describe('addInfoToElements tests', () => {
-      const elements = ['element1', 'element2', 'element3']
+      const elements = [{dataset: {}}, {}, {dataset: {}}]
       const type = 'type'
       const info = {}
       const data = {elements, type, info}
@@ -76,17 +76,23 @@ describe('Collection tests', () => {
         sandbox.stub(collection, 'addInfoToElement')
       })
 
-      it('should call addInfoToElement each iteration with an object containing each element, type and info', () => {
+      it('should call addInfoToElement each iteration with an object containing each element which has dataset, type and info', () => {
+        const args = {type, info}
+
         collection.addInfoToElements(data)
 
-        for (const [index, element] of elements.entries()) {
-          const addInfoToElementCall =
-            collection.addInfoToElement.getCall(index)
-          expect(
-            addInfoToElementCall
-              .calledWithExactly({element, type, info})
-          ).to.be.true
-        }
+        expect(
+          collection.addInfoToElement
+            .neverCalledWith(Object.assign({}, args, {element: elements[1]}))
+        ).to.be.true
+        expect(
+          collection.addInfoToElement
+            .calledWithExactly(Object.assign({}, args, {element: elements[0]}))
+        ).to.be.true
+        expect(
+          collection.addInfoToElement
+            .calledWithExactly(Object.assign({}, args, {element: elements[2]}))
+        ).to.be.true
       })
     })
 

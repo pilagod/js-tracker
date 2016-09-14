@@ -52,19 +52,26 @@ describe('Chain of collection', () => {
     })
 
     it('should add chain manipulation and event properly', () => {
+      child.addEventListener = sandbox.spy()
+
       const ast = esprima.parse(`
         var element = document.getElementById('element');
+        var clickHandler = function () {};
 
-        element.appendChild('child').addEventListener('click', function () {});
+        element.appendChild('child').addEventListener('click', clickHandler);
       `, {loc: true})
 
       esprimaParser.parseAst(ast, scriptUrl)
 
+      const clickHandler = closureStack.get('clickHandler')
+
+      expect(child.addEventListener.withArgs('click', clickHandler).calledOnce).to.be.true
+
       expect(element.dataset).to.have.property('collectionId', 1)
       expect(child.dataset).to.have.property('collectionId', 2)
 
-      expect(collection.data[1][M][scriptUrl]).to.have.property('[4:8]-[4:36]', 'element.appendChild(\'child\')')
-      expect(collection.data[2][E][scriptUrl]).to.have.property('[4:8]-[4:78]', 'element.appendChild(\'child\').addEventListener(\'cli...')
+      expect(collection.data[1][M][scriptUrl]).to.have.property('[5:8]-[5:36]', 'element.appendChild(\'child\')')
+      expect(collection.data[2][E][scriptUrl]).to.have.property('[5:8]-[5:76]', 'element.appendChild(\'child\').addEventListener(\'cli...')
     })
   })
 })
