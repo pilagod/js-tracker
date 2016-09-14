@@ -1663,13 +1663,13 @@ var EsprimaParser = function () {
   }, {
     key: 'execute',
     value: function execute(exp) {
-      // try {
-      return this.executeExp(exp);
-      // } catch (e) {
-      // console.log(e);
-      // console.log(exp, this.scriptUrl);
-      // return undefined
-      // }
+      try {
+        return this.executeExp(exp);
+      } catch (e) {
+        console.log(e);
+        console.log(exp, this.scriptUrl);
+        return undefined;
+      }
     }
   }, {
     key: 'executeExp',
@@ -2222,8 +2222,10 @@ var Collection = function () {
         for (var _iterator = elements[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
           var element = _step.value;
 
-          console.log(element, type, info);
-          this.addInfoToElement({ element: element, type: type, info: info });
+          // $(document) -> document (has no dataset) -> broken
+          if (element.dataset) {
+            this.addInfoToElement({ element: element, type: type, info: info });
+          }
         }
       } catch (err) {
         _didIteratorError = true;
@@ -2281,8 +2283,6 @@ var Collection = function () {
   }, {
     key: 'getIdFromElement',
     value: function getIdFromElement(element) {
-      console.log(element);
-      // @TODO: document has no data set
       var dataset = element.dataset;
 
       if (!dataset.hasOwnProperty('collectionId')) {

@@ -88,4 +88,18 @@ describe('variable tests', () => {
 
     expect(closureStack.get('test')()).to.be.true
   })
+
+  it('should not set duplicate but no init declaration', () => {
+    const ast = esprima.parse(`
+      var isFunction = function () {
+        return true;
+      };
+      var isFunction;
+      var result = isFunction();
+    `)
+    esprimaParser.parseAst(ast)
+
+    expect(closureStack.get('isFunction')).is.a('function')
+    expect(closureStack.get('result')).to.be.true
+  })
 })
