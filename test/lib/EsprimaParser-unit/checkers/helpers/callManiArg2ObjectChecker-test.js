@@ -60,35 +60,12 @@ describe('callManiArg2ObjectChecker tests', () => {
     const data = {
       criteria: {[method]: true},
       callee: new Callee(method),
-      statusData: {
-        execute: 'execute',
-        passive: 'passive'
-      }
     }
     data.callee.addArguments([{}])
 
     const result = callManiArg2ObjectChecker(data)
 
-    expect(result).to.be.eql({
-      type: Collection.MANIPULATION,
-      execute: 'execute',
-      passive: 'passive'
-    })
-  })
-
-  it('should return status only with type and properties in statusData when all criteria matched', () => {
-    const data = {
-      criteria: {[method]: true},
-      callee: new Callee(method),
-      statusData: {execute: undefined}
-    }
-    data.callee.addArguments([{}])
-
-    const result = callManiArg2ObjectChecker(data)
-
-    expect(result).to.have.property('type')
-    expect(result).to.have.property('execute')
-    expect(result).to.not.have.property('passive')
+    expect(result).to.have.property('type', Collection.MANIPULATION)
   })
 
   it('should return undefined when callee.method is not in criteria', () => {

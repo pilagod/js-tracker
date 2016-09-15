@@ -279,10 +279,11 @@ var Collection = require('../../structures/Collection');
 module.exports = function (_ref) {
   var criteria = _ref.criteria;
   var callee = _ref.callee;
-  var statusData = _ref.statusData;
 
   if (criteria.hasOwnProperty(callee.method) && callee.arguments.length >= 1) {
-    return Object.assign({ type: Collection.EVENT }, statusData);
+    return {
+      type: Collection.EVENT
+    };
   }
   return undefined;
 };
@@ -295,10 +296,11 @@ var Collection = require('../../structures/Collection');
 module.exports = function (_ref) {
   var criteria = _ref.criteria;
   var callee = _ref.callee;
-  var statusData = _ref.statusData;
 
   if (criteria.hasOwnProperty(callee.method)) {
-    return Object.assign({ type: Collection.EVENT }, statusData);
+    return {
+      type: Collection.EVENT
+    };
   }
   return undefined;
 };
@@ -311,10 +313,11 @@ var Collection = require('../../structures/Collection');
 module.exports = function (_ref) {
   var criteria = _ref.criteria;
   var callee = _ref.callee;
-  var statusData = _ref.statusData;
 
   if (criteria.hasOwnProperty(callee.method) && callee.arguments.length === 0) {
-    return Object.assign({ type: Collection.MANIPULATION }, statusData);
+    return {
+      type: Collection.MANIPULATION
+    };
   }
   return undefined;
 };
@@ -327,10 +330,11 @@ var Collection = require('../../structures/Collection');
 module.exports = function (_ref) {
   var criteria = _ref.criteria;
   var callee = _ref.callee;
-  var statusData = _ref.statusData;
 
   if (criteria.hasOwnProperty(callee.method) && callee.arguments.length === 1) {
-    return Object.assign({ type: Collection.MANIPULATION }, statusData);
+    return {
+      type: Collection.MANIPULATION
+    };
   }
   return undefined;
 };
@@ -346,10 +350,11 @@ var isArg2Object = function isArg2Object(callee) {
 module.exports = function (_ref) {
   var criteria = _ref.criteria;
   var callee = _ref.callee;
-  var statusData = _ref.statusData;
 
   if (criteria.hasOwnProperty(callee.method) && isArg2Object(callee)) {
-    return Object.assign({ type: Collection.MANIPULATION }, statusData);
+    return {
+      type: Collection.MANIPULATION
+    };
   }
   return undefined;
 };
@@ -362,10 +367,11 @@ var Collection = require('../../structures/Collection');
 module.exports = function (_ref) {
   var criteria = _ref.criteria;
   var callee = _ref.callee;
-  var statusData = _ref.statusData;
 
   if (criteria.hasOwnProperty(callee.method)) {
-    return Object.assign({ type: Collection.MANIPULATION }, statusData);
+    return {
+      type: Collection.MANIPULATION
+    };
   }
   return undefined;
 };
@@ -378,10 +384,11 @@ var Collection = require('../../structures/Collection');
 module.exports = function (_ref) {
   var criteria = _ref.criteria;
   var callee = _ref.callee;
-  var statusData = _ref.statusData;
 
   if (criteria.hasOwnProperty(callee)) {
-    return Object.assign({ type: Collection.EVENT }, statusData);
+    return {
+      type: Collection.EVENT
+    };
   }
   return undefined;
 };
@@ -394,10 +401,11 @@ var Collection = require('../../structures/Collection');
 module.exports = function (_ref) {
   var criteria = _ref.criteria;
   var callee = _ref.callee;
-  var statusData = _ref.statusData;
 
   if (criteria.hasOwnProperty(callee)) {
-    return Object.assign({ type: Collection.MANIPULATION }, statusData);
+    return {
+      type: Collection.MANIPULATION
+    };
   }
   return undefined;
 };
@@ -600,10 +608,14 @@ module.exports = function (_ref) {
   var caller = _ref.caller;
   var callee = _ref.callee;
 
-  var statusData = {
-    passive: context.jQuery(callee.arguments[0])
-  };
-  return callManiChecker({ criteria: criteria, callee: callee, statusData: statusData });
+  var status = callManiChecker({ criteria: criteria, callee: callee });
+
+  if (status) {
+    return Object.assign({}, status, {
+      target: context.jQuery(callee.arguments[0])
+    });
+  }
+  return undefined;
 };
 
 },{"../../../helpers/callManiChecker":19,"./criteria":34}],36:[function(require,module,exports){
@@ -1342,6 +1354,8 @@ var EsprimaParser = function () {
     value: function VariableDeclaration(variableDeclaration) {
       var _this4 = this;
 
+      // @TODO: var -> function closure
+      // @TODO: es6: let, const -> block closure
       variableDeclaration.declarations.forEach(function (node) {
         _this4.parseNode(node);
       });
@@ -1349,12 +1363,24 @@ var EsprimaParser = function () {
   }, {
     key: 'VariableDeclarator',
     value: function VariableDeclarator(variableDeclarator) {
-      // @TODO: var -> function closure
-      // @TODO: es6: let, const -> block closure
+      // @TODO: ObjectPattern / ArrayPattern
       var variables = this.getNameFromPattern(variableDeclarator.id);
-      var values = variableDeclarator.init ? this.parseNode(variableDeclarator.init) : undefined;
-
-      this.setVariables(variables, values);
+      var values = this.getInitValues(variableDeclarator.init);
+      // if init is null, and variables is already in current closure,
+      // don't set variables
+      if (this.isNeededToSet(variables, variableDeclarator.init)) {
+        this.setVariables(variables, values);
+      }
+    }
+  }, {
+    key: 'getInitValues',
+    value: function getInitValues(init) {
+      return init ? this.parseNode(init) : undefined;
+    }
+  }, {
+    key: 'isNeededToSet',
+    value: function isNeededToSet(variables, init) {
+      return !!init || !this.closureStack.getLatestClosure().exist(variables);
     }
 
     /*************************/
@@ -1857,14 +1883,14 @@ var EsprimaParser = function () {
     value: function getTargetElements(caller, status) {
       var object = this.getTargetObject(caller, status);
       var elements = this.isJquery(object) ? object.get() : object;
-      // @NOTE: passive could be an array for future use
+      // @NOTE: target could be an array for future use
       return [].concat(elements);
     }
   }, {
     key: 'getTargetObject',
     value: function getTargetObject(caller, status) {
-      if (status.hasOwnProperty('passive')) {
-        return status.passive;
+      if (status.hasOwnProperty('target')) {
+        return status.target;
       } else if (this.isStyleOrDOMTokenList(caller)) {
         return caller.parent;
       } else if (this.isAttr(caller)) {

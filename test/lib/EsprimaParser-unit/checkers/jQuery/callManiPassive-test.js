@@ -8,36 +8,47 @@ describe('callManiPassive checker tests', () => {
     method: 'callee',
     arguments: ['argument']
   }
+  const status = {
+    type: 'type'
+  }
   let checkerStub, checker
 
   before(() => {
-    checkerStub = sandbox.stub().returns('resultFromChecker')
+    checkerStub = sandbox.stub()
     checker = proxyquire(`../${libDir}/checkers/jQuery/Call/maniPassive`, {
       './criteria': criteria,
       '../../../helpers/callManiChecker': checkerStub
     })
   })
 
-  it('should call callManiPassiveChecker with an object containing proper criteria, callee and statusData (execute -> caller, passive -> jQuery(callee.argument[0])) then return', () => {
-    const $element = [callee.arguments[0]]
-    const statusData = {
-      passive: $element
-    }
+  it('should call callManiPassiveChecker with an object containing criteria and callee', () => {
+    checker({context, caller, callee})
+
+    expect(checkerStub.calledOnce).to.be.true
+    expect(
+      checkerStub
+        .calledWithExactly({criteria, callee})
+    ).to.be.true
+  })
+
+  it('should set target in result to jQuery called with callee.arguments[0] given callManiPassiveChecker returns valid status', () => {
+    const $element = {}
+
+    checkerStub.returns(status)
     context.jQuery = sandbox.stub()
       .withArgs(callee.arguments[0])
         .returns($element)
 
     const result = checker({context, caller, callee})
 
-    expect(checkerStub.calledOnce).to.be.true
-    expect(
-      context.jQuery
-        .calledWithExactly(callee.arguments[0])
-    ).to.be.true
-    expect(
-      checkerStub
-        .calledWithExactly({criteria, callee, statusData})
-    ).to.be.true
-    expect(result).to.be.eql('resultFromChecker')
+    expect(result).to.have.property('target', $element)
+  })
+
+  it('should return undefined given callManiPassiveChecker returns undefined status', () => {
+    checkerStub.returns(undefined)
+
+    const result = checker({context, caller, callee})
+
+    expect(result).to.be.undefined
   })
 })

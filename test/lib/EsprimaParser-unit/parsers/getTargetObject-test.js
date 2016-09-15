@@ -12,12 +12,12 @@ describe('getTargetObject tests', () => {
     sandbox.stub(esprimaParser, 'isAttr')
   })
 
-  it('should return status.passive given status has property passive', () => {
-    status.passive = {}
+  it('should return status.target given status has property target', () => {
+    status.target = {}
 
     const result = esprimaParser.getTargetObject(caller, status)
 
-    expect(result).to.be.equal(status.passive)
+    expect(result).to.be.equal(status.target)
   })
 
   it('should call isStyleOrDOMTokenList with caller given status has no passive property', () => {
