@@ -148,7 +148,6 @@ describe('ClosureStack tests', () => {
     describe('update tests', () => {
       const variable = 'a'
       const value = 1
-
       let closureStub
 
       beforeEach(() => {
@@ -156,36 +155,48 @@ describe('ClosureStack tests', () => {
           set: sandbox.spy()
         }
         sandbox.stub(closureStack, 'findClosureByVariable')
-          .withArgs(variable)
-            .returns(closureStub)
+        sandbox.stub(closureStack, 'getContextClosure')
       })
 
-      it('should call findClosureByVariable with given varaible', () => {
+      it('should call set of result from findClosureByVariable with variable and value given it returns valid closure', () => {
+        closureStack.findClosureByVariable.withArgs(variable).returns(closureStub)
+
         closureStack.update(variable, value)
 
         expect(
           closureStack.findClosureByVariable
             .calledWithExactly(variable)
         ).to.be.true
-      })
-
-      it('should call set of closure returned from findClosureByVariable with given variable and value when closure is found', () => {
-        closureStack.update(variable, value)
-
+        expect(closureStack.getContextClosure.called).to.be.false
         expect(
           closureStub.set
             .calledWithExactly(variable, value)
         ).to.be.true
       })
 
-      it('should not call set of closure when closure is not found', () => {
-        closureStack.findClosureByVariable
-          .withArgs(variable)
-            .returns(undefined)
+      it('should call set with variable and value of result from getContextClosure given findClosureByVariable returns undefined', () => {
+        closureStack.findClosureByVariable.withArgs(variable).returns(undefined)
+        closureStack.getContextClosure.returns(closureStub)
 
         closureStack.update(variable, value)
 
-        expect(closureStub.set.called).to.be.false
+        expect(
+          closureStack.findClosureByVariable
+            .calledWithExactly(variable)
+        ).to.be.true
+        expect(closureStack.getContextClosure.called).to.be.true
+        expect(
+          closureStub.set
+            .calledWithExactly(variable, value)
+        ).to.be.true
+      })
+    })
+
+    describe('getContextClosure tests', () => {
+      it('should return the first closure in stack', () => {
+        const result = closureStack.getContextClosure()
+
+        expect(result).to.be.equal(closureStack.stack[0])
       })
     })
 

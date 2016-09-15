@@ -102,4 +102,16 @@ describe('variable tests', () => {
     expect(closureStack.get('isFunction')).is.a('function')
     expect(closureStack.get('result')).to.be.true
   })
+
+  it('should set variable to global context given not declared by \'var\' first', () => {
+    resetVariables('result')
+
+    const ast = esprima.parse(`
+      result = 1;
+    `)
+    esprimaParser.parseAst(ast)
+
+    expect(esprimaParser.context).to.have.property('result', 1)
+    expect(closureStack.get('result')).to.be.equal(1)
+  })
 })

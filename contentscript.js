@@ -1,10 +1,5 @@
 console.log('<==== init tracking ====>')
 
-// stub whole body (remove all event listener)
-const body = document.getElementsByTagName('body')[0]
-const stubBody = body.cloneNode(true)
-body.parentNode.replaceChild(stubBody, body)
-
 require('es6-promise').polyfill()
 require('isomorphic-fetch')
 
@@ -45,12 +40,24 @@ scripts.forEach((script) => {
   }
 })
 
+// stub whole body (remove all event listener)
+const body = document.getElementsByTagName('body')[0]
+const stubBody = body.cloneNode(true)
+body.parentNode.replaceChild(stubBody, body)
+
+// clear all timeouts
+let id = setTimeout(function () {}, 9999)
+do {
+  clearTimeout(id)
+} while (id --)
+
 p.then(() => {
   console.log(asts)
 
   asts.forEach((ast) => {
     esprimaParser.parseAst(ast.root, ast.url)
   })
+  dispatchEvent(new Event('load'));
   console.log('<==== start tracking ====>')
 })
 

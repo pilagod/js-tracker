@@ -3,11 +3,6 @@
 
 console.log('<==== init tracking ====>');
 
-// stub whole body (remove all event listener)
-var body = document.getElementsByTagName('body')[0];
-var stubBody = body.cloneNode(true);
-body.parentNode.replaceChild(stubBody, body);
-
 require('es6-promise').polyfill();
 require('isomorphic-fetch');
 
@@ -48,12 +43,24 @@ scripts.forEach(function (script) {
   }
 });
 
+// stub whole body (remove all event listener)
+var body = document.getElementsByTagName('body')[0];
+var stubBody = body.cloneNode(true);
+body.parentNode.replaceChild(stubBody, body);
+
+// clear all timeouts
+var id = setTimeout(function () {}, 9999);
+do {
+  clearTimeout(id);
+} while (id--);
+
 p.then(function () {
   console.log(asts);
 
   asts.forEach(function (ast) {
     esprimaParser.parseAst(ast.root, ast.url);
   });
+  dispatchEvent(new Event('load'));
   console.log('<==== start tracking ====>');
 });
 
@@ -2247,9 +2254,15 @@ var ClosureStack = function () {
     value: function update(variable, value) {
       var closure = this.findClosureByVariable(variable);
 
-      if (closure) {
-        closure.set(variable, value);
+      if (!closure) {
+        closure = this.getContextClosure();
       }
+      closure.set(variable, value);
+    }
+  }, {
+    key: 'getContextClosure',
+    value: function getContextClosure() {
+      return this.stack[0];
     }
   }, {
     key: 'createClosure',
