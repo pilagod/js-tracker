@@ -416,24 +416,73 @@ module.exports = function (_ref) {
 module.exports = {
   /* jQuery Events http://goo.gl/6DOW */
   bind: true,
-  delegate: true,
+  delegate: true, // (v) .delegate( selector )
   error: true,
   die: true,
   live: true,
   load: true,
-  off: true,
-  on: true, // on('click', 'p' (selector) , handler)
-  one: true,
+  off: true, // (v) off ( ..., selector )
+  on: true, // (v) on ('click', 'p' (selector) , handler), handle arguments[1] selector
+  one: true, // (v) one ( ..., selector )
   ready: true,
   toggle: true,
   unbind: true,
-  undelegate: true,
+  undelegate: true, // (v) undelegate ( selector, ... )
   unload: true
 };
 
 },{}],23:[function(require,module,exports){
-arguments[4][7][0].apply(exports,arguments)
-},{"../../../helpers/callEventChecker":15,"./criteria":22,"dup":7}],24:[function(require,module,exports){
+'use strict';
+
+var criteria = require('./criteria');
+var callEventChecker = require('../../../helpers/callEventChecker');
+//
+// const filterTarget = ({caller, callee}) => {
+//   switch (callee.method) {
+//     case 'on':
+//     case 'one':
+//     case 'off':
+//       return filterOn({caller, callee})
+//
+//     case 'delegate':
+//     case 'undelegate':
+//       return filterDelegate({caller, callee})
+//
+//     default:
+//       return {}
+//   }
+// }
+//
+// const filterOn = ({caller, callee}) => {
+//   if (typeof callee.arguments[1] === 'string') {
+//     return {
+//       target: caller.find(callee.arguments[1])
+//     }
+//   }
+// }
+//
+// const filterDelegate = ({caller, callee}) => {
+//   if (callee.arguments.length > 1) {
+//     return {
+//       target: caller.find(callee.arguments[0])
+//     }
+//   }
+// }
+
+module.exports = function (_ref) {
+  var caller = _ref.caller;
+  var callee = _ref.callee;
+
+  // const status = callEventChecker({criteria, callee})
+  //
+  // if (status) {
+  //   return Object.assign({}, status, filterTarget({caller, callee}))
+  // }
+  // return undefined
+  return callEventChecker({ criteria: criteria, callee: callee });
+};
+
+},{"../../../helpers/callEventChecker":15,"./criteria":22}],24:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -2337,7 +2386,7 @@ var Collection = function () {
   }, {
     key: 'normalizeCode',
     value: function normalizeCode(code) {
-      return code.substr(0, 50) + (code.length > 50 ? '...' : '');
+      return code.substr(0, 75) + (code.length > 75 ? '...' : '');
     }
   }], [{
     key: 'EVENT',

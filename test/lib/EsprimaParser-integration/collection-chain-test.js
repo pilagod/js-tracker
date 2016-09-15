@@ -71,7 +71,7 @@ describe('Chain of collection', () => {
       expect(child.dataset).to.have.property('collectionId', 2)
 
       expect(collection.data[1][M][scriptUrl]).to.have.property('[5:8]-[5:36]', 'element.appendChild(\'child\')')
-      expect(collection.data[2][E][scriptUrl]).to.have.property('[5:8]-[5:76]', 'element.appendChild(\'child\').addEventListener(\'cli...')
+      expect(collection.data[2][E][scriptUrl]).to.have.property('[5:8]-[5:76]', 'element.appendChild(\'child\').addEventListener(\'click\', clickHandler)')
     })
   })
 })

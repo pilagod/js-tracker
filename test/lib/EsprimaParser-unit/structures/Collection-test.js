@@ -353,10 +353,14 @@ describe('Collection tests', () => {
     /*************************/
 
     describe('normalizeCode tests', () => {
-      it('should return a sub string of given string to max length 50, with ... for remaining not show string', () => {
-        const result = collection.normalizeCode('document.getElementById(\'demo\').classList.add(\'demoHightlight\')')
+      it('should return a sub string of given string to max length 75, with ... for remaining not show string', () => {
+        const result = collection.normalizeCode(
+          'document.getElementById(\'firstDemoExample\').classList.add(\'firstDemoExampleHightlight\')'
+        )
 
-        expect(result).to.be.equal('document.getElementById(\'demo\').classList.add(\'dem...')
+        expect(result).to.be.equal(
+          'document.getElementById(\'firstDemoExample\').classList.add(\'firstDemoExample...'
+        )
       })
 
       it('should return same string given string does not have max length greater than 50', () => {

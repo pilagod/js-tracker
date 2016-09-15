@@ -142,11 +142,11 @@ describe('EVENT of collection', () => {
   describe('jQuery', () => {
     let $element, elements
 
-    const jQueryStub = function () {
+    const jQueryStub = function (arrElements) {
       if (!(this instanceof jQueryStub)) {
         return $element
       }
-      this.elements = elements
+      this.elements = arrElements
 
       return this
     }
@@ -168,9 +168,11 @@ describe('EVENT of collection', () => {
     })
 
     describe('event tests', () => {
-      it('should add code to collection', () => {
+      beforeEach(() => {
         $element.on = sandbox.spy()
+      })
 
+      it('should add code to collection', () => {
         const ast = esprima.parse(`
           var $element = jQuery('#element');
           var clickHandler = function () {};
@@ -193,6 +195,34 @@ describe('EVENT of collection', () => {
         checkCollectionDataByElements(elements, [
           {loc: `[5:10]-[5:44]`, code: '$element.on(\'click\', clickHandler)'},
           {loc: `[6:10]-[8:12]`, code: '$element.on({ click: clickHandler })'}
+        ])
+      })
+
+      it.skip('should add code to macthed children given event has selector argument', () => {
+        children = [
+          new HTMLElementStub(),
+          new HTMLElementStub()
+        ]
+        $children = new jQueryStub(children)
+        $element.find = sandbox.stub().returns($children)
+
+        const ast = esprima.parse(`
+          var $element = jQuery('#element');
+          var clickHandler = function () {};
+
+          $element.on('click', 'div', clickHandler);
+        `, {loc: true})
+
+        esprimaParser.parseAst(ast, scriptUrl)
+
+        const clickHandler = closureStack.get('clickHandler')
+
+        expect($element.on.calledWith('click', 'div', clickHandler)).to.be.true
+        expect($element.find.calledWith('div')).to.be.true
+
+        checkCollectionIds(children)
+        checkCollectionDataByElements(children, [
+          {loc: `[5:10]-[5:51]`, code: '$element.on(\'click\', \'div\', clickHandler)'},
         ])
       })
     })

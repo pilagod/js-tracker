@@ -31,17 +31,18 @@ describe('callManiPassive checker tests', () => {
     ).to.be.true
   })
 
-  it('should set target in result to jQuery called with callee.arguments[0] given callManiPassiveChecker returns valid status', () => {
-    const $element = {}
+  it('should set target in result status to jQuery called with callee.arguments[0] given callManiPassiveChecker returns valid status', () => {
+    const $target = {}
 
     checkerStub.returns(status)
     context.jQuery = sandbox.stub()
       .withArgs(callee.arguments[0])
-        .returns($element)
+        .returns($target)
 
     const result = checker({context, caller, callee})
 
-    expect(result).to.have.property('target', $element)
+    expect(result).to.have.property('type', status.type)
+    expect(result).to.have.property('target', $target)
   })
 
   it('should return undefined given callManiPassiveChecker returns undefined status', () => {
