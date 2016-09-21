@@ -1768,7 +1768,6 @@ var EsprimaParser = function () {
         return this.executeExp(exp);
       } catch (e) {
         console.log(e);
-        console.log(exp, this.scriptUrl);
         return undefined;
       }
     }
