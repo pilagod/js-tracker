@@ -16,6 +16,8 @@
   "devtools_page": "devtools.html",
 
   "permissions": [
-    "activeTab"
+    "activeTab",
+    "http://*/",
+    "https://*/"
   ]
 }
