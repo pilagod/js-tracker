@@ -1,5 +1,20 @@
 console.log('<==== init tracking ====>')
 
+// stub whole html (remove all event listener)
+const html = document.getElementsByTagName('html')[0]
+const stubHtml = html.cloneNode(true)
+
+html.parentNode.replaceChild(stubHtml, html)
+//
+
+// clear all timeouts
+let id = setTimeout(function () {}, 9999)
+
+do {
+  clearTimeout(id)
+} while (id --)
+//
+
 require('es6-promise').polyfill()
 require('isomorphic-fetch')
 
@@ -40,28 +55,15 @@ scripts.forEach((script) => {
   }
 })
 
-// stub whole body (remove all event listener)
-const body = document.getElementsByTagName('body')[0]
-const stubBody = body.cloneNode(true)
-
-body.parentNode.replaceChild(stubBody, body)
-//
-
-// clear all timeouts
-let id = setTimeout(function () {}, 9999)
-
-do {
-  clearTimeout(id)
-} while (id --)
-//
-
 p.then(() => {
   console.log(asts)
 
   asts.forEach((ast) => {
     esprimaParser.parseAst(ast.root, ast.url)
   })
-  dispatchEvent(new Event('load'));
+  // trigger content script window onload event
+  // window.dispatchEvent(new Event('load')) will trigger original window onload
+  window.onload()
   console.log('<==== start tracking ====>')
 })
 

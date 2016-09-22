@@ -3,6 +3,21 @@
 
 console.log('<==== init tracking ====>');
 
+// stub whole html (remove all event listener)
+var html = document.getElementsByTagName('html')[0];
+var stubHtml = html.cloneNode(true);
+
+html.parentNode.replaceChild(stubHtml, html);
+//
+
+// clear all timeouts
+var id = setTimeout(function () {}, 9999);
+
+do {
+  clearTimeout(id);
+} while (id--);
+//
+
 require('es6-promise').polyfill();
 require('isomorphic-fetch');
 
@@ -43,28 +58,14 @@ scripts.forEach(function (script) {
   }
 });
 
-// stub whole body (remove all event listener)
-var body = document.getElementsByTagName('body')[0];
-var stubBody = body.cloneNode(true);
-
-body.parentNode.replaceChild(stubBody, body);
-//
-
-// clear all timeouts
-var id = setTimeout(function () {}, 9999);
-
-do {
-  clearTimeout(id);
-} while (id--);
-//
-
 p.then(function () {
   console.log(asts);
 
   asts.forEach(function (ast) {
     esprimaParser.parseAst(ast.root, ast.url);
   });
-  dispatchEvent(new Event('load'));
+  // window.dispatchEvent(new Event('load'));
+  window.onload();
   console.log('<==== start tracking ====>');
 });
 
