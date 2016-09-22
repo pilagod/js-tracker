@@ -46,13 +46,17 @@ scripts.forEach(function (script) {
 // stub whole body (remove all event listener)
 var body = document.getElementsByTagName('body')[0];
 var stubBody = body.cloneNode(true);
+
 body.parentNode.replaceChild(stubBody, body);
+//
 
 // clear all timeouts
 var id = setTimeout(function () {}, 9999);
+
 do {
   clearTimeout(id);
 } while (id--);
+//
 
 p.then(function () {
   console.log(asts);

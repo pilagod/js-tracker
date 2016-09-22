@@ -22,13 +22,13 @@ scripts.forEach((script) => {
     p = p.then(() => {
       if (script.src) {
         return fetch(script.src)
-          .then((response) => response.text())
-          .then((scriptText) => {
-            asts.push({
-              url: script.src,
-              root: esprima.parse(scriptText, {loc: true})
-            })
+        .then((response) => response.text())
+        .then((scriptText) => {
+          asts.push({
+            url: script.src,
+            root: esprima.parse(scriptText, {loc: true})
           })
+        })
       } else if (script.innerHTML) {
         asts.push({
           url,
@@ -43,13 +43,17 @@ scripts.forEach((script) => {
 // stub whole body (remove all event listener)
 const body = document.getElementsByTagName('body')[0]
 const stubBody = body.cloneNode(true)
+
 body.parentNode.replaceChild(stubBody, body)
+//
 
 // clear all timeouts
 let id = setTimeout(function () {}, 9999)
+
 do {
   clearTimeout(id)
 } while (id --)
+//
 
 p.then(() => {
   console.log(asts)

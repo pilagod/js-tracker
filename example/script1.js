@@ -1,6 +1,9 @@
 var button = document.getElementsByTagName('button')[0];
 
 button.addEventListener('click', function () {
-  this.innerHTML =
-    this.innerHTML === 'unclicked' ? 'clicked' : 'unclicked';
+  if (this.innerHTML === 'unclicked') {
+    this.innerHTML = 'clicked';
+  } else {
+    this.innerHTML = 'unclicked';
+  }
 });
