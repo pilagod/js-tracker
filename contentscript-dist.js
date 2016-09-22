@@ -64,8 +64,7 @@ p.then(function () {
   asts.forEach(function (ast) {
     esprimaParser.parseAst(ast.root, ast.url);
   });
-  // window.dispatchEvent(new Event('load'));
-  window.onload();
+  triggerWindowLoad();
   console.log('<==== start tracking ====>');
 });
 
@@ -79,6 +78,17 @@ if (!window.onDevtoolsSelectionChanged) {
       console.log(response);
     });
   };
+}
+
+function triggerWindowLoad() {
+  var jQuery = window.jQuery || window.$;
+  // window.dispatchEvent(new Event('load'))
+  // will trigger original window onload
+  if (jQuery) {
+    $(window).trigger('load');
+  } else if (window.onload) {
+    window.onload();
+  }
 }
 
 },{"./lib/EsprimaParser":49,"./mimetypes":59,"es6-promise":60,"esprima":81,"isomorphic-fetch":82}],2:[function(require,module,exports){
@@ -528,12 +538,12 @@ module.exports = {
 'use strict';
 
 var criteria = require('./criteria');
-var callEventArg1Checker = require('../../../helpers/callEventArgge1Checker');
+var callEventArgge1Checker = require('../../../helpers/callEventArgge1Checker');
 
 module.exports = function (_ref) {
   var callee = _ref.callee;
 
-  return callEventArg1Checker({ criteria: criteria, callee: callee });
+  return callEventArgge1Checker({ criteria: criteria, callee: callee });
 };
 
 },{"../../../helpers/callEventArgge1Checker":14,"./criteria":24}],26:[function(require,module,exports){

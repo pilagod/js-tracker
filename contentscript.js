@@ -61,9 +61,7 @@ p.then(() => {
   asts.forEach((ast) => {
     esprimaParser.parseAst(ast.root, ast.url)
   })
-  // trigger content script window onload event
-  // window.dispatchEvent(new Event('load')) will trigger original window onload
-  window.onload()
+  triggerWindowLoad()
   console.log('<==== start tracking ====>')
 })
 
@@ -76,5 +74,16 @@ if (!window.onDevtoolsSelectionChanged) {
     chrome.runtime.sendMessage(info, (response) => {
       console.log(response)
     });
+  }
+}
+
+function triggerWindowLoad() {
+  const jQuery = window.jQuery || window.$
+  // window.dispatchEvent(new Event('load'))
+  // will trigger original window onload
+  if (jQuery) {
+    $(window).trigger('load')
+  } else if (window.onload) {
+    window.onload()
   }
 }
