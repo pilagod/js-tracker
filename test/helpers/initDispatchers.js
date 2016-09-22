@@ -3,22 +3,25 @@ const DISPATCHERS = [
   /* Native */
   {
     type: 'HTMLElement',
-    Call: {event: true, mani: true},
-    Prop: {event: true, mani: true}
+    Call: true,
+    Prop: true
   },
   {
     type: 'DOMTokenList',
-    Call: {mani: true}
+    Call: true
   },
   {
     type: 'Attr',
-    Prop: {mani: true}
+    Prop: true
   },
-
+  {
+    type: 'CSSStyleDeclaration',
+    Prop: true
+  },
   /* jQuery */
   {
     type: 'jQuery',
-    Call: {}
+    Call: true
   }
 ]
 

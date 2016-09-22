@@ -22,14 +22,14 @@ for (const DISPATCHER of global.DISPATCHERS) {
           })
         })
 
-        it('should call create${calleeType}Dispatcher once with an array of handlers', () => {
+        it(`should call create${calleeType}Dispatcher once with an array of handlers`, () => {
           const handlers = createDispatcherStub.args[0][0]
 
           expect(createDispatcherStub.calledOnce).to.be.true
           expect(handlers).to.be.an('array')
         })
 
-        it(`should call create${calleeType}Dispatcher with an object whose path points to /checkers/${callerType}/${calleeType}`, () => {
+        it(`should call create${calleeType}Dispatcher with an array containing all checkers in /checkers/${callerType}/${calleeType}`, () => {
           const handlers = createDispatcherStub.args[0][0]
           // it's not easily to test two different absolute paths equal, instead,
           // import modules from these two paths and check if importing results equal

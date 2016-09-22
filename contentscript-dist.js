@@ -2335,6 +2335,8 @@ var Collection = function () {
       var elements = _ref.elements;
       var type = _ref.type;
       var info = _ref.info;
+
+      console.log('elements:', elements, type, info);
       var _iteratorNormalCompletion = true;
       var _didIteratorError = false;
       var _iteratorError = undefined;
@@ -2343,6 +2345,7 @@ var Collection = function () {
         for (var _iterator = elements[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
           var element = _step.value;
 
+          console.log('element:', element);
           // $(document) -> document (has no dataset) -> broken
           if (element.dataset) {
             this.addInfoToElement({ element: element, type: type, info: info });
