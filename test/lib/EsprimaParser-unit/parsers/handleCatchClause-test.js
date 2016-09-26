@@ -1,48 +1,47 @@
 describe('handleCatchClause tests', () => {
-  const error = new Error('error from block')
-  let handler
+  const error = new Error()
 
-  beforeEach(() => {
-    handler = createAstNode('CatchClause', {
-      param: createAstNode('Pattern'),
-      body: createAstNode('BlockStatement')
+  describe('null catchClause', () => {
+    const catchClause = null
+
+    it('should return an object containing given error', () => {
+      const result = esprimaParser.handleCatchClause(catchClause, error)
+
+      expect(result).to.be.eql({error})
     })
   })
 
-  describe('given non-null handler', () => {
+  describe('valid catchClause', () => {
+    let catchClause
+
     beforeEach(() => {
-      sandbox.stub(esprimaParser, 'setErrorInCatchClause')
-      sandbox.stub(esprimaParser, 'parseNode', createParseNodeStub())
+      catchClause = createAstNode('CatchClause')
+
+      sandbox.stub(esprimaParser, 'parseCatchClause')
     })
 
-    it('should call setCatchClauseError with handler param and error', () => {
-      esprimaParser.handleCatchClause(handler, error)
+    it('should call parseCatchClause with catchClause and error and return', () => {
+      const resultFromParseCatchClause = {value: 'value'}
 
-      expect(
-        esprimaParser.setErrorInCatchClause
-          .calledWithExactly(handler.param, error)
-      ).to.be.true
+      esprimaParser.parseCatchClause
+        .returns(resultFromParseCatchClause)
+
+      const result = esprimaParser.handleCatchClause(catchClause, error)
+
+      expect(result).to.be.equal(resultFromParseCatchClause)
     })
 
-    it('should call parseNode with handler body and return', () => {
-      const result = esprimaParser.handleCatchClause(handler, error)
+    it('should return an object containing error thrown from parseCatchClause given parseCatchClause throws error', () => {
+      const errorFromParseCatchClause = new Error('errorFromParseCatchClause')
 
-      expect(
-        esprimaParser.parseNode
-          .calledWithExactly(handler.body)
-      ).to.be.true
-      expect(result).to.be.equal('parsedBlockStatement')
-    })
-  })
+      esprimaParser.parseCatchClause
+        .throws(errorFromParseCatchClause)
 
-  describe('given null handler', () => {
-    it('should throw error got from block', () => {
-      handler = null
+      const result = esprimaParser.handleCatchClause(catchClause, error)
 
-      expect(
-        esprimaParser.handleCatchClause
-          .bind(esprimaParser, handler, error)
-      ).to.throw(error)
+      expect(result).to.be.eql({
+        error: errorFromParseCatchClause
+      })
     })
   })
 })

@@ -1,4 +1,4 @@
-describe('setErrorInCatchClause tests', () => {
+describe('setCatchError tests', () => {
   const error = new Error('error from block')
   let param
 
@@ -11,7 +11,7 @@ describe('setErrorInCatchClause tests', () => {
   })
 
   it('should call getNameFromPattern with param', () => {
-    esprimaParser.setErrorInCatchClause(param, error)
+    esprimaParser.setCatchError(param, error)
 
     expect(
       esprimaParser.getNameFromPattern
@@ -20,7 +20,7 @@ describe('setErrorInCatchClause tests', () => {
   })
 
   it('should call setVariables with result from getNameFromPattern and error', () => {
-    esprimaParser.setErrorInCatchClause(param, error)
+    esprimaParser.setCatchError(param, error)
 
     expect(
       esprimaParser.setVariables

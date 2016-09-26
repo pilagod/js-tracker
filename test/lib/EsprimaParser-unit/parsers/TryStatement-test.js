@@ -1,8 +1,6 @@
 // spec: https://github.com/estree/estree/blob/master/spec.md#trystatement
 
 describe('TryStatement tests', () => {
-  const error = new Error('error from block')
-
   let tryStatement
 
   beforeEach(() => {
@@ -11,96 +9,112 @@ describe('TryStatement tests', () => {
       handler: createAstNode('CatchClause'),
       finalizer: createAstNode('BlockStatementFinalizer')
     })
-
-    sandbox.stub(esprimaParser, 'parseNode')
-    sandbox.stub(esprimaParser, 'handleCatchClause')
-    sandbox.stub(esprimaParser, 'handleFinalizer')
+    sandbox.stub(esprimaParser, 'handleExceptionBlock')
+    sandbox.stub(esprimaParser, 'handleExceptionResult')
+      .returns('resultFromHandleExceptionResult')
   })
 
-  it('should call parseNode with block', () => {
-    esprimaParser.TryStatement(tryStatement)
+  describe('no error thrown', () => {
+    beforeEach(() => {
+      esprimaParser.handleExceptionBlock
+        .onCall(0).returns({valueFromTry: 'valueFromTryBlock'})
+        .onCall(1).returns({valueFromFinally: 'valueFromFinallyBlock'})
+    })
 
-    expect(
-      esprimaParser.parseNode
-        .withArgs(tryStatement.block).called
-    ).to.be.true
+    it('should call handleExceptionBlock with tryStatement.block', () => {
+      esprimaParser.TryStatement(tryStatement)
+
+      expect(
+        esprimaParser.handleExceptionBlock.getCall(0)
+          .calledWithExactly(tryStatement.block)
+      ).to.be.true
+    })
+
+    it('should call handleExceptionBlock with tryStatement.finalizer', () => {
+      esprimaParser.TryStatement(tryStatement)
+
+      expect(
+        esprimaParser.handleExceptionBlock.getCall(1)
+          .calledWithExactly(tryStatement.finalizer)
+      ).to.be.true
+    })
+
+    it('should call exactly twice of handleExceptionBlock', () => {
+      esprimaParser.TryStatement(tryStatement)
+
+      expect(esprimaParser.handleExceptionBlock.calledTwice).to.be.true
+    })
+
+    it('should call handleExceptionResult with an object get updates from try and finally block and return', () => {
+      const result = esprimaParser.TryStatement(tryStatement)
+
+      expect(
+        esprimaParser.handleExceptionResult
+          .calledWithExactly({
+            valueFromTry: 'valueFromTryBlock',
+            valueFromFinally: 'valueFromFinallyBlock'
+          })
+      ).to.be.true
+      expect(result).to.be.equal('resultFromHandleExceptionResult')
+    })
   })
 
-  it('should call handleCatchClause with handler and error throws from block', () => {
-    esprimaParser.parseNode
-      .withArgs(tryStatement.block)
-        .throws(error)
+  describe('error thrown', () => {
+    const error = new Error()
 
-    esprimaParser.TryStatement(tryStatement)
+    beforeEach(() => {
+      sandbox.stub(esprimaParser, 'handleCatchClause')
+        .returns({valueFromCatch: 'valueFromCatch'})
+      esprimaParser.handleExceptionBlock
+        .onCall(0).throws(error)
+        .onCall(1).returns({valueFromFinally: 'valueFromFinally'})
+    })
 
-    expect(
-      esprimaParser.handleCatchClause
-        .calledWithExactly(tryStatement.handler, error)
-    ).to.be.true
-  })
+    it('should call handleExceptionBlock with tryStatement.block', () => {
+      esprimaParser.TryStatement(tryStatement)
 
-  it('should not call handleCatchClause given no error threw from block', () => {
-    esprimaParser.TryStatement(tryStatement)
+      expect(
+        esprimaParser.handleExceptionBlock.getCall(0)
+          .calledWithExactly(tryStatement.block)
+      ).to.be.true
+    })
 
-    expect(esprimaParser.handleCatchClause.called).to.be.false
-  })
+    it('should call handleCatchClause with tryStatement.handler and error thrown in try block', () => {
+      esprimaParser.TryStatement(tryStatement)
 
-  it('should call handleFinalizer given no error', () => {
-    esprimaParser.TryStatement(tryStatement)
+      expect(
+        esprimaParser.handleCatchClause
+          .calledWithExactly(tryStatement.handler, error)
+      ).to.be.true
+    })
 
-    expect(
-      esprimaParser.handleFinalizer
-        .withArgs(tryStatement.finalizer).called
-    ).to.be.true
-  })
+    it('should call handleExceptionBlock with tryStatement.finalizer', () => {
+      esprimaParser.TryStatement(tryStatement)
 
-  it('should call handleFinalizer given error threw from block', () => {
-    esprimaParser.parseNode
-      .withArgs(tryStatement.block)
-        .throws(error)
+      expect(
+        esprimaParser.handleExceptionBlock.getCall(1)
+          .calledWithExactly(tryStatement.finalizer)
+      ).to.be.true
+    })
 
-    esprimaParser.TryStatement(tryStatement)
+    it('should call twice of handleExceptionBlock and once of handleCatchClause', () => {
+      esprimaParser.TryStatement(tryStatement)
 
-    expect(
-      esprimaParser.handleFinalizer
-        .withArgs(tryStatement.finalizer).called
-    ).to.be.true
-  })
+      expect(esprimaParser.handleCatchClause.calledOnce).to.be.true
+      expect(esprimaParser.handleExceptionBlock.calledTwice).to.be.true
+    })
 
-  it('should return last valid value', () => {
-    let results = []
+    it('should call handleExceptionResult with an object get updates from catch and finally block and return', () => {
+      const result = esprimaParser.TryStatement(tryStatement)
 
-    /* try return value, finally no return */
-    esprimaParser.parseNode
-      .returns('resultFromParseNode')
-
-    results.push(esprimaParser.TryStatement(tryStatement))
-
-    /* try throws error, catch return value, finally no return */
-    esprimaParser.parseNode
-      .throws(error)
-    esprimaParser.handleCatchClause
-      .returns('resultFromHandleCatchClause')
-
-    results.push(esprimaParser.TryStatement(tryStatement))
-
-    /* try throws error, catch and finally return value */
-    esprimaParser.handleFinalizer
-      .returns('resultFromHandleFinalizer')
-
-    results.push(esprimaParser.TryStatement(tryStatement))
-
-    /* try and finally return value */
-    esprimaParser.parseNode
-      .returns('resultFromParseNode')
-
-    results.push(esprimaParser.TryStatement(tryStatement))
-
-    expect(results).to.be.eql([
-      'resultFromParseNode',
-      'resultFromHandleCatchClause',
-      'resultFromHandleFinalizer',
-      'resultFromHandleFinalizer',
-    ])
+      expect(
+        esprimaParser.handleExceptionResult
+          .calledWithExactly({
+            valueFromCatch: 'valueFromCatch',
+            valueFromFinally: 'valueFromFinally'
+          })
+      ).to.be.true
+      expect(result).to.be.equal('resultFromHandleExceptionResult')
+    })
   })
 })

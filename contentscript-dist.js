@@ -3,91 +3,149 @@
 
 console.log('<==== init tracking ====>');
 
-// stub whole html (remove all event listener)
-var html = document.getElementsByTagName('html')[0];
-var stubHtml = html.cloneNode(true);
-
-html.parentNode.replaceChild(stubHtml, html);
-//
-
-// clear all timeouts
-var id = setTimeout(function () {}, 9999);
-
-do {
-  clearTimeout(id);
-} while (id--);
-//
-
 require('es6-promise').polyfill();
 require('isomorphic-fetch');
 
 if (!window.esprimaParser) {
   window.esprimaParser = new (require('./lib/EsprimaParser'))(window);
 }
-
 var esprima = require('esprima');
 var mimetypes = require('./mimetypes');
 
 var url = window.location.href;
-var asts = [];
-var scripts = Array.prototype.slice.call(document.getElementsByTagName('script'));
 
-var p = Promise.resolve(true);
+main();
 
-scripts.forEach(function (script) {
-  if (!script.type || mimetypes.hasOwnProperty(script.type)) {
-    // parse only valid type of scripts
-    p = p.then(function () {
-      if (script.src) {
-        return fetch(script.src).then(function (response) {
-          return response.text();
-        }).then(function (scriptText) {
-          asts.push({
-            url: script.src,
-            root: esprima.parse(scriptText, { loc: true })
-          });
-        });
-      } else if (script.innerHTML) {
-        asts.push({
-          url: url,
-          root: esprima.parse(script.innerHTML, { loc: true })
-        });
-      }
-      return Promise.resolve(true);
-    });
-  }
-});
-
-p.then(function () {
-  console.log(asts);
-
-  asts.forEach(function (ast) {
-    esprimaParser.parseAst(ast.root, ast.url);
+function main() {
+  // re-init page and start tracking scripts
+  fetch(window.location.href).then(function (response) {
+    return response.text();
+  }).then(function (htmlString) {
+    stubPageFrom(htmlString);
+    clearAllTimeouts();
+    trackingScripts();
   });
-  triggerWindowLoad();
-  console.log('<==== start tracking ====>');
-});
-
-if (!window.onDevtoolsSelectionChanged) {
-  window.onDevtoolsSelectionChanged = function (element) {
-    console.log('onSelectionChanged', element);
-    var id = element.dataset.collectionId;
-    var info = id ? esprimaParser.collection.get(id) : {};
-
-    chrome.runtime.sendMessage(info, function (response) {
-      console.log(response);
-    });
-  };
 }
 
-function triggerWindowLoad() {
-  var jQuery = window.jQuery || window.$;
-  // window.dispatchEvent(new Event('load'))
-  // will trigger original window onload
-  if (jQuery) {
-    $(window).trigger('load');
-  } else if (window.onload) {
-    window.onload();
+function stubPageFrom(htmlString) {
+  // init all elements and remove all event listeners
+  var parser = new DOMParser();
+  var stubDocument = parser.parseFromString(htmlString, 'text/html');
+
+  var stubHtml = void 0;
+
+  var _iteratorNormalCompletion = true;
+  var _didIteratorError = false;
+  var _iteratorError = undefined;
+
+  try {
+    for (var _iterator = stubDocument.children[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+      var child = _step.value;
+
+      if (child.tagName === 'HTML') {
+        stubHtml = child;
+        break;
+      }
+    }
+  } catch (err) {
+    _didIteratorError = true;
+    _iteratorError = err;
+  } finally {
+    try {
+      if (!_iteratorNormalCompletion && _iterator.return) {
+        _iterator.return();
+      }
+    } finally {
+      if (_didIteratorError) {
+        throw _iteratorError;
+      }
+    }
+  }
+
+  var html = document.getElementsByTagName('html')[0];
+
+  html.parentNode.replaceChild(stubHtml, html);
+}
+
+function clearAllTimeouts() {
+  var id = setTimeout(function () {}, 9999);
+
+  do {
+    clearTimeout(id);
+  } while (id--);
+}
+
+function trackingScripts() {
+  var asts = [];
+  var scripts = Array.prototype.slice.call(document.getElementsByTagName('script'));
+
+  var p = Promise.resolve(true);
+
+  scripts.forEach(function (script) {
+    if (!script.type || mimetypes.hasOwnProperty(script.type)) {
+      // parse only valid type of scripts
+      p = p.then(function () {
+        if (script.src) {
+          return fetch(script.src).then(function (response) {
+            return response.text();
+          }).then(function (scriptText) {
+            asts.push({
+              url: script.src,
+              root: esprima.parse(scriptText, { loc: true })
+            });
+          });
+        } else if (script.innerHTML) {
+          asts.push({
+            url: url,
+            root: esprima.parse(script.innerHTML, { loc: true })
+          });
+        }
+        return true;
+      });
+    }
+  });
+
+  p.then(function () {
+    console.log(asts);
+
+    asts.forEach(function (ast) {
+      console.log(ast.url);
+      esprimaParser.parseAst(ast.root, ast.url);
+    });
+  }).then(function () {
+    triggerWindowLoad();
+    addDevtoolsSelectionChangedListener();
+  }).then(function () {
+    console.log('<==== start tracking ====>');
+  });
+
+  function triggerWindowLoad() {
+    var jQuery = window.jQuery || window.$;
+    // window.dispatchEvent(new Event('load'))
+    // will trigger original window onload
+    if (jQuery) {
+      // document ready events would occur after all promise finished,
+      // wrap window load trigger with document ready to ensure load called after ready
+      $(document).ready(function () {
+        $(window).trigger('load');
+      });
+    } else if (window.onload) {
+      window.onload();
+    }
+  }
+
+  function addDevtoolsSelectionChangedListener() {
+    if (!window.onDevtoolsSelectionChanged) {
+      window.onDevtoolsSelectionChanged = function (element) {
+        console.log('onSelectionChanged', element);
+        var id = element.dataset.collectionId;
+        var info = id ? esprimaParser.collection.get(id) : {};
+
+        chrome.runtime.sendMessage(info, function (response) {
+          console.log(response);
+        });
+      };
+    }
   }
 }
 
@@ -902,6 +960,7 @@ var EsprimaParser = function () {
 
     /* import structures */
     this.Callee = Callee; // main use for execute
+    this.FlowState = FlowState; // @TODO: added new
     this.Collection = Collection;
     this.FunctionAgent = FunctionAgent;
 
@@ -1249,30 +1308,55 @@ var EsprimaParser = function () {
   }, {
     key: 'TryStatement',
     value: function TryStatement(tryStatement) {
-      var result = void 0;
+      var result = {};
 
       try {
-        result = this.parseNode(tryStatement.block) || result;
+        Object.assign(result, this.handleExceptionBlock(tryStatement.block));
       } catch (e) {
-        result = this.handleCatchClause(tryStatement.handler, e) || result;
+        Object.assign(result, this.handleCatchClause(tryStatement.handler, e));
       } finally {
-        result = this.handleFinalizer(tryStatement.finalizer) || result;
+        Object.assign(result, this.handleExceptionBlock(tryStatement.finalizer));
       }
-      return result;
+      return this.handleExceptionResult(result);
+    }
+  }, {
+    key: 'handleExceptionBlock',
+    value: function handleExceptionBlock(block) {
+      var value = this.parseNode(block);
+
+      return this.getExceptionBlockResult(value);
+    }
+  }, {
+    key: 'getExceptionBlockResult',
+    value: function getExceptionBlockResult(value) {
+      if (this.flowState.isReturnState()) {
+        this.flowState.unset(this.FlowState.RETURN);
+        return { value: value };
+      }
+      return {};
     }
   }, {
     key: 'handleCatchClause',
-    value: function handleCatchClause(handler, error) {
-      if (!handler) {
-        throw error;
+    value: function handleCatchClause(catchClause, error) {
+      if (catchClause) {
+        try {
+          return this.parseCatchClause(catchClause, error);
+        } catch (e) {
+          return { error: e };
+        }
       }
-      this.setErrorInCatchClause(handler.param, error);
-
-      return this.parseNode(handler.body);
+      return { error: error };
     }
   }, {
-    key: 'setErrorInCatchClause',
-    value: function setErrorInCatchClause(param, error) {
+    key: 'parseCatchClause',
+    value: function parseCatchClause(catchClause, error) {
+      this.setCatchError(catchClause.param, error);
+
+      return this.handleExceptionBlock(catchClause.body);
+    }
+  }, {
+    key: 'setCatchError',
+    value: function setCatchError(param, error) {
       // @TODO: es6: create new block closure
       var variables = this.getNameFromPattern(param);
 
@@ -1298,9 +1382,15 @@ var EsprimaParser = function () {
       this.closureStack.set(variables, values);
     }
   }, {
-    key: 'handleFinalizer',
-    value: function handleFinalizer(finalizer) {
-      return finalizer ? this.parseNode(finalizer) : undefined;
+    key: 'handleExceptionResult',
+    value: function handleExceptionResult(result) {
+      if (result.hasOwnProperty('value')) {
+        this.flowState.set(this.FlowState.RETURN);
+        return result.value;
+      } else if (result.hasOwnProperty('error')) {
+        throw result.error;
+      }
+      return undefined;
     }
 
     /*************************/
@@ -1612,9 +1702,13 @@ var EsprimaParser = function () {
         keys: functionAgent.params,
         values: calledArguments
       });
-      var result = this.parseNode(functionAgent.body);
+      var result = void 0;
 
-      this.setEnvironment(this, globalEnvironment);
+      try {
+        result = this.parseNode(functionAgent.body);
+      } finally {
+        this.setEnvironment(this, globalEnvironment);
+      }
       this.flowState.unset(FlowState.RETURN);
 
       return result;
@@ -1765,6 +1859,9 @@ var EsprimaParser = function () {
       // {caller, callee}
       var exp = this.getMemberExp(memberExpression);
 
+      // console.log(exp, memberExpression.loc);
+      // console.log(this.escodegen.generate(memberExpression));
+
       return this.parseMemberExp(exp);
     }
   }, {
@@ -1790,12 +1887,12 @@ var EsprimaParser = function () {
   }, {
     key: 'execute',
     value: function execute(exp) {
-      try {
-        return this.executeExp(exp);
-      } catch (e) {
-        console.log(e);
-        return undefined;
-      }
+      // try {
+      return this.executeExp(exp);
+      // } catch (e) {
+      // console.log(e);
+      // return undefined
+      // }
     }
   }, {
     key: 'executeExp',
@@ -2566,25 +2663,46 @@ var FlowState = function () {
       }
     }
   }, {
+    key: 'isReturnState',
+    value: function isReturnState() {
+      var state = arguments.length <= 0 || arguments[0] === undefined ? this.state : arguments[0];
+
+      return state === FlowState.RETURN;
+    }
+  }, {
+    key: 'isBreakState',
+    value: function isBreakState() {
+      var state = arguments.length <= 0 || arguments[0] === undefined ? this.state : arguments[0];
+
+      return state === FlowState.BREAK;
+    }
+  }, {
+    key: 'isContinueState',
+    value: function isContinueState() {
+      var state = arguments.length <= 0 || arguments[0] === undefined ? this.state : arguments[0];
+
+      return state === FlowState.CONTINUE;
+    }
+  }, {
     key: 'isEitherState',
     value: function isEitherState() {
       var state = arguments.length <= 0 || arguments[0] === undefined ? this.state : arguments[0];
 
-      return state === FlowState.RETURN || state === FlowState.BREAK || state === FlowState.CONTINUE;
+      return this.isReturnState(state) || this.isBreakState(state) || this.isContinueState(state);
     }
   }, {
     key: 'isLoopBreakState',
     value: function isLoopBreakState() {
       var state = arguments.length <= 0 || arguments[0] === undefined ? this.state : arguments[0];
 
-      return state === FlowState.RETURN || state === FlowState.BREAK;
+      return this.isReturnState(state) || this.isBreakState(state);
     }
   }, {
     key: 'isLoopContinueState',
     value: function isLoopContinueState() {
       var state = arguments.length <= 0 || arguments[0] === undefined ? this.state : arguments[0];
 
-      return state === FlowState.CONTINUE;
+      return this.isContinueState(state);
     }
   }], [{
     key: 'RETURN',
