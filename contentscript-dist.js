@@ -1964,6 +1964,9 @@ var EsprimaParser = function () {
 
       exp.info = this.getExpInfo(callExpression);
 
+      console.log(exp);
+      console.log(this.escodegen.generate(callExpression));
+
       return this.parseCallExp(exp);
     }
   }, {
