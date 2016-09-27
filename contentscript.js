@@ -1,3 +1,4 @@
+// @TODO: window event execute twice
 console.log('<==== init tracking ====>')
 
 require('es6-promise').polyfill()
@@ -102,10 +103,11 @@ function trackingScripts() {
       // document ready events would occur after all promise finished,
       // wrap window load trigger with document ready to ensure load called after ready
       $(document).ready(() => {
-        $(window).trigger('load')
+        // $(window).trigger('load')
+        window.dispatchEvent(new Event('load'))
       })
-    } else if (window.onload) {
-      window.onload()
+    } else {
+      window.dispatchEvent(new Event('load'))
     }
   }
 

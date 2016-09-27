@@ -127,10 +127,11 @@ function trackingScripts() {
       // document ready events would occur after all promise finished,
       // wrap window load trigger with document ready to ensure load called after ready
       $(document).ready(function () {
-        $(window).trigger('load');
+        // $(window).trigger('load')
+        window.dispatchEvent(new Event('load'));
       });
-    } else if (window.onload) {
-      window.onload();
+    } else {
+      window.dispatchEvent(new Event('load'));
     }
   }
 
@@ -1752,7 +1753,7 @@ var EsprimaParser = function () {
       var functionAgentData = this.parseFunctionExpression(functionExpression);
       var functionAgent = this.wrapFunctionAgentDataWithFunction(functionAgentData);
 
-      // should keep reference given non-null id
+      // should keep reference to its functionAgentData.closureStack given non-null id
       if (functionExpression.id) {
         this.setFunctionExpressionTo(functionAgentData, functionExpression.id, functionAgent);
       }
@@ -1906,6 +1907,7 @@ var EsprimaParser = function () {
       return this.executeExp(exp);
       // } catch (e) {
       // console.log(e);
+      // console.log(exp.info);
       // return undefined
       // }
     }
@@ -1981,9 +1983,6 @@ var EsprimaParser = function () {
       var exp = this.getCallExp(callExpression);
 
       exp.info = this.getExpInfo(callExpression);
-
-      // console.log(exp);
-      // console.log(this.escodegen.generate(callExpression));
 
       return this.parseCallExp(exp);
     }
