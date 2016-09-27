@@ -149,7 +149,7 @@ function trackingScripts() {
   }
 }
 
-},{"./lib/EsprimaParser":51,"./mimetypes":62,"es6-promise":63,"esprima":84,"isomorphic-fetch":85}],2:[function(require,module,exports){
+},{"./lib/EsprimaParser":51,"./mimetypes":61,"es6-promise":62,"esprima":83,"isomorphic-fetch":84}],2:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -939,7 +939,6 @@ var escodegen = require('escodegen');
 
 /* import structures */
 var Callee = require('./structures/Callee');
-var FunctionAgent = require('./structures/FunctionAgent');
 
 /* import operators */
 var binaryOperators = require('./operators/binaryOperators');
@@ -963,11 +962,9 @@ var EsprimaParser = function () {
     this.Callee = Callee; // main use for execute
     this.FlowState = FlowState; // @TODO: added new
     this.Collection = Collection;
-    this.FunctionAgent = FunctionAgent;
 
     /* import operators */
     this.binaryOperators = binaryOperators;
-    // @TODO: updateOperators
     this.updateOperators = updateOperators;
     this.unaryOperators = this.initUnaryOperators(unaryOperators);
     this.logicalOperators = this.initLogicalOperators();
@@ -1539,117 +1536,24 @@ var EsprimaParser = function () {
     value: function FunctionDeclaration(functionDeclaration) {
       // id is Identifier only
       var variable = this.getNameFromPattern(functionDeclaration.id);
-      var value = this.FunctionExpression(functionDeclaration);
+      var functionAgent = this.createFunctionAgent(functionDeclaration);
 
-      this.setVariables(variable, value);
-    }
-  }, {
-    key: 'VariableDeclaration',
-    value: function VariableDeclaration(variableDeclaration) {
-      var _this4 = this;
-
-      // @TODO: var -> function closure
-      // @TODO: es6: let, const -> block closure
-      variableDeclaration.declarations.forEach(function (node) {
-        _this4.parseNode(node);
-      });
-    }
-  }, {
-    key: 'VariableDeclarator',
-    value: function VariableDeclarator(variableDeclarator) {
-      // @TODO: ObjectPattern / ArrayPattern
-      var variables = this.getNameFromPattern(variableDeclarator.id);
-      var values = this.getInitValues(variableDeclarator.init);
-      // if init is null, and variables is already in current closure,
-      // don't set variables
-      if (this.isNeededToSet(variables, variableDeclarator.init)) {
-        this.setVariables(variables, values);
-      }
-    }
-  }, {
-    key: 'getInitValues',
-    value: function getInitValues(init) {
-      return init ? this.parseNode(init) : undefined;
-    }
-  }, {
-    key: 'isNeededToSet',
-    value: function isNeededToSet(variables, init) {
-      return !!init || !this.closureStack.getLatestClosure().exist(variables);
-    }
-
-    /*************************/
-    /*      Expressions      */
-    /*************************/
-
-  }, {
-    key: 'ThisExpression',
-    value: function ThisExpression() {
-      return this.closureStack.get('this');
-    }
-  }, {
-    key: 'ArrayExpression',
-    value: function ArrayExpression(arrayExpression) {
-      var _this5 = this;
-
-      var result = [];
-
-      arrayExpression.elements.forEach(function (node, index) {
-        result.push(_this5.parseNode(node));
-        // delete null node (e.g. [1, , 2] != [1, undefined, 2])
-        if (!node) {
-          delete result[index];
-        }
-      });
-      return result;
-    }
-  }, {
-    key: 'ObjectExpression',
-    value: function ObjectExpression(objectExpression) {
-      var _this6 = this;
-
-      var result = {};
-
-      objectExpression.properties.forEach(function (node) {
-        var _parseNode = _this6.parseNode(node);
-
-        var key = _parseNode.key;
-        var value = _parseNode.value;
-
-
-        result[key] = value;
-      });
-      return result;
-    }
-  }, {
-    key: 'Property',
-    value: function Property(property) {
-      return {
-        key: this.getPropertyKey(property.key, property.computed),
-        value: this.parseNode(property.value)
-      };
-    }
-  }, {
-    key: 'getPropertyKey',
-    value: function getPropertyKey(key, computed) {
-      if (computed) {
-        return this.parseNode(key);
-      }
-      return key.name || key.value;
-    }
-  }, {
-    key: 'FunctionExpression',
-    value: function FunctionExpression(functionExpression) {
-      var functionAgent = this.createFunctionAgent(functionExpression);
-
-      return this.wrapFunctionAgentWithFunction(functionAgent);
+      this.setVariables(variable, functionAgent);
     }
   }, {
     key: 'createFunctionAgent',
     value: function createFunctionAgent(functionExpression) {
+      var functionAgentData = this.parseFunctionExpression(functionExpression);
+
+      return this.wrapFunctionAgentDataWithFunction(functionAgentData);
+    }
+  }, {
+    key: 'parseFunctionExpression',
+    value: function parseFunctionExpression(functionExpression) {
       var functionEnvironment = this.getEnvironment(this);
       var functionInfo = this.parseFunctionInfo(functionExpression);
 
-      return new this.FunctionAgent(Object.assign({}, functionEnvironment, functionInfo));
+      return Object.assign({}, functionEnvironment, functionInfo);
     }
   }, {
     key: 'getEnvironment',
@@ -1670,16 +1574,16 @@ var EsprimaParser = function () {
   }, {
     key: 'parseFunctionParamsName',
     value: function parseFunctionParamsName(params) {
-      var _this7 = this;
+      var _this4 = this;
 
       // @TODO: a way to identify rest args
       return params.map(function (param) {
-        return _this7.getNameFromPattern(param);
+        return _this4.getNameFromPattern(param);
       });
     }
   }, {
-    key: 'wrapFunctionAgentWithFunction',
-    value: function wrapFunctionAgentWithFunction(functionAgent) {
+    key: 'wrapFunctionAgentDataWithFunction',
+    value: function wrapFunctionAgentDataWithFunction(functionAgentData) {
       var self = this;
 
       return function () {
@@ -1687,28 +1591,28 @@ var EsprimaParser = function () {
           calledArguments[_key] = arguments[_key];
         }
 
-        return self.parseFunctionAgent(functionAgent, {
+        return self.parseFunctionAgentData(functionAgentData, {
           this: this,
           arguments: arguments
         }, calledArguments);
       };
     }
   }, {
-    key: 'parseFunctionAgent',
-    value: function parseFunctionAgent(functionAgent, builtInArguments, calledArguments) {
+    key: 'parseFunctionAgentData',
+    value: function parseFunctionAgentData(functionAgentData, builtInArguments, calledArguments) {
       // environment refers to an object containing scriptUrl and closureStack
       var globalEnvironment = this.getEnvironment(this);
-      var functionEnvironment = this.getEnvironment(functionAgent);
+      var functionEnvironment = this.getEnvironment(functionAgentData);
 
       this.setEnvironment(this, functionEnvironment);
       this.setFunctionClosure(builtInArguments, {
-        keys: functionAgent.params,
+        keys: functionAgentData.params,
         values: calledArguments
       });
       var result = void 0;
 
       try {
-        result = this.parseNode(functionAgent.body);
+        result = this.parseNode(functionAgentData.body);
       } finally {
         this.setEnvironment(this, globalEnvironment);
       }
@@ -1747,6 +1651,120 @@ var EsprimaParser = function () {
       for (var i = 0; i < length; i += 1) {
         this.setVariables(keys[i], values[i]);
       }
+    }
+  }, {
+    key: 'VariableDeclaration',
+    value: function VariableDeclaration(variableDeclaration) {
+      var _this5 = this;
+
+      // @TODO: var -> function closure
+      // @TODO: es6: let, const -> block closure
+      variableDeclaration.declarations.forEach(function (node) {
+        _this5.parseNode(node);
+      });
+    }
+  }, {
+    key: 'VariableDeclarator',
+    value: function VariableDeclarator(variableDeclarator) {
+      // @TODO: ObjectPattern / ArrayPattern
+      var variables = this.getNameFromPattern(variableDeclarator.id);
+      var values = this.getInitValues(variableDeclarator.init);
+      // if init is null, and variables is already in current closure,
+      // don't set variables
+      if (this.isNeededToSet(variables, variableDeclarator.init)) {
+        this.setVariables(variables, values);
+      }
+    }
+  }, {
+    key: 'getInitValues',
+    value: function getInitValues(init) {
+      return init ? this.parseNode(init) : undefined;
+    }
+  }, {
+    key: 'isNeededToSet',
+    value: function isNeededToSet(variables, init) {
+      return !!init || !this.closureStack.getLatestClosure().exist(variables);
+    }
+
+    /*************************/
+    /*      Expressions      */
+    /*************************/
+
+  }, {
+    key: 'ThisExpression',
+    value: function ThisExpression() {
+      return this.closureStack.get('this');
+    }
+  }, {
+    key: 'ArrayExpression',
+    value: function ArrayExpression(arrayExpression) {
+      var _this6 = this;
+
+      var result = [];
+
+      arrayExpression.elements.forEach(function (node, index) {
+        result.push(_this6.parseNode(node));
+        // delete null node (e.g. [1, , 2] != [1, undefined, 2])
+        if (!node) {
+          delete result[index];
+        }
+      });
+      return result;
+    }
+  }, {
+    key: 'ObjectExpression',
+    value: function ObjectExpression(objectExpression) {
+      var _this7 = this;
+
+      var result = {};
+
+      objectExpression.properties.forEach(function (node) {
+        var _parseNode = _this7.parseNode(node);
+
+        var key = _parseNode.key;
+        var value = _parseNode.value;
+
+
+        result[key] = value;
+      });
+      return result;
+    }
+  }, {
+    key: 'Property',
+    value: function Property(property) {
+      return {
+        key: this.getPropertyKey(property.key, property.computed),
+        value: this.parseNode(property.value)
+      };
+    }
+  }, {
+    key: 'getPropertyKey',
+    value: function getPropertyKey(key, computed) {
+      if (computed) {
+        return this.parseNode(key);
+      }
+      return key.name || key.value;
+    }
+  }, {
+    key: 'FunctionExpression',
+    value: function FunctionExpression(functionExpression) {
+      // @TODO: (function test() {console.log(test) // undefined})
+      var functionAgentData = this.parseFunctionExpression(functionExpression);
+      var functionAgent = this.wrapFunctionAgentDataWithFunction(functionAgentData);
+
+      // should keep reference given non-null id
+      if (functionExpression.id) {
+        this.setFunctionExpressionTo(functionAgentData, functionExpression.id, functionAgent);
+      }
+      return functionAgent;
+    }
+  }, {
+    key: 'setFunctionExpressionTo',
+    value: function setFunctionExpressionTo(functionAgentData, id, functionAgent) {
+      var variable = this.getNameFromPattern(id);
+
+      functionAgentData.closureStack.createClosure();
+      functionAgentData.closureStack.set(variable, functionAgent);
     }
   }, {
     key: 'UnaryExpression',
@@ -1964,8 +1982,8 @@ var EsprimaParser = function () {
 
       exp.info = this.getExpInfo(callExpression);
 
-      console.log(exp);
-      console.log(this.escodegen.generate(callExpression));
+      // console.log(exp);
+      // console.log(this.escodegen.generate(callExpression));
 
       return this.parseCallExp(exp);
     }
@@ -2142,7 +2160,7 @@ var EsprimaParser = function () {
 
 module.exports = EsprimaParser;
 
-},{"./dispatchers/checkerDispatcher":46,"./operators/binaryOperators":52,"./operators/unaryOperators":53,"./operators/updateOperators":54,"./structures/Callee":55,"./structures/ClosureStack":57,"./structures/Collection":58,"./structures/FlowState":60,"./structures/FunctionAgent":61,"escodegen":64}],52:[function(require,module,exports){
+},{"./dispatchers/checkerDispatcher":46,"./operators/binaryOperators":52,"./operators/unaryOperators":53,"./operators/updateOperators":54,"./structures/Callee":55,"./structures/ClosureStack":57,"./structures/Collection":58,"./structures/FlowState":60,"escodegen":63}],52:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -2739,22 +2757,6 @@ var FlowState = function () {
 module.exports = FlowState;
 
 },{}],61:[function(require,module,exports){
-"use strict";
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var FunctionAgent = function FunctionAgent(init) {
-  _classCallCheck(this, FunctionAgent);
-
-  this.body = init.body;
-  this.params = init.params;
-  this.scriptUrl = init.scriptUrl;
-  this.closureStack = init.closureStack;
-};
-
-module.exports = FunctionAgent;
-
-},{}],62:[function(require,module,exports){
 module.exports={
   "text/javascript": true,
   "text/ecmascript": true,
@@ -2762,7 +2764,7 @@ module.exports={
   "application/ecmascript": true
 }
 
-},{}],63:[function(require,module,exports){
+},{}],62:[function(require,module,exports){
 (function (process,global){
 /*!
  * @overview es6-promise - a tiny implementation of Promises/A+.
@@ -3725,7 +3727,7 @@ module.exports={
 
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"_process":87}],64:[function(require,module,exports){
+},{"_process":86}],63:[function(require,module,exports){
 (function (global){
 /*
   Copyright (C) 2012-2014 Yusuke Suzuki <utatane.tea@gmail.com>
@@ -6328,7 +6330,7 @@ module.exports={
 /* vim: set sw=4 ts=4 et tw=80 : */
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./package.json":83,"estraverse":65,"esutils":69,"source-map":70}],65:[function(require,module,exports){
+},{"./package.json":82,"estraverse":64,"esutils":68,"source-map":69}],64:[function(require,module,exports){
 /*
   Copyright (C) 2012-2013 Yusuke Suzuki <utatane.tea@gmail.com>
   Copyright (C) 2012 Ariya Hidayat <ariya.hidayat@gmail.com>
@@ -7175,7 +7177,7 @@ module.exports={
 }));
 /* vim: set sw=4 ts=4 et tw=80 : */
 
-},{}],66:[function(require,module,exports){
+},{}],65:[function(require,module,exports){
 /*
   Copyright (C) 2013 Yusuke Suzuki <utatane.tea@gmail.com>
 
@@ -7321,7 +7323,7 @@ module.exports={
 }());
 /* vim: set sw=4 ts=4 et tw=80 : */
 
-},{}],67:[function(require,module,exports){
+},{}],66:[function(require,module,exports){
 /*
   Copyright (C) 2013-2014 Yusuke Suzuki <utatane.tea@gmail.com>
   Copyright (C) 2014 Ivan Nikulin <ifaaan@gmail.com>
@@ -7458,7 +7460,7 @@ module.exports={
 }());
 /* vim: set sw=4 ts=4 et tw=80 : */
 
-},{}],68:[function(require,module,exports){
+},{}],67:[function(require,module,exports){
 /*
   Copyright (C) 2013 Yusuke Suzuki <utatane.tea@gmail.com>
 
@@ -7625,7 +7627,7 @@ module.exports={
 }());
 /* vim: set sw=4 ts=4 et tw=80 : */
 
-},{"./code":67}],69:[function(require,module,exports){
+},{"./code":66}],68:[function(require,module,exports){
 /*
   Copyright (C) 2013 Yusuke Suzuki <utatane.tea@gmail.com>
 
@@ -7660,7 +7662,7 @@ module.exports={
 }());
 /* vim: set sw=4 ts=4 et tw=80 : */
 
-},{"./ast":66,"./code":67,"./keyword":68}],70:[function(require,module,exports){
+},{"./ast":65,"./code":66,"./keyword":67}],69:[function(require,module,exports){
 /*
  * Copyright 2009-2011 Mozilla Foundation and contributors
  * Licensed under the New BSD license. See LICENSE.txt or:
@@ -7670,7 +7672,7 @@ exports.SourceMapGenerator = require('./source-map/source-map-generator').Source
 exports.SourceMapConsumer = require('./source-map/source-map-consumer').SourceMapConsumer;
 exports.SourceNode = require('./source-map/source-node').SourceNode;
 
-},{"./source-map/source-map-consumer":78,"./source-map/source-map-generator":79,"./source-map/source-node":80}],71:[function(require,module,exports){
+},{"./source-map/source-map-consumer":77,"./source-map/source-map-generator":78,"./source-map/source-node":79}],70:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -7769,7 +7771,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"./util":81,"amdefine":82}],72:[function(require,module,exports){
+},{"./util":80,"amdefine":81}],71:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -7913,7 +7915,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"./base64":73,"amdefine":82}],73:[function(require,module,exports){
+},{"./base64":72,"amdefine":81}],72:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -7957,7 +7959,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"amdefine":82}],74:[function(require,module,exports){
+},{"amdefine":81}],73:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -8379,7 +8381,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"./array-set":71,"./base64-vlq":72,"./binary-search":75,"./source-map-consumer":78,"./util":81,"amdefine":82}],75:[function(require,module,exports){
+},{"./array-set":70,"./base64-vlq":71,"./binary-search":74,"./source-map-consumer":77,"./util":80,"amdefine":81}],74:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -8461,7 +8463,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"amdefine":82}],76:[function(require,module,exports){
+},{"amdefine":81}],75:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -8766,7 +8768,7 @@ define(function (require, exports, module) {
   exports.IndexedSourceMapConsumer = IndexedSourceMapConsumer;
 });
 
-},{"./basic-source-map-consumer":74,"./binary-search":75,"./source-map-consumer":78,"./util":81,"amdefine":82}],77:[function(require,module,exports){
+},{"./basic-source-map-consumer":73,"./binary-search":74,"./source-map-consumer":77,"./util":80,"amdefine":81}],76:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2014 Mozilla Foundation and contributors
@@ -8854,7 +8856,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"./util":81,"amdefine":82}],78:[function(require,module,exports){
+},{"./util":80,"amdefine":81}],77:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -9078,7 +9080,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"./basic-source-map-consumer":74,"./indexed-source-map-consumer":76,"./util":81,"amdefine":82}],79:[function(require,module,exports){
+},{"./basic-source-map-consumer":73,"./indexed-source-map-consumer":75,"./util":80,"amdefine":81}],78:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -9480,7 +9482,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"./array-set":71,"./base64-vlq":72,"./mapping-list":77,"./util":81,"amdefine":82}],80:[function(require,module,exports){
+},{"./array-set":70,"./base64-vlq":71,"./mapping-list":76,"./util":80,"amdefine":81}],79:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -9896,7 +9898,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"./source-map-generator":79,"./util":81,"amdefine":82}],81:[function(require,module,exports){
+},{"./source-map-generator":78,"./util":80,"amdefine":81}],80:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -10217,7 +10219,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"amdefine":82}],82:[function(require,module,exports){
+},{"amdefine":81}],81:[function(require,module,exports){
 (function (process,__filename){
 /** vim: et:ts=4:sw=4:sts=4
  * @license amdefine 1.0.0 Copyright (c) 2011-2015, The Dojo Foundation All Rights Reserved.
@@ -10522,7 +10524,7 @@ function amdefine(module, requireFn) {
 module.exports = amdefine;
 
 }).call(this,require('_process'),"/node_modules/escodegen/node_modules/source-map/node_modules/amdefine/amdefine.js")
-},{"_process":87,"path":86}],83:[function(require,module,exports){
+},{"_process":86,"path":85}],82:[function(require,module,exports){
 module.exports={
   "name": "escodegen",
   "description": "ECMAScript code generator",
@@ -10609,7 +10611,7 @@ module.exports={
   "_resolved": "http://registry.npm.vmfive.com/escodegen/-/escodegen-1.8.0.tgz"
 }
 
-},{}],84:[function(require,module,exports){
+},{}],83:[function(require,module,exports){
 /*
   Copyright (c) jQuery Foundation, Inc. and Contributors, All Rights Reserved.
 
@@ -16350,7 +16352,7 @@ module.exports={
 }));
 /* vim: set sw=4 ts=4 et tw=80 : */
 
-},{}],85:[function(require,module,exports){
+},{}],84:[function(require,module,exports){
 // the whatwg-fetch polyfill installs the fetch() function
 // on the global object (window or self)
 //
@@ -16358,7 +16360,7 @@ module.exports={
 require('whatwg-fetch');
 module.exports = self.fetch.bind(self);
 
-},{"whatwg-fetch":88}],86:[function(require,module,exports){
+},{"whatwg-fetch":87}],85:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -16586,7 +16588,7 @@ var substr = 'ab'.substr(-1) === 'b'
 ;
 
 }).call(this,require('_process'))
-},{"_process":87}],87:[function(require,module,exports){
+},{"_process":86}],86:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -16768,7 +16770,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],88:[function(require,module,exports){
+},{}],87:[function(require,module,exports){
 (function(self) {
   'use strict';
 

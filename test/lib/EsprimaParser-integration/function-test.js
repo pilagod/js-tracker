@@ -46,6 +46,22 @@ describe('function', () => {
       expect(closureStack.get('a')).to.be.equal(1)
       expect(closureStack.get('result')).to.be.equal(2)
     })
+
+    it('should handle function expression with id properly', () => {
+      resetVariables('test')
+
+      const ast = esprima.parse(`
+        var result = (function test(num) {
+          if (num > 0) {
+            return [].concat(num, test(--num))
+          }
+          return 0
+        })(5)
+      `)
+      esprimaParser.parseAst(ast)
+
+      expect(closureStack.get('result')).to.be.eql([5, 4, 3, 2, 1, 0])
+    })
   })
 
   describe('priority tests', () => {
