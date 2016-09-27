@@ -386,5 +386,15 @@ describe('operation', () => {
       expect(closureStack.get('b')).to.be.equal(1)
       expect(closureStack.get('a')).to.be.equal(-1)
     })
+
+    it('should handle properly with string argument', () => {
+      const ast = esprima.parse(`
+        var a = "0";
+        var b = ++a;
+      `)
+      esprimaParser.parseAst(ast)
+
+      expect(closureStack.get('b')).to.be.equal(1)
+    })
   })
 })

@@ -1,6 +1,8 @@
 // spec: https://github.com/estree/estree/blob/master/spec.md#updateexpression
 
 describe('UpdateExpression tests', () => {
+  const origin = 'origin'
+  const update = 'update'
   let updateExpression
 
   beforeEach(() => {
@@ -9,11 +11,11 @@ describe('UpdateExpression tests', () => {
       argument: createAstNode('Expression'),
       prefix: 'boolean'
     })
-
-    sandbox.stub(esprimaParser, 'parseNode')
-      .returns('resultFromParseNode')
-    sandbox.stub(esprimaParser, 'getUpdateValue')
-      .returns('resultFromGetUpdateValue')
+    sandbox.stub(esprimaParser, 'parseNode').returns(origin)
+    sandbox.stub(esprimaParser, 'updateOperators', {
+      'updateOperator': sandbox.stub().returns(update)
+    })
+    sandbox.stub(esprimaParser, 'setUpdateValue')
   })
 
   it('should call parseNode with argument of updateExpression', () => {
@@ -25,16 +27,21 @@ describe('UpdateExpression tests', () => {
     ).to.be.true
   })
 
-  it('should call getUpdateValue with updateExpression after parseNode', () => {
+  it('should call given update operation with result from parseNode', () => {
     esprimaParser.UpdateExpression(updateExpression)
 
     expect(
-      esprimaParser.getUpdateValue
-        .calledWithExactly(updateExpression)
+      esprimaParser.updateOperators[updateExpression.operator]
+        .calledWithExactly(origin)
     ).to.be.true
+  })
+
+  it('should call setUpdateValue with updateExpression.argument and update from update operation', () => {
+    esprimaParser.UpdateExpression(updateExpression)
+
     expect(
-      esprimaParser.getUpdateValue
-        .calledAfter(esprimaParser.parseNode)
+      esprimaParser.setUpdateValue
+        .calledWithExactly(updateExpression.argument, update)
     ).to.be.true
   })
 
@@ -43,14 +50,14 @@ describe('UpdateExpression tests', () => {
 
     const result = esprimaParser.UpdateExpression(updateExpression)
 
-    expect(result).to.be.equal('resultFromGetUpdateValue')
+    expect(result).to.be.equal(update)
   })
 
-  it('should return origin value given prefix false', () => {
+  it('should return update value given prefix false', () => {
     updateExpression.prefix = false
 
     const result = esprimaParser.UpdateExpression(updateExpression)
 
-    expect(result).to.be.equal('resultFromParseNode')
+    expect(result).to.be.equal(origin)
   })
 })
