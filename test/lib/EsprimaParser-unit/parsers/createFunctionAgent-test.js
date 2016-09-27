@@ -1,54 +1,36 @@
 describe('createFunctionAgent tests', () => {
-  const parseFunctionInfoStub = {
+  const functionAgentData = {
     body: 'body',
-    params: 'params'
-  }
-  const getEnvironmentStub = {
+    params: ['params'],
     scriptUrl: 'scriptUrl',
-    closureStack: 'closureStack'
+    closureStack: {}
   }
-  const getFunctionAgentParserStub = function () {}
-  
+  const functionAgent = function () {}
   let functionExpression
 
   beforeEach(() => {
     functionExpression = createAstNode('FunctionExpression')
 
-    sandbox.stub(esprimaParser, 'parseFunctionInfo')
-      .returns(parseFunctionInfoStub)
-    sandbox.stub(esprimaParser, 'getEnvironment')
-      .returns(getEnvironmentStub)
-    sandbox.stub(esprimaParser, 'FunctionAgent', function (init) {
-      this.init = init
-    })
+    sandbox.stub(esprimaParser, 'parseFunctionExpression').returns(functionAgentData)
+    sandbox.stub(esprimaParser, 'wrapFunctionAgentDataWithFunction').returns(functionAgent)
   })
 
-  it('should call getEnvironment with esprimaParser', () => {
+  it('should call parseFunctionExpression with functionExpression', () => {
     esprimaParser.createFunctionAgent(functionExpression)
 
     expect(
-      esprimaParser.getEnvironment
-        .calledWithExactly(esprimaParser)
-    ).to.be.true
-  })
-
-  it('should call parseFunctionInfo with functionExpression', () => {
-    esprimaParser.createFunctionAgent(functionExpression)
-
-    expect(
-      esprimaParser.parseFunctionInfo
+      esprimaParser.parseFunctionExpression
         .calledWithExactly(functionExpression)
     ).to.be.true
   })
 
-  it('should create new instance of FunctionAgent init with an object concat all above results and return', () => {
-    const expectedInit = Object.assign(
-      getEnvironmentStub,
-      parseFunctionInfoStub
-    )
+  it('should call wrapAgentDataWithFunction with result from parseFunctionExpression and return', () => {
     const result = esprimaParser.createFunctionAgent(functionExpression)
 
-    expect(result).to.be.instanceof(esprimaParser.FunctionAgent)
-    expect(result.init).to.be.eql(expectedInit)
+    expect(
+      esprimaParser.wrapFunctionAgentDataWithFunction
+        .calledWithExactly(functionAgentData)
+    ).to.be.true
+    expect(result).to.be.equal(functionAgent)
   })
 })

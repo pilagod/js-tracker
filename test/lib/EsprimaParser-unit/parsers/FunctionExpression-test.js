@@ -1,29 +1,19 @@
 // spec: https://github.com/estree/estree/blob/master/spec.md#functions
 
 describe('FunctionExpression tests', () => {
+  const functionAgent = function () {}
   let functionExpression
 
   beforeEach(() => {
     functionExpression = createAstNode('FunctionExpression')
 
     sandbox.stub(esprimaParser, 'createFunctionAgent')
-      .returns('resultFromCreateFunctionAgent')
-    sandbox.stub(esprimaParser, 'wrapFunctionAgentWithFunction')
-      .returns('resultFromWrapFunctionAgentWithFunction')
+      .returns(functionAgent)
   })
 
-  it('should call createFunctionAgent with functionExpression', () => {
-    esprimaParser.FunctionExpression(functionExpression)
-
-    expect(
-      esprimaParser.createFunctionAgent
-        .calledWithExactly(functionExpression)
-    ).to.be.true
-  })
-
-  it('should call wrapFunctionAgentWithFunction with result from createFunctionAgent and return', () => {
+  it('should call createFunctionAgent with functionExpression and return', () => {
     const result = esprimaParser.FunctionExpression(functionExpression)
 
-    expect(result).to.be.equal('resultFromWrapFunctionAgentWithFunction')
+    expect(result).to.be.equal(functionAgent)
   })
 })

@@ -1,6 +1,8 @@
 // spec: https://github.com/estree/estree/blob/master/spec.md#functionexpression
 
 describe('FunctionDeclaration tests', () => {
+  const variable = 'variable'
+  const functionAgent = function () {}
   let functionDeclaration
 
   beforeEach(() => {
@@ -9,11 +11,8 @@ describe('FunctionDeclaration tests', () => {
       params: [createAstNode('Pattern')],
       body: createAstNode('BlockStatement')
     })
-
-    sandbox.stub(esprimaParser, 'getNameFromPattern')
-      .returns('resultFromGetNameFromPattern')
-    sandbox.stub(esprimaParser, 'FunctionExpression')
-      .returns('resultFromFunctionExpression')
+    sandbox.stub(esprimaParser, 'getNameFromPattern').returns(variable)
+    sandbox.stub(esprimaParser, 'createFunctionAgent').returns(functionAgent)
     sandbox.stub(esprimaParser, 'setVariables')
   })
 
@@ -26,24 +25,21 @@ describe('FunctionDeclaration tests', () => {
     ).to.be.true
   })
 
-  it('should call FunctionExpression with functionDeclaration', () => {
+  it('should call createFunctionAgent with functionDeclaration', () => {
     esprimaParser.FunctionDeclaration(functionDeclaration)
 
     expect(
-      esprimaParser.FunctionExpression
+      esprimaParser.createFunctionAgent
         .calledWithExactly(functionDeclaration)
     ).to.be.true
   })
 
-  it('should call setVariables with result from getNameFromPattern and FunctionExpression', () => {
+  it('should call setVariables with variable and functionAgent', () => {
     esprimaParser.FunctionDeclaration(functionDeclaration)
 
     expect(
       esprimaParser.setVariables
-        .calledWithExactly(
-          'resultFromGetNameFromPattern',
-          'resultFromFunctionExpression'
-        )
+        .calledWithExactly(variable, functionAgent)
     ).to.be.true
   })
 })
