@@ -1,7 +1,7 @@
 {
   "name": "js-tracking",
   "version": "2.0.0",
-  "description": "A chrome extension tracking the behavior of javascript manipulating html elements on web",
+  "description": "A chrome extension tracks front-end javascript code which manipulating html dom elements (e.g. style, properties, event) on web page.",
   "main": "index.js",
   "scripts": {
     "test-unit": "node node_modules/istanbul/lib/cli.js cover node_modules/mocha/bin/_mocha test/EsprimaParser-unit.js",
