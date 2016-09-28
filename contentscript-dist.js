@@ -957,7 +957,7 @@ var EsprimaParser = function () {
 
     /* import structures */
     this.Callee = Callee; // main use for execute
-    this.FlowState = FlowState; // @TODO: added new
+    this.FlowState = FlowState;
     this.Collection = Collection;
 
     /* import operators */
@@ -1531,8 +1531,7 @@ var EsprimaParser = function () {
   }, {
     key: 'FunctionDeclaration',
     value: function FunctionDeclaration(functionDeclaration) {
-      // id is Identifier only
-      var variable = this.getNameFromPattern(functionDeclaration.id);
+      var variable = this.getNameFromPattern(functionDeclaration.id); // id is Identifier only
       var functionAgent = this.createFunctionAgent(functionDeclaration);
 
       this.setVariables(variable, functionAgent);
@@ -1663,7 +1662,7 @@ var EsprimaParser = function () {
   }, {
     key: 'VariableDeclarator',
     value: function VariableDeclarator(variableDeclarator) {
-      // @TODO: ObjectPattern / ArrayPattern
+      // @TODO: es6: ObjectPattern / ArrayPattern
       var variables = this.getNameFromPattern(variableDeclarator.id);
       var values = this.getInitValues(variableDeclarator.init);
       // if init is null, and variables is already in current closure,
@@ -1701,7 +1700,8 @@ var EsprimaParser = function () {
 
       arrayExpression.elements.forEach(function (node, index) {
         result.push(_this6.parseNode(node));
-        // delete null node (e.g. [1, , 2] != [1, undefined, 2])
+        // @NOTE: should delete null node
+        // @CASE: [1, , 2] != [1, undefined, 2]
         if (!node) {
           delete result[index];
         }
@@ -1745,11 +1745,11 @@ var EsprimaParser = function () {
   }, {
     key: 'FunctionExpression',
     value: function FunctionExpression(functionExpression) {
-      // @TODO: (function test() {console.log(test) // undefined})
       var functionAgentData = this.parseFunctionExpression(functionExpression);
       var functionAgent = this.wrapFunctionAgentDataWithFunction(functionAgentData);
 
-      // should keep reference to its functionAgentData.closureStack given non-null id
+      // @NOTE: should keep reference to its functionAgentData.closureStack given non-null id
+      // @CASE: (function test() {console.log(test)})(), should not log undefined
       if (functionExpression.id) {
         this.setFunctionExpressionTo(functionAgentData, functionExpression.id, functionAgent);
       }
@@ -1804,7 +1804,8 @@ var EsprimaParser = function () {
   }, {
     key: 'UpdateExpression',
     value: function UpdateExpression(updateExpression) {
-      // '++' != '+=' (e.g. "0"++ -> 1, "0" += 1 -> "01")
+      // @NOTE: '++' != '+='
+      // @CASE: "0"++ -> 1, "0" += 1 -> "01"
       var origin = this.parseNode(updateExpression.argument);
       var update = this.updateOperators[updateExpression.operator](origin);
 
@@ -1832,8 +1833,7 @@ var EsprimaParser = function () {
   }, {
     key: 'AssignmentExpression',
     value: function AssignmentExpression(assignmentExpression) {
-      // {caller, callee}
-      var exp = this.getRefExp(assignmentExpression.left);
+      var exp = this.getRefExp(assignmentExpression.left); // {callee, caller}
       var value = this.getAssignValue(assignmentExpression);
       var operation = this.assignmentOperators['='];
 
@@ -1868,11 +1868,7 @@ var EsprimaParser = function () {
   }, {
     key: 'MemberExpression',
     value: function MemberExpression(memberExpression) {
-      // {caller, callee}
-      var exp = this.getMemberExp(memberExpression);
-
-      // console.log(exp, memberExpression.loc);
-      // console.log(this.escodegen.generate(memberExpression));
+      var exp = this.getMemberExp(memberExpression); // {caller, callee}
 
       return this.parseMemberExp(exp);
     }
@@ -1899,13 +1895,7 @@ var EsprimaParser = function () {
   }, {
     key: 'execute',
     value: function execute(exp) {
-      // try {
       return this.executeExp(exp);
-      // } catch (e) {
-      // console.log(e);
-      // console.log(exp.info);
-      // return undefined
-      // }
     }
   }, {
     key: 'executeExp',
@@ -1975,8 +1965,7 @@ var EsprimaParser = function () {
   }, {
     key: 'CallExpression',
     value: function CallExpression(callExpression) {
-      // {caller, callee}
-      var exp = this.getCallExp(callExpression);
+      var exp = this.getCallExp(callExpression); // {caller, callee}
 
       exp.info = this.getExpInfo(callExpression);
 
@@ -2047,7 +2036,7 @@ var EsprimaParser = function () {
   }, {
     key: 'parseCallExp',
     value: function parseCallExp(exp) {
-      // {caller, callee, info}
+      // exp: {caller, callee, info}
       var success = this.setCheckFlag(exp);
       var result = this.execute(exp);
 
