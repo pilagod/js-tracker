@@ -521,49 +521,11 @@ module.exports = {
 
 var criteria = require('./criteria');
 var callEventChecker = require('../../../helpers/callEventChecker');
-//
-// const filterTarget = ({caller, callee}) => {
-//   switch (callee.method) {
-//     case 'on':
-//     case 'one':
-//     case 'off':
-//       return filterOn({caller, callee})
-//
-//     case 'delegate':
-//     case 'undelegate':
-//       return filterDelegate({caller, callee})
-//
-//     default:
-//       return {}
-//   }
-// }
-//
-// const filterOn = ({caller, callee}) => {
-//   if (typeof callee.arguments[1] === 'string') {
-//     return {
-//       target: caller.find(callee.arguments[1])
-//     }
-//   }
-// }
-//
-// const filterDelegate = ({caller, callee}) => {
-//   if (callee.arguments.length > 1) {
-//     return {
-//       target: caller.find(callee.arguments[0])
-//     }
-//   }
-// }
 
 module.exports = function (_ref) {
   var caller = _ref.caller;
   var callee = _ref.callee;
 
-  // const status = callEventChecker({criteria, callee})
-  //
-  // if (status) {
-  //   return Object.assign({}, status, filterTarget({caller, callee}))
-  // }
-  // return undefined
   return callEventChecker({ criteria: criteria, callee: callee });
 };
 
@@ -901,7 +863,6 @@ module.exports = function (handlers) {
 'use strict';
 
 var createCallDispatcher = require('../createCallDispatcher');
-var workDir = '../../checkers/jQuery/call';
 
 /* browserify can't resolve dynamic path */
 module.exports = createCallDispatcher([require('../../checkers/jQuery/call/event'), require('../../checkers/jQuery/call/eventArgge1'), require('../../checkers/jQuery/call/mani'), require('../../checkers/jQuery/call/maniArg0'), require('../../checkers/jQuery/call/maniArg1'), require('../../checkers/jQuery/call/maniArg2Object'), require('../../checkers/jQuery/call/maniPassive')]);
