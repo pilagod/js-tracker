@@ -1,5 +1,5 @@
 {
-  "name": "js-tracking",
+  "name": "js-tracker",
   "version": "2.0.0",
   "description": "A chrome extension tracks front-end JavaScript (DOM and jQuery apis) which manipulating html dom elements (e.g. property, style, event) on web page.",
   "main": "index.js",
@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/pilagod/js-tracking.git"
+    "url": "git+https://github.com/pilagod/js-tracker.git"
   },
   "keywords": [
     "chrome",
@@ -27,7 +27,7 @@
   ],
   "author": "pilagod <hotony801018@gmail.com>",
   "license": "MIT",
-  "homepage": "https://github.com/pilagod/js-tracking",
+  "homepage": "https://github.com/pilagod/js-tracker",
   "dependencies": {
     "es6-promise": "^3.2.1",
     "escodegen": "^1.8.0",
