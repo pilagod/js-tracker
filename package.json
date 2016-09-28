@@ -1,6 +1,6 @@
 {
   "name": "js-tracking",
-  "version": "0.0.0",
+  "version": "2.0.0",
   "description": "A chrome extension tracking the behavior of javascript manipulating html elements on web",
   "main": "index.js",
   "scripts": {
@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://pilagod@bitbucket.org/pilagod/js-tracking.git"
+    "url": "git+https://github.com/pilagod/js-tracking.git"
   },
   "keywords": [
     "chrome",
@@ -22,9 +22,9 @@
     "javascript",
     "debug"
   ],
-  "author": "pilagod",
-  "license": "ISC",
-  "homepage": "https://bitbucket.org/pilagod/js-tracking#readme",
+  "author": "pilagod <hotony801018@gmail.com>",
+  "license": "MIT",
+  "homepage": "https://github.com/pilagod/js-tracking",
   "dependencies": {
     "es6-promise": "^3.2.1",
     "escodegen": "^1.8.0",
