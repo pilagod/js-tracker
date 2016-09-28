@@ -24,7 +24,7 @@ function main() {
     return response.text();
   }).then(function (htmlString) {
     stubPageFrom(htmlString);
-    setFavicon();
+    stubFavicon();
     trackingScripts();
   });
 }
@@ -69,7 +69,7 @@ function stubPageFrom(htmlString) {
   html.parentNode.replaceChild(stubHtml, html);
 }
 
-function setFavicon() {
+function stubFavicon() {
   var link = document.createElement('link');
 
   link.rel = "shortcut icon";
