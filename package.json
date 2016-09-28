@@ -1,7 +1,7 @@
 {
   "name": "js-tracker",
   "version": "2.0.0",
-  "description": "A chrome extension tracks front-end JavaScript (DOM and jQuery apis) which manipulating html dom elements (e.g. property, style, event) on web page.",
+  "description": "A chrome extension tracks front-end JavaScript (DOM and jQuery APIs) which manipulating html dom elements (e.g. property, style, event) on web page at runtime.",
   "main": "index.js",
   "scripts": {
     "test-unit": "node node_modules/istanbul/lib/cli.js cover node_modules/mocha/bin/_mocha test/EsprimaParser-unit.js",
