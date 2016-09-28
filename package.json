@@ -20,6 +20,9 @@
     "html",
     "css",
     "javascript",
+    "dom",
+    "jquery",
+    "manipulation",
     "debug"
   ],
   "author": "pilagod <hotony801018@gmail.com>",
