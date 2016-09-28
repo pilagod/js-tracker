@@ -2,7 +2,7 @@
   "manifest_version": 2,
 
   "name": "JavaScript Tracker",
-  "description": "A chrome extension tracks front-end JavaScript (DOM and jQuery APIs) which manipulating html dom elements (e.g. property, style, event) on web page at runtime.",
+  "description": "A chrome extension tracks front-end JavaScript which using DOM or jQuery APIs to manipulate html dom elements (e.g., change style, attach event listener) on web page at runtime.",
   "version": "2.0.0",
 
   "icons": {
