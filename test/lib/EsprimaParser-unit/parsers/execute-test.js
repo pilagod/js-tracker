@@ -20,12 +20,4 @@ describe('execute tests', () => {
     ).to.be.true
     expect(result).to.be.equal(resultFromExecuteExp)
   })
-
-  it('should return undefined given error threw from executeExp', () => {
-    esprimaParser.executeExp.throws(new Error())
-
-    const result = esprimaParser.execute(exp)
-
-    expect(result).to.be.undefined
-  })
 })

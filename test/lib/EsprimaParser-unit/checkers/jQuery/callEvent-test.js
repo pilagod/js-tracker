@@ -44,6 +44,9 @@ describe('callEvent checker tests', () => {
     expect(result).to.be.eql(status)
   })
 
+  // @NOTE: these types of event handler is registered to parent, bubbling up from child
+  // $().on / one / off ('click', 'div', function () {})
+  // $().delegate / undelegate ('div', 'click', function () {})
   describe.skip('given valid status', () => {
     const divChildrenOfCaller = 'divChildrenOfCaller'
 
