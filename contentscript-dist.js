@@ -24,7 +24,7 @@ function main() {
     return response.text();
   }).then(function (htmlString) {
     stubPageFrom(htmlString);
-    clearAllTimeouts();
+    setFavicon();
     trackingScripts();
   });
 }
@@ -69,12 +69,14 @@ function stubPageFrom(htmlString) {
   html.parentNode.replaceChild(stubHtml, html);
 }
 
-function clearAllTimeouts() {
-  var id = setTimeout(function () {}, 9999);
+function setFavicon() {
+  var link = document.createElement('link');
 
-  do {
-    clearTimeout(id);
-  } while (id--);
+  link.rel = "shortcut icon";
+  link.type = "image/png";
+  link.href = "http://i.imgur.com/vjgvRtG.png";
+
+  document.getElementsByTagName('head')[0].appendChild(link);
 }
 
 function trackingScripts() {

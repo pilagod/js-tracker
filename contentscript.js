@@ -28,7 +28,7 @@ function main() {
     .then((response) => response.text())
     .then((htmlString) => {
       stubPageFrom(htmlString)
-      clearAllTimeouts()
+      stubFavicon()
       trackingScripts()
     })
 }
@@ -51,12 +51,14 @@ function stubPageFrom(htmlString) {
   html.parentNode.replaceChild(stubHtml, html)
 }
 
-function clearAllTimeouts() {
-  let id = setTimeout(function () {}, 9999)
+function stubFavicon() {
+  const link = document.createElement('link')
 
-  do {
-    clearTimeout(id)
-  } while (id --)
+  link.rel = "shortcut icon"
+  link.type = "image/png"
+  link.href = "http://i.imgur.com/vjgvRtG.png"
+
+  document.getElementsByTagName('head')[0].appendChild(link)
 }
 
 function trackingScripts() {
