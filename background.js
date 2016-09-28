@@ -48,8 +48,21 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 
 // Called when the user clicks on the browser action.
 chrome.browserAction.onClicked.addListener(function () {
-  // No tabs or host permissions needed!
-  chrome.tabs.executeScript({
-    file: 'contentscript-dist.js'
-  });
+  // get current active tab
+  chrome.tabs.query({
+    active: true,
+    currentWindow: true
+  }, function (tabs) {
+    // create a new tab with current active tab url
+    chrome.tabs.create({
+      url: tabs[0].url
+    }, function (tab) {
+      // inject script to new created tab
+      // start tracking javascript
+      chrome.tabs.executeScript(tab.id, {
+        file: 'contentscript-dist.js',
+        runAt: 'document_start'
+      })
+    })
+  })
 });

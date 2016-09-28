@@ -1,6 +1,15 @@
 // @TODO: window event execute twice
 console.log('<==== init tracking ====>')
 
+document.write(`
+  <!DOCTYPE html>
+  <html>
+    <body>
+      <div>Initializing JS-Tracking</div>
+    </body>
+  </html>
+`);
+
 require('es6-promise').polyfill()
 require('isomorphic-fetch')
 
@@ -16,7 +25,7 @@ main()
 
 function main() {
   // re-init page and start tracking scripts
-  fetch(window.location.href)
+  fetch(url)
     .then((response) => response.text())
     .then((htmlString) => {
       stubPageFrom(htmlString)
@@ -89,26 +98,19 @@ function trackingScripts() {
       esprimaParser.parseAst(ast.root, ast.url)
     })
   }).then(() => {
+    triggerDomReady()
     triggerWindowLoad()
     addDevtoolsSelectionChangedListener()
   }).then(() => {
     console.log('<==== start tracking ====>')
   })
 
+  function triggerDomReady() {
+    window.stop()
+  }
+
   function triggerWindowLoad() {
-    const jQuery = window.jQuery || window.$
-    // window.dispatchEvent(new Event('load'))
-    // will trigger original window onload
-    if (jQuery) {
-      // document ready events would occur after all promise finished,
-      // wrap window load trigger with document ready to ensure load called after ready
-      $(document).ready(() => {
-        // $(window).trigger('load')
-        window.dispatchEvent(new Event('load'))
-      })
-    } else {
-      window.dispatchEvent(new Event('load'))
-    }
+    window.dispatchEvent(new Event('load'))
   }
 
   function addDevtoolsSelectionChangedListener() {

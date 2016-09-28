@@ -10,13 +10,13 @@
   },
 
   "background": {
-    "scripts": ["background.js"],
-    "persistent": false
+    "scripts": ["background.js"]
   },
 
   "devtools_page": "devtools.html",
 
   "permissions": [
+    "tabs",
     "activeTab",
     "http://*/",
     "https://*/"

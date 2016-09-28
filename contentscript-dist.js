@@ -1,7 +1,10 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
 
+// @TODO: window event execute twice
 console.log('<==== init tracking ====>');
+
+document.write('\n  <!DOCTYPE html>\n  <html>\n    <body>\n      <div>Initializing JS-Tracking</div>\n    </body>\n  </html>\n');
 
 require('es6-promise').polyfill();
 require('isomorphic-fetch');
@@ -18,7 +21,7 @@ main();
 
 function main() {
   // re-init page and start tracking scripts
-  fetch(window.location.href).then(function (response) {
+  fetch(url).then(function (response) {
     return response.text();
   }).then(function (htmlString) {
     stubPageFrom(htmlString);
@@ -113,26 +116,19 @@ function trackingScripts() {
       esprimaParser.parseAst(ast.root, ast.url);
     });
   }).then(function () {
+    triggerDomReady();
     triggerWindowLoad();
     addDevtoolsSelectionChangedListener();
   }).then(function () {
     console.log('<==== start tracking ====>');
   });
 
+  function triggerDomReady() {
+    window.stop();
+  }
+
   function triggerWindowLoad() {
-    var jQuery = window.jQuery || window.$;
-    // window.dispatchEvent(new Event('load'))
-    // will trigger original window onload
-    if (jQuery) {
-      // document ready events would occur after all promise finished,
-      // wrap window load trigger with document ready to ensure load called after ready
-      $(document).ready(function () {
-        // $(window).trigger('load')
-        window.dispatchEvent(new Event('load'));
-      });
-    } else {
-      window.dispatchEvent(new Event('load'));
-    }
+    window.dispatchEvent(new Event('load'));
   }
 
   function addDevtoolsSelectionChangedListener() {
