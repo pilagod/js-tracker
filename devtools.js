@@ -7,7 +7,7 @@ backgroundConnection.postMessage({
   tabId: chrome.devtools.inspectedWindow.tabId
 });
 
-chrome.devtools.panels.elements.createSidebarPane('JS Tracking', function (sidebar) {
+chrome.devtools.panels.elements.createSidebarPane('JS Tracker', function (sidebar) {
   backgroundConnection.onMessage.addListener(function (message) {
     console.log('message got:', message);
     sidebar.setObject(message);

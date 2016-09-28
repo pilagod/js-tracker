@@ -1,11 +1,10 @@
-// @TODO: window event execute twice
 console.log('<==== init tracking ====>')
 
 document.write(`
   <!DOCTYPE html>
   <html>
     <body>
-      <div>Initializing JS-Tracking</div>
+      <div>Initializing JS Tracker</div>
     </body>
   </html>
 `);

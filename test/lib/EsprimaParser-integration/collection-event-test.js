@@ -197,34 +197,6 @@ describe('EVENT of collection', () => {
           {loc: `[6:10]-[8:12]`, code: '$element.on({ click: clickHandler })'}
         ])
       })
-
-      it.skip('should add code to macthed children given event has selector argument', () => {
-        children = [
-          new HTMLElementStub(),
-          new HTMLElementStub()
-        ]
-        $children = new jQueryStub(children)
-        $element.find = sandbox.stub().returns($children)
-
-        const ast = esprima.parse(`
-          var $element = jQuery('#element');
-          var clickHandler = function () {};
-
-          $element.on('click', 'div', clickHandler);
-        `, {loc: true})
-
-        esprimaParser.parseAst(ast, scriptUrl)
-
-        const clickHandler = closureStack.get('clickHandler')
-
-        expect($element.on.calledWith('click', 'div', clickHandler)).to.be.true
-        expect($element.find.calledWith('div')).to.be.true
-
-        checkCollectionIds(children)
-        checkCollectionDataByElements(children, [
-          {loc: `[5:10]-[5:51]`, code: '$element.on(\'click\', \'div\', clickHandler)'},
-        ])
-      })
     })
 
     describe('event arg > 1 tests', () => {

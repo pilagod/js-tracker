@@ -5,12 +5,19 @@
   "description": "A chrome extension tracks front-end javascript (DOM and jQuery apis) which manipulating html dom elements (e.g. property, style, event) on web page.",
   "version": "2.0.0",
 
+  "icons": {
+    "16": "assets/appicon-16.png",
+    "48": "assets/appicon-48.png",
+    "128": "assets/appicon-128.png"
+  },
+
   "browser_action": {
 
   },
 
   "background": {
-    "scripts": ["background.js"]
+    "scripts": ["background.js"],
+    "persistent": false
   },
 
   "devtools_page": "devtools.html",
