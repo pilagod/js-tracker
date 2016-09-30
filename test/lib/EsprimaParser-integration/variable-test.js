@@ -114,4 +114,17 @@ describe('variable tests', () => {
     expect(esprimaParser.context).to.have.property('result', 1)
     expect(closureStack.get('result')).to.be.equal(1)
   })
+
+  it('should handle hoisting properly', () => {
+    const ast = esprima.parse(`
+      var a = 1;
+      var result = (function () {
+        return a;
+        var a;
+      })()
+    `)
+    esprimaParser.parseAst(ast)
+
+    expect(closureStack.get('result')).to.be.undefined
+  })
 })

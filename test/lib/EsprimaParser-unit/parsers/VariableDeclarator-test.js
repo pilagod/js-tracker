@@ -1,61 +1,42 @@
 // spec: https://github.com/estree/estree/blob/master/spec.md#variabledeclarator
 
 describe('VariableDeclarator tests', () => {
-  const variables = 'variables'
-  const values = 'values'
+  const kind = 'var/let/const'
   let variableDeclarator
 
   beforeEach(() => {
     variableDeclarator = createAstNode('VariableDeclarator', {
-      id: createAstNode('Identifier', {name: 'name'}),
       init: createAstNode('Expression')
     })
-    sandbox.stub(esprimaParser, 'getNameFromPattern')
-      .returns(variables)
-    sandbox.stub(esprimaParser, 'getInitValues')
-      .returns(values)
-    sandbox.stub(esprimaParser, 'isNeededToSet')
-    sandbox.stub(esprimaParser, 'setVariables')
+    sandbox.stub(esprimaParser, 'isVariableNeededToSet')
+    sandbox.stub(esprimaParser, 'parseVariableDeclarator')
   })
 
-  it('should call getNameFromPattern with id', () => {
-    esprimaParser.VariableDeclarator(variableDeclarator)
+  it('should call isVariableNeededToSet with kind and variableDeclarator.init', () => {
+    esprimaParser.VariableDeclarator(variableDeclarator, kind)
 
     expect(
-      esprimaParser.getNameFromPattern
-        .calledWithExactly(variableDeclarator.id)
+      esprimaParser.isVariableNeededToSet
+        .calledWithExactly(kind, variableDeclarator.init)
     ).to.be.true
   })
 
-  it('should call getInitValues with init', () => {
-    esprimaParser.VariableDeclarator(variableDeclarator)
+  it('should call parseVariableDeclarator with variableDeclarator given isVariableNeededToSet returns true', () => {
+    esprimaParser.isVariableNeededToSet.returns(true)
+
+    esprimaParser.VariableDeclarator(variableDeclarator, kind)
 
     expect(
-      esprimaParser.getInitValues
-        .calledWithExactly(variableDeclarator.init)
+      esprimaParser.parseVariableDeclarator
+        .calledWithExactly(variableDeclarator)
     ).to.be.true
   })
 
-  it('should call setVariables with variables and values given isNeededToSet called with variables and init returns true', () => {
-    esprimaParser.isNeededToSet
-      .withArgs(variables, variableDeclarator.init)
-        .returns(true)
+  it('should not call parseVariableDeclarator given isVariableNeededToSet returns false', () => {
+    esprimaParser.isVariableNeededToSet.returns(false)
 
-    esprimaParser.VariableDeclarator(variableDeclarator)
+    esprimaParser.VariableDeclarator(variableDeclarator, kind)
 
-    expect(
-      esprimaParser.setVariables
-        .calledWithExactly(variables, values)
-    ).to.be.true
-  })
-
-  it('should not call setVariables given isNeededToSet called with variables and init returns false', () => {
-    esprimaParser.isNeededToSet
-      .withArgs(variables, variableDeclarator.init)
-        .returns(false)
-
-    esprimaParser.VariableDeclarator(variableDeclarator)
-
-    expect(esprimaParser.setVariables.called).to.be.false
+    expect(esprimaParser.parseVariableDeclarator.called).to.be.false
   })
 })

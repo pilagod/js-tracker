@@ -1,4 +1,4 @@
-describe('parseOtherStatements tests', () => {
+describe('parseNonHoistingStatements tests', () => {
   const setStateStub = (results) => {
     sandbox.stub(esprimaParser, 'flowState', {
       isEitherState: sandbox.spy(
@@ -23,7 +23,7 @@ describe('parseOtherStatements tests', () => {
   it('should call isEitherState of flowState each loop given no flow control statement', () => {
     setStateStub([false, false, false])
 
-    esprimaParser.parseOtherStatements(statements)
+    esprimaParser.parseNonHoistingStatements(statements)
 
     expect(esprimaParser.flowState.isEitherState.calledThrice).to.be.true
   })
@@ -31,7 +31,7 @@ describe('parseOtherStatements tests', () => {
   it('should call parseNode with each body node given no flow control statement, and return last parsed result', () => {
     setStateStub([false, false, false])
 
-    const result = esprimaParser.parseOtherStatements(statements)
+    const result = esprimaParser.parseNonHoistingStatements(statements)
 
     statements.forEach((statement, index) => {
       expect(
@@ -46,7 +46,7 @@ describe('parseOtherStatements tests', () => {
   it('should call isEitherState of flowState until getting first flow control state', () => {
     setStateStub([false, true, false])
 
-    esprimaParser.parseOtherStatements(statements)
+    esprimaParser.parseNonHoistingStatements(statements)
 
     expect(esprimaParser.flowState.isEitherState.calledTwice).to.be.true
   })
@@ -54,7 +54,7 @@ describe('parseOtherStatements tests', () => {
   it('should call parseNode with node until getting first flow control state and return the result', () => {
     setStateStub([false, true, false])
 
-    const result = esprimaParser.parseOtherStatements(statements)
+    const result = esprimaParser.parseNonHoistingStatements(statements)
 
     expect(esprimaParser.parseNode.calledTwice).to.be.true
     expect(

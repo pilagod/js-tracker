@@ -1,5 +1,5 @@
 describe('parseStatements tests', () => {
-  let statements, otherStatements
+  let statements, nonHoistingStatements
 
   before(() => {
     statements = [
@@ -9,31 +9,31 @@ describe('parseStatements tests', () => {
   })
 
   beforeEach(() => {
-    otherStatements = [statements[1]]
+    nonHoistingStatements = [statements[1]]
 
-    sandbox.stub(esprimaParser, 'parseFunctionDeclaration')
-      .returns(otherStatements)
-    sandbox.stub(esprimaParser, 'parseOtherStatements')
-      .returns('resultFromParseOtherStatements')
+    sandbox.stub(esprimaParser, 'parseHoistingStatements')
+      .returns(nonHoistingStatements)
+    sandbox.stub(esprimaParser, 'parseNonHoistingStatements')
+      .returns('resultFromParseNonHoistingStatements')
   })
 
-  it('should call parseFunctionDeclaration with statements', () => {
+  it('should call parseHoistingStatements with statements', () => {
     esprimaParser.parseStatements(statements)
 
     expect(
-      esprimaParser.parseFunctionDeclaration
+      esprimaParser.parseHoistingStatements
         .calledWithExactly(statements)
     ).to.be.true
   })
 
-  it('should call parseOtherStatements with result from parseFunctionDeclaration and return', () => {
+  it('should call parseNonHoistingStatements with result from parseHoistingStatements and return', () => {
     const result = esprimaParser.parseStatements(statements)
 
     expect(
-      esprimaParser.parseOtherStatements
-        .calledWithExactly(otherStatements)
+      esprimaParser.parseNonHoistingStatements
+        .calledWithExactly(nonHoistingStatements)
     ).to.be.true
-    expect(result).to.be.equal('resultFromParseOtherStatements')
+    expect(result).to.be.equal('resultFromParseNonHoistingStatements')
   })
 
 })

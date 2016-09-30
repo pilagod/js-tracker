@@ -5,26 +5,26 @@ describe('VariableDeclaration tests', () => {
 
   beforeEach(() => {
     variableDeclaration = createAstNode('VariableDeclaration', {
+      kind: 'var/let/const',
       declarations: [
         createAstNode('VariableDeclarator1'),
         createAstNode('VariableDeclarator2'),
         createAstNode('VariableDeclarator3')
       ]
     })
-
-    sandbox.stub(esprimaParser, 'parseNode')
+    sandbox.stub(esprimaParser, 'VariableDeclarator')
   })
 
-  it('should call parseNode with nodes in declarations', () => {
+  it('should call VariableDeclarator with each node in declarations and variableDeclaration.kind', () => {
     esprimaParser.VariableDeclaration(variableDeclaration)
 
-    variableDeclaration.declarations.forEach((node, index) => {
+    expect(esprimaParser.VariableDeclarator.calledThrice).to.be.true
+
+    for (const [index, declaration] of variableDeclaration.declarations.entries()) {
       expect(
-        esprimaParser.parseNode
-          .getCall(index)
-          .calledWithExactly(node)
+        esprimaParser.VariableDeclarator.getCall(index)
+          .calledWithExactly(declaration, variableDeclaration.kind)
       ).to.be.true
-    })
-    expect(esprimaParser.parseNode.calledThrice).to.be.true
+    }
   })
 })

@@ -22,7 +22,7 @@ describe('ForInStatement', () => {
       body: createAstNode('Statement')
     })
 
-    sandbox.stub(esprimaParser, 'getIteratorName')
+    sandbox.stub(esprimaParser, 'parseIterator')
       .returns(leftStub)
     sandbox.stub(esprimaParser, 'parseNode')
       .returns(rightStub)
@@ -31,11 +31,11 @@ describe('ForInStatement', () => {
       .returns(parseLoopBodyStub)
   })
 
-  it('should call getIteratorName with left', () => {
+  it('should call parseIterator with left', () => {
     esprimaParser.ForInStatement(forInStatement)
 
     expect(
-      esprimaParser.getIteratorName
+      esprimaParser.parseIterator
         .calledWithExactly(forInStatement.left)
     ).to.be.true
   })

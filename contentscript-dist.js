@@ -1048,14 +1048,14 @@ var EsprimaParser = function () {
   }, {
     key: 'parseStatements',
     value: function parseStatements(statements) {
-      var otherStatements = this.parseFunctionDeclaration(statements);
+      var nonHoistingStatements = this.parseHoistingStatements(statements);
 
-      return this.parseOtherStatements(otherStatements);
+      return this.parseNonHoistingStatements(nonHoistingStatements);
     }
   }, {
-    key: 'parseFunctionDeclaration',
-    value: function parseFunctionDeclaration(statements) {
-      var otherStatements = [];
+    key: 'parseHoistingStatements',
+    value: function parseHoistingStatements(statements) {
+      var nonHoistingStatements = [];
 
       var _iteratorNormalCompletion = true;
       var _didIteratorError = false;
@@ -1065,10 +1065,8 @@ var EsprimaParser = function () {
         for (var _iterator = statements[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
           var statement = _step.value;
 
-          if (statement.type === 'FunctionDeclaration') {
-            this.parseNode(statement);
-          } else {
-            otherStatements.push(statement);
+          if (!this.isHoistingStatement(statement)) {
+            nonHoistingStatements.push(statement);
           }
         }
       } catch (err) {
@@ -1086,20 +1084,121 @@ var EsprimaParser = function () {
         }
       }
 
-      return otherStatements;
+      return nonHoistingStatements;
     }
   }, {
-    key: 'parseOtherStatements',
-    value: function parseOtherStatements(statements) {
-      var result = void 0;
+    key: 'isHoistingStatement',
+    value: function isHoistingStatement(statement) {
+      switch (statement.type) {
+        case 'FunctionDeclaration':
+          this.parseNode(statement);
+          return true;
 
-      var _iteratorNormalCompletion2 = true;
-      var _didIteratorError2 = false;
-      var _iteratorError2 = undefined;
+        case 'VariableDeclaration':
+          // variables hoisting to undefined,
+          // but it should be set value when encounter again
+          // return false to push into nonHoistingStatements
+          this.initVariableDeclaration(statement);
+
+        default:
+          return false;
+      }
+    }
+  }, {
+    key: 'initVariableDeclaration',
+    value: function initVariableDeclaration(variableDeclaration) {
+      if (variableDeclaration.kind === 'var') {
+        var variables = this.getNameFromVariableDeclaration(variableDeclaration);
+
+        var _iteratorNormalCompletion2 = true;
+        var _didIteratorError2 = false;
+        var _iteratorError2 = undefined;
+
+        try {
+          for (var _iterator2 = variables[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+            var variable = _step2.value;
+
+            this.setVariables(variable, undefined);
+          }
+        } catch (err) {
+          _didIteratorError2 = true;
+          _iteratorError2 = err;
+        } finally {
+          try {
+            if (!_iteratorNormalCompletion2 && _iterator2.return) {
+              _iterator2.return();
+            }
+          } finally {
+            if (_didIteratorError2) {
+              throw _iteratorError2;
+            }
+          }
+        }
+      }
+    }
+  }, {
+    key: 'getNameFromVariableDeclaration',
+    value: function getNameFromVariableDeclaration(variableDeclaration) {
+      var variables = [];
+
+      var _iteratorNormalCompletion3 = true;
+      var _didIteratorError3 = false;
+      var _iteratorError3 = undefined;
 
       try {
-        for (var _iterator2 = statements[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-          var statement = _step2.value;
+        for (var _iterator3 = variableDeclaration.declarations[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+          var declaration = _step3.value;
+
+          variables.push(this.getNameFromPattern(declaration.id));
+        }
+      } catch (err) {
+        _didIteratorError3 = true;
+        _iteratorError3 = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion3 && _iterator3.return) {
+            _iterator3.return();
+          }
+        } finally {
+          if (_didIteratorError3) {
+            throw _iteratorError3;
+          }
+        }
+      }
+
+      return variables;
+    }
+  }, {
+    key: 'getNameFromPattern',
+    value: function getNameFromPattern(pattern) {
+      // @TODO: es6: ObjectPattern / ArrayPattern
+      switch (pattern.type) {
+        case 'Identifier':
+          return pattern.name;
+
+        default:
+          return null;
+      }
+    }
+  }, {
+    key: 'setVariables',
+    value: function setVariables(variables, values) {
+      // @TODO: es6: function closure / block closure
+      // @TODO: es6: ObjectPattern / ArrayPattern
+      this.closureStack.set(variables, values);
+    }
+  }, {
+    key: 'parseNonHoistingStatements',
+    value: function parseNonHoistingStatements(statements) {
+      var result = void 0;
+
+      var _iteratorNormalCompletion4 = true;
+      var _didIteratorError4 = false;
+      var _iteratorError4 = undefined;
+
+      try {
+        for (var _iterator4 = statements[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+          var statement = _step4.value;
 
           result = this.parseNode(statement);
 
@@ -1108,16 +1207,16 @@ var EsprimaParser = function () {
           }
         }
       } catch (err) {
-        _didIteratorError2 = true;
-        _iteratorError2 = err;
+        _didIteratorError4 = true;
+        _iteratorError4 = err;
       } finally {
         try {
-          if (!_iteratorNormalCompletion2 && _iterator2.return) {
-            _iterator2.return();
+          if (!_iteratorNormalCompletion4 && _iterator4.return) {
+            _iterator4.return();
           }
         } finally {
-          if (_didIteratorError2) {
-            throw _iteratorError2;
+          if (_didIteratorError4) {
+            throw _iteratorError4;
           }
         }
       }
@@ -1194,16 +1293,16 @@ var EsprimaParser = function () {
     value: function parseSwitchCases(switchCases, discriminant) {
       var result = void 0;
 
-      var _iteratorNormalCompletion3 = true;
-      var _didIteratorError3 = false;
-      var _iteratorError3 = undefined;
+      var _iteratorNormalCompletion5 = true;
+      var _didIteratorError5 = false;
+      var _iteratorError5 = undefined;
 
       try {
-        for (var _iterator3 = switchCases.entries()[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-          var _step3$value = _slicedToArray(_step3.value, 2);
+        for (var _iterator5 = switchCases.entries()[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+          var _step5$value = _slicedToArray(_step5.value, 2);
 
-          var matchedIndex = _step3$value[0];
-          var switchCase = _step3$value[1];
+          var matchedIndex = _step5$value[0];
+          var switchCase = _step5$value[1];
 
           var matched = this.isCaseMatched(switchCase.test, discriminant);
 
@@ -1213,16 +1312,16 @@ var EsprimaParser = function () {
           }
         }
       } catch (err) {
-        _didIteratorError3 = true;
-        _iteratorError3 = err;
+        _didIteratorError5 = true;
+        _iteratorError5 = err;
       } finally {
         try {
-          if (!_iteratorNormalCompletion3 && _iterator3.return) {
-            _iterator3.return();
+          if (!_iteratorNormalCompletion5 && _iterator5.return) {
+            _iterator5.return();
           }
         } finally {
-          if (_didIteratorError3) {
-            throw _iteratorError3;
+          if (_didIteratorError5) {
+            throw _iteratorError5;
           }
         }
       }
@@ -1320,25 +1419,6 @@ var EsprimaParser = function () {
       var variables = this.getNameFromPattern(param);
 
       this.setVariables(variables, error);
-    }
-  }, {
-    key: 'getNameFromPattern',
-    value: function getNameFromPattern(pattern) {
-      // @TODO: es6: ObjectPattern / ArrayPattern
-      switch (pattern.type) {
-        case 'Identifier':
-          return pattern.name;
-
-        default:
-          return null;
-      }
-    }
-  }, {
-    key: 'setVariables',
-    value: function setVariables(variables, values) {
-      // @TODO: es6: function closure / block closure
-      // @TODO: es6: ObjectPattern / ArrayPattern
-      this.closureStack.set(variables, values);
     }
   }, {
     key: 'handleExceptionResult',
@@ -1440,7 +1520,7 @@ var EsprimaParser = function () {
     key: 'ForInStatement',
     value: function ForInStatement(forInStatement) {
       // @TODO: es6: block closure
-      var left = this.getIteratorName(forInStatement.left);
+      var left = this.parseIterator(forInStatement.left);
       var right = this.parseNode(forInStatement.right);
 
       var result = void 0,
@@ -1462,22 +1542,18 @@ var EsprimaParser = function () {
       return result;
     }
   }, {
-    key: 'getIteratorName',
-    value: function getIteratorName(node) {
+    key: 'parseIterator',
+    value: function parseIterator(node) {
       switch (node.type) {
         case 'VariableDeclaration':
-          return this.getNameFromVariableDeclaration(node);
+          // @NOTE: initialize iterator
+          // @CASE: for (var key in object) { ... }
+          this.parseNode(node);
+          return this.getNameFromVariableDeclaration(node)[0];
 
         default:
           return this.getNameFromPattern(node);
       }
-    }
-  }, {
-    key: 'getNameFromVariableDeclaration',
-    value: function getNameFromVariableDeclaration(variableDeclaration) {
-      this.parseNode(variableDeclaration);
-
-      return this.getNameFromPattern(variableDeclaration.declarations[0].id);
     }
   }, {
     key: 'updateVariables',
@@ -1617,31 +1693,32 @@ var EsprimaParser = function () {
 
       // @TODO: var -> function closure
       // @TODO: es6: let, const -> block closure
-      variableDeclaration.declarations.forEach(function (node) {
-        _this5.parseNode(node);
+      var kind = variableDeclaration.kind;
+
+      variableDeclaration.declarations.forEach(function (variableDeclarator) {
+        _this5.VariableDeclarator(variableDeclarator, kind);
       });
     }
   }, {
     key: 'VariableDeclarator',
-    value: function VariableDeclarator(variableDeclarator) {
-      // @TODO: es6: ObjectPattern / ArrayPattern
-      var variables = this.getNameFromPattern(variableDeclarator.id);
-      var values = this.getInitValues(variableDeclarator.init);
-      // if init is null, and variables is already in current closure,
-      // don't set variables
-      if (this.isNeededToSet(variables, variableDeclarator.init)) {
-        this.setVariables(variables, values);
+    value: function VariableDeclarator(variableDeclarator, kind) {
+      if (this.isVariableNeededToSet(kind, variableDeclarator.init)) {
+        this.parseVariableDeclarator(variableDeclarator);
       }
     }
   }, {
-    key: 'getInitValues',
-    value: function getInitValues(init) {
-      return init ? this.parseNode(init) : undefined;
+    key: 'isVariableNeededToSet',
+    value: function isVariableNeededToSet(kind, init) {
+      return !(kind === 'var' && init === null);
     }
   }, {
-    key: 'isNeededToSet',
-    value: function isNeededToSet(variables, init) {
-      return !!init || !this.closureStack.getLatestClosure().exist(variables);
+    key: 'parseVariableDeclarator',
+    value: function parseVariableDeclarator(variableDeclarator) {
+      // @TODO: es6: ObjectPattern / ArrayPattern
+      var variables = this.getNameFromPattern(variableDeclarator.id);
+      var values = this.parseNode(variableDeclarator.init);
+
+      this.setVariables(variables, values);
     }
 
     /*************************/
@@ -1857,7 +1934,13 @@ var EsprimaParser = function () {
   }, {
     key: 'execute',
     value: function execute(exp) {
+      // try {
       return this.executeExp(exp);
+      // } catch (e) {
+      // console.log(e);
+      // console.log(exp);
+      // return undefined
+      // }
     }
   }, {
     key: 'executeExp',

@@ -1,35 +1,37 @@
 describe('getNameFromVariableDeclaration tests', () => {
-  let variableDeclaration
+  let variableDeclaration, declarations
 
   beforeEach(() => {
-    variableDeclaration = createAstNode('VariableDeclaration', {
-      declarations: [
-        createAstNode('VariableDeclarator', {
-          id: createAstNode('Pattern')
-        })
-      ]
-    })
-    sandbox.stub(esprimaParser, 'parseNode')
-    sandbox.stub(esprimaParser, 'getNameFromPattern')
-      .returns('resultFromGetNameFromPattern')
+    declarations = [
+      createAstNode('VariableDeclarator', {id: createAstNode('Pattern1')}),
+      createAstNode('VariableDeclarator', {id: createAstNode('Pattern2')}),
+      createAstNode('VariableDeclarator', {id: createAstNode('Pattern3')}),
+    ]
+    variableDeclaration = createAstNode('VariableDeclaration', {declarations})
+
+    sandbox.stub(esprimaParser, 'getNameFromPattern', createParseNodeStub())
   })
 
-  it('should call parseNode with node', () => {
+  it('should call getNameFromPattern with each declarations', () => {
     esprimaParser.getNameFromVariableDeclaration(variableDeclaration)
 
-    expect(
-      esprimaParser.parseNode
-        .calledWithExactly(variableDeclaration)
-    ).to.be.true
+    expect(esprimaParser.getNameFromPattern.callCount).to.be.equal(declarations.length)
+
+    for (const [index, declaration] of declarations.entries()) {
+      expect(
+        esprimaParser.getNameFromPattern.getCall(index)
+          .calledWithExactly(declaration.id)
+      ).to.be.true
+    }
   })
 
-  it('should call getNameFromPattern with first VariableDeclarator\'s id in declarations and return', () => {
+  it('should return an array concating all results from getNameFromPattern', () => {
     const result = esprimaParser.getNameFromVariableDeclaration(variableDeclaration)
 
-    expect(
-      esprimaParser.getNameFromPattern
-        .calledWithExactly(variableDeclaration.declarations[0].id)
-    ).to.be.true
-    expect(result).to.be.equal('resultFromGetNameFromPattern')
+    expect(result).to.be.eql([
+      'parsedPattern1',
+      'parsedPattern2',
+      'parsedPattern3',
+    ])
   })
 })

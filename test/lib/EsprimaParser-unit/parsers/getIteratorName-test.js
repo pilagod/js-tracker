@@ -1,34 +1,82 @@
-describe('getIteratorName tests', () => {
+describe('parseIterator tests', () => {
   let node
 
-  beforeEach(() => {
-    sandbox.stub(esprimaParser, 'getNameFromVariableDeclaration')
-      .returns('resultFromGetNameFromVariableDeclaration')
-    sandbox.stub(esprimaParser, 'getNameFromPattern')
-      .returns('resultFromGetNameFromPattern')
+  describe('VariableDeclaration', () => {
+    const variables = ['var1', 'var2', 'var3']
+
+    beforeEach(() => {
+      node = createAstNode('VariableDeclaration')
+
+      sandbox.stub(esprimaParser, 'parseNode')
+      sandbox.stub(esprimaParser, 'getNameFromVariableDeclaration').returns(variables)
+    })
+
+    it('should call parseNode with node', () => {
+      esprimaParser.parseIterator(node)
+
+      expect(
+        esprimaParser.parseNode
+          .calledWithExactly(node)
+      ).to.be.true
+    })
+
+    it('should call getNameFromVariableDeclaration with node', () => {
+      esprimaParser.parseIterator(node)
+
+      expect(
+        esprimaParser.getNameFromVariableDeclaration
+          .calledWithExactly(node)
+      ).to.be.true
+    })
+
+    it('should return first element of result from getNameFromVariableDeclaration', () => {
+      const result = esprimaParser.parseIterator(node)
+
+      expect(result).to.be.equal(variables[0])
+    })
   })
 
-  it('should call getNameFromVariableDeclaration with node and return given node type VariableDeclaration', () => {
-    node = createAstNode('VariableDeclaration')
+  describe('Pattern', () => {
+    const variable = 'var'
 
-    const result = esprimaParser.getIteratorName(node)
+    beforeEach(() => {
+      node = createAstNode('Identifier')
 
-    expect(
-      esprimaParser.getNameFromVariableDeclaration
-        .calledWithExactly(node)
-    ).to.be.true
-    expect(result).to.be.equal('resultFromGetNameFromVariableDeclaration')
+      sandbox.stub(esprimaParser, 'getNameFromPattern').returns(variable)
+    })
+
+    it('should call getNameFromPattern with node and return', () => {
+      const result = esprimaParser.parseIterator(node)
+
+      expect(
+        esprimaParser.getNameFromPattern
+          .calledWithExactly(node)
+      ).to.be.true
+      expect(result).to.be.equal(variable)
+    })
   })
-
-  it('should call getNameFromPattern with node and return given node type other than VariableDeclaration', () => {
-    node = createAstNode('Pattern')
-
-    const result = esprimaParser.getIteratorName(node)
-
-    expect(
-      esprimaParser.getNameFromPattern
-        .calledWithExactly(node)
-    ).to.be.true
-    expect(result).to.be.equal('resultFromGetNameFromPattern')
-  })
+  //
+  // it('should call getNameFromVariableDeclaration with node and return given node type VariableDeclaration', () => {
+  //   node = createAstNode('VariableDeclaration')
+  //
+  //   const result = esprimaParser.parseIterator(node)
+  //
+  //   expect(
+  //     esprimaParser.getNameFromVariableDeclaration
+  //       .calledWithExactly(node)
+  //   ).to.be.true
+  //   expect(result).to.be.equal('resultFromGetNameFromVariableDeclaration')
+  // })
+  //
+  // it('should call getNameFromPattern with node and return given node type other than VariableDeclaration', () => {
+  //   node = createAstNode('Pattern')
+  //
+  //   const result = esprimaParser.parseIterator(node)
+  //
+  //   expect(
+  //     esprimaParser.getNameFromPattern
+  //       .calledWithExactly(node)
+  //   ).to.be.true
+  //   expect(result).to.be.equal('resultFromGetNameFromPattern')
+  // })
 })
