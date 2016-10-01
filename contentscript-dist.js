@@ -147,7 +147,7 @@ function trackingScripts() {
   }
 }
 
-},{"./lib/EsprimaParser":51,"./mimetypes":61,"es6-promise":62,"esprima":83,"isomorphic-fetch":84}],2:[function(require,module,exports){
+},{"./lib/EsprimaParser":51,"./mimetypes":62,"es6-promise":63,"esprima":84,"isomorphic-fetch":85}],2:[function(require,module,exports){
 "use strict";
 
 module.exports = {
@@ -905,6 +905,7 @@ var updateOperators = require('./operators/updateOperators');
 var unaryOperators = require('./operators/unaryOperators');
 
 /* for variables init */
+var Flag = require('./structures/Flag');
 var Collection = require('./structures/Collection');
 var FlowState = require('./structures/FlowState');
 var ClosureStack = require('./structures/ClosureStack');
@@ -933,7 +934,9 @@ var EsprimaParser = function () {
     context.this = context;
     this.context = context;
     this.scriptUrl = null;
-    this.checkFlag = false;
+
+    this.checkFlag = false; // track only high level api
+    this.flagHoisting = new Flag(true); // whether check hoisting or not
 
     this.collection = new Collection();
     this.flowState = new FlowState();
@@ -1048,15 +1051,23 @@ var EsprimaParser = function () {
   }, {
     key: 'parseStatements',
     value: function parseStatements(statements) {
+      // this.handleHoisting(statements)
+      // after init hoisting var, var is never a hoisting statement
       var nonHoistingStatements = this.parseHoistingStatements(statements);
 
       return this.parseNonHoistingStatements(nonHoistingStatements);
     }
   }, {
-    key: 'parseHoistingStatements',
-    value: function parseHoistingStatements(statements) {
-      var nonHoistingStatements = [];
-
+    key: 'handleHoisting',
+    value: function handleHoisting(statements) {
+      if (this.flagHoisting.isSet()) {
+        this.searchHoisting(statements);
+        this.flagHoisting.unset();
+      }
+    }
+  }, {
+    key: 'searchHoisting',
+    value: function searchHoisting(statements) {
       var _iteratorNormalCompletion = true;
       var _didIteratorError = false;
       var _iteratorError = undefined;
@@ -1065,8 +1076,8 @@ var EsprimaParser = function () {
         for (var _iterator = statements[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
           var statement = _step.value;
 
-          if (!this.isHoistingStatement(statement)) {
-            nonHoistingStatements.push(statement);
+          if (statement) {
+            this.checkHoisting(statement);
           }
         }
       } catch (err) {
@@ -1083,30 +1094,57 @@ var EsprimaParser = function () {
           }
         }
       }
-
-      return nonHoistingStatements;
     }
   }, {
-    key: 'isHoistingStatement',
-    value: function isHoistingStatement(statement) {
+    key: 'checkHoisting',
+    value: function checkHoisting(statement) {
       switch (statement.type) {
         case 'FunctionDeclaration':
-          this.parseNode(statement);
-          return true;
+          this.initFunctionHoisting(statement);
+          break;
 
         case 'VariableDeclaration':
-          // variables hoisting to undefined,
-          // but it should be set value when encounter again
-          // return false to push into nonHoistingStatements
-          this.initVariableDeclaration(statement);
+          this.initVariableHoisting(statement);
+          break;
 
         default:
-          return false;
+          this.searchSubHoisting(statement);
       }
     }
   }, {
-    key: 'initVariableDeclaration',
-    value: function initVariableDeclaration(variableDeclaration) {
+    key: 'initFunctionHoisting',
+    value: function initFunctionHoisting(functionDeclaration) {
+      var variable = this.getNameFromPattern(functionDeclaration.id);
+
+      this.initHoisting(variable);
+    }
+  }, {
+    key: 'getNameFromPattern',
+    value: function getNameFromPattern(pattern) {
+      // @TODO: es6: ObjectPattern / ArrayPattern
+      switch (pattern.type) {
+        case 'Identifier':
+          return pattern.name;
+
+        default:
+          return null;
+      }
+    }
+  }, {
+    key: 'initHoisting',
+    value: function initHoisting(variables) {
+      this.setVariables(variables, undefined);
+    }
+  }, {
+    key: 'setVariables',
+    value: function setVariables(variables, values) {
+      // @TODO: es6: function closure / block closure
+      // @TODO: es6: ObjectPattern / ArrayPattern
+      this.closureStack.set(variables, values);
+    }
+  }, {
+    key: 'initVariableHoisting',
+    value: function initVariableHoisting(variableDeclaration) {
       if (variableDeclaration.kind === 'var') {
         var variables = this.getNameFromVariableDeclaration(variableDeclaration);
 
@@ -1118,7 +1156,7 @@ var EsprimaParser = function () {
           for (var _iterator2 = variables[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
             var variable = _step2.value;
 
-            this.setVariables(variable, undefined);
+            this.initHoisting(variable);
           }
         } catch (err) {
           _didIteratorError2 = true;
@@ -1169,28 +1207,50 @@ var EsprimaParser = function () {
       return variables;
     }
   }, {
-    key: 'getNameFromPattern',
-    value: function getNameFromPattern(pattern) {
-      // @TODO: es6: ObjectPattern / ArrayPattern
-      switch (pattern.type) {
-        case 'Identifier':
-          return pattern.name;
+    key: 'searchSubHoisting',
+    value: function searchSubHoisting(statement) {
+      var statements = this.filterSubStatements(statement);
+
+      this.searchHoisting(statements);
+    }
+  }, {
+    key: 'filterSubStatements',
+    value: function filterSubStatements(statement) {
+      switch (statement.type) {
+        case 'BlockStatement':
+          return statement.body;
+
+        case 'IfStatement':
+          return [].concat(statement.consequent, statement.alternate);
+
+        case 'SwitchStatement':
+          return statement.cases.reduce(function (pre, cur) {
+            return pre.concat(cur.consequent);
+          }, []);
+
+        case 'TryStatement':
+          var handler = statement.handler ? statement.handler.body : statement.handler;
+
+          return [].concat(statement.block, handler, statement.finalizer);
+
+        case 'ForStatement':
+          return [].concat(statement.init, statement.body);
+
+        case 'ForInStatement':
+          return [].concat(statement.left, statement.body);
+
+        case 'WhileStatement':
+        case 'DoWhileStatement':
+          return [].concat(statement.body);
 
         default:
-          return null;
+          return [];
       }
     }
   }, {
-    key: 'setVariables',
-    value: function setVariables(variables, values) {
-      // @TODO: es6: function closure / block closure
-      // @TODO: es6: ObjectPattern / ArrayPattern
-      this.closureStack.set(variables, values);
-    }
-  }, {
-    key: 'parseNonHoistingStatements',
-    value: function parseNonHoistingStatements(statements) {
-      var result = void 0;
+    key: 'parseHoistingStatements',
+    value: function parseHoistingStatements(statements) {
+      var nonHoistingStatements = [];
 
       var _iteratorNormalCompletion4 = true;
       var _didIteratorError4 = false;
@@ -1200,10 +1260,8 @@ var EsprimaParser = function () {
         for (var _iterator4 = statements[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
           var statement = _step4.value;
 
-          result = this.parseNode(statement);
-
-          if (this.flowState.isEitherState()) {
-            break;
+          if (!this.isHoistingStatement(statement)) {
+            nonHoistingStatements.push(statement);
           }
         }
       } catch (err) {
@@ -1217,6 +1275,51 @@ var EsprimaParser = function () {
         } finally {
           if (_didIteratorError4) {
             throw _iteratorError4;
+          }
+        }
+      }
+
+      return nonHoistingStatements;
+    }
+  }, {
+    key: 'isHoistingStatement',
+    value: function isHoistingStatement(statement) {
+      if (statement.type === 'FunctionDeclaration') {
+        this.parseNode(statement);
+        return true;
+      }
+      return false;
+    }
+  }, {
+    key: 'parseNonHoistingStatements',
+    value: function parseNonHoistingStatements(statements) {
+      var result = void 0;
+
+      var _iteratorNormalCompletion5 = true;
+      var _didIteratorError5 = false;
+      var _iteratorError5 = undefined;
+
+      try {
+        for (var _iterator5 = statements[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+          var statement = _step5.value;
+
+          result = this.parseNode(statement);
+
+          if (this.flowState.isEitherState()) {
+            break;
+          }
+        }
+      } catch (err) {
+        _didIteratorError5 = true;
+        _iteratorError5 = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion5 && _iterator5.return) {
+            _iterator5.return();
+          }
+        } finally {
+          if (_didIteratorError5) {
+            throw _iteratorError5;
           }
         }
       }
@@ -1293,16 +1396,16 @@ var EsprimaParser = function () {
     value: function parseSwitchCases(switchCases, discriminant) {
       var result = void 0;
 
-      var _iteratorNormalCompletion5 = true;
-      var _didIteratorError5 = false;
-      var _iteratorError5 = undefined;
+      var _iteratorNormalCompletion6 = true;
+      var _didIteratorError6 = false;
+      var _iteratorError6 = undefined;
 
       try {
-        for (var _iterator5 = switchCases.entries()[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
-          var _step5$value = _slicedToArray(_step5.value, 2);
+        for (var _iterator6 = switchCases.entries()[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
+          var _step6$value = _slicedToArray(_step6.value, 2);
 
-          var matchedIndex = _step5$value[0];
-          var switchCase = _step5$value[1];
+          var matchedIndex = _step6$value[0];
+          var switchCase = _step6$value[1];
 
           var matched = this.isCaseMatched(switchCase.test, discriminant);
 
@@ -1312,16 +1415,16 @@ var EsprimaParser = function () {
           }
         }
       } catch (err) {
-        _didIteratorError5 = true;
-        _iteratorError5 = err;
+        _didIteratorError6 = true;
+        _iteratorError6 = err;
       } finally {
         try {
-          if (!_iteratorNormalCompletion5 && _iterator5.return) {
-            _iterator5.return();
+          if (!_iteratorNormalCompletion6 && _iterator6.return) {
+            _iterator6.return();
           }
         } finally {
-          if (_didIteratorError5) {
-            throw _iteratorError5;
+          if (_didIteratorError6) {
+            throw _iteratorError6;
           }
         }
       }
@@ -1634,6 +1737,7 @@ var EsprimaParser = function () {
   }, {
     key: 'parseFunctionAgentData',
     value: function parseFunctionAgentData(functionAgentData, builtInArguments, calledArguments) {
+      var result = void 0;
       // environment refers to an object containing scriptUrl and closureStack
       var globalEnvironment = this.getEnvironment(this);
       var functionEnvironment = this.getEnvironment(functionAgentData);
@@ -1643,11 +1747,13 @@ var EsprimaParser = function () {
         keys: functionAgentData.params,
         values: calledArguments
       });
-      var result = void 0;
+      // @NOTE: hoisting is in function scope
+      this.flagHoisting.set();
 
       try {
         result = this.parseNode(functionAgentData.body);
       } finally {
+        // @NOTE: should reset environment when error thrown while parsing function body
         this.setEnvironment(this, globalEnvironment);
       }
       this.flowState.unset(FlowState.RETURN);
@@ -2189,7 +2295,7 @@ var EsprimaParser = function () {
 
 module.exports = EsprimaParser;
 
-},{"./dispatchers/checkerDispatcher":46,"./operators/binaryOperators":52,"./operators/unaryOperators":53,"./operators/updateOperators":54,"./structures/Callee":55,"./structures/ClosureStack":57,"./structures/Collection":58,"./structures/FlowState":60,"escodegen":63}],52:[function(require,module,exports){
+},{"./dispatchers/checkerDispatcher":46,"./operators/binaryOperators":52,"./operators/unaryOperators":53,"./operators/updateOperators":54,"./structures/Callee":55,"./structures/ClosureStack":57,"./structures/Collection":58,"./structures/Flag":60,"./structures/FlowState":61,"escodegen":64}],52:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -2690,6 +2796,42 @@ var Dispatcher = function () {
 module.exports = Dispatcher;
 
 },{}],60:[function(require,module,exports){
+"use strict";
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Flag = function () {
+  function Flag(bool) {
+    _classCallCheck(this, Flag);
+
+    this.data = bool;
+  }
+
+  _createClass(Flag, [{
+    key: "set",
+    value: function set() {
+      this.data = true;
+    }
+  }, {
+    key: "unset",
+    value: function unset() {
+      this.data = false;
+    }
+  }, {
+    key: "isSet",
+    value: function isSet() {
+      return this.data;
+    }
+  }]);
+
+  return Flag;
+}();
+
+module.exports = Flag;
+
+},{}],61:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -2785,7 +2927,7 @@ var FlowState = function () {
 
 module.exports = FlowState;
 
-},{}],61:[function(require,module,exports){
+},{}],62:[function(require,module,exports){
 module.exports={
   "text/javascript": true,
   "text/ecmascript": true,
@@ -2793,7 +2935,7 @@ module.exports={
   "application/ecmascript": true
 }
 
-},{}],62:[function(require,module,exports){
+},{}],63:[function(require,module,exports){
 (function (process,global){
 /*!
  * @overview es6-promise - a tiny implementation of Promises/A+.
@@ -3756,7 +3898,7 @@ module.exports={
 
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"_process":86}],63:[function(require,module,exports){
+},{"_process":87}],64:[function(require,module,exports){
 (function (global){
 /*
   Copyright (C) 2012-2014 Yusuke Suzuki <utatane.tea@gmail.com>
@@ -6359,7 +6501,7 @@ module.exports={
 /* vim: set sw=4 ts=4 et tw=80 : */
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./package.json":82,"estraverse":64,"esutils":68,"source-map":69}],64:[function(require,module,exports){
+},{"./package.json":83,"estraverse":65,"esutils":69,"source-map":70}],65:[function(require,module,exports){
 /*
   Copyright (C) 2012-2013 Yusuke Suzuki <utatane.tea@gmail.com>
   Copyright (C) 2012 Ariya Hidayat <ariya.hidayat@gmail.com>
@@ -7206,7 +7348,7 @@ module.exports={
 }));
 /* vim: set sw=4 ts=4 et tw=80 : */
 
-},{}],65:[function(require,module,exports){
+},{}],66:[function(require,module,exports){
 /*
   Copyright (C) 2013 Yusuke Suzuki <utatane.tea@gmail.com>
 
@@ -7352,7 +7494,7 @@ module.exports={
 }());
 /* vim: set sw=4 ts=4 et tw=80 : */
 
-},{}],66:[function(require,module,exports){
+},{}],67:[function(require,module,exports){
 /*
   Copyright (C) 2013-2014 Yusuke Suzuki <utatane.tea@gmail.com>
   Copyright (C) 2014 Ivan Nikulin <ifaaan@gmail.com>
@@ -7489,7 +7631,7 @@ module.exports={
 }());
 /* vim: set sw=4 ts=4 et tw=80 : */
 
-},{}],67:[function(require,module,exports){
+},{}],68:[function(require,module,exports){
 /*
   Copyright (C) 2013 Yusuke Suzuki <utatane.tea@gmail.com>
 
@@ -7656,7 +7798,7 @@ module.exports={
 }());
 /* vim: set sw=4 ts=4 et tw=80 : */
 
-},{"./code":66}],68:[function(require,module,exports){
+},{"./code":67}],69:[function(require,module,exports){
 /*
   Copyright (C) 2013 Yusuke Suzuki <utatane.tea@gmail.com>
 
@@ -7691,7 +7833,7 @@ module.exports={
 }());
 /* vim: set sw=4 ts=4 et tw=80 : */
 
-},{"./ast":65,"./code":66,"./keyword":67}],69:[function(require,module,exports){
+},{"./ast":66,"./code":67,"./keyword":68}],70:[function(require,module,exports){
 /*
  * Copyright 2009-2011 Mozilla Foundation and contributors
  * Licensed under the New BSD license. See LICENSE.txt or:
@@ -7701,7 +7843,7 @@ exports.SourceMapGenerator = require('./source-map/source-map-generator').Source
 exports.SourceMapConsumer = require('./source-map/source-map-consumer').SourceMapConsumer;
 exports.SourceNode = require('./source-map/source-node').SourceNode;
 
-},{"./source-map/source-map-consumer":77,"./source-map/source-map-generator":78,"./source-map/source-node":79}],70:[function(require,module,exports){
+},{"./source-map/source-map-consumer":78,"./source-map/source-map-generator":79,"./source-map/source-node":80}],71:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -7800,7 +7942,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"./util":80,"amdefine":81}],71:[function(require,module,exports){
+},{"./util":81,"amdefine":82}],72:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -7944,7 +8086,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"./base64":72,"amdefine":81}],72:[function(require,module,exports){
+},{"./base64":73,"amdefine":82}],73:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -7988,7 +8130,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"amdefine":81}],73:[function(require,module,exports){
+},{"amdefine":82}],74:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -8410,7 +8552,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"./array-set":70,"./base64-vlq":71,"./binary-search":74,"./source-map-consumer":77,"./util":80,"amdefine":81}],74:[function(require,module,exports){
+},{"./array-set":71,"./base64-vlq":72,"./binary-search":75,"./source-map-consumer":78,"./util":81,"amdefine":82}],75:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -8492,7 +8634,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"amdefine":81}],75:[function(require,module,exports){
+},{"amdefine":82}],76:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -8797,7 +8939,7 @@ define(function (require, exports, module) {
   exports.IndexedSourceMapConsumer = IndexedSourceMapConsumer;
 });
 
-},{"./basic-source-map-consumer":73,"./binary-search":74,"./source-map-consumer":77,"./util":80,"amdefine":81}],76:[function(require,module,exports){
+},{"./basic-source-map-consumer":74,"./binary-search":75,"./source-map-consumer":78,"./util":81,"amdefine":82}],77:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2014 Mozilla Foundation and contributors
@@ -8885,7 +9027,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"./util":80,"amdefine":81}],77:[function(require,module,exports){
+},{"./util":81,"amdefine":82}],78:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -9109,7 +9251,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"./basic-source-map-consumer":73,"./indexed-source-map-consumer":75,"./util":80,"amdefine":81}],78:[function(require,module,exports){
+},{"./basic-source-map-consumer":74,"./indexed-source-map-consumer":76,"./util":81,"amdefine":82}],79:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -9511,7 +9653,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"./array-set":70,"./base64-vlq":71,"./mapping-list":76,"./util":80,"amdefine":81}],79:[function(require,module,exports){
+},{"./array-set":71,"./base64-vlq":72,"./mapping-list":77,"./util":81,"amdefine":82}],80:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -9927,7 +10069,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"./source-map-generator":78,"./util":80,"amdefine":81}],80:[function(require,module,exports){
+},{"./source-map-generator":79,"./util":81,"amdefine":82}],81:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -10248,7 +10390,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"amdefine":81}],81:[function(require,module,exports){
+},{"amdefine":82}],82:[function(require,module,exports){
 (function (process,__filename){
 /** vim: et:ts=4:sw=4:sts=4
  * @license amdefine 1.0.0 Copyright (c) 2011-2015, The Dojo Foundation All Rights Reserved.
@@ -10553,7 +10695,7 @@ function amdefine(module, requireFn) {
 module.exports = amdefine;
 
 }).call(this,require('_process'),"/node_modules/escodegen/node_modules/source-map/node_modules/amdefine/amdefine.js")
-},{"_process":86,"path":85}],82:[function(require,module,exports){
+},{"_process":87,"path":86}],83:[function(require,module,exports){
 module.exports={
   "name": "escodegen",
   "description": "ECMAScript code generator",
@@ -10640,7 +10782,7 @@ module.exports={
   "_resolved": "http://registry.npm.vmfive.com/escodegen/-/escodegen-1.8.0.tgz"
 }
 
-},{}],83:[function(require,module,exports){
+},{}],84:[function(require,module,exports){
 /*
   Copyright (c) jQuery Foundation, Inc. and Contributors, All Rights Reserved.
 
@@ -16381,7 +16523,7 @@ module.exports={
 }));
 /* vim: set sw=4 ts=4 et tw=80 : */
 
-},{}],84:[function(require,module,exports){
+},{}],85:[function(require,module,exports){
 // the whatwg-fetch polyfill installs the fetch() function
 // on the global object (window or self)
 //
@@ -16389,7 +16531,7 @@ module.exports={
 require('whatwg-fetch');
 module.exports = self.fetch.bind(self);
 
-},{"whatwg-fetch":87}],85:[function(require,module,exports){
+},{"whatwg-fetch":88}],86:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -16617,7 +16759,7 @@ var substr = 'ab'.substr(-1) === 'b'
 ;
 
 }).call(this,require('_process'))
-},{"_process":86}],86:[function(require,module,exports){
+},{"_process":87}],87:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -16799,7 +16941,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],87:[function(require,module,exports){
+},{}],88:[function(require,module,exports){
 (function(self) {
   'use strict';
 

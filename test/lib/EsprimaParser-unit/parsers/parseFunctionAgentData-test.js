@@ -23,9 +23,12 @@ describe('parseFunctionAgentData tests', () => {
       .withArgs(functionAgentData).returns(functionEnvironment)
     sandbox.stub(esprimaParser, 'setEnvironment')
     sandbox.stub(esprimaParser, 'setFunctionClosure')
+    sandbox.stub(esprimaParser, 'flagHoisting', {
+      set: sandbox.spy()
+    })
     sandbox.stub(esprimaParser, 'parseNode')
     sandbox.stub(esprimaParser, 'flowState', {
-      unset: sandbox.stub()
+      unset: sandbox.spy()
     })
   })
 
@@ -74,6 +77,16 @@ describe('parseFunctionAgentData tests', () => {
     expect(
       esprimaParser.setFunctionClosure
         .calledAfter(esprimaParser.setEnvironment.withArgs(esprimaParser, functionEnvironment))
+    ).to.be.true
+  })
+
+  it('should call flagHoisting.set before parseNode', () => {
+    esprimaParser.parseFunctionAgentData(functionAgentData, builtInArguments, calledArguments)
+
+    expect(esprimaParser.flagHoisting.set.called).to.be.true
+    expect(
+      esprimaParser.flagHoisting.set
+        .calledBefore(esprimaParser.parseNode)
     ).to.be.true
   })
 

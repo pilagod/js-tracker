@@ -24,29 +24,6 @@ describe('isHoistingStatement tests', () => {
     })
   })
 
-  describe('VariableDeclaration', () => {
-    beforeEach(() => {
-      statement = createAstNode('VariableDeclaration')
-
-      sandbox.stub(esprimaParser, 'initVariableDeclaration')
-    })
-
-    it('should call initVariableDeclaration with statement', () => {
-      esprimaParser.isHoistingStatement(statement)
-
-      expect(
-        esprimaParser.initVariableDeclaration
-          .calledWithExactly(statement)
-      ).to.be.true
-    })
-
-    it('should return false', () => {
-      const result = esprimaParser.isHoistingStatement(statement)
-
-      expect(result).to.be.false
-    })
-  })
-
   describe('Other Statements', () => {
     beforeEach(() => {
       statement = createAstNode('Statement')

@@ -1,13 +1,12 @@
-describe('initVariableDeclaration tests', () => {
+describe('initVariableHoisting tests', () => {
   const variables = ['var1', 'var2', 'var3']
   let variableDeclaration
 
   beforeEach(() => {
     variableDeclaration = createAstNode('VariableDeclaration')
 
-    sandbox.stub(esprimaParser, 'getNameFromVariableDeclaration')
-      .returns(variables)
-    sandbox.stub(esprimaParser, 'setVariables')
+    sandbox.stub(esprimaParser, 'getNameFromVariableDeclaration').returns(variables)
+    sandbox.stub(esprimaParser, 'initHoisting')
   })
 
   describe('kind of var', () => {
@@ -16,7 +15,7 @@ describe('initVariableDeclaration tests', () => {
     })
 
     it('should call getNameFromVariableDeclaration with variableDeclaration', () => {
-      esprimaParser.initVariableDeclaration(variableDeclaration)
+      esprimaParser.initVariableHoisting(variableDeclaration)
 
       expect(
         esprimaParser.getNameFromVariableDeclaration
@@ -24,15 +23,15 @@ describe('initVariableDeclaration tests', () => {
       ).to.be.true
     })
 
-    it('should call setVariables with each element in result from getNameFromVariableDeclaration and undefined', () => {
-      esprimaParser.initVariableDeclaration(variableDeclaration)
+    it('should call initHoisting with each element in result from getNameFromVariableDeclaration', () => {
+      esprimaParser.initVariableHoisting(variableDeclaration)
 
-      expect(esprimaParser.setVariables.calledThrice).to.be.true
+      expect(esprimaParser.initHoisting.calledThrice).to.be.true
 
       for (const [index, variable] of variables.entries()) {
         expect(
-          esprimaParser.setVariables.getCall(index)
-            .calledWithExactly(variable, undefined)
+          esprimaParser.initHoisting.getCall(index)
+            .calledWithExactly(variable)
         ).to.be.true
       }
     })
@@ -44,10 +43,10 @@ describe('initVariableDeclaration tests', () => {
     })
 
     it('should do nothing', () => {
-      esprimaParser.initVariableDeclaration(variableDeclaration)
+      esprimaParser.initVariableHoisting(variableDeclaration)
 
       expect(esprimaParser.getNameFromVariableDeclaration.called).to.be.false
-      expect(esprimaParser.setVariables.called).to.be.false
+      expect(esprimaParser.initHoisting.called).to.be.false
     })
   })
 })

@@ -81,6 +81,19 @@ describe('constructor tests', () => {
     expect(esprimaParser.assignmentOperators).to.be.equal('resultFromInitAssignmentOperators')
   })
 
+  it('should set flagHoisting to a new instance of Flag initialized with true', () => {
+    const flagHoistingSpy = sandbox.spy()
+    const EsprimaParserStub = proxyquire(libDir, {
+      './structures/Flag': flagHoistingSpy
+    })
+    const esprimaParser = new EsprimaParserStub(context)
+
+    expect(flagHoistingSpy.calledOnce).to.be.true
+    expect(flagHoistingSpy.calledWithNew()).to.be.true
+    expect(flagHoistingSpy.calledWithExactly(true)).to.be.true
+    expect(esprimaParser.flagHoisting).to.be.instanceof(flagHoistingSpy)
+  })
+
   it('should set collection to a new instance of Collection', () => {
     const CollectionSpy = sandbox.spy()
     const EsprimaParserStub = proxyquire(libDir, {
