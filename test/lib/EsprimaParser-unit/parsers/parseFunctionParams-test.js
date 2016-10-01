@@ -1,4 +1,4 @@
-describe('parseFunctionParamsName tests', () => {
+describe('parseFunctionParams tests', () => {
   const params = ['param1', 'param2', 'param3']
 
   beforeEach(() => {
@@ -6,7 +6,7 @@ describe('parseFunctionParamsName tests', () => {
   })
 
   it('should call getNameFromPattern with each given param', () => {
-    esprimaParser.parseFunctionParamsName(params)
+    esprimaParser.parseFunctionParams(params)
 
     for (const [index, param] of params.entries()) {
       expect(
@@ -29,7 +29,7 @@ describe('parseFunctionParamsName tests', () => {
       expectedResult.push(parsedParam)
     }
 
-    const result = esprimaParser.parseFunctionParamsName(params)
+    const result = esprimaParser.parseFunctionParams(params)
 
     expect(result).to.be.eql(expectedResult)
   })
@@ -42,7 +42,7 @@ describe('parseFunctionParamsName tests', () => {
   // })
   //
   // it('should call parseCalledParamNames with given params', () => {
-  //   esprimaParser.parseFunctionParamsName(params)
+  //   esprimaParser.parseFunctionParams(params)
   //
   //   expect(
   //     esprimaParser.parseCalledParamsName
@@ -51,7 +51,7 @@ describe('parseFunctionParamsName tests', () => {
   // })
   //
   // it('should return an Array of paramNames concating \'arguments\' string', () => {
-  //   const result = esprimaParser.parseFunctionParamsName(params)
+  //   const result = esprimaParser.parseFunctionParams(params)
   //
   //   expect(result).to.be.eql(paramsName.concat('arguments'))
   // })

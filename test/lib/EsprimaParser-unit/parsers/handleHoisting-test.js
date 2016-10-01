@@ -1,54 +1,32 @@
 describe('handleHoisting tests', () => {
+  const hoistings = ['var1', 'var2']
   let statements
 
   beforeEach(() => {
     statements = [
       createAstNode('Statement1'),
       createAstNode('Statement2'),
-      createAstNode('Statement3')
+      createAstNode('Statement3'),
     ]
-    sandbox.stub(esprimaParser, 'searchHoisting')
-    sandbox.stub(esprimaParser, 'flagHoisting', {
-      isSet: sandbox.stub(),
-      unset: sandbox.stub()
-    })
+    sandbox.stub(esprimaParser, 'searchHoistings').returns(hoistings)
+    sandbox.stub(esprimaParser, 'setHoistings')
   })
 
-  describe('flagHoisting is set', () => {
-    beforeEach(() => {
-      esprimaParser.flagHoisting.isSet.returns(true)
-    })
+  it('should call searchHoistings with statements', () => {
+    esprimaParser.handleHoisting(statements)
 
-    it('should call searchHoisting with statements', () => {
-      esprimaParser.handleHoisting(statements)
-
-      expect(
-        esprimaParser.searchHoisting
-          .calledWithExactly(statements)
-      ).to.be.true
-    })
-
-    it('should call esprimaParser.flagHoisting.unset after searchHoisting', () => {
-      esprimaParser.handleHoisting(statements)
-
-      expect(esprimaParser.flagHoisting.unset.called).to.be.true
-      expect(
-        esprimaParser.flagHoisting.unset
-          .calledAfter(esprimaParser.searchHoisting)
-      ).to.be.true
-    })
+    expect(
+      esprimaParser.searchHoistings
+        .calledWithExactly(statements)
+    ).to.be.true
   })
 
-  describe('flagHoisting is not set', () => {
-    beforeEach(() => {
-      esprimaParser.flagHoisting.isSet.returns(false)
-    })
+  it('should call setHoistings with result from searchHoistings', () => {
+    esprimaParser.handleHoisting(statements)
 
-    it('should do nothing', () => {
-      esprimaParser.handleHoisting(statements)
-
-      expect(esprimaParser.searchHoisting.called).to.be.false
-      expect(esprimaParser.flagHoisting.unset.called).to.be.false
-    })
+    expect(
+      esprimaParser.setHoistings
+        .calledWithExactly(hoistings)
+    ).to.be.true
   })
 })

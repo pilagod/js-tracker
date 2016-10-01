@@ -10,8 +10,9 @@ describe('parseFunctionExpression tests', () => {
   let functionExpression
 
   beforeEach(() => {
-    functionExpression = createAstNode('FunctionExpression')
-
+    functionExpression = createAstNode('FunctionExpression', {
+      body: createAstNode('BlockStatement')
+    })
     sandbox.stub(esprimaParser, 'getEnvironment').returns(functionEnvironment)
     sandbox.stub(esprimaParser, 'parseFunctionInfo').returns(functionInfo)
   })

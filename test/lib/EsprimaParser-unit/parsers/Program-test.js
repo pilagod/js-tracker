@@ -11,13 +11,26 @@ describe('Program tests', () => {
         createAstNode('Statement3')
       ]
     })
+    sandbox.stub(esprimaParser, 'handleHoisting')
     sandbox.stub(esprimaParser, 'parseStatements')
   })
 
-  it('should call parseStatements with body', () => {
+  it('should call handleHoisting with body', () => {
     esprimaParser.Program(program)
 
-    expect(esprimaParser.parseStatements.calledOnce).to.be.true
+    expect(
+      esprimaParser.handleHoisting
+        .calledWithExactly(program.body)
+    ).to.be.true
+  })
+
+  it('should call parseStatements with body after handleHoisting', () => {
+    esprimaParser.Program(program)
+
+    expect(
+      esprimaParser.parseStatements
+        .calledAfter(esprimaParser.handleHoisting)
+    ).to.be.true
     expect(
       esprimaParser.parseStatements
         .calledWithExactly(program.body)
