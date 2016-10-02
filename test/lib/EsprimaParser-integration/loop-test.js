@@ -20,6 +20,7 @@ describe('loop', () => {
       esprimaParser.parseAst(ast)
 
       expect(closureStack.get('a')).to.be.equal(10)
+      expect(flowState.state).to.be.null
     })
 
     it('should loop until break', () => {
@@ -35,7 +36,7 @@ describe('loop', () => {
       esprimaParser.parseAst(ast)
 
       expect(closureStack.get('a')).to.be.equal(5)
-      expect(flowState.state).to.be.undefined
+      expect(flowState.state).to.be.null
     })
 
     it('should loop until return', () => {
@@ -53,7 +54,7 @@ describe('loop', () => {
       esprimaParser.parseAst(ast)
 
       expect(closureStack.get('a')).to.be.equal(5)
-      expect(flowState.state).to.be.undefined
+      expect(flowState.state).to.be.null
     })
 
     it('should loop next when continue met', () => {
@@ -68,7 +69,7 @@ describe('loop', () => {
       esprimaParser.parseAst(ast)
 
       expect(closureStack.get('a')).to.be.equal(10)
-      expect(flowState.state).to.be.undefined
+      expect(flowState.state).to.be.null
     })
   })
 
@@ -88,6 +89,7 @@ describe('loop', () => {
       esprimaParser.parseAst(ast)
 
       expect(closureStack.get('a')).to.be.equal(11)
+      expect(flowState.state).to.be.null
     })
 
     it('should loop until break', () => {
@@ -103,7 +105,7 @@ describe('loop', () => {
       esprimaParser.parseAst(ast)
 
       expect(closureStack.get('a')).to.be.equal(5)
-      expect(flowState.state).to.be.undefined
+      expect(flowState.state).to.be.null
     })
 
     it('should loop until return', () => {
@@ -121,7 +123,7 @@ describe('loop', () => {
       esprimaParser.parseAst(ast)
 
       expect(closureStack.get('a')).to.be.equal(5)
-      expect(flowState.state).to.be.undefined
+      expect(flowState.state).to.be.null
     })
 
     it('should loop next when continue met', () => {
@@ -136,7 +138,7 @@ describe('loop', () => {
       esprimaParser.parseAst(ast)
 
       expect(closureStack.get('a')).to.be.equal(10)
-      expect(flowState.state).to.be.undefined
+      expect(flowState.state).to.be.null
     })
   })
 
@@ -154,6 +156,7 @@ describe('loop', () => {
       esprimaParser.parseAst(ast)
 
       expect(closureStack.get('a')).to.be.equal(10)
+      expect(flowState.state).to.be.null
     })
 
     it('should loop until break', () => {
@@ -169,7 +172,7 @@ describe('loop', () => {
       esprimaParser.parseAst(ast)
 
       expect(closureStack.get('a')).to.be.equal(5)
-      expect(flowState.state).to.be.undefined
+      expect(flowState.state).to.be.null
     })
 
     it('should loop until return', () => {
@@ -185,7 +188,7 @@ describe('loop', () => {
       esprimaParser.parseAst(ast)
 
       expect(closureStack.get('a')).to.be.equal(5)
-      expect(flowState.state).to.be.undefined
+      expect(flowState.state).to.be.null
     })
 
     it('should loop next when continue met', () => {
@@ -200,7 +203,7 @@ describe('loop', () => {
       esprimaParser.parseAst(ast)
 
       expect(closureStack.get('a')).to.be.equal(10)
-      expect(flowState.state).to.be.undefined
+      expect(flowState.state).to.be.null
     })
   })
 
@@ -227,6 +230,7 @@ describe('loop', () => {
 
       expect(closureStack.get('a')).to.be.equal('abc')
       expect(closureStack.get('b')).to.be.equal(6)
+      expect(flowState.state).to.be.null
     })
 
     it('should loop until break', () => {
@@ -251,6 +255,7 @@ describe('loop', () => {
 
       expect(closureStack.get('a')).to.be.equal('ab')
       expect(closureStack.get('b')).to.be.equal(3)
+      expect(flowState.state).to.be.null
     })
 
     it('should loop until return', () => {
@@ -280,6 +285,7 @@ describe('loop', () => {
 
       expect(closureStack.get('result').a).to.be.equal('ab')
       expect(closureStack.get('result').b).to.be.equal(3)
+      expect(flowState.state).to.be.null
     })
 
     it('should loop next when continue met', () => {
@@ -301,6 +307,7 @@ describe('loop', () => {
 
       expect(closureStack.get('a')).to.be.equal('')
       expect(closureStack.get('b')).to.be.equal(0)
+      expect(flowState.state).to.be.null
     })
   })
 })

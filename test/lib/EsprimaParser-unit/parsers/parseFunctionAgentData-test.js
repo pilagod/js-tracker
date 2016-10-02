@@ -1,4 +1,4 @@
-describe.only('parseFunctionAgentData tests', () => {
+describe('parseFunctionAgentData tests', () => {
   const functionAgentData = {
     body: 'body',
     params: ['param1', 'param2', 'param3'],

@@ -1021,8 +1021,8 @@ var EsprimaParser = function () {
     }
   }, {
     key: 'parseNode',
-    value: function parseNode(node) {
-      return node === null ? undefined : this[node.type](node);
+    value: function parseNode(node, options) {
+      return node ? this[node.type](node, options) : undefined;
     }
   }, {
     key: 'Identifier',
@@ -1114,7 +1114,7 @@ var EsprimaParser = function () {
           return pattern.name;
 
         default:
-          return null;
+          return undefined;
       }
     }
   }, {
@@ -1290,7 +1290,7 @@ var EsprimaParser = function () {
           var statement = _step5.value;
 
           result = this.parseNode(statement);
-
+          // @TODO: need to refined
           if (this.flowState.isEitherState()) {
             break;
           }
@@ -1333,6 +1333,11 @@ var EsprimaParser = function () {
   }, {
     key: 'EmptyStatement',
     value: function EmptyStatement() {}
+
+    /*************************/
+    /*      Control Flow     */
+    /*************************/
+
   }, {
     key: 'ReturnStatement',
     value: function ReturnStatement(returnStatement) {
@@ -1351,15 +1356,38 @@ var EsprimaParser = function () {
       return argument ? this.parseNode(argument) : undefined;
     }
   }, {
+    key: 'LabeledStatement',
+    value: function LabeledStatement(labeledStatement) {
+      var label = this.getNameFromPattern(labeledStatement.label);
+
+      return this.parseNode(labeledStatement.body, { label: label });
+    }
+  }, {
     key: 'BreakStatement',
-    value: function BreakStatement() {
-      this.flowState.set(FlowState.BREAK);
+    value: function BreakStatement(breakStatement) {
+      this.flowState.setBreak();
+      this.setFlowStateLabel(breakStatement.label);
+    }
+  }, {
+    key: 'setFlowStateLabel',
+    value: function setFlowStateLabel(labelNode) {
+      if (labelNode) {
+        var label = this.getNameFromPattern(labelNode);
+
+        this.flowState.setLabel(label);
+      }
     }
   }, {
     key: 'ContinueStatement',
-    value: function ContinueStatement() {
-      this.flowState.set(FlowState.CONTINUE);
+    value: function ContinueStatement(continueStatement) {
+      this.flowState.setContinue();
+      this.setFlowStateLabel(continueStatement.label);
     }
+
+    /*************************/
+    /*        Choice         */
+    /*************************/
+
   }, {
     key: 'IfStatement',
     value: function IfStatement(ifStatement) {
@@ -1528,59 +1556,78 @@ var EsprimaParser = function () {
   }, {
     key: 'WhileStatement',
     value: function WhileStatement(whileStatement) {
-      var result = void 0,
-          state = void 0;
+      var _ref3 = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+      var label = _ref3.label;
+
+      var result = void 0;
 
       while (this.parseNode(whileStatement.test)) {
-        var _parseLoopBody = this.parseLoopBody(whileStatement.body);
+        result = this.parseNode(whileStatement.body);
 
-        result = _parseLoopBody.result;
-        state = _parseLoopBody.state;
-
-
-        if (state === FlowState.BREAK) {
+        if (this.isLoopNeededToBreak(label)) {
           break;
         }
       }
       return result;
     }
   }, {
-    key: 'parseLoopBody',
-    value: function parseLoopBody(body) {
-      var result = this.parseNode(body);
-      var state = this.resetLoopState();
-
-      return { result: result, state: state };
-    }
-  }, {
-    key: 'resetLoopState',
-    value: function resetLoopState() {
-      var state = this.getLoopState();
-
-      this.flowState.unset(state);
-
-      return state;
-    }
-  }, {
-    key: 'getLoopState',
-    value: function getLoopState() {
-      if (this.flowState.isLoopBreakState()) {
-        return FlowState.BREAK;
-      } else if (this.flowState.isLoopContinueState()) {
-        return FlowState.CONTINUE;
+    key: 'isLoopNeededToBreak',
+    value: function isLoopNeededToBreak(label) {
+      if (this.flowState.isReturnState()) {
+        return true;
       }
-      return undefined;
+
+      if (this.flowState.isBreakState()) {
+        return this.handleLoopBreakState(label);
+      }
+
+      if (this.flowState.isContinueState()) {
+        return this.handleLoopContinueState(label);
+      }
+      return false;
+    }
+  }, {
+    key: 'handleLoopBreakState',
+    value: function handleLoopBreakState(label) {
+      if (this.isLoopStateNeededToUnset(label)) {
+        this.flowState.unsetBreak();
+        // label here could only be null or matched
+        // it should only unset matched label,
+        // but unset null label is never mind.
+        this.flowState.unsetLabel();
+      }
+      return true;
+    }
+  }, {
+    key: 'isLoopStateNeededToUnset',
+    value: function isLoopStateNeededToUnset(label) {
+      return this.flowState.isNullLabel() || this.flowState.isLabelMatched(label);
+    }
+  }, {
+    key: 'handleLoopContinueState',
+    value: function handleLoopContinueState(label) {
+      if (this.isLoopStateNeededToUnset(label)) {
+        this.flowState.unsetContinue();
+        // label here could only be null or matched
+        // it should only unset matched label,
+        // but unset null label is never mind.
+        this.flowState.unsetLabel();
+
+        return false;
+      }
+      return true;
     }
   }, {
     key: 'DoWhileStatement',
     value: function DoWhileStatement(doWhileStatement) {
-      var _parseLoopBody2 = this.parseLoopBody(doWhileStatement.body);
+      var _ref4 = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
-      var result = _parseLoopBody2.result;
-      var state = _parseLoopBody2.state;
+      var label = _ref4.label;
 
+      var result = this.parseNode(doWhileStatement.body);
 
-      if (state !== FlowState.BREAK) {
+      if (!this.isLoopNeededToBreak(label)) {
         result = this.WhileStatement(doWhileStatement);
       }
       return result;
@@ -1588,18 +1635,17 @@ var EsprimaParser = function () {
   }, {
     key: 'ForStatement',
     value: function ForStatement(forStatement) {
+      var _ref5 = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+      var label = _ref5.label;
+
       // @TODO: es6: block closure
-      var result = void 0,
-          state = void 0;
+      var result = void 0;
 
       for (this.parseNode(forStatement.init); this.parseNode(forStatement.test); this.parseNode(forStatement.update)) {
-        var _parseLoopBody3 = this.parseLoopBody(forStatement.body);
+        result = this.parseNode(forStatement.body);
 
-        result = _parseLoopBody3.result;
-        state = _parseLoopBody3.state;
-
-
-        if (state === FlowState.BREAK) {
+        if (this.isLoopNeededToBreak(label)) {
           break;
         }
       }
@@ -1608,23 +1654,21 @@ var EsprimaParser = function () {
   }, {
     key: 'ForInStatement',
     value: function ForInStatement(forInStatement) {
+      var _ref6 = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+      var label = _ref6.label;
+
       // @TODO: es6: block closure
       var left = this.parseIterator(forInStatement.left);
       var right = this.parseNode(forInStatement.right);
-
-      var result = void 0,
-          state = void 0;
+      var result = void 0;
 
       for (var key in right) {
         this.updateVariables(left, key);
 
-        var _parseLoopBody4 = this.parseLoopBody(forInStatement.body);
+        result = this.parseNode(forInStatement.body);
 
-        result = _parseLoopBody4.result;
-        state = _parseLoopBody4.state;
-
-
-        if (state === FlowState.BREAK) {
+        if (this.isLoopNeededToBreak(label)) {
           break;
         }
       }
@@ -2035,13 +2079,13 @@ var EsprimaParser = function () {
   }, {
     key: 'execute',
     value: function execute(exp) {
-      // try {
-      return this.executeExp(exp);
-      // } catch (e) {
-      // console.log(e);
-      // console.log(exp);
-      // return undefined
-      // }
+      try {
+        return this.executeExp(exp);
+      } catch (e) {
+        console.log(e);
+        console.log(exp);
+        return undefined;
+      }
     }
   }, {
     key: 'executeExp',
@@ -2050,9 +2094,9 @@ var EsprimaParser = function () {
     }
   }, {
     key: 'executeCall',
-    value: function executeCall(_ref3) {
-      var caller = _ref3.caller;
-      var callee = _ref3.callee;
+    value: function executeCall(_ref7) {
+      var caller = _ref7.caller;
+      var callee = _ref7.callee;
 
       // a function had been bound can not change context by bind, call and apply
       // a function call or apply with non-object context would be ignored
@@ -2062,17 +2106,17 @@ var EsprimaParser = function () {
     }
   }, {
     key: 'getCalledMethod',
-    value: function getCalledMethod(_ref4) {
-      var caller = _ref4.caller;
-      var callee = _ref4.callee;
+    value: function getCalledMethod(_ref8) {
+      var caller = _ref8.caller;
+      var callee = _ref8.callee;
 
       return caller === undefined ? callee.method : caller[callee.method];
     }
   }, {
     key: 'executeMember',
-    value: function executeMember(_ref5) {
-      var caller = _ref5.caller;
-      var callee = _ref5.callee;
+    value: function executeMember(_ref9) {
+      var caller = _ref9.caller;
+      var callee = _ref9.callee;
 
       return caller[callee];
     }
@@ -2841,8 +2885,13 @@ var FlowState = function () {
   function FlowState() {
     _classCallCheck(this, FlowState);
 
-    this.state = undefined;
+    this.state = null;
+    this.label = null;
   }
+
+  /*************************/
+  /*          set          */
+  /*************************/
 
   _createClass(FlowState, [{
     key: 'set',
@@ -2852,12 +2901,52 @@ var FlowState = function () {
       }
     }
   }, {
+    key: 'setReturn',
+    value: function setReturn() {
+      this.set(FlowState.RETURN);
+    }
+  }, {
+    key: 'setBreak',
+    value: function setBreak() {
+      this.set(FlowState.BREAK);
+    }
+  }, {
+    key: 'setContinue',
+    value: function setContinue() {
+      this.set(FlowState.CONTINUE);
+    }
+
+    /*************************/
+    /*         unset         */
+    /*************************/
+
+  }, {
     key: 'unset',
     value: function unset(state) {
       if (state === this.state) {
-        this.state = undefined;
+        this.state = null;
       }
     }
+  }, {
+    key: 'unsetReturn',
+    value: function unsetReturn() {
+      this.unset(FlowState.RETURN);
+    }
+  }, {
+    key: 'unsetBreak',
+    value: function unsetBreak() {
+      this.unset(FlowState.BREAK);
+    }
+  }, {
+    key: 'unsetContinue',
+    value: function unsetContinue() {
+      this.unset(FlowState.CONTINUE);
+    }
+
+    /*************************/
+    /*     state checkers    */
+    /*************************/
+
   }, {
     key: 'isReturnState',
     value: function isReturnState() {
@@ -2886,19 +2975,30 @@ var FlowState = function () {
 
       return this.isReturnState(state) || this.isBreakState(state) || this.isContinueState(state);
     }
-  }, {
-    key: 'isLoopBreakState',
-    value: function isLoopBreakState() {
-      var state = arguments.length <= 0 || arguments[0] === undefined ? this.state : arguments[0];
 
-      return this.isReturnState(state) || this.isBreakState(state);
+    /*************************/
+    /*         label         */
+    /*************************/
+
+  }, {
+    key: 'setLabel',
+    value: function setLabel(label) {
+      this.label = label;
     }
   }, {
-    key: 'isLoopContinueState',
-    value: function isLoopContinueState() {
-      var state = arguments.length <= 0 || arguments[0] === undefined ? this.state : arguments[0];
-
-      return this.isContinueState(state);
+    key: 'unsetLabel',
+    value: function unsetLabel() {
+      this.label = null;
+    }
+  }, {
+    key: 'isNullLabel',
+    value: function isNullLabel() {
+      return this.label === null;
+    }
+  }, {
+    key: 'isLabelMatched',
+    value: function isLabelMatched(label) {
+      return this.isNullLabel() ? false : this.label === label;
     }
   }], [{
     key: 'RETURN',

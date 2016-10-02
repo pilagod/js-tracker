@@ -1,19 +1,16 @@
 // spec: https://github.com/estree/estree/blob/master/spec.md#forinstatement
 
 describe('ForInStatement', () => {
-  const resultStub = 'resultFromParseLoopBody'
-  const parseLoopBodyStub = {}
-  const leftStub = 'leftStub'
-  const rightStub = {
+  const label = 'label'
+  const options = {label}
+  const left = 'left'
+  const rightLength = 3
+  const right = {
     'a': 1,
     'b': 2,
     'c': 3
   }
-  let forInStatement, FlowState
-
-  before(() => {
-    FlowState = require('../../../../lib/EsprimaParser/structures/FlowState')
-  })
+  let forInStatement
 
   beforeEach(() => {
     forInStatement = createAstNode('ForInStatement', {
@@ -21,14 +18,11 @@ describe('ForInStatement', () => {
       right: createAstNode('Expression'),
       body: createAstNode('Statement')
     })
-
-    sandbox.stub(esprimaParser, 'parseIterator')
-      .returns(leftStub)
+    sandbox.stub(esprimaParser, 'parseIterator').returns(left)
     sandbox.stub(esprimaParser, 'parseNode')
-      .returns(rightStub)
+      .withArgs(forInStatement.right).returns(right)
     sandbox.stub(esprimaParser, 'updateVariables')
-    sandbox.stub(esprimaParser, 'parseLoopBody')
-      .returns(parseLoopBodyStub)
+    sandbox.stub(esprimaParser, 'isLoopNeededToBreak')
   })
 
   it('should call parseIterator with left', () => {
@@ -49,54 +43,89 @@ describe('ForInStatement', () => {
     ).to.be.true
   })
 
-  it('should call updateVariables with left name and right key each loop', () => {
+  it('should call updateVariables with left and keys in right each loop', () => {
     esprimaParser.ForInStatement(forInStatement)
 
-    for (const key in rightStub) {
+    for (const key in right) {
       expect(
         esprimaParser.updateVariables
-          .calledWithExactly(leftStub, key)
+          .calledWithExactly(left, key)
       ).to.be.true
     }
     expect(esprimaParser.updateVariables.calledThrice).to.be.true
   })
 
-  it('should call parseLoopBody with body each loop', () => {
+  it('should call parseNode with body each loop after updateVariables', () => {
     esprimaParser.ForInStatement(forInStatement)
 
-    for (let i = 0; i < rightStub.length; i += 1) {
+    expect(
+      esprimaParser.parseNode
+        .withArgs(forInStatement.body).calledThrice
+    ).to.be.true
+
+    for (let i = 0; i < rightLength; i += 1) {
       expect(
-        esprimaParser.parseLoopBody
-          .getCall(i)
-            .calledAfter(esprimaParser.updateVariables.getCall(i))
+        esprimaParser.parseNode
+          .withArgs(forInStatement.body)
+            .getCall(i)
+              .calledAfter(esprimaParser.updateVariables.getCall(i))
       ).to.be.true
     }
+  })
+
+  it('should call isLoopNeededToBreak with options.label each loop given valid options', () => {
+    esprimaParser.ForInStatement(forInStatement, options)
+
     expect(
-      esprimaParser.parseLoopBody
-        .withArgs(forInStatement.body).calledThrice
+      esprimaParser.isLoopNeededToBreak
+        .withArgs(label).calledThrice
     ).to.be.true
   })
 
-  it('should break loop given parseLoopBody return state FlowState.BREAK and return result from parseLoopBody', () => {
-    esprimaParser.parseLoopBody
-      .onCall(1).returns({
-        result: resultStub,
-        state: FlowState.BREAK
-      })
-    const result = esprimaParser.ForInStatement(forInStatement)
+  it('should call isLoopNeededToBreak with undefined given undefined options', () => {
+    esprimaParser.ForInStatement(forInStatement)
 
-    expect(esprimaParser.updateVariables.calledTwice).to.be.true
-    expect(esprimaParser.parseLoopBody.calledTwice).to.be.true
-    expect(result).to.be.equal(resultStub)
+    expect(
+      esprimaParser.isLoopNeededToBreak
+        .withArgs(undefined).calledThrice
+    ).to.be.true
   })
 
-  it('should return last parseLoopBody result given no FlowState.BREAK signal', () => {
-    esprimaParser.parseLoopBody
-      .onCall(2).returns({
-        result: resultStub
-      })
+  it('should break loop if isLoopNeededToBreak returns true', () => {
+    esprimaParser.isLoopNeededToBreak
+      .onCall(1).returns(true)
+
+    esprimaParser.ForInStatement(forInStatement)
+
+    expect(
+      esprimaParser.parseNode
+        .withArgs(forInStatement.body).calledTwice
+    ).to.be.true
+  })
+
+  const setParseNodeResults = () => {
+    for (var index = 0; index < rightLength; index += 1) {
+      esprimaParser.parseNode
+        .withArgs(forInStatement.body)
+          .onCall(index).returns(`resultFromParseNode${index + 1}`)
+    }
+  }
+
+  it('should result from last parseNode called with body given loop never breaks', () => {
+    setParseNodeResults()
+
     const result = esprimaParser.ForInStatement(forInStatement)
 
-    expect(result).to.be.equal(resultStub)
+    expect(result).to.be.equal('resultFromParseNode3')
+  })
+
+  it('should return result from second parseNode called with body given loop breaks at second loop', () => {
+    setParseNodeResults()
+    esprimaParser.isLoopNeededToBreak
+      .onCall(1).returns(true)
+
+    const result = esprimaParser.ForInStatement(forInStatement)
+
+    expect(result).to.be.equal('resultFromParseNode2')
   })
 })

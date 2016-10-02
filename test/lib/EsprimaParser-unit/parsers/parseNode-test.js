@@ -1,4 +1,7 @@
 describe('parseNode tests', () => {
+  const options = {
+    key: 'value'
+  }
   let nodes
 
   beforeEach(() => {
@@ -8,25 +11,36 @@ describe('parseNode tests', () => {
       createAstNode('VariableDeclaration'),
       createAstNode('CallExpression')
     ]
-
-    sandbox.stub(esprimaParser)
+    sandbox.stub(esprimaParser) // stub all parsers
     esprimaParser.parseNode.restore()
   })
 
-  it('should call coresponding node parser according to node type and return', () => {
+  it('should return result from coresponding node parser called with node and undefined given no options', () => {
     for (const node of nodes) {
       esprimaParser.parseNode(node)
 
       expect(
         esprimaParser[node.type]
-          .calledWithExactly(node)
+          .calledWithExactly(node, undefined)
       ).to.be.true
     }
   })
 
-  it('should return from node parser', () => {
+  it('should return result from coresponding node parser called with node and options given valid options', () => {
+    for (const node of nodes) {
+      esprimaParser.parseNode(node, options)
+
+      expect(
+        esprimaParser[node.type]
+          .calledWithExactly(node, options)
+      ).to.be.true
+    }
+  })
+
+  it('should return result from node parser', () => {
     for (const node of nodes) {
       const expected = `parsed${node.type}`
+
       esprimaParser[node.type].returns(expected)
 
       const result = esprimaParser.parseNode(node)

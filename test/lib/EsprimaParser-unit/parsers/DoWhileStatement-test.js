@@ -1,51 +1,64 @@
 // spec: https://github.com/estree/estree/blob/master/spec.md#dowhilestatement
 
 describe('DoWhileStatement tests', () => {
-  const resultStub = 'resultFromParseLoopBody'
-  const parseLoopBodyStub = {}
-
-  let doWhileStatement, FlowState
-
-  before(() => {
-    FlowState = require('../../../../lib/EsprimaParser/structures/FlowState')
-  })
+  const label = 'label'
+  const options = {label}
+  let doWhileStatement
 
   beforeEach(() => {
     doWhileStatement = createAstNode('DoWhileStatement', {
-      test: createAstNode('Expression'),
       body: createAstNode('Statement')
     })
-
-    sandbox.stub(esprimaParser, 'parseLoopBody')
-      .returns(parseLoopBodyStub)
-    sandbox.stub(esprimaParser, 'WhileStatement')
-      .returns('resultFromWhileStatement')
+    sandbox.stub(esprimaParser, 'isLoopNeededToBreak')
+    sandbox.stub(esprimaParser, 'parseNode').returns('resultFromParseNode')
+    sandbox.stub(esprimaParser, 'WhileStatement').returns('resultFromWhileStatement')
   })
 
-  it('should call parseLoopBody with body', () => {
+  it('should call parseNode with body', () => {
     esprimaParser.DoWhileStatement(doWhileStatement)
 
     expect(
-      esprimaParser.parseLoopBody
-        .withArgs(doWhileStatement.body).calledOnce
+      esprimaParser.parseNode
+        .calledWithExactly(doWhileStatement.body)
     ).to.be.true
   })
 
-  it('should not call WhileStatement given parseLoopBody return state FlowState.BREAK and return result from parseLoopBody', () => {
-    esprimaParser.parseLoopBody
-      .returns({
-        result: resultStub,
-        state: FlowState.BREAK
-      })
+  it('should call isLoopNeededToBreak with options.label given valid options', () => {
+    esprimaParser.DoWhileStatement(doWhileStatement, options)
+
+    expect(
+      esprimaParser.isLoopNeededToBreak
+        .calledWithExactly(label)
+    ).to.be.true
+  })
+
+  it('should call isLoopNeededToBreak with undefined given undefined options', () => {
+    esprimaParser.DoWhileStatement(doWhileStatement)
+
+    expect(
+      esprimaParser.isLoopNeededToBreak
+        .calledWithExactly(undefined)
+    ).to.be.true
+  })
+
+  it('should return result from WhileStatement called with doWhileStatement if isLoopNeededToBreak returns false', () => {
+    esprimaParser.isLoopNeededToBreak.returns(false)
+
+    const result = esprimaParser.DoWhileStatement(doWhileStatement)
+
+    expect(
+      esprimaParser.WhileStatement
+        .calledWithExactly(doWhileStatement)
+    ).to.be.true
+    expect(result).to.be.equal('resultFromWhileStatement')
+  })
+
+  it('should return result from parseNode called with doWhileStatement if isLoopNeededToBreak returns true', () => {
+    esprimaParser.isLoopNeededToBreak.returns(true)
+
     const result = esprimaParser.DoWhileStatement(doWhileStatement)
 
     expect(esprimaParser.WhileStatement.called).to.be.false
-    expect(result).to.be.equal(resultStub)
-  })
-
-  it('should return result from WhileStatement given state from parseLoopBody is not FlowState.BREAK', () => {
-    const result = esprimaParser.DoWhileStatement(doWhileStatement)
-
-    expect(result).to.be.equal('resultFromWhileStatement')
+    expect(result).to.be.equal('resultFromParseNode')
   })
 })

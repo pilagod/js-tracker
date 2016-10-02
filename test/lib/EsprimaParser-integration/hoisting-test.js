@@ -1,4 +1,4 @@
-describe.only('hoisting tests', () => {
+describe('hoisting tests', () => {
   let closureStack
 
   beforeEach(() => {

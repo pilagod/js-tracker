@@ -5,17 +5,16 @@ describe('getNameFromPattern tests', () => {
     node = createAstNode('Identifier', {
       name: 'variable'
     })
-
     const result = esprimaParser.getNameFromPattern(node)
 
     expect(result).to.be.equal(node.name)
   })
 
-  it('should return null given unknown node type', () => {
+  it('should return undefined given unknown node type', () => {
     node = createAstNode('UnknownType')
 
     const result = esprimaParser.getNameFromPattern(node)
 
-    expect(result).to.be.null
+    expect(result).to.be.undefined
   })
 })

@@ -9,10 +9,11 @@ describe('FlowState tests', () => {
   })
 
   describe('constructor tests', () => {
-    it('should set property state to undefined', () => {
+    it('should set property state and label to null', () => {
       const flowState = new FlowState()
 
-      expect(flowState.state).to.be.undefined
+      expect(flowState.state).to.be.null
+      expect(flowState.label).to.be.null
     })
   })
 
@@ -43,6 +44,10 @@ describe('FlowState tests', () => {
       flowState = new FlowState()
     })
 
+    /*************************/
+    /*          set          */
+    /*************************/
+
     describe('set tests', () => {
       beforeEach(() => {
         sandbox.stub(flowState, 'isEitherState')
@@ -61,20 +66,69 @@ describe('FlowState tests', () => {
 
         flowState.set('STATE')
 
-        expect(flowState.state).to.be.undefined
+        expect(flowState.state).to.be.null
       })
     })
 
+    describe('setReturn tests', () => {
+      beforeEach(() => {
+        sandbox.stub(flowState, 'set')
+      })
+
+      it('should call set with FlowState.RETURN', () => {
+        flowState.setReturn()
+
+        expect(
+          flowState.set
+            .calledWithExactly(FlowState.RETURN)
+        ).to.be.true
+      })
+    })
+
+    describe('setBreak tests', () => {
+      beforeEach(() => {
+        sandbox.stub(flowState, 'set')
+      })
+
+      it('should call set with FlowState.BREAK', () => {
+        flowState.setBreak()
+
+        expect(
+          flowState.set
+            .calledWithExactly(FlowState.BREAK)
+        ).to.be.true
+      })
+    })
+
+    describe('setContinue tests', () => {
+      beforeEach(() => {
+        sandbox.stub(flowState, 'set')
+      })
+
+      it('should call set with FlowState.CONTINUE', () => {
+        flowState.setContinue()
+
+        expect(
+          flowState.set
+            .calledWithExactly(FlowState.CONTINUE)
+        ).to.be.true
+      })
+    })
+
+    /*************************/
+    /*         unset         */
+    /*************************/
+
     describe('unset tests', () => {
-      it('should set state to undefined given argument state equals to current state', () => {
+      it('should set state to null given argument state equals to current state', () => {
         flowState.state = RETURN
 
         flowState.unset(RETURN)
 
-        expect(flowState.state).to.be.undefined
+        expect(flowState.state).to.be.null
       })
 
-      it('should not set state to undefined given argument state not equal to current state', () => {
+      it('should not set state to null given argument state not equal to current state', () => {
         flowState.state = RETURN
 
         flowState.unset(BREAK)
@@ -83,8 +137,53 @@ describe('FlowState tests', () => {
       })
     })
 
+    describe('unsetReturn tests', () => {
+      beforeEach(() => {
+        sandbox.stub(flowState, 'unset')
+      })
+
+      it('should call unset with FlowState.RETURN', () => {
+        flowState.unsetReturn()
+
+        expect(
+          flowState.unset
+            .calledWithExactly(FlowState.RETURN)
+        ).to.be.true
+      })
+    })
+
+    describe('unsetBreak tests', () => {
+      beforeEach(() => {
+        sandbox.stub(flowState, 'unset')
+      })
+
+      it('should call unset with FlowState.BREAK', () => {
+        flowState.unsetBreak()
+
+        expect(
+          flowState.unset
+            .calledWithExactly(FlowState.BREAK)
+        ).to.be.true
+      })
+    })
+
+    describe('unsetContinue tests', () => {
+      beforeEach(() => {
+        sandbox.stub(flowState, 'unset')
+      })
+
+      it('should call unset with FlowState.CONTINUE', () => {
+        flowState.unsetContinue()
+
+        expect(
+          flowState.unset
+            .calledWithExactly(FlowState.CONTINUE)
+        ).to.be.true
+      })
+    })
+
     /*************************/
-    /*     isReturnState     */
+    /*     state checkers    */
     /*************************/
 
     describe('isReturnState tests', () => {
@@ -134,10 +233,6 @@ describe('FlowState tests', () => {
       })
     })
 
-    /*************************/
-    /*      isBreakState     */
-    /*************************/
-
     describe('isBreakState tests', () => {
       it('should return true if current state is BREAK', () => {
         const results = []
@@ -185,10 +280,6 @@ describe('FlowState tests', () => {
       })
     })
 
-    /*************************/
-    /*    isContinueState    */
-    /*************************/
-
     describe('isContinueState tests', () => {
       it('should return true if current state is CONTINUE', () => {
         const results = []
@@ -235,10 +326,6 @@ describe('FlowState tests', () => {
         expect(results).to.be.eql([false, false])
       })
     })
-
-    /*************************/
-    /*     isEitherState     */
-    /*************************/
 
     describe('isEitherState tests', () => {
       it('should return true if current state is RETURN / BREAK / CONTINUE', () => {
@@ -289,104 +376,71 @@ describe('FlowState tests', () => {
     })
 
     /*************************/
-    /*    isLoopBreakState   */
+    /*         label         */
     /*************************/
 
-    describe('isLoopBreakState tests', () => {
-      it('should return true if current state is RETURN / BREAK', () => {
-        const results = []
+    describe('setLabel tests', () => {
+      it('should set label to given label', () => {
+        const label = 'label'
 
-        // state: RETURN
-        flowState.state = RETURN
-        results.push(flowState.isLoopBreakState())
+        flowState.setLabel(label)
 
-        // state: BREAK
-        flowState.state = BREAK
-        results.push(flowState.isLoopBreakState())
-
-        expect(results).to.be.eql([true, true])
-      })
-
-      it('should return true if argument state is RETURN / BREAK', () => {
-        const results = []
-
-        // state: RETURN
-        results.push(flowState.isLoopBreakState(RETURN))
-
-        // state: BREAK
-        results.push(flowState.isLoopBreakState(BREAK))
-
-        expect(results).to.be.eql([true, true])
-      })
-
-      it('should return false if current state is CONTINUE', () => {
-        const results = []
-
-        // state: CONTINUE
-        flowState.state = CONTINUE
-        results.push(flowState.isLoopBreakState())
-
-        expect(results).to.be.eql([false])
-      })
-
-      it('should return false if argument state is CONTINUE', () => {
-        const results = []
-
-        // state: CONTINUE
-        results.push(flowState.isLoopBreakState(CONTINUE))
-
-        expect(results).to.be.eql([false])
+        expect(flowState.label).to.be.equal(label)
       })
     })
 
-    /*************************/
-    /*  isLoopContinueState  */
-    /*************************/
+    describe('unsetLabel tests', () => {
+      it('should unset label to null', () => {
+        flowState.label = 'label'
 
-    describe('isLoopContinueState tests', () => {
-      it('should return true if current state is CONTINUE', () => {
-        const results = []
+        flowState.unsetLabel()
 
-        // state: CONTINUE
-        flowState.state = CONTINUE
-        results.push(flowState.isLoopContinueState())
+        expect(flowState.label).to.be.null
+      })
+    })
 
-        expect(results).to.be.eql([true])
+    describe('isNullLabel tests', () => {
+      it('should return true if label is null', () => {
+        const result = flowState.isNullLabel()
+
+        expect(result).to.be.true
       })
 
-      it('should return true if argument state is CONTINUE', () => {
-        const results = []
+      it('should return false if label is not null', () => {
+        flowState.label = 'label'
 
-        // state: CONTINUE
-        results.push(flowState.isLoopContinueState(CONTINUE))
+        const result = flowState.isNullLabel()
 
-        expect(results).to.be.eql([true])
+        expect(result).to.be.false
+      })
+    })
+
+    describe('isLabelMatched tests', () => {
+      it('should return false if label is null', () => {
+        const result = flowState.isLabelMatched()
+
+        expect(result).to.be.false
       })
 
-      it('should return false if current state is RETURN / BREAK', () => {
-        const results = []
+      it('should return false if label is not null but label is not equal to argument label', () => {
+        const label = 'label'
+        const stateLabel = 'stateLabel'
 
-        // state: RETURN
-        flowState.state = RETURN
-        results.push(flowState.isLoopContinueState())
+        flowState.label = stateLabel
 
-        // state: BREAK
-        flowState.state = BREAK
-        results.push(flowState.isLoopContinueState())
+        const result = flowState.isLabelMatched(label)
 
-        expect(results).to.be.eql([false, false])
+        expect(result).to.be.false
       })
 
-      it('should return false if argument state is RETURN / BREAK', () => {
-        const results = []
+      it('should return true if label is not null and label is equal to argument label', () => {
+        const label = 'label'
 
-        // state: RETURN
-        results.push(flowState.isLoopContinueState(RETURN))
+        flowState.label = label
 
-        // state: BREAK
-        results.push(flowState.isLoopContinueState(BREAK))
+        const result = flowState.isLabelMatched(label)
 
-        expect(results).to.be.eql([false, false])
+        expect(result).to.be.true
       })
     })
   })

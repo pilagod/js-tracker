@@ -1,33 +1,30 @@
 // spec: https://github.com/estree/estree/blob/master/spec.md#continuestatement
-// @TODO: label
 
 describe('ContinueStatement tests', () => {
-  let continueStatement, FlowState
-
-  before(() => {
-    FlowState = require('../../../../lib/EsprimaParser/structures/FlowState')
-  })
+  let continueStatement
 
   beforeEach(() => {
-    continueStatement = createAstNode('ContinueStatement')
-
+    continueStatement = createAstNode('ContinueStatement', {
+      label: createAstNode('Identifier')
+    })
+    sandbox.stub(esprimaParser, 'setFlowStateLabel')
     sandbox.stub(esprimaParser, 'flowState', {
-      set: sandbox.spy()
+      setContinue: sandbox.spy()
     })
   })
 
-  it('should set flowState to FlowState.CONTINUE', () => {
+  it('should call setFlowStateLabel with label', () => {
     esprimaParser.ContinueStatement(continueStatement)
 
     expect(
-      esprimaParser.flowState.set
-        .calledWithExactly(FlowState.CONTINUE)
+      esprimaParser.setFlowStateLabel
+        .calledWithExactly(continueStatement.label)
     ).to.be.true
   })
 
-  it('should return undefined', () => {
-    const result = esprimaParser.ContinueStatement(continueStatement)
+  it('should call flowState.setContinue', () => {
+    esprimaParser.ContinueStatement(continueStatement)
 
-    expect(result).to.be.undefined
+    expect(esprimaParser.flowState.setContinue.called).to.be.true
   })
 })

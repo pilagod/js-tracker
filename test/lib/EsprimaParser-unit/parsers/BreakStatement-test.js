@@ -1,32 +1,30 @@
 // spec: https://github.com/estree/estree/blob/master/spec.md#breakstatement
-// @TODO: label
-describe('BreakStatement tests', () => {
-  let breakStatement, FlowState
 
-  before(() => {
-    FlowState = require('../../../../lib/EsprimaParser/structures/FlowState')
-  })
+describe('BreakStatement tests', () => {
+  let breakStatement
 
   beforeEach(() => {
-    breakStatement = createAstNode('BreakStatement')
-
+    breakStatement = createAstNode('BreakStatement', {
+      label: createAstNode('Identifier')
+    })
+    sandbox.stub(esprimaParser, 'setFlowStateLabel')
     sandbox.stub(esprimaParser, 'flowState', {
-      set: sandbox.spy()
+      setBreak: sandbox.spy()
     })
   })
 
-  it('should set flowState to FlowState.BREAK', () => {
+  it('should call setFlowStateLabel with label', () => {
     esprimaParser.BreakStatement(breakStatement)
 
     expect(
-      esprimaParser.flowState.set
-        .calledWithExactly(FlowState.BREAK)
+      esprimaParser.setFlowStateLabel
+        .calledWithExactly(breakStatement.label)
     ).to.be.true
   })
 
-  it('should return undefined', () => {
-    const result = esprimaParser.BreakStatement(breakStatement)
+  it('should call flowState.setBreak', () => {
+    esprimaParser.BreakStatement(breakStatement)
 
-    expect(result).to.be.undefined
+    expect(esprimaParser.flowState.setBreak.called).to.be.true
   })
 })

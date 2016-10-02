@@ -7,7 +7,7 @@ describe('parseStatements tests', () => {
       createAstNode('Statement2'),
     ]
   })
-｀
+
   beforeEach(() => {
     nonHoistingStatements = [statements[1]]
 
@@ -35,5 +35,4 @@ describe('parseStatements tests', () => {
     ).to.be.true
     expect(result).to.be.equal('resultFromParseNonHoistingStatements')
   })
-
 })

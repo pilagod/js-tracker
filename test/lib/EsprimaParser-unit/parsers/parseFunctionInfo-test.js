@@ -26,7 +26,7 @@ describe('parseFunctionInfo tests', () => {
 
     expect(
       esprimaParser.searchHoistings
-        .calledWithExactly(functionExpression.body)
+        .calledWithExactly([functionExpression.body])
     ).to.be.true
   })
 
