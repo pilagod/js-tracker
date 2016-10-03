@@ -1,4 +1,4 @@
-describe('wrapFunctionAgentDataWithFunction tests', () => {
+describe('wrapWithFunction tests', () => {
   const functionAgentData = {}
   const calledArguments = [1, 2, 3, 4]
   const builtInArguments = {
@@ -20,14 +20,14 @@ describe('wrapFunctionAgentDataWithFunction tests', () => {
 
   it('should return a function', () => {
     const wrappedFunctionAgent =
-      esprimaParser.wrapFunctionAgentDataWithFunction(functionAgentData)
+      esprimaParser.wrapWithFunction(functionAgentData)
 
     expect(wrappedFunctionAgent).to.be.instanceof(Function)
   })
 
   it('should return a function call parseFunctionAgentData with functionAgentData, builtInArguments and calledArguments and return (basic call test)', () => {
     const wrappedFunctionAgent =
-      esprimaParser.wrapFunctionAgentDataWithFunction(functionAgentData)
+      esprimaParser.wrapWithFunction(functionAgentData)
 
     builtInArguments.this = undefined
 
@@ -43,7 +43,7 @@ describe('wrapFunctionAgentDataWithFunction tests', () => {
   it('should return a function call parseFunctionAgentData with functionAgentData, builtInArguments and calledArguments and return (bind test)', () => {
     const contextStub = {}
     const wrappedFunctionAgent =
-      esprimaParser.wrapFunctionAgentDataWithFunction(functionAgentData)
+      esprimaParser.wrapWithFunction(functionAgentData)
 
     builtInArguments.this = contextStub
 
@@ -59,7 +59,7 @@ describe('wrapFunctionAgentDataWithFunction tests', () => {
   it('should return a function call parseFunctionAgentData with functionAgentData, builtInArguments and calledArguments and return (call test)', () => {
     const contextStub = {}
     const wrappedFunctionAgent =
-      esprimaParser.wrapFunctionAgentDataWithFunction(functionAgentData)
+      esprimaParser.wrapWithFunction(functionAgentData)
 
     builtInArguments.this = contextStub
 
@@ -75,7 +75,7 @@ describe('wrapFunctionAgentDataWithFunction tests', () => {
   it('should return a function call parseFunctionAgentData with functionAgentData, builtInArguments and calledArguments and return (apply test)', () => {
     const contextStub = {}
     const wrappedFunctionAgent =
-      esprimaParser.wrapFunctionAgentDataWithFunction(functionAgentData)
+      esprimaParser.wrapWithFunction(functionAgentData)
 
     builtInArguments.this = contextStub
 

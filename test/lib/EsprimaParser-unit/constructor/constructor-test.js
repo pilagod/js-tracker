@@ -25,6 +25,7 @@ describe('constructor tests', () => {
   it('should set static imported modules properly', () => {
     /* import libs */
     const escodegen = require('escodegen')
+    const arity = require('util-arity')
     /* import structures */
     const Callee = require(libDir + '/structures/Callee')
     const Collection = require(libDir + '/structures/Collection')
@@ -38,6 +39,7 @@ describe('constructor tests', () => {
     const esprimaParser = new EsprimaParser(context)
 
     expect(esprimaParser.escodegen).to.be.equal(escodegen)
+    expect(esprimaParser.arity).to.be.equal(arity)
     expect(esprimaParser.Callee).to.be.equal(Callee)
     expect(esprimaParser.Collection).to.be.equal(Collection)
     expect(esprimaParser.binaryOperators).to.be.equal(binaryOperators)

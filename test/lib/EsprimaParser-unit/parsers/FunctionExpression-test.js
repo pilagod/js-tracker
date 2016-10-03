@@ -14,7 +14,7 @@ describe('FunctionExpression tests', () => {
     functionExpression = createAstNode('FunctionExpression')
 
     sandbox.stub(esprimaParser, 'parseFunctionExpression').returns(functionAgentData)
-    sandbox.stub(esprimaParser, 'wrapFunctionAgentDataWithFunction')
+    sandbox.stub(esprimaParser, 'wrapWithFunction')
       .returns(functionAgent)
     sandbox.stub(esprimaParser, 'setFunctionExpressionTo')
   })
@@ -28,11 +28,11 @@ describe('FunctionExpression tests', () => {
     ).to.be.true
   })
 
-  it('should call wrapFunctionAgentDataWithFunction with functionAgentData and return', () => {
+  it('should call wrapWithFunction with functionAgentData and return', () => {
     esprimaParser.FunctionExpression(functionExpression)
 
     expect(
-      esprimaParser.wrapFunctionAgentDataWithFunction
+      esprimaParser.wrapWithFunction
         .calledWithExactly(functionAgentData)
     ).to.be.true
   })
@@ -54,7 +54,7 @@ describe('FunctionExpression tests', () => {
     expect(esprimaParser.setFunctionExpressionTo.called).to.be.false
   })
 
-  it('should return result from wrapFunctionAgentDataWithFunction', () => {
+  it('should return result from wrapWithFunction', () => {
     const result = esprimaParser.FunctionExpression(functionExpression)
 
     expect(result).to.be.equal(functionAgent)
