@@ -59,4 +59,39 @@ describe('label tests', () => {
       {i: 1, j: 0},
     ])
   })
+
+  it('should handle label for block', () => {
+    const ast = esprima.parse(`
+      var result;
+
+      block: {
+        for (var i = 0; i < 10; i += 1) {
+          result = i;
+
+          if (i === 2) {
+            break block;
+          }
+        }
+      }
+    `)
+    esprimaParser.parseAst(ast)
+
+    expect(closureStack.get('result')).to.be.equal(2)
+  })
+
+  it('should handle label for if', () => {
+    const ast = esprima.parse(`
+      var result;
+
+      block:
+      if (true) {
+        result = 1;
+        break block;
+        result = 2;
+      }
+    `)
+    esprimaParser.parseAst(ast)
+
+    expect(closureStack.get('result')).to.be.equal(1)
+  })
 })

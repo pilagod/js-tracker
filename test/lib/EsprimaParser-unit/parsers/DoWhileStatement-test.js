@@ -15,7 +15,7 @@ describe('DoWhileStatement tests', () => {
   })
 
   it('should call parseNode with body', () => {
-    esprimaParser.DoWhileStatement(doWhileStatement)
+    esprimaParser.DoWhileStatement(doWhileStatement, options)
 
     expect(
       esprimaParser.parseNode
@@ -23,7 +23,7 @@ describe('DoWhileStatement tests', () => {
     ).to.be.true
   })
 
-  it('should call isLoopNeededToBreak with options.label given valid options', () => {
+  it('should call isLoopNeededToBreak with options.label', () => {
     esprimaParser.DoWhileStatement(doWhileStatement, options)
 
     expect(
@@ -32,19 +32,10 @@ describe('DoWhileStatement tests', () => {
     ).to.be.true
   })
 
-  it('should call isLoopNeededToBreak with undefined given undefined options', () => {
-    esprimaParser.DoWhileStatement(doWhileStatement)
-
-    expect(
-      esprimaParser.isLoopNeededToBreak
-        .calledWithExactly(undefined)
-    ).to.be.true
-  })
-
   it('should return result from WhileStatement called with doWhileStatement if isLoopNeededToBreak returns false', () => {
     esprimaParser.isLoopNeededToBreak.returns(false)
 
-    const result = esprimaParser.DoWhileStatement(doWhileStatement)
+    const result = esprimaParser.DoWhileStatement(doWhileStatement, options)
 
     expect(
       esprimaParser.WhileStatement
@@ -56,7 +47,7 @@ describe('DoWhileStatement tests', () => {
   it('should return result from parseNode called with doWhileStatement if isLoopNeededToBreak returns true', () => {
     esprimaParser.isLoopNeededToBreak.returns(true)
 
-    const result = esprimaParser.DoWhileStatement(doWhileStatement)
+    const result = esprimaParser.DoWhileStatement(doWhileStatement, options)
 
     expect(esprimaParser.WhileStatement.called).to.be.false
     expect(result).to.be.equal('resultFromParseNode')

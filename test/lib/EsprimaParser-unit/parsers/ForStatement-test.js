@@ -29,7 +29,7 @@ describe('ForStatement tests', () => {
   })
 
   it('should call parseNode with init only once', () => {
-    esprimaParser.ForStatement(forStatement)
+    esprimaParser.ForStatement(forStatement, options)
 
     expect(
       esprimaParser.parseNode
@@ -38,7 +38,7 @@ describe('ForStatement tests', () => {
   })
 
   it('should call parseNode with test each loop', () => {
-    esprimaParser.ForStatement(forStatement)
+    esprimaParser.ForStatement(forStatement, options)
 
     expect(
       esprimaParser.parseNode
@@ -47,7 +47,7 @@ describe('ForStatement tests', () => {
   })
 
   it('should call parseNode with update each loop', () => {
-    esprimaParser.ForStatement(forStatement)
+    esprimaParser.ForStatement(forStatement, options)
 
     expect(
       esprimaParser.parseNode
@@ -56,7 +56,7 @@ describe('ForStatement tests', () => {
   })
 
   it('should call parseNode with body each loop', () => {
-    esprimaParser.ForStatement(forStatement)
+    esprimaParser.ForStatement(forStatement, options)
 
     expect(
       esprimaParser.parseNode
@@ -64,7 +64,7 @@ describe('ForStatement tests', () => {
     ).to.be.true
   })
 
-  it('should call isLoopNeededToBreak with options.label each loop given valid options', () => {
+  it('should call isLoopNeededToBreak with options.label each loop', () => {
     esprimaParser.ForStatement(forStatement, options)
 
     expect(
@@ -73,20 +73,11 @@ describe('ForStatement tests', () => {
     ).to.be.true
   })
 
-  it('should call isLoopNeededToBreak with undefined each loop given undefined options', () => {
-    esprimaParser.ForStatement(forStatement)
-
-    expect(
-      esprimaParser.isLoopNeededToBreak
-        .withArgs(undefined).calledThrice
-    ).to.be.true
-  })
-
   it('should break loop if isLoopNeededToBreak returns true', () => {
     esprimaParser.isLoopNeededToBreak
       .onCall(1).returns(true)
 
-    esprimaParser.ForStatement(forStatement)
+    esprimaParser.ForStatement(forStatement, options)
 
     expect(
       esprimaParser.parseNode
@@ -97,7 +88,7 @@ describe('ForStatement tests', () => {
   it('should break loop if test fails', () => {
     setTestResults([true, true, false])
 
-    esprimaParser.ForStatement(forStatement)
+    esprimaParser.ForStatement(forStatement, options)
 
     expect(
       esprimaParser.parseNode
@@ -116,7 +107,7 @@ describe('ForStatement tests', () => {
   it('should return result from last parseNode called with body given loop never breaks', () => {
     setParseNodeResults()
 
-    const result = esprimaParser.ForStatement(forStatement)
+    const result = esprimaParser.ForStatement(forStatement, options)
 
     expect(result).to.be.equal('resultFromParseNode3')
   })
@@ -126,7 +117,7 @@ describe('ForStatement tests', () => {
     esprimaParser.isLoopNeededToBreak
       .onCall(1).returns(true)
 
-    const result = esprimaParser.ForStatement(forStatement)
+    const result = esprimaParser.ForStatement(forStatement, options)
 
     expect(result).to.be.equal('resultFromParseNode2')
   })

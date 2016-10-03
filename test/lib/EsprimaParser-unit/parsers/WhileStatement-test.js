@@ -28,7 +28,7 @@ describe('WhileStatement tests', () => {
 
   it('should call parseNode with test each loop', () => {
     // test will call more one time
-    esprimaParser.WhileStatement(whileStatement)
+    esprimaParser.WhileStatement(whileStatement, options)
 
     expect(
       esprimaParser.parseNode
@@ -37,7 +37,7 @@ describe('WhileStatement tests', () => {
   })
 
   it('should call parseNode with body each loop', () => {
-    esprimaParser.WhileStatement(whileStatement)
+    esprimaParser.WhileStatement(whileStatement, options)
 
     expect(
       esprimaParser.parseNode
@@ -45,7 +45,7 @@ describe('WhileStatement tests', () => {
     ).to.be.true
   })
 
-  it('should call isLoopNeededToBreak with options.label each loop given valid options', () => {
+  it('should call isLoopNeededToBreak with options.label each loop', () => {
     esprimaParser.WhileStatement(whileStatement, options)
 
     expect(
@@ -54,20 +54,11 @@ describe('WhileStatement tests', () => {
     ).to.be.true
   })
 
-  it('should call isLoopNeededToBreak with undefined each loop given undefined options', () => {
-    esprimaParser.WhileStatement(whileStatement)
-
-    expect(
-      esprimaParser.isLoopNeededToBreak
-        .withArgs(undefined).calledThrice
-    ).to.be.true
-  })
-
   it('should break loop if isLoopNeededToBreak returns true', () => {
     esprimaParser.isLoopNeededToBreak
       .onCall(1).returns(true)
 
-    esprimaParser.WhileStatement(whileStatement)
+    esprimaParser.WhileStatement(whileStatement, options)
 
     expect(
       esprimaParser.parseNode
@@ -78,7 +69,7 @@ describe('WhileStatement tests', () => {
   it('should break loop if test fails', () => {
     setTestResults([true, true, false])
 
-    esprimaParser.WhileStatement(whileStatement)
+    esprimaParser.WhileStatement(whileStatement, options)
 
     expect(
       esprimaParser.parseNode
@@ -94,11 +85,11 @@ describe('WhileStatement tests', () => {
           .onCall(index).returns(`resultFromParseNode${index + 1}`)
     }
   }
-  
+
   it('should return result from last parseNode called with body given loop never breaks', () => {
     setParseNodeResults()
 
-    const result = esprimaParser.WhileStatement(whileStatement)
+    const result = esprimaParser.WhileStatement(whileStatement, options)
 
     expect(result).to.be.equal('resultFromParseNode3')
   })
@@ -108,7 +99,7 @@ describe('WhileStatement tests', () => {
     esprimaParser.isLoopNeededToBreak
       .onCall(1).returns(true)
 
-    const result = esprimaParser.WhileStatement(whileStatement)
+    const result = esprimaParser.WhileStatement(whileStatement, options)
 
     expect(result).to.be.equal('resultFromParseNode2')
   })

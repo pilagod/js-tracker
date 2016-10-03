@@ -1024,8 +1024,33 @@ var EsprimaParser = function () {
     }
   }, {
     key: 'parseNode',
-    value: function parseNode(node, options) {
-      return node ? this[node.type](node, options) : undefined;
+    value: function parseNode(node) {
+      var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+      var result = void 0;
+
+      if (node) {
+        result = this[node.type](node, options);
+        this.handleStatementLabelState(options.label);
+      }
+      return result;
+    }
+  }, {
+    key: 'handleStatementLabelState',
+    value: function handleStatementLabelState(label) {
+      if (this.isStatementLabelNeededToUnset(label)) {
+        // @NOTE:
+        // continue state only exists in loop, and loop statements already handle it
+        // return state only reset when function return, thus return should never unset here
+        this.flowState.unsetBreak();
+        this.flowState.unsetLabel();
+      }
+    }
+  }, {
+    key: 'isStatementLabelNeededToUnset',
+    value: function isStatementLabelNeededToUnset(label) {
+      // most of the time, flowState.label is null
+      return !this.flowState.isNullLabel() && this.flowState.isLabelMatched(label);
     }
   }, {
     key: 'Identifier',
@@ -1328,9 +1353,11 @@ var EsprimaParser = function () {
   }, {
     key: 'BlockStatement',
     value: function BlockStatement(blockStatement) {
+      // @TODO: add options
       // @TODO: es6: create and push new block scope to closureStack
       var result = this.parseStatements(blockStatement.body);
       // @TODO: es6: pop block scope from closureStack
+      // @TODO: should unset break here only if has label
       return result;
     }
   }, {
