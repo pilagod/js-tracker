@@ -64,7 +64,7 @@ describe('function', () => {
     })
   })
 
-  describe('priority tests', () => {
+  describe('hoisting tests', () => {
     it('should add function declarations first', () => {
       const ast = esprima.parse(`
         var result = test();
@@ -82,6 +82,19 @@ describe('function', () => {
       esprimaParser.parseAst(ast)
 
       expect(closureStack.get('result')).to.be.equal('resultFromTest2')
+    })
+  })
+
+  describe('arity tests', () => {
+    it('should have proper function length', () => {
+      const ast = esprima.parse(`
+        function test(a, b, c) {}
+
+        var result = test.length
+      `)
+      esprimaParser.parseAst(ast)
+
+      expect(closureStack.get('result')).to.be.equal(3)
     })
   })
 

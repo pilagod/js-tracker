@@ -895,6 +895,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 /* import libs */
 var escodegen = require('escodegen');
+var arity = require('util-arity');
 
 /* import structures */
 var Callee = require('./structures/Callee');
@@ -917,9 +918,11 @@ var EsprimaParser = function () {
 
     /* import libs */
     this.escodegen = escodegen;
+    // @TODO: added arity
+    this.arity = arity;
 
     /* import structures */
-    this.Callee = Callee; // main use for execute
+    this.Callee = Callee;
     this.FlowState = FlowState;
     this.Collection = Collection;
 
@@ -1711,8 +1714,10 @@ var EsprimaParser = function () {
     key: 'createFunctionAgent',
     value: function createFunctionAgent(functionExpression) {
       var functionAgentData = this.parseFunctionExpression(functionExpression);
-
-      return this.wrapFunctionAgentDataWithFunction(functionAgentData);
+      var functionAgent = this.wrapWithFunction(functionAgentData);
+      // @NOTE: arity simulate function.length
+      // @CASE: function (a, b, c).length should be 3 not 0
+      return this.arity(functionAgentData.params.length, functionAgent);
     }
   }, {
     key: 'parseFunctionExpression',
@@ -1750,8 +1755,8 @@ var EsprimaParser = function () {
       });
     }
   }, {
-    key: 'wrapFunctionAgentDataWithFunction',
-    value: function wrapFunctionAgentDataWithFunction(functionAgentData) {
+    key: 'wrapWithFunction',
+    value: function wrapWithFunction(functionAgentData) {
       var self = this;
 
       return function () {
@@ -1930,8 +1935,7 @@ var EsprimaParser = function () {
     key: 'FunctionExpression',
     value: function FunctionExpression(functionExpression) {
       var functionAgentData = this.parseFunctionExpression(functionExpression);
-      var functionAgent = this.wrapFunctionAgentDataWithFunction(functionAgentData);
-
+      var functionAgent = this.wrapWithFunction(functionAgentData);
       // @NOTE: should keep reference to its functionAgentData.closureStack given non-null id
       // @CASE: (function test() {console.log(test)})(), should not log undefined
       if (functionExpression.id) {
@@ -2079,13 +2083,13 @@ var EsprimaParser = function () {
   }, {
     key: 'execute',
     value: function execute(exp) {
-      try {
-        return this.executeExp(exp);
-      } catch (e) {
-        console.log(e);
-        console.log(exp);
-        return undefined;
-      }
+      // try {
+      return this.executeExp(exp);
+      // } catch (e) {
+      // console.log(e);
+      // console.log(exp);
+      // return undefined
+      // }
     }
   }, {
     key: 'executeExp',
@@ -2334,7 +2338,7 @@ var EsprimaParser = function () {
 
 module.exports = EsprimaParser;
 
-},{"./dispatchers/checkerDispatcher":46,"./operators/binaryOperators":52,"./operators/unaryOperators":53,"./operators/updateOperators":54,"./structures/Callee":55,"./structures/ClosureStack":57,"./structures/Collection":58,"./structures/Flag":60,"./structures/FlowState":61,"escodegen":64}],52:[function(require,module,exports){
+},{"./dispatchers/checkerDispatcher":46,"./operators/binaryOperators":52,"./operators/unaryOperators":53,"./operators/updateOperators":54,"./structures/Callee":55,"./structures/ClosureStack":57,"./structures/Collection":58,"./structures/Flag":60,"./structures/FlowState":61,"escodegen":64,"util-arity":88}],52:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -16626,7 +16630,7 @@ module.exports={
 require('whatwg-fetch');
 module.exports = self.fetch.bind(self);
 
-},{"whatwg-fetch":88}],86:[function(require,module,exports){
+},{"whatwg-fetch":89}],86:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -17037,6 +17041,29 @@ process.chdir = function (dir) {
 process.umask = function() { return 0; };
 
 },{}],88:[function(require,module,exports){
+var FUNCTIONS = {};
+
+/**
+ * Create a function wrapper that specifies the argument length.
+ *
+ * @param  {Number}   arity
+ * @param  {Function} fn
+ * @return {Function}
+ */
+module.exports = function (arity, fn) {
+  if (!FUNCTIONS[arity]) {
+    var params = Array(arity + 1).join(', _').substr(2);
+
+    FUNCTIONS[arity] = new Function(
+      'fn',
+      'return function (' + params + ') { return fn.apply(this, arguments); }'
+    );
+  }
+
+  return FUNCTIONS[arity](fn);
+};
+
+},{}],89:[function(require,module,exports){
 (function(self) {
   'use strict';
 
