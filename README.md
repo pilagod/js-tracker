@@ -9,7 +9,7 @@ A chrome extension tracks front-end JavaScript which using DOM or jQuery APIs to
 
 ## Installation
 
-Add JavaScript Tracker to your Google Chrome from [Chrome Web Store]()
+Add JavaScript Tracker to your Google Chrome from [Chrome Web Store](https://goo.gl/D6WVAX)
 
 ## Usage
 
