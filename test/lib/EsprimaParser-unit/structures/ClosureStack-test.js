@@ -26,83 +26,116 @@ describe('ClosureStack tests', () => {
 
     describe('get tests', () => {
       const variable = 'a'
-
+      const value = 1
       let closureStub
 
       beforeEach(() => {
         closureStub = {
           get: sandbox.stub()
-            .withArgs(variable)
-              .returns('resultFromClosureGet')
+            .withArgs(variable).returns(value)
         }
-        sandbox.stub(closureStack, 'findClosureByVariable')
-          .withArgs(variable)
-            .returns(closureStub)
+        sandbox.stub(closureStack, 'findClosure')
+          .withArgs(variable).returns(closureStub)
       })
 
-      it('should call findClosureByVariable with given variable', () => {
+      it('should call findClosure with given variable', () => {
         closureStack.get(variable)
 
         expect(
-          closureStack.findClosureByVariable
+          closureStack.findClosure
             .calledWithExactly(variable)
         ).to.be.true
       })
 
-      it('should call get of closure returned from findClosureByVariable with given variable and return when closure is found', () => {
+      it('should return result from get of closure returned from findClosure called with variable', () => {
         const result = closureStack.get(variable)
 
-        expect(result).to.be.equal('resultFromClosureGet')
-      })
-
-      it('should return undefined given findClosureByVariable returns undefined', () => {
-        closureStack.findClosureByVariable
-          .withArgs(variable)
-            .returns(undefined)
-
-        const result = closureStack.get(variable)
-
-        expect(result).to.be.undefined
+        expect(
+          closureStub.get
+            .calledWithExactly(variable)
+        ).to.be.true
+        expect(result).to.be.equal(value)
       })
     })
 
-    describe('findClosureByVariable tests', () => {
+    describe('findClosure tests', () => {
       const variable = 'a'
 
-      it('should return the first closure searched from stack behind whose method exist called with variable return true', () => {
-        const closureStub1 = new Closure({name: 'closureStub1'})
-        const closureStub2 = new Closure({name: 'closureStub2'})
-        const closureStub3 = new Closure({name: 'closureStub3'})
-
-        sandbox.stub(closureStub1, 'exist')
-          .withArgs(variable)
-            .returns(true)
-        sandbox.stub(closureStub2, 'exist')
-          .withArgs(variable)
-            .returns(true)
-        sandbox.stub(closureStub3, 'exist')
-          .withArgs(variable)
-            .returns(false)
-
-        closureStack.stack.push(closureStub1, closureStub2, closureStub3)
-
-        const result = closureStack.findClosureByVariable(variable)
-
-        expect(result).to.be.equal(closureStub2)
+      beforeEach(() => {
+        sandbox.stub(closureStack, 'findFirstMatchedClosure')
+        sandbox.stub(closureStack, 'getContextClosure')
       })
 
-      it('should return undefined when variable is not found in any closure', () => {
-        const closureStub = new Closure()
+      it('should call findFirstMatchedClosure with variable', () => {
+        closureStack.findClosure(variable)
 
-        sandbox.stub(closureStub, 'exist')
-          .withArgs(variable)
-            .returns(false)
+        expect(
+          closureStack.findFirstMatchedClosure
+            .calledWithExactly(variable)
+        ).to.be.true
+      })
 
-        closureStack.stack = [closureStub]
+      it('should return closure from findFirstMatchedClosure called with variable given it returns a valid closure', () => {
+        const closure = {data: 'data'}
 
-        const result = closureStack.findClosureByVariable()
+        closureStack.findFirstMatchedClosure
+          .withArgs(variable).returns(closure)
 
+        const result = closureStack.findClosure(variable)
+
+        expect(result).to.be.equal(closure)
+      })
+
+      it('should return result from getContextClosure given findFirstMatchedClosure returns undefined', () => {
+        const contextClosure = {data: 'context data'}
+
+        closureStack.findFirstMatchedClosure
+          .withArgs(variable).returns(undefined)
+        closureStack.getContextClosure.returns(contextClosure)
+
+        const result = closureStack.findClosure(variable)
+
+        expect(closureStack.getContextClosure.called).to.be.true
+        expect(result).to.be.equal(contextClosure)
+      })
+    })
+
+    describe('findFirstMatchedClosure tests', () => {
+      const variable = 'a'
+      let closure1, closure2, closure3
+
+      beforeEach(() => {
+        closure1 = new Closure({name: 'closure1'})
+        closure2 = new Closure({name: 'closure2'})
+        closure3 = new Closure({name: 'closure3'})
+
+        sandbox.stub(closure1)
+        sandbox.stub(closure2)
+        sandbox.stub(closure3)
+        sandbox.stub(closureStack.stack[0])
+
+        closureStack.stack.push(closure1, closure2, closure3)
+      })
+
+      it('should return undefined given no closure other than context closure has the variable', () => {
+        closure1.exist.withArgs(variable).returns(false)
+        closure2.exist.withArgs(variable).returns(false)
+        closure3.exist.withArgs(variable).returns(false)
+
+        const result = closureStack.findFirstMatchedClosure(variable)
+
+        expect(closureStack.stack[0].exist.called).to.be.false
         expect(result).to.be.undefined
+      })
+
+      it('should return first matched closure from stack behind which containing the given variable', () => {
+        closure1.exist.withArgs(variable).returns(true)
+        closure2.exist.withArgs(variable).returns(true)
+        closure3.exist.withArgs(variable).returns(false)
+
+        const result = closureStack.findFirstMatchedClosure(variable)
+
+        expect(result).to.be.equal(closure2)
       })
     })
 
@@ -154,37 +187,22 @@ describe('ClosureStack tests', () => {
         closureStub = {
           set: sandbox.spy()
         }
-        sandbox.stub(closureStack, 'findClosureByVariable')
-        sandbox.stub(closureStack, 'getContextClosure')
+        sandbox.stub(closureStack, 'findClosure')
+          .withArgs(variable).returns(closureStub)
       })
 
-      it('should call set of result from findClosureByVariable with variable and value given it returns valid closure', () => {
-        closureStack.findClosureByVariable.withArgs(variable).returns(closureStub)
-
+      it('should call findClosure with given variable', () => {
         closureStack.update(variable, value)
 
         expect(
-          closureStack.findClosureByVariable
+          closureStack.findClosure
             .calledWithExactly(variable)
-        ).to.be.true
-        expect(closureStack.getContextClosure.called).to.be.false
-        expect(
-          closureStub.set
-            .calledWithExactly(variable, value)
         ).to.be.true
       })
 
-      it('should call set with variable and value of result from getContextClosure given findClosureByVariable returns undefined', () => {
-        closureStack.findClosureByVariable.withArgs(variable).returns(undefined)
-        closureStack.getContextClosure.returns(closureStub)
-
+      it('should call set of closure returned from findClosure with given variable and value', () => {
         closureStack.update(variable, value)
 
-        expect(
-          closureStack.findClosureByVariable
-            .calledWithExactly(variable)
-        ).to.be.true
-        expect(closureStack.getContextClosure.called).to.be.true
         expect(
           closureStub.set
             .calledWithExactly(variable, value)

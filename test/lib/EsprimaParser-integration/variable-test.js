@@ -114,4 +114,15 @@ describe('variable tests', () => {
     expect(esprimaParser.context).to.have.property('result', 1)
     expect(closureStack.get('result')).to.be.equal(1)
   })
+
+  it('should get prototype of global context given no variable found in all closures', () => {
+    resetVariables('hasOwnProperty')
+
+    const ast = esprima.parse(`
+      var result = hasOwnProperty;
+    `)
+    esprimaParser.parseAst(ast)
+
+    expect(closureStack.get('result')).to.be.a('function')
+  })
 })

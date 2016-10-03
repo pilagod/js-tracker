@@ -2479,50 +2479,35 @@ var Callee = function () {
 module.exports = Callee;
 
 },{}],56:[function(require,module,exports){
-'use strict';
+"use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Closure = function () {
-  function Closure(data) {
+  function Closure() {
+    var data = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
     _classCallCheck(this, Closure);
 
-    if (Closure.isObject(data)) {
-      this.data = data;
-    } else {
-      this.data = {};
-    }
+    this.data = data;
   }
 
   _createClass(Closure, [{
-    key: 'get',
+    key: "get",
     value: function get(variable) {
-      // prototype property would be ignored,
-      // but before getting prototype property should get parent object first,
-      // and parent object must be in own property
-      if (this.exist(variable)) {
-        return this.data[variable];
-      }
-      return undefined;
+      return this.data[variable];
     }
   }, {
-    key: 'set',
+    key: "set",
     value: function set(variable, value) {
       this.data[variable] = value;
     }
   }, {
-    key: 'exist',
+    key: "exist",
     value: function exist(variable) {
       return this.data.hasOwnProperty(variable);
-    }
-  }], [{
-    key: 'isObject',
-    value: function isObject(object) {
-      var objectToString = Object.prototype.toString.call(object);
-
-      return objectToString === '[object Object]' || objectToString === '[object Window]' || objectToString === '[object global]';
     }
   }]);
 
@@ -2552,14 +2537,24 @@ var ClosureStack = function () {
   _createClass(ClosureStack, [{
     key: 'get',
     value: function get(variable) {
-      var closure = this.findClosureByVariable(variable);
+      var closure = this.findClosure(variable);
 
-      return closure ? closure.get(variable) : undefined;
+      return closure.get(variable);
     }
   }, {
-    key: 'findClosureByVariable',
-    value: function findClosureByVariable(variable) {
-      for (var i = this.stack.length - 1; i >= 0; i -= 1) {
+    key: 'findClosure',
+    value: function findClosure(variable) {
+      var closure = this.findFirstMatchedClosure(variable);
+
+      if (!closure) {
+        closure = this.getContextClosure();
+      }
+      return closure;
+    }
+  }, {
+    key: 'findFirstMatchedClosure',
+    value: function findFirstMatchedClosure(variable) {
+      for (var i = this.stack.length; --i;) {
         var closure = this.stack[i];
 
         if (closure.exist(variable)) {
@@ -2583,11 +2578,8 @@ var ClosureStack = function () {
   }, {
     key: 'update',
     value: function update(variable, value) {
-      var closure = this.findClosureByVariable(variable);
+      var closure = this.findClosure(variable);
 
-      if (!closure) {
-        closure = this.getContextClosure();
-      }
       closure.set(variable, value);
     }
   }, {
