@@ -3,7 +3,7 @@
 
   "name": "JavaScript Tracker",
   "description": "A chrome extension tracks front-end JavaScript which using DOM or jQuery APIs to manipulate html dom elements (e.g., change style, attach event listener) on web page at runtime.",
-  "version": "2.1.2",
+  "version": "2.1.3",
 
   "icons": {
     "16": "assets/appicon-16.png",
