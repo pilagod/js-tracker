@@ -918,7 +918,6 @@ var EsprimaParser = function () {
 
     /* import libs */
     this.escodegen = escodegen;
-    // @TODO: added arity
     this.arity = arity;
 
     /* import structures */
@@ -1318,7 +1317,7 @@ var EsprimaParser = function () {
           var statement = _step5.value;
 
           result = this.parseNode(statement);
-          // @TODO: need to refined
+
           if (this.flowState.isEitherState()) {
             break;
           }
@@ -1353,11 +1352,9 @@ var EsprimaParser = function () {
   }, {
     key: 'BlockStatement',
     value: function BlockStatement(blockStatement) {
-      // @TODO: add options
       // @TODO: es6: create and push new block scope to closureStack
       var result = this.parseStatements(blockStatement.body);
       // @TODO: es6: pop block scope from closureStack
-      // @TODO: should unset break here only if has label
       return result;
     }
   }, {

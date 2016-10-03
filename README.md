@@ -5,6 +5,8 @@ A chrome extension tracks front-end JavaScript which using DOM or jQuery APIs to
 
 ## Demo
 
+[![JavaScript Tracker Demo](http://i.imgur.com/JWC9xut.png)](https://www.youtube.com/watch?v=bHcgtOF9wLw)
+
 ## Installation
 
 Add JavaScript Tracker to your Google Chrome from [Chrome Web Store]()
@@ -21,51 +23,15 @@ Add JavaScript Tracker to your Google Chrome from [Chrome Web Store]()
 
 5. Check the sidebar pane "JS Tracker" to see information about only those JavaScript code manipulating the button
 
-There are many cool websites built with jQuery in [Best jQuery Websites](http://www.awwwards.com/websites/jquery/), try JavaScript Tracker out : )
+There are also many cool websites built with jQuery in [Best jQuery Websites](http://www.awwwards.com/websites/jquery/), you can try it out there : )
 
 **NOTE:** Updating information in sidebar pane "JS Tracker" is triggered by selection change among elements in Elements panel, thus it needs to re-select the element to see any new  updates.  
 
-**NOTE:** This extension focuses on DOM and jQuery APIs, those web pages using template to render updates are not sufficiently effective. (try [jQuery TodoMVC](http://todomvc.com/examples/jquery/#/all) example)
-
 ## Contribution
 
-This extension is built on TDD (Test-Driven Development) using [mocha](https://mochajs.org), [karma](http://karma-runner.github.io/1.0/index.html),  [chai](http://chaijs.com) and [sinon](http://sinonjs.org), here is a website introduce TDD for JavaScript - [A GENTLE INTRODUCTION TO JAVASCRIPT TEST DRIVEN DEVELOPMENT](http://jrsinclair.com/articles/2016/gentle-introduction-to-javascript-tdd-intro/)
+This extension is built on TDD (Test-Driven Development) using [mocha](https://mochajs.org), [karma](http://karma-runner.github.io/1.0/index.html),  [chai](http://chaijs.com) and [sinon](http://sinonjs.org). All production code are written after corresponding test code done first. If you are interesting to contribute, you can contact me for more details.
 
 Suggestions and discussions are highly welcomed. Feel free to share any good ideas : )
-
-### Setup
-
-``` sh
-$ git clone https://github.com/pilagod/js-tracker.git
-```
-
-and then run
-
-``` sh
-$ npm install
-```
-
-at the directory root
-
-### Reminding
-
-All unit tests and integration tests are in` test/lib/EsprimaParser-unit` and `test/lib/EsprimaParser-integration` respectively.
-
-Code added to `lib` should have corresponding unit tests, and new feature added to extension should have associated integration tests.
-
-If there is any question, it's welcome to communicate with me : )
-
-### Test
-
-**unit test:**
-``` sh
-$ npm run test-unit
-```
-
-**integration test:**
-``` sh
-$ npm run test-integration
-```
 
 ## License
 MIT

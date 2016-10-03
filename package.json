@@ -1,13 +1,13 @@
 {
   "name": "js-tracker",
   "version": "2.1.3",
-  "description": "A chrome extension tracks front-end JavaScript which using DOM or jQuery APIs to manipulate html dom elements (e.g., change style, attach event listener) on web page at runtime.",
+  "description": "A chrome extension tracks front-end JavaScript using DOM or jQuery APIs to manipulate html dom elements at runtime.",
   "main": "index.js",
   "scripts": {
     "test-unit": "node node_modules/istanbul/lib/cli.js cover node_modules/mocha/bin/_mocha test/EsprimaParser-unit.js",
     "test-integration": "karma start --reporters mocha",
     "build": "browserify contentscript.js -o contentscript-dist.js",
-    "dev": "watchify contentscript.js -o contentscript-dist.js"
+    "deploy": "rm ~/Desktop/JS-Tracker.zip & zip -r ~/Desktop/JS-Tracker.zip manifest.json assets/ background.js devtools.* contentscript-dist.js"
   },
   "repository": {
     "type": "git",
