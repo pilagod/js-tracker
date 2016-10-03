@@ -3,19 +3,21 @@
 describe('FunctionExpression tests', () => {
   const functionAgentData = {
     body: 'BlockStatement',
-    params: ['params'],
+    params: ['param1', 'param2', 'param3'],
+    hoistings: ['var1', 'var2', 'var3'],
     scriptUrl: 'scriptUrl',
     closureStack: {}
   }
   const functionAgent = function () {}
+  const functionArity = function (param1, param2, param3) {}
   let functionExpression
 
   beforeEach(() => {
     functionExpression = createAstNode('FunctionExpression')
 
     sandbox.stub(esprimaParser, 'parseFunctionExpression').returns(functionAgentData)
-    sandbox.stub(esprimaParser, 'wrapWithFunction')
-      .returns(functionAgent)
+    sandbox.stub(esprimaParser, 'wrapWithFunction').returns(functionAgent)
+    sandbox.stub(esprimaParser, 'arity').returns(functionArity)
     sandbox.stub(esprimaParser, 'setFunctionExpressionTo')
   })
 
@@ -37,14 +39,26 @@ describe('FunctionExpression tests', () => {
     ).to.be.true
   })
 
-  it('should call setFunctionExpressionTo with functionAgentData, functionExpression.id and functionAgent given non-null id', () => {
+  it('should call esprimaParser.arity with params.length in functionAgentData and functionAgent', () => {
+    esprimaParser.FunctionExpression(functionExpression)
+
+    expect(
+      esprimaParser.arity
+        .calledWithExactly(
+          functionAgentData.params.length,
+          functionAgent
+        )
+    ).to.be.true
+  })
+
+  it('should call setFunctionExpressionTo with functionAgentData, functionExpression.id and functionArity given non-null id', () => {
     functionExpression.id = createAstNode('Identifier')
 
     esprimaParser.FunctionExpression(functionExpression)
 
     expect(
       esprimaParser.setFunctionExpressionTo
-        .calledWithExactly(functionAgentData, functionExpression.id, functionAgent)
+        .calledWithExactly(functionAgentData, functionExpression.id, functionArity)
     ).to.be.true
   })
 
@@ -54,9 +68,9 @@ describe('FunctionExpression tests', () => {
     expect(esprimaParser.setFunctionExpressionTo.called).to.be.false
   })
 
-  it('should return result from wrapWithFunction', () => {
+  it('should return result from functionArity', () => {
     const result = esprimaParser.FunctionExpression(functionExpression)
 
-    expect(result).to.be.equal(functionAgent)
+    expect(result).to.be.equal(functionArity)
   })
 })

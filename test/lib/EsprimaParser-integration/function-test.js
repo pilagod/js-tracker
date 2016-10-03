@@ -88,13 +88,16 @@ describe('function', () => {
   describe('arity tests', () => {
     it('should have proper function length', () => {
       const ast = esprima.parse(`
-        function test(a, b, c) {}
+        function test1(a, b, c) {}
+        var test2 = function (a, b, c) {};
 
-        var result = test.length
+        var result1 = test1.length;
+        var result2 = test2.length;
       `)
       esprimaParser.parseAst(ast)
 
-      expect(closureStack.get('result')).to.be.equal(3)
+      expect(closureStack.get('result1')).to.be.equal(3)
+      expect(closureStack.get('result2')).to.be.equal(3)
     })
   })
 

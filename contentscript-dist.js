@@ -1936,12 +1936,13 @@ var EsprimaParser = function () {
     value: function FunctionExpression(functionExpression) {
       var functionAgentData = this.parseFunctionExpression(functionExpression);
       var functionAgent = this.wrapWithFunction(functionAgentData);
+      var functionArity = this.arity(functionAgentData.params.length, functionAgent);
       // @NOTE: should keep reference to its functionAgentData.closureStack given non-null id
       // @CASE: (function test() {console.log(test)})(), should not log undefined
       if (functionExpression.id) {
-        this.setFunctionExpressionTo(functionAgentData, functionExpression.id, functionAgent);
+        this.setFunctionExpressionTo(functionAgentData, functionExpression.id, functionArity);
       }
-      return functionAgent;
+      return functionArity;
     }
   }, {
     key: 'setFunctionExpressionTo',
