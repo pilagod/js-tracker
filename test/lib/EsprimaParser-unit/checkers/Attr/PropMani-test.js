@@ -7,7 +7,7 @@ describe('propMani checker tests', () => {
 
   before(() => {
     checkerStub = sandbox.stub().returns('resultFromChecker')
-    checker = proxyquire(`../${libDir}/checkers/Attr/Prop/mani`, {
+    checker = proxyquire(`../${libDir}/checkers/Attr/prop/mani`, {
       './criteria': criteria,
       '../../../helpers/propManiChecker': checkerStub
     })

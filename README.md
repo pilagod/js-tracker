@@ -1,4 +1,4 @@
-JavaScript Tracker
+JavaScript Tracker [![Build Status](https://travis-ci.org/pilagod/js-tracker.svg?branch=master)](https://travis-ci.org/pilagod/js-tracker) [![Test coverage](https://img.shields.io/badge/coverage-100%25-brightgreen.svg)](https://travis-ci.org/pilagod/js-tracker#L1395)
 ==================
 
 A chrome extension tracks front-end JavaScript which using DOM or jQuery APIs to manipulate html dom elements (e.g., change style, attach event listener) on web page at runtime.

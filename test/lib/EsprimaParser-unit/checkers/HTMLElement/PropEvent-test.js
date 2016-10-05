@@ -7,7 +7,7 @@ describe('propEvent checker tests', () => {
 
   before(() => {
     checkerStub = sandbox.stub().returns('resultFromChecker')
-    checker = proxyquire(`../${libDir}/checkers/HTMLElement/Prop/event`, {
+    checker = proxyquire(`../${libDir}/checkers/HTMLElement/prop/event`, {
       './criteria': criteria,
       '../../../helpers/propEventChecker': checkerStub
     })

@@ -15,7 +15,7 @@ describe('callManiPassive checker tests', () => {
 
   before(() => {
     checkerStub = sandbox.stub()
-    checker = proxyquire(`../${libDir}/checkers/jQuery/Call/maniPassive`, {
+    checker = proxyquire(`../${libDir}/checkers/jQuery/call/maniPassive`, {
       './criteria': criteria,
       '../../../helpers/callManiChecker': checkerStub
     })

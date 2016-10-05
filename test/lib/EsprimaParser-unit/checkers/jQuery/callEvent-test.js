@@ -11,7 +11,7 @@ describe('callEvent checker tests', () => {
 
   before(() => {
     checkerStub = sandbox.stub()
-    checker = proxyquire(`../${libDir}/checkers/jQuery/Call/event`, {
+    checker = proxyquire(`../${libDir}/checkers/jQuery/call/event`, {
       './criteria': criteria,
       '../../../helpers/callEventChecker': checkerStub
     })

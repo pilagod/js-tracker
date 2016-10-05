@@ -8,7 +8,7 @@ describe('callManiArg0 checker tests', () => {
 
   before(() => {
     checkerStub = sandbox.stub().returns('resultFromChecker')
-    checker = proxyquire(`../${libDir}/checkers/jQuery/Call/maniArg0`, {
+    checker = proxyquire(`../${libDir}/checkers/jQuery/call/maniArg0`, {
       './criteria': criteria,
       '../../../helpers/callManiArg0Checker': checkerStub
     })

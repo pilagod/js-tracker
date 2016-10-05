@@ -66,6 +66,15 @@ module.exports = function (config) {
     browsers: ['Chrome'],
 
 
+    // http://blog.500tech.com/setting-up-travis-ci-to-run-tests-on-latest-google-chrome-version/
+    customLaunchers: {
+      Chrome_travis_ci: {
+        base: 'Chrome',
+        flags: ['--no-sandbox']
+      }
+    },
+
+
     // Continuous Integration mode
     // if true, Karma captures browsers, runs the tests and exits
     singleRun: false,
@@ -73,5 +82,10 @@ module.exports = function (config) {
     // Concurrency level
     // how many browser should be started simultaneous
     concurrency: Infinity
-  })
+  });
+
+  if (process.env.TRAVIS) {
+    config.browsers = ['Chrome_travis_ci'];
+    config.singleRun = true;
+  }
 }

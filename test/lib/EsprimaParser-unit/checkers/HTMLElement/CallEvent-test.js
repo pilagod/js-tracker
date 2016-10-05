@@ -7,7 +7,7 @@ describe('callEvent checker tests', () => {
 
   before(() => {
     checkerStub = sandbox.stub().returns('resultFromChecker')
-    checker = proxyquire(`../${libDir}/checkers/HTMLElement/Call/event`, {
+    checker = proxyquire(`../${libDir}/checkers/HTMLElement/call/event`, {
       './criteria': criteria,
       '../../../helpers/callEventChecker': checkerStub
     })
