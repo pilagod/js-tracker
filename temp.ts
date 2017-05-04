@@ -1,5 +1,4 @@
-import './index.html'
-import Types, { propCls, methodCls } from './tracker/class'
+import Types, { propCls, methodCls } from './src/tracker/class'
 
 // @TODO: deal with outerHTML (converting HTML string to element), check [http://stackoverflow.com/questions/3103962/converting-html-string-into-dom-elements]
 // @TODO: deal with innerHTML (converting HTML string to element), check [http://stackoverflow.com/questions/3103962/converting-html-string-into-dom-elements]
