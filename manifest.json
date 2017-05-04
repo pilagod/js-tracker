@@ -1,27 +1,24 @@
 {
   "manifest_version": 2,
-
   "name": "JavaScript Tracker",
   "description": "Tracking JavaScript (DOM or jQuery APIs) on web page at runtime",
-  "version": "2.1.3",
-
+  "version": "3.0.0",
   "icons": {
     "16": "assets/appicon-16.png",
     "48": "assets/appicon-48.png",
     "128": "assets/appicon-128.png"
   },
-
-  "browser_action": {
-
-  },
-
+  "browser_action": {},
   "background": {
-    "scripts": ["background.js"],
+    "scripts": [
+      "src/background.js"
+    ],
     "persistent": false
   },
-
   "devtools_page": "devtools.html",
-
+  "web_accessible_resources": [
+    "src/tracker.js"
+  ],
   "permissions": [
     "tabs",
     "activeTab",

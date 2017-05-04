@@ -6,7 +6,10 @@
   "scripts": {
     "test-unit": "node node_modules/istanbul/lib/cli.js cover node_modules/mocha/bin/_mocha test/EsprimaParser-unit.js",
     "test-integration": "karma start --reporters mocha",
-    "build": "browserify contentscript.js -o contentscript-dist.js",
+    "test": "karma start",
+    "build": "webpack",
+    "watch": "webpack --watch",
+    "dev": "webpack-dev-server --port 3000",
     "deploy": "rm ~/Desktop/JS-Tracker.zip & zip -r ~/Desktop/JS-Tracker.zip manifest.json assets/ background.js devtools.* contentscript-dist.js"
   },
   "repository": {
@@ -25,26 +28,25 @@
     "manipulation",
     "debug"
   ],
-  "author": "pilagod <hotony801018@gmail.com>",
+  "author": "pilagod <pilagooood@gmail.com>",
   "license": "MIT",
   "homepage": "https://github.com/pilagod/js-tracker",
-  "dependencies": {
-    "es6-promise": "^3.2.1",
-    "escodegen": "^1.8.0",
-    "esprima": "^2.7.2",
-    "isomorphic-fetch": "^2.2.1",
-    "jquery": "^3.1.1",
-    "util-arity": "^1.0.2"
-  },
+  "dependencies": {},
   "devDependencies": {
+    "@types/chai": "^3.5.1",
+    "@types/mocha": "^2.2.41",
+    "awesome-typescript-loader": "^3.1.2",
     "babel-preset-es2015": "^6.9.0",
     "babelify": "^7.3.0",
     "brfs": "^1.4.3",
-    "browserify": "^13.1.0",
+    "browserify": "^13.3.0",
     "chai": "^3.5.0",
-    "import-all-from": "^1.0.1",
+    "diff-dom": "^2.1.0",
+    "es6-promise": "^3.3.1",
+    "file-loader": "^0.11.1",
+    "isomorphic-fetch": "^2.2.1",
     "istanbul": "^0.4.5",
-    "karma": "^1.2.0",
+    "karma": "^1.6.0",
     "karma-browserify": "^5.1.0",
     "karma-chrome-launcher": "^2.0.0",
     "karma-clear-screen-reporter": "^1.0.0",
@@ -52,10 +54,16 @@
     "karma-coverage": "^1.1.1",
     "karma-mocha": "^1.1.1",
     "karma-mocha-reporter": "^2.1.0",
+    "karma-sourcemap-loader": "^0.3.7",
+    "karma-typescript": "^3.0.1",
+    "karma-typescript-es6-transform": "^1.0.0",
     "mocha": "^3.0.2",
-    "proxyquire": "^1.7.10",
     "sinon": "^1.17.4",
-    "watchify": "^3.7.0"
+    "source-map-loader": "^0.2.1",
+    "typescript": "^2.3.2",
+    "watchify": "^3.9.0",
+    "webpack": "^2.4.1",
+    "webpack-dev-server": "^2.4.2"
   },
   "browserify": {
     "transform": [
