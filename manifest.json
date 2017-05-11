@@ -17,12 +17,13 @@
   },
   "devtools_page": "devtools.html",
   "web_accessible_resources": [
-    "src/tracker.js"
+    "src/injectscript.js"
   ],
   "permissions": [
     "tabs",
     "activeTab",
     "http://*/",
-    "https://*/"
+    "https://*/",
+    "file://*/"
   ]
 }

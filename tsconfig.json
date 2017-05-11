@@ -1,7 +1,10 @@
 {
     "compilerOptions": {
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
         "module": "commonjs",
         "removeComments": true,
-        "target": "es6"
+        "sourceMap": true,
+        "target": "es2017"
     }
 }

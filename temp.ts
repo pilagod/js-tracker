@@ -1,35 +1,35 @@
-import Types, { propCls, methodCls } from './src/tracker/class'
+// import Types, { propCls, methodCls } from './src/tracker/class'
 
-// @TODO: deal with outerHTML (converting HTML string to element), check [http://stackoverflow.com/questions/3103962/converting-html-string-into-dom-elements]
-// @TODO: deal with innerHTML (converting HTML string to element), check [http://stackoverflow.com/questions/3103962/converting-html-string-into-dom-elements]
-// @TODO: inplace replace descriptors
+// // @TODO: deal with outerHTML (converting HTML string to element), check [http://stackoverflow.com/questions/3103962/converting-html-string-into-dom-elements]
+// // @TODO: deal with innerHTML (converting HTML string to element), check [http://stackoverflow.com/questions/3103962/converting-html-string-into-dom-elements]
+// // @TODO: inplace replace descriptors
 
-const trackedDescriptors: PropertyDescriptorMap = {}
+// const trackedDescriptors: PropertyDescriptorMap = {}
 
-for (let proto = HTMLElement.prototype; proto !== Object.prototype; proto = Object.getPrototypeOf(proto)) {
-  Object.getOwnPropertyNames(proto).forEach((prop) => {
-    if (propCls.hasOwnProperty(prop)) {
-      trackedDescriptors[prop] = createTrackedPropDescriptor(proto, prop)
-    }
-    if (methodCls.hasOwnProperty(prop)) {
-      trackedDescriptors[prop] = createTrackedMethodDescriptor(proto, prop)
-    }
-    // @TODO: get function value
-  })
-}
-console.log(trackedDescriptors)
+// for (let proto = HTMLElement.prototype; proto !== Object.prototype; proto = Object.getPrototypeOf(proto)) {
+//   Object.getOwnPropertyNames(proto).forEach((prop) => {
+//     if (propCls.hasOwnProperty(prop)) {
+//       trackedDescriptors[prop] = createTrackedPropDescriptor(proto, prop)
+//     }
+//     if (methodCls.hasOwnProperty(prop)) {
+//       trackedDescriptors[prop] = createTrackedMethodDescriptor(proto, prop)
+//     }
+//     // @TODO: get function value
+//   })
+// }
+// console.log(trackedDescriptors)
 
-function createTrackedPropDescriptor(proto: object, prop: string): object {
-  // @TODO: replace 'set' function
-  return Object.getOwnPropertyDescriptor(proto, prop)
-}
+// function createTrackedPropDescriptor(proto: object, prop: string): object {
+//   // @TODO: replace 'set' function
+//   return Object.getOwnPropertyDescriptor(proto, prop)
+// }
 
-function createTrackedMethodDescriptor(proto: object, prop: string): object {
-  // @TODO: replace 'value' function
-  return Object.getOwnPropertyDescriptor(proto, prop)
-}
+// function createTrackedMethodDescriptor(proto: object, prop: string): object {
+//   // @TODO: replace 'value' function
+//   return Object.getOwnPropertyDescriptor(proto, prop)
+// }
 
-document.createElement('div').align
+// document.createElement('div').align
 
 // @TODO: cope with (attributes[NamedNodeMap, Attr], classList[DOMTokenList], dataset, style[CSSStyleDeclaration])
 // @TODO: should modify their prototype

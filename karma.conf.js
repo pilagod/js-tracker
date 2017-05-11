@@ -18,6 +18,7 @@ module.exports = function (config) {
     // all modules including in tests should be included here
     files: [
       { pattern: 'src/tracker/*.ts' },
+      { pattern: 'src/injectscript.ts' },
       { pattern: 'test/*.ts' }
     ],
 
@@ -30,7 +31,8 @@ module.exports = function (config) {
       'src/tracker/*.ts': ['karma-typescript'],
       'test/*.ts': ['karma-typescript'],
 
-      'src/tracker/TrackStore.ts': ['karma-typescript', 'coverage']
+      'src/injectscript.ts': ['karma-typescript', 'coverage']
+      // 'src/tracker/TrackStore.ts': ['karma-typescript', 'coverage']
     },
 
     karmaTypescriptConfig: {
@@ -42,7 +44,8 @@ module.exports = function (config) {
       reports: {
         'html': 'coverage',
         'text-summary': ''
-      }
+      },
+      tsconfig: './tsconfig.json'
     },
 
     // test results reporter to use
