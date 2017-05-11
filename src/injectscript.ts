@@ -1,4 +1,5 @@
-import { ActionTypes, ActionTypesMap, Utils } from './tracker/ActionTypes'
+import { ActionTypes, ActionTypesMap } from './tracker/ActionTypes'
+import utils from './tracker/utils'
 
 (function (global) {
   // @TODO: setup tracker
@@ -15,7 +16,7 @@ import { ActionTypes, ActionTypesMap, Utils } from './tracker/ActionTypes'
     const proto = global[ctr].prototype
 
     Object.getOwnPropertyNames(proto).forEach((prop) => {
-      if (Utils.isSimpleActionType(actionTypesMap, prop)) {
+      if (utils.isSimpleActionType(actionTypesMap, prop)) {
         Object.defineProperty(
           proto,
           prop,
@@ -31,9 +32,9 @@ import { ActionTypes, ActionTypesMap, Utils } from './tracker/ActionTypes'
   ): PropertyDescriptor {
     const descriptor = Object.getOwnPropertyDescriptor(proto, prop)
 
-    if (Utils.isMethodDescriptor(descriptor)) {
+    if (utils.isMethodDescriptor(descriptor)) {
       descriptor.value = methodDecorator(descriptor.value, actionType)
-    } else if (Utils.isWritableDescriptor(descriptor)) {
+    } else if (utils.isWritableDescriptor(descriptor)) {
       descriptor.set = setterDecorator(descriptor.set, actionType)
     }
     return descriptor
