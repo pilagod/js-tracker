@@ -1,5 +1,5 @@
 import * as chai from 'chai'
-import { ActionTypesMap } from '../src/tracker/ActionTypes'
+import ActionTypeMap from '../src/tracker/ActionTypeMap'
 
 const expect = chai.expect
 
@@ -21,10 +21,10 @@ function isProxyCtr(ctr) {
 }
 
 describe('coverage', function () {
-  for (let ctr in ActionTypesMap) {
+  for (let ctr in ActionTypeMap) {
     if (!isProxyCtr(ctr)) {
       const proto = window[ctr].prototype
-      const trackProps = ActionTypesMap[ctr]
+      const trackProps = ActionTypeMap[ctr]
 
       it(`should track ${ctr} all property setters`, function () {
         Object.getOwnPropertyNames(proto).forEach((prop) => {

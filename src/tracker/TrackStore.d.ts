@@ -1,6 +1,6 @@
 interface ITrackStore {
-  register(track: Track): void;
-  retrieve(trackId: string): any;
+  register(trackData: TrackData): void;
+  retrieve(trackid: string): any;
 }
-type Track = {
+type TrackData = {
 }

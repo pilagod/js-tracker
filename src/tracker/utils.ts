@@ -1,16 +1,12 @@
-const _: {
-  isSimpleActionType(actionTypesMap: object, prop: string): boolean;
+const utils: {
   isMethodDescriptor(descriptor: PropertyDescriptor): boolean;
-  isWritableDescriptor(descriptor: PropertyDescriptor): boolean;
+  isSettableDescriptor(descriptor: PropertyDescriptor): boolean;
 } = {
-    isSimpleActionType(actionTypesMap, prop) {
-      return actionTypesMap.hasOwnProperty(prop) && Number.isInteger(actionTypesMap[prop])
-    },
     isMethodDescriptor(descriptor) {
       return !!descriptor.value && (typeof descriptor.value === 'function')
     },
-    isWritableDescriptor(descriptor) {
+    isSettableDescriptor(descriptor) {
       return !!descriptor.set
-    }
+    },
   }
-export default _
+export default utils

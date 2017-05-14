@@ -3,6 +3,6 @@
 export default class TrackStore implements ITrackStore {
   private store: object = {};
 
-  register(track: Track) { }
-  retrieve(trackId: string) { }
+  register(trackData: TrackData) { }
+  retrieve(trackid: string) { }
 }
