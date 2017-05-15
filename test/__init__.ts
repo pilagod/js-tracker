@@ -4,8 +4,7 @@ import TrackStore from '../src/tracker/TrackStore'
 const expect = chai.expect;
 
 beforeEach(function () {
-  TrackStore.trackidManager.resetID()
-  // (<any>window)._trackidManager.resetID()
+  TrackStore.resetID()
 })
 
 describe('__init__', function () {
