@@ -65,19 +65,85 @@ function TrackData(
 }
 
 function getTrackid(caller: TrackTarget): string {
-  const owner: HTMLElement =
+  // @NOTE: Attr create by document.createAttribute will have null owner
+  let owner: HTMLElement | null =
     caller instanceof HTMLElement ? caller : caller._owner
 
+  // @NOTE: only <Attr>caller._owner will be null
+  // if (owner === null) {
+  //   owner = document.createElement('div');
+  //   owner.attributes.setNamedItem(<Attr>caller)
+  // }
   if (!owner.dataset.trackid) {
     owner.dataset.trackid = trackidManager.generateID()
   }
   return owner.dataset.trackid
 }
 
-trackHTMLElementDataset()
-trackHTMLElementStyle()
+setupAttr()
+setupElementAttributes()
+setupElementClassList()
+proxyHTMLElementDataset()
+proxyHTMLElementStyle()
 
-function trackHTMLElementDataset(): void {
+function setupAttr(): void {
+  Object.defineProperty(Attr.prototype, '_owner', {
+    get: function (this: Attr): Element {
+      // @TODO: create shadow element, while it is been set, merge the result
+      return this.ownerElement
+    }
+  })
+}
+
+function setupElementAttributes(): void {
+  const attributesDescriptor =
+    Object.getOwnPropertyDescriptor(Element.prototype, 'attributes')
+
+  attributesDescriptor.get = (function (
+    getter: PropertyDescriptor['get']
+  ): PropertyDescriptor['get'] {
+    return function (this: Element): NamedNodeMap {
+      const attributes = getter.call(this)
+
+      if (!attributes._owner) {
+        attributes._owner = this
+      }
+      return attributes
+    }
+  })(attributesDescriptor.get)
+
+  Object.defineProperty(
+    Element.prototype,
+    'attributes',
+    attributesDescriptor
+  )
+}
+
+function setupElementClassList(): void {
+  const classListDescriptor =
+    Object.getOwnPropertyDescriptor(Element.prototype, 'classList')
+
+  classListDescriptor.get = (function (
+    getter: PropertyDescriptor['get']
+  ): PropertyDescriptor['get'] {
+    return function (this: Element): DOMTokenList {
+      const classList = getter.call(this)
+
+      if (!classList._owner) {
+        classList._owner = this
+      }
+      return classList
+    }
+  })(classListDescriptor.get)
+
+  Object.defineProperty(
+    Element.prototype,
+    'classList',
+    classListDescriptor
+  )
+}
+
+function proxyHTMLElementDataset(): void {
   const datasetDescriptor =
     Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'dataset')
 
@@ -114,7 +180,7 @@ function trackHTMLElementDataset(): void {
   )
 }
 
-function trackHTMLElementStyle(): void {
+function proxyHTMLElementStyle(): void {
   const styleDescriptor =
     Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'style')
 
@@ -136,9 +202,10 @@ function trackHTMLElementStyle(): void {
             //    and if methods need to be called by the right caller, it will raise
             //    Illegal Invocation Error.
             if (typeof target[action] === 'function') {
-              return function (...args) {
-                return target[action].call(target, ...args)
-              }
+              return target[action].bind(target)
+              // return function (...args) {
+              //   return target[action].call(target, ...args)
+              // }
             }
             return target[action]
           },
@@ -165,31 +232,3 @@ function trackHTMLElementStyle(): void {
     styleDescriptor
   )
 }
-
-
-// function trackDecorator(
-//   target: string,
-//   action: string,
-//   actionFunc: (...args: any[]) => any
-// ): (...args: any[]) => any {
-//   return function (...args) {
-//     const owner = this._owner || this
-//     if (!this.dataset.trackid) {
-//       // @TODO: need meta data here
-//       this.dataset.trackid = trackidManager.generateID()
-//     }
-//     // @TODO: need meta data here
-//     window.postMessage({
-//       trackid: this.dataset.trackid,
-//       target,
-//       action
-//     }, '*')
-//     return actionFunc.call(this, ...args)
-//   }
-// }
-
-
-
-
-
-

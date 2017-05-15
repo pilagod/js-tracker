@@ -26,10 +26,15 @@ describe('tracker', function () {
 
     expect(div.dataset.trackid).to.equal('1')
   })
+
+  it('should track Attr actions', () => {
+  })
+
   it('should track DOMStringMap actions', () => {
     const div = document.createElement('div')
 
     div.dataset.data = 'data'
+
     expect(div.dataset.trackid).to.equal('1')
     expect(msgs).to.have.length(1)
     expect(msgs[0]).to.deep.equal({
