@@ -2,8 +2,15 @@
 
 import TrackidManager from './TrackidManager'
 
+const trackidManager = new TrackidManager()
+
 export default class TrackStore implements ITrackStore {
-  static trackidManager = new TrackidManager()
+  static generateID = function () {
+    return trackidManager.generateID()
+  }
+  static resetID = function () {
+    trackidManager.resetID()
+  }
   static createTrackData = function (
     caller: TrackTarget,
     target: string,
@@ -29,8 +36,7 @@ function getTrackid(
     caller instanceof HTMLElement ? caller : caller._owner
 
   if (!owner.dataset.trackid) {
-    owner.dataset.trackid =
-      TrackStore.trackidManager.generateID()
+    owner.dataset.trackid = TrackStore.generateID()
   }
   return owner.dataset.trackid
 }
