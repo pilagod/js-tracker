@@ -14,18 +14,3 @@ interface DOMTokenList {
 interface NamedNodeMap {
   _owner: HTMLElement;
 }
-
-type TrackTarget =
-  HTMLElement
-  | Attr
-  | CSSStyleDeclaration
-  | DOMTokenList
-  | NamedNodeMap
-
-interface ITrackData {
-  trackid: string,
-  target: string,
-  action: PropertyKey,
-  actionTag?: string,
-  stacktrace?: any
-}

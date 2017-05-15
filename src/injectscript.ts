@@ -1,90 +1,73 @@
 /// <reference path='./injectscript.d.ts' />
 
-import ActionTagMap from './tracker/ActionTagMap'
 import ActionTypeMap from './tracker/ActionTypeMap'
-import TrackidManager from './tracker/TrackidManager'
+import TrackStore from './tracker/TrackStore'
 import utils from './tracker/utils'
 
-const trackidManager = new TrackidManager();
-
-(<any>window)._trackidManager = trackidManager
-
-for (let ctr in ActionTypeMap) {
-  const proto = window[ctr].prototype
-
-  Object.getOwnPropertyNames(proto).forEach((prop) => {
-    const descriptor =
-      Object.getOwnPropertyDescriptor(proto, prop)
-
-    Object.defineProperty(
-      proto,
-      prop,
-      decorate(ctr, prop, descriptor)
-    )
-  })
-}
-
-function decorate(
-  target: string,
-  action: PropertyKey,
-  descriptor: PropertyDescriptor
-): PropertyDescriptor {
-  if (utils.isMethodDescriptor(descriptor)) {
-    descriptor.value =
-      trackDecorator(target, action, descriptor.value)
-  } else if (utils.isSettableDescriptor(descriptor)) {
-    descriptor.set =
-      trackDecorator(target, action, descriptor.set)
-  }
-  return descriptor
-}
-
-function trackDecorator(
-  target: string,
-  action: PropertyKey,
-  actionFunc: (...args: any[]) => any
-): (this: TrackTarget, ...args: any[]) => any {
-  return function (...args) {
-    window.postMessage(
-      TrackData(this, target, action), '*'
-    )
-    return actionFunc.call(this, ...args)
-  }
-}
-
-function TrackData(
-  caller: TrackTarget,
-  target: string,
-  action: PropertyKey
-): ITrackData {
-  return {
-    trackid: getTrackid(caller),
-    target,
-    action
-  }
-}
-
-function getTrackid(caller: TrackTarget): string {
-  // @NOTE: Attr create by document.createAttribute will have null owner
-  let owner: HTMLElement | null =
-    caller instanceof HTMLElement ? caller : caller._owner
-
-  // @NOTE: only <Attr>caller._owner will be null
-  // if (owner === null) {
-  //   owner = document.createElement('div');
-  //   owner.attributes.setNamedItem(<Attr>caller)
-  // }
-  if (!owner.dataset.trackid) {
-    owner.dataset.trackid = trackidManager.generateID()
-  }
-  return owner.dataset.trackid
-}
+trackNormalCases()
+trackSpecialCases()
 
 setupAttr()
+
 setupElementAttributes()
 setupElementClassList()
+
 proxyHTMLElementDataset()
 proxyHTMLElementStyle()
+
+function trackNormalCases(): void {
+  for (let ctr in ActionTypeMap) {
+    const proto = window[ctr].prototype
+
+    Object.getOwnPropertyNames(proto).forEach((prop) => {
+      if (!utils.isSpecialCase(ctr, prop)) {
+        const descriptor =
+          Object.getOwnPropertyDescriptor(proto, prop)
+
+        Object.defineProperty(
+          proto,
+          prop,
+          decorate(ctr, prop, descriptor)
+        )
+      }
+    })
+  }
+  function decorate(
+    target: string,
+    action: PropertyKey,
+    descriptor: PropertyDescriptor
+  ): PropertyDescriptor {
+    if (utils.isMethodDescriptor(descriptor)) {
+      descriptor.value =
+        trackDecorator(target, action, descriptor.value)
+    } else if (utils.isSettableDescriptor(descriptor)) {
+      descriptor.set =
+        trackDecorator(target, action, descriptor.set)
+    }
+    return descriptor
+  }
+  function trackDecorator(
+    target: string,
+    action: PropertyKey,
+    actionFunc: (...args: any[]) => any
+  ): (this: TrackTarget, ...args: any[]) => any {
+    return function (...args) {
+      window.postMessage(
+        TrackStore.createTrackData(
+          this,
+          target,
+          action
+        ),
+        '*'
+      )
+      return actionFunc.call(this, ...args)
+    }
+  }
+}
+
+function trackSpecialCases(): void {
+
+}
 
 function setupAttr(): void {
   Object.defineProperty(Attr.prototype, '_owner', {
@@ -161,7 +144,12 @@ function proxyHTMLElementDataset(): void {
           set: function (target, action, value) {
             if (action !== 'trackid') {
               window.postMessage(
-                TrackData(owner, 'DOMStringMap', action), '*'
+                TrackStore.createTrackData(
+                  owner,
+                  'DOMStringMap',
+                  action
+                ),
+                '*'
               )
             }
             target[action] = value
@@ -211,11 +199,12 @@ function proxyHTMLElementStyle(): void {
           },
           set: function (target, action, value) {
             window.postMessage(
-              TrackData(
+              TrackStore.createTrackData(
                 target,
                 'CSSStyleDeclaration',
                 <string>action
-              ), '*'
+              ),
+              '*'
             )
             target[action] = value
             return true

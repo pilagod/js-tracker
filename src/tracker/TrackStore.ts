@@ -1,8 +1,36 @@
 /// <reference path="TrackStore.d.ts" />
 
-export default class TrackStore implements ITrackStore {
-  private store: object = {};
+import TrackidManager from './TrackidManager'
 
-  register(trackData: TrackData) { }
-  retrieve(trackid: string) { }
+export default class TrackStore implements ITrackStore {
+  static trackidManager = new TrackidManager()
+  static createTrackData = function (
+    caller: TrackTarget,
+    target: string,
+    action: PropertyKey
+  ): TrackData {
+    return {
+      trackid: getTrackid(caller),
+      target,
+      action
+    }
+  }
+  private store: {
+    [key: string]: Array<TrackStoreData>
+  } = {};
+  public register(trackData: TrackData) { }
+  public retrieve(trackid: string) { }
+}
+
+function getTrackid(
+  caller: TrackTarget
+): string {
+  const owner: HTMLElement =
+    caller instanceof HTMLElement ? caller : caller._owner
+
+  if (!owner.dataset.trackid) {
+    owner.dataset.trackid =
+      TrackStore.trackidManager.generateID()
+  }
+  return owner.dataset.trackid
 }

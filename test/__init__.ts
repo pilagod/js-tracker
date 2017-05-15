@@ -1,9 +1,11 @@
 import * as chai from 'chai'
+import TrackStore from '../src/tracker/TrackStore'
 
-const expect = chai.expect
+const expect = chai.expect;
 
 beforeEach(function () {
-  (<any>window)._trackidManager.resetID()
+  TrackStore.trackidManager.resetID()
+  // (<any>window)._trackidManager.resetID()
 })
 
 describe('__init__', function () {
