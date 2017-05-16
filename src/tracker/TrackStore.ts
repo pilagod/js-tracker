@@ -5,6 +5,8 @@ import TrackidManager from './TrackidManager'
 const trackidManager = new TrackidManager()
 
 export default class TrackStore implements ITrackStore {
+  /* static */
+
   static generateID = function () {
     return trackidManager.generateID()
   }
@@ -22,16 +24,20 @@ export default class TrackStore implements ITrackStore {
       action
     }
   }
+
+  /* private */
+
   private store: {
     [key: string]: Array<TrackStoreData>
   } = {};
+
+  /* public */
+
   public register(trackData: TrackData) { }
   public retrieve(trackid: string) { }
 }
 
-function getTrackid(
-  caller: TrackTarget
-): string {
+function getTrackid(caller: TrackTarget): string {
   const owner: HTMLElement =
     caller instanceof HTMLElement ? caller : caller._owner
 

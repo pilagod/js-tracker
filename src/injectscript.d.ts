@@ -14,3 +14,8 @@ interface DOMTokenList {
 interface NamedNodeMap {
   _owner: HTMLElement;
 }
+
+type TrackSwitchValue<T> = T | {
+  off?: boolean;
+  value: T;
+}

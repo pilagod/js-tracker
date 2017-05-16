@@ -189,10 +189,10 @@ const ActionTypeMap: {
       'removeAttribute': AttrActionTagMap,
       'removeAttributeNode': AttrActionTagMap,
       'removeAttributeNS': AttrActionTagMap,
-      'setAttribute': AttrActionTagMap, // #special
+      'setAttribute': AttrActionTagMap,
       'setAttributeNode': AttrActionTagMap, // #special
       'setAttributeNodeNS': AttrActionTagMap, // #special
-      'setAttributeNS': AttrActionTagMap, // #special
+      'setAttributeNS': AttrActionTagMap,
 
       'scrollIntoView': Behavior,
 

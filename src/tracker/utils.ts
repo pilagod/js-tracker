@@ -1,19 +1,19 @@
-import SpecialCases from './SpecialCases'
+import Anomalies from './Anomalies'
 
 const utils: {
+  isAnomaly(target, action: PropertyKey): boolean;
   isMethodDescriptor(descriptor: PropertyDescriptor): boolean;
   isSettableDescriptor(descriptor: PropertyDescriptor): boolean;
-  isSpecialCase(target, action: PropertyKey): boolean;
 } = {
+    isAnomaly(target, action) {
+      return Anomalies.hasOwnProperty(target)
+        && Anomalies[target].hasOwnProperty(action)
+    },
     isMethodDescriptor(descriptor) {
       return !!descriptor.value && (typeof descriptor.value === 'function')
     },
     isSettableDescriptor(descriptor) {
       return !!descriptor.set
     },
-    isSpecialCase(target, action) {
-      return SpecialCases.hasOwnProperty(target)
-        && SpecialCases[target].hasOwnProperty(action)
-    }
   }
 export default utils

@@ -4,23 +4,19 @@ import ActionTypeMap from './tracker/ActionTypeMap'
 import TrackStore from './tracker/TrackStore'
 import utils from './tracker/utils'
 
-trackNormalCases()
-trackSpecialCases()
+trackGeneralCases()
 
-setupAttr()
+trackHTMLElementAnomalies()
+trackElementAnomalies()
+trackAttrAnomalies()
+trackNamedNodeMapAnomalies()
 
-setupElementAttributes()
-setupElementClassList()
-
-proxyHTMLElementDataset()
-proxyHTMLElementStyle()
-
-function trackNormalCases(): void {
+function trackGeneralCases() {
   for (let ctr in ActionTypeMap) {
     const proto = window[ctr].prototype
 
     Object.getOwnPropertyNames(proto).forEach((prop) => {
-      if (!utils.isSpecialCase(ctr, prop)) {
+      if (!utils.isAnomaly(ctr, prop)) {
         const descriptor =
           Object.getOwnPropertyDescriptor(proto, prop)
 
@@ -32,6 +28,7 @@ function trackNormalCases(): void {
       }
     })
   }
+
   function decorate(
     target: string,
     action: PropertyKey,
@@ -46,11 +43,12 @@ function trackNormalCases(): void {
     }
     return descriptor
   }
+
   function trackDecorator(
     target: string,
     action: PropertyKey,
     actionFunc: (...args: any[]) => any
-  ): (this: TrackTarget, ...args: any[]) => any {
+  ): (...args: any[]) => any {
     return function (...args) {
       window.postMessage(
         TrackStore.createTrackData(
@@ -65,159 +63,307 @@ function trackNormalCases(): void {
   }
 }
 
-function trackSpecialCases(): void {
+function trackHTMLElementAnomalies() {
+  proxyDataset()
+  proxyStyle()
 
-}
+  function proxyDataset() {
+    const datasetDescriptor =
+      Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'dataset')
 
-function setupAttr(): void {
-  Object.defineProperty(Attr.prototype, '_owner', {
-    get: function (this: Attr): Element {
-      // @TODO: create shadow element, while it is been set, merge the result
-      return this.ownerElement
-    }
-  })
-}
+    datasetDescriptor.get = (function (getter) {
+      let datasetProxy: DOMStringMap
 
-function setupElementAttributes(): void {
-  const attributesDescriptor =
-    Object.getOwnPropertyDescriptor(Element.prototype, 'attributes')
+      return function (this: HTMLElement): DOMStringMap {
+        if (!datasetProxy) {
+          const dataset = getter.call(this)
+          const owner = this
 
-  attributesDescriptor.get = (function (
-    getter: PropertyDescriptor['get']
-  ): PropertyDescriptor['get'] {
-    return function (this: Element): NamedNodeMap {
-      const attributes = getter.call(this)
-
-      if (!attributes._owner) {
-        attributes._owner = this
+          datasetProxy = new Proxy<DOMStringMap>(dataset, {
+            set: function (target, action, value) {
+              if (action !== 'trackid') {
+                window.postMessage(
+                  TrackStore.createTrackData(
+                    owner,
+                    'DOMStringMap',
+                    action
+                  ),
+                  '*'
+                )
+              }
+              target[action] = value
+              return true
+            }
+          })
+        }
+        return datasetProxy
       }
-      return attributes
-    }
-  })(attributesDescriptor.get)
+    })(datasetDescriptor.get)
 
-  Object.defineProperty(
-    Element.prototype,
-    'attributes',
-    attributesDescriptor
-  )
-}
+    Object.defineProperty(
+      HTMLElement.prototype,
+      'dataset',
+      datasetDescriptor
+    )
+  }
 
-function setupElementClassList(): void {
-  const classListDescriptor =
-    Object.getOwnPropertyDescriptor(Element.prototype, 'classList')
+  function proxyStyle() {
+    const styleDescriptor =
+      Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'style')
 
-  classListDescriptor.get = (function (
-    getter: PropertyDescriptor['get']
-  ): PropertyDescriptor['get'] {
-    return function (this: Element): DOMTokenList {
-      const classList = getter.call(this)
+    styleDescriptor.get = (function (getter) {
+      let styleProxy: CSSStyleDeclaration
 
-      if (!classList._owner) {
-        classList._owner = this
-      }
-      return classList
-    }
-  })(classListDescriptor.get)
+      return function (this: HTMLElement): CSSStyleDeclaration {
+        if (!styleProxy) {
+          const style = getter.call(this)
 
-  Object.defineProperty(
-    Element.prototype,
-    'classList',
-    classListDescriptor
-  )
-}
+          style._owner = this
 
-function proxyHTMLElementDataset(): void {
-  const datasetDescriptor =
-    Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'dataset')
-
-  datasetDescriptor.get = (function (
-    getter: PropertyDescriptor['get']
-  ): PropertyDescriptor['get'] {
-    let datasetProxy: DOMStringMap
-
-    return function (this: HTMLElement): DOMStringMap {
-      if (!datasetProxy) {
-        const dataset = getter.call(this)
-        const owner = this
-
-        datasetProxy = new Proxy<DOMStringMap>(dataset, {
-          set: function (target, action, value) {
-            if (action !== 'trackid') {
+          styleProxy = new Proxy<CSSStyleDeclaration>(style, {
+            get: function (target, action) {
+              // @NOTE: 
+              //    function should redirect caller to target, or caller will be Proxy,
+              //    and if methods need to be called by the right caller, it will raise
+              //    Illegal Invocation Error.
+              if (typeof target[action] === 'function') {
+                return target[action].bind(target)
+              }
+              return target[action]
+            },
+            set: function (target, action, value) {
               window.postMessage(
                 TrackStore.createTrackData(
-                  owner,
-                  'DOMStringMap',
-                  action
+                  target,
+                  'CSSStyleDeclaration',
+                  <string>action
                 ),
                 '*'
               )
+              target[action] = value
+              return true
             }
-            target[action] = value
-            return true
-          }
-        })
+          })
+        }
+        return styleProxy
       }
-      return datasetProxy
-    }
-  })(datasetDescriptor.get)
+    })(styleDescriptor.get)
 
-  Object.defineProperty(
-    HTMLElement.prototype,
-    'dataset',
-    datasetDescriptor
-  )
+    Object.defineProperty(
+      HTMLElement.prototype,
+      'style',
+      styleDescriptor
+    )
+  }
 }
 
-function proxyHTMLElementStyle(): void {
-  const styleDescriptor =
-    Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'style')
+function trackElementAnomalies() {
+  setupAttributes()
+  setupClassList()
+  trackSetAttributeNode()
+  trackSetAttributeNodeNS()
 
-  styleDescriptor.get = (function (
-    getter: PropertyDescriptor['get']
-  ): PropertyDescriptor['get'] {
-    let styleProxy: CSSStyleDeclaration
+  function setupAttributes() {
+    const attributesDescriptor =
+      Object.getOwnPropertyDescriptor(Element.prototype, 'attributes')
 
-    return function (this: HTMLElement): CSSStyleDeclaration {
-      if (!styleProxy) {
-        const style = getter.call(this)
+    attributesDescriptor.get = (function (getter) {
+      return function (this: Element): NamedNodeMap {
+        const attributes = getter.call(this)
 
-        style._owner = this
-
-        styleProxy = new Proxy<CSSStyleDeclaration>(style, {
-          get: function (target, action) {
-            // @NOTE: 
-            //    function should redirect caller to target, or caller will be Proxy,
-            //    and if methods need to be called by the right caller, it will raise
-            //    Illegal Invocation Error.
-            if (typeof target[action] === 'function') {
-              return target[action].bind(target)
-              // return function (...args) {
-              //   return target[action].call(target, ...args)
-              // }
-            }
-            return target[action]
-          },
-          set: function (target, action, value) {
-            window.postMessage(
-              TrackStore.createTrackData(
-                target,
-                'CSSStyleDeclaration',
-                <string>action
-              ),
-              '*'
-            )
-            target[action] = value
-            return true
-          }
-        })
+        if (!attributes._owner) {
+          attributes._owner = this
+        }
+        return attributes
       }
-      return styleProxy
-    }
-  })(styleDescriptor.get)
+    })(attributesDescriptor.get)
 
-  Object.defineProperty(
-    HTMLElement.prototype,
-    'style',
-    styleDescriptor
-  )
+    Object.defineProperty(
+      Element.prototype,
+      'attributes',
+      attributesDescriptor
+    )
+  }
+
+  function setupClassList() {
+    const classListDescriptor =
+      Object.getOwnPropertyDescriptor(Element.prototype, 'classList')
+
+    classListDescriptor.get = (function (getter) {
+      return function (this: Element): DOMTokenList {
+        const classList = getter.call(this)
+
+        if (!classList._owner) {
+          classList._owner = this
+        }
+        return classList
+      }
+    })(classListDescriptor.get)
+
+    Object.defineProperty(
+      Element.prototype,
+      'classList',
+      classListDescriptor
+    )
+  }
+
+  function trackSetAttributeNode() {
+    const setAttributeNodeDescriptor =
+      Object.getOwnPropertyDescriptor(Element.prototype, 'setAttributeNode')
+
+    setAttributeNodeDescriptor.value =
+      setAttrNodeDecorator(setAttributeNodeDescriptor.value)
+
+    Object.defineProperty(
+      Element.prototype,
+      'setAttributeNode',
+      setAttributeNodeDescriptor
+    )
+  }
+
+  function trackSetAttributeNodeNS() {
+    const setAttributeNodeNSDescriptor =
+      Object.getOwnPropertyDescriptor(Element.prototype, 'setAttributeNodeNS')
+
+    setAttributeNodeNSDescriptor.value =
+      setAttrNodeNSDecorator(setAttributeNodeNSDescriptor.value)
+
+    Object.defineProperty(
+      Element.prototype,
+      'setAttributeNodeNS',
+      setAttributeNodeNSDescriptor
+    )
+  }
+}
+
+function trackAttrAnomalies(): void {
+  setupAttr()
+  trackValue()
+
+  function setupAttr() {
+    Object.defineProperty(Attr.prototype, '_owner', {
+      get: function (this: Attr): Element {
+        return this.ownerElement
+      }
+    })
+  }
+
+  function trackValue(): void {
+    const valueDescriptor =
+      Object.getOwnPropertyDescriptor(Attr.prototype, 'value')
+
+    valueDescriptor.set = (function (setter) {
+      return function (
+        this: Attr,
+        tsvString: TrackSwitchValue<string>
+      ): void {
+        if (typeof tsvString === 'string') {
+          if (this._owner === null) {
+            // @TODO: check namespaceURI
+            document.createElement('div').setAttributeNode(<any>{
+              off: true,
+              value: this
+            })
+          }
+          window.postMessage(
+            TrackStore.createTrackData(
+              this,
+              'Attr',
+              'value'
+            ),
+            '*'
+          )
+          return setter.call(this, tsvString)
+        }
+        return setter.call(this, tsvString.value)
+      }
+    })(valueDescriptor.set)
+
+    Object.defineProperty(
+      Attr.prototype,
+      'value',
+      valueDescriptor
+    )
+  }
+}
+
+function trackNamedNodeMapAnomalies(): void {
+  trackSetNamedItem()
+  trackSetNamedItemNS()
+
+  function trackSetNamedItem(): void {
+    const setNamedItemDescriptor =
+      Object.getOwnPropertyDescriptor(NamedNodeMap.prototype, 'setNamedItem')
+
+    setNamedItemDescriptor.value =
+      setAttrNodeDecorator(setNamedItemDescriptor.value)
+
+    Object.defineProperty(
+      NamedNodeMap.prototype,
+      'setNamedItem',
+      setNamedItemDescriptor
+    )
+  }
+
+  function trackSetNamedItemNS(): void {
+    const setNamedItemNSDescriptor =
+      Object.getOwnPropertyDescriptor(NamedNodeMap.prototype, 'setNamedItemNS')
+
+    setNamedItemNSDescriptor.value =
+      setAttrNodeNSDecorator(setNamedItemNSDescriptor.value)
+
+    Object.defineProperty(
+      NamedNodeMap.prototype,
+      'setNamedItemNS',
+      setNamedItemNSDescriptor
+    )
+  }
+}
+// @TODO: post track data
+function setAttrNodeDecorator(
+  setAttrNode: (attr: Attr) => void
+): (
+    this: Element | NamedNodeMap,
+    tsvAttr: TrackSwitchValue<Attr>
+  ) => void {
+  return function (tsvAttr) {
+    if (tsvAttr instanceof Attr) {
+      if (tsvAttr._owner) {
+        const clone = document.createAttribute(tsvAttr.name)
+
+        clone.value = <any>{
+          off: true,
+          value: tsvAttr.value
+        }
+        return setAttrNode.call(this, clone)
+      }
+      return setAttrNode.call(this, tsvAttr)
+    }
+    return setAttrNode.call(this, tsvAttr.value)
+  }
+}
+
+function setAttrNodeNSDecorator(
+  setAttrNodeNS: (attr: Attr) => void
+): (
+    this: Element | NamedNodeMap,
+    tsvAttr: TrackSwitchValue<Attr>
+  ) => void {
+  return function (tsvAttr) {
+    if (tsvAttr instanceof Attr) {
+      if (tsvAttr._owner) {
+        const clone = document.createAttributeNS(
+          tsvAttr.namespaceURI,
+          tsvAttr.name // @NOTE not sure to use name or localname ? 
+        )
+        clone.value = <any>{
+          off: true,
+          value: tsvAttr.value
+        }
+        return setAttrNodeNS.call(this, clone)
+      }
+      return setAttrNodeNS.call(this, tsvAttr)
+    }
+    return setAttrNodeNS.call(this, tsvAttr.value)
+  }
 }

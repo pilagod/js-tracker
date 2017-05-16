@@ -7,10 +7,8 @@ export default {
     'attributes': true,
     'classList': true,
 
-    'setAttribute': true,
     'setAttributeNode': true,
-    'setAttributeNodeNS': true,
-    'setAttributeNS': true
+    'setAttributeNodeNS': true
   },
   'Attr': {
     'value': true
