@@ -14,15 +14,24 @@ export default class TrackStore implements ITrackStore {
     trackidManager.resetID()
   }
   static createTrackData = function (
-    caller: TrackTarget,
-    target: string,
-    action: PropertyKey
-  ): TrackData {
-    return {
-      trackid: getTrackid(caller),
-      target,
-      action
+    info: {
+      caller: TrackTarget,
+      target: string,
+      action: Action,
+      merge?: string
     }
+  ): TrackData {
+    const trackData = {
+      trackid: getTrackid(info.caller),
+      target: info.target,
+      action: info.action
+    }
+    if (info.merge) {
+      Object.assign(trackData, {
+        merge: info.merge
+      })
+    }
+    return trackData
   }
 
   /* private */

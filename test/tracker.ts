@@ -37,6 +37,10 @@ describe('tracker', function () {
 
     expect(div.dataset.trackid).to.equal('1')
     expect(msgs).to.have.length(1)
+    console.log(msgs[0].trackid)
+    console.log(msgs[0].target)
+    console.log(msgs[0].action)
+    console.log(msgs[0].hasOwnProperty('merge'))
     expect(msgs[0]).to.deep.equal({
       trackid: '1',
       target: 'DOMStringMap',

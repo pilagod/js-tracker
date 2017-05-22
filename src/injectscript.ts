@@ -31,7 +31,7 @@ function trackGeneralCases() {
 
   function decorate(
     target: string,
-    action: PropertyKey,
+    action: Action,
     descriptor: PropertyDescriptor
   ): PropertyDescriptor {
     if (utils.isMethodDescriptor(descriptor)) {
@@ -46,16 +46,16 @@ function trackGeneralCases() {
 
   function trackDecorator(
     target: string,
-    action: PropertyKey,
+    action: Action,
     actionFunc: (...args: any[]) => any
   ): (...args: any[]) => any {
     return function (...args) {
       window.postMessage(
-        TrackStore.createTrackData(
-          this,
+        TrackStore.createTrackData({
+          caller: this,
           target,
           action
-        ),
+        }),
         '*'
       )
       return actionFunc.call(this, ...args)
@@ -83,11 +83,11 @@ function trackHTMLElementAnomalies() {
             set: function (target, action, value) {
               if (action !== 'trackid') {
                 window.postMessage(
-                  TrackStore.createTrackData(
-                    owner,
-                    'DOMStringMap',
+                  TrackStore.createTrackData({
+                    caller: owner,
+                    target: 'DOMStringMap',
                     action
-                  ),
+                  }),
                   '*'
                 )
               }
@@ -133,11 +133,11 @@ function trackHTMLElementAnomalies() {
             },
             set: function (target, action, value) {
               window.postMessage(
-                TrackStore.createTrackData(
-                  target,
-                  'CSSStyleDeclaration',
-                  <string>action
-                ),
+                TrackStore.createTrackData({
+                  caller: target,
+                  target: 'CSSStyleDeclaration',
+                  action: action
+                }),
                 '*'
               )
               target[action] = value
@@ -226,7 +226,7 @@ function trackElementAnomalies() {
       Object.getOwnPropertyDescriptor(Element.prototype, 'setAttributeNodeNS')
 
     setAttributeNodeNSDescriptor.value =
-      setAttrNodeNSDecorator(setAttributeNodeNSDescriptor.value)
+      setAttrNodeDecorator(setAttributeNodeNSDescriptor.value)
 
     Object.defineProperty(
       Element.prototype,
@@ -266,11 +266,11 @@ function trackAttrAnomalies(): void {
             })
           }
           window.postMessage(
-            TrackStore.createTrackData(
-              this,
-              'Attr',
-              'value'
-            ),
+            TrackStore.createTrackData({
+              caller: this,
+              target: 'Attr',
+              action: 'value'
+            }),
             '*'
           )
           return setter.call(this, tsvString)
@@ -310,7 +310,7 @@ function trackNamedNodeMapAnomalies(): void {
       Object.getOwnPropertyDescriptor(NamedNodeMap.prototype, 'setNamedItemNS')
 
     setNamedItemNSDescriptor.value =
-      setAttrNodeNSDecorator(setNamedItemNSDescriptor.value)
+      setAttrNodeDecorator(setNamedItemNSDescriptor.value)
 
     Object.defineProperty(
       NamedNodeMap.prototype,
@@ -328,42 +328,29 @@ function setAttrNodeDecorator(
   ) => void {
   return function (tsvAttr) {
     if (tsvAttr instanceof Attr) {
-      if (tsvAttr._owner) {
-        const clone = document.createAttribute(tsvAttr.name)
-
-        clone.value = <any>{
-          off: true,
-          value: tsvAttr.value
-        }
-        return setAttrNode.call(this, clone)
-      }
-      return setAttrNode.call(this, tsvAttr)
+      return setAttrNode.call(this, parseTrackAttr(tsvAttr))
     }
     return setAttrNode.call(this, tsvAttr.value)
   }
 }
 
-function setAttrNodeNSDecorator(
-  setAttrNodeNS: (attr: Attr) => void
-): (
-    this: Element | NamedNodeMap,
-    tsvAttr: TrackSwitchValue<Attr>
-  ) => void {
-  return function (tsvAttr) {
-    if (tsvAttr instanceof Attr) {
-      if (tsvAttr._owner) {
-        const clone = document.createAttributeNS(
-          tsvAttr.namespaceURI,
-          tsvAttr.name // @NOTE not sure to use name or localname ? 
-        )
-        clone.value = <any>{
-          off: true,
-          value: tsvAttr.value
-        }
-        return setAttrNodeNS.call(this, clone)
-      }
-      return setAttrNodeNS.call(this, tsvAttr)
+function parseTrackAttr(attr: Attr): Attr {
+  if (attr._owner) {
+    let clone
+
+    if (attr.namespaceURI) {
+      clone = document.createAttributeNS(
+        attr.namespaceURI,
+        attr.name // @NOTE not sure to use name or localname ? 
+      )
+    } else {
+      clone = document.createAttribute(attr.name)
     }
-    return setAttrNodeNS.call(this, tsvAttr.value)
+    clone.value = <any>{
+      off: true,
+      value: attr.value
+    }
+    return clone
   }
+  return attr
 }

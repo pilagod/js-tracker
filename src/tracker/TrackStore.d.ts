@@ -1,3 +1,5 @@
+type Action = PropertyKey
+
 type TrackTarget =
   HTMLElement
   | Attr
@@ -5,11 +7,19 @@ type TrackTarget =
   | DOMTokenList
   | NamedNodeMap
 
+type TrackInfo = {
+  caller: TrackTarget,
+  target: string,
+  action: Action,
+  merge?: string
+}
+
 type TrackData = {
   trackid: string,
   target: string,
-  action: PropertyKey,
+  action: Action,
   actionTag?: string,
+  merge?: string,
   stacktrace?: any
 }
 
