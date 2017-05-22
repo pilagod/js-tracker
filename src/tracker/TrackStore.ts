@@ -47,8 +47,7 @@ export default class TrackStore implements ITrackStore {
 }
 
 function getTrackid(caller: TrackTarget): string {
-  const owner: HTMLElement =
-    caller instanceof HTMLElement ? caller : caller._owner
+  const owner: HTMLElement = caller._owner
 
   if (!owner.dataset.trackid) {
     owner.dataset.trackid = TrackStore.generateID()

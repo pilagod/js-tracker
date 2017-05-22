@@ -64,8 +64,17 @@ function trackGeneralCases() {
 }
 
 function trackHTMLElementAnomalies() {
+  setupOwner()
   proxyDataset()
   proxyStyle()
+
+  function setupOwner() {
+    Object.defineProperty(HTMLElement.prototype, '_owner', {
+      get: function () {
+        return this
+      }
+    })
+  }
 
   function proxyDataset() {
     const datasetDescriptor =
@@ -211,9 +220,11 @@ function trackElementAnomalies() {
     const setAttributeNodeDescriptor =
       Object.getOwnPropertyDescriptor(Element.prototype, 'setAttributeNode')
 
-    setAttributeNodeDescriptor.value =
-      setAttrNodeDecorator(setAttributeNodeDescriptor.value)
-
+    setAttributeNodeDescriptor.value = setAttrNodeDecorator(
+      'Element',
+      'setAttributeNode',
+      setAttributeNodeDescriptor.value
+    )
     Object.defineProperty(
       Element.prototype,
       'setAttributeNode',
@@ -225,9 +236,11 @@ function trackElementAnomalies() {
     const setAttributeNodeNSDescriptor =
       Object.getOwnPropertyDescriptor(Element.prototype, 'setAttributeNodeNS')
 
-    setAttributeNodeNSDescriptor.value =
-      setAttrNodeDecorator(setAttributeNodeNSDescriptor.value)
-
+    setAttributeNodeNSDescriptor.value = setAttrNodeDecorator(
+      'Element',
+      'setAttributeNodeNS',
+      setAttributeNodeNSDescriptor.value
+    )
     Object.defineProperty(
       Element.prototype,
       'setAttributeNodeNS',
@@ -295,9 +308,11 @@ function trackNamedNodeMapAnomalies(): void {
     const setNamedItemDescriptor =
       Object.getOwnPropertyDescriptor(NamedNodeMap.prototype, 'setNamedItem')
 
-    setNamedItemDescriptor.value =
-      setAttrNodeDecorator(setNamedItemDescriptor.value)
-
+    setNamedItemDescriptor.value = setAttrNodeDecorator(
+      'NamedNodeMap',
+      'setNamedItem',
+      setNamedItemDescriptor.value
+    )
     Object.defineProperty(
       NamedNodeMap.prototype,
       'setNamedItem',
@@ -309,9 +324,11 @@ function trackNamedNodeMapAnomalies(): void {
     const setNamedItemNSDescriptor =
       Object.getOwnPropertyDescriptor(NamedNodeMap.prototype, 'setNamedItemNS')
 
-    setNamedItemNSDescriptor.value =
-      setAttrNodeDecorator(setNamedItemNSDescriptor.value)
-
+    setNamedItemNSDescriptor.value = setAttrNodeDecorator(
+      'NamedNodeMap',
+      'setNamedItemNS',
+      setNamedItemNSDescriptor.value
+    )
     Object.defineProperty(
       NamedNodeMap.prototype,
       'setNamedItemNS',
@@ -319,18 +336,31 @@ function trackNamedNodeMapAnomalies(): void {
     )
   }
 }
-// @TODO: post track data
+
 function setAttrNodeDecorator(
-  setAttrNode: (attr: Attr) => void
+  target: string,
+  action: Action,
+  actionFunc: (attr: Attr) => void
 ): (
-    this: Element | NamedNodeMap,
+    // @TODO: 
+    //  this api built on Element, but there are other
+    //  interfaces built on Element, such as SVGElement
+    this: HTMLElement | NamedNodeMap,
     tsvAttr: TrackSwitchValue<Attr>
   ) => void {
   return function (tsvAttr) {
     if (tsvAttr instanceof Attr) {
-      return setAttrNode.call(this, parseTrackAttr(tsvAttr))
+      window.postMessage(
+        TrackStore.createTrackData({
+          caller: this,
+          target,
+          action
+        }),
+        '*'
+      )
+      return actionFunc.call(this, parseTrackAttr(tsvAttr))
     }
-    return setAttrNode.call(this, tsvAttr.value)
+    return actionFunc.call(this, tsvAttr.value)
   }
 }
 

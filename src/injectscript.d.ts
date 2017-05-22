@@ -1,3 +1,7 @@
+interface HTMLElement {
+  _owner: HTMLElement
+}
+
 interface Attr {
   _owner: HTMLElement;
 }
