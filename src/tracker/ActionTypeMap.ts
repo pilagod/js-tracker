@@ -192,6 +192,8 @@ const ActionTypeMap: {
 
       'scrollIntoView': Behavior,
 
+      'setPointerCapture': Event,
+
       'append': Node,
       'attachShadow': Node,
       'insertAdjacentElement': Node,
@@ -200,13 +202,13 @@ const ActionTypeMap: {
       'prepend': Node,
 
       // ChildNode https://developer.mozilla.org/zh-TW/docs/Web/API/ChildNode
-      // Chrome sets these methods in Element
+      // Chrome keeps these methods in Element
       'remove': Node,
       'before': Node,
       'after': Node,
       'replaceWith': Node,
 
-      'animate': Style
+      // 'animate': Style,
     },
     'Node': {
       // https://developer.mozilla.org/zh-TW/docs/Web/API/Node
