@@ -40,15 +40,11 @@ const ActionTypeMap: {
     'HTMLElement': {
       // https://developer.mozilla.org/zh-TW/docs/Web/API/HTMLElement
 
-      /* special cases */
-
-
-
       /* properties */
 
       'accessKey': Attribute,
       'contentEditable': Attribute,
-      'dataset': Attribute, // #special
+      'dataset': Attribute, // #anomaly
       'dir': Attribute,
       'draggable': Attribute,
       'hidden': Attribute,
@@ -56,7 +52,7 @@ const ActionTypeMap: {
       'lang': Attribute,
       'outerText': Node,
       'spellcheck': Attribute,
-      'style': Style, // #special
+      'style': Style, // #anomaly
       'tabIndex': Attribute,
       'title': Attribute,
       'translate': Attribute,
@@ -158,8 +154,8 @@ const ActionTypeMap: {
 
       /* properties */
 
-      'attributes': Attribute, // #special
-      'classList': Style, // #special
+      'attributes': Attribute, // #anomaly
+      'classList': Style, // #anomaly
       'id': Attribute,
       'name': Attribute,
       'slot': Attribute,
@@ -190,8 +186,8 @@ const ActionTypeMap: {
       'removeAttributeNode': AttrActionTagMap,
       'removeAttributeNS': AttrActionTagMap,
       'setAttribute': AttrActionTagMap,
-      'setAttributeNode': AttrActionTagMap, // #special
-      'setAttributeNodeNS': AttrActionTagMap, // #special
+      'setAttributeNode': AttrActionTagMap, // #anomaly
+      'setAttributeNodeNS': AttrActionTagMap, // #anomaly
       'setAttributeNS': AttrActionTagMap,
 
       'scrollIntoView': Behavior,
@@ -244,7 +240,7 @@ const ActionTypeMap: {
 
       /* properties */
 
-      'value': AttrActionTagMap // #special
+      'value': AttrActionTagMap // #anomaly
     },
     'CSSStyleDeclaration': {
       // https://developer.mozilla.org/zh-TW/docs/Web/API/CSSStyleDeclaration
@@ -278,8 +274,8 @@ const ActionTypeMap: {
 
       'removeNamedItem': AttrActionTagMap,
       'removeNamedItemNS': AttrActionTagMap,
-      'setNamedItem': AttrActionTagMap, // #special
-      'setNamedItemNS': AttrActionTagMap, // #special
+      'setNamedItem': AttrActionTagMap, // #anomaly
+      'setNamedItemNS': AttrActionTagMap, // #anomaly
     },
   }
 export default ActionTypeMap
