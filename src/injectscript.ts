@@ -4,14 +4,19 @@ import ActionTypeMap from './tracker/ActionTypeMap'
 import TrackStore from './tracker/TrackStore'
 import utils from './tracker/utils'
 
-trackGeneralCases()
+main()
 
-trackHTMLElementAnomalies()
-trackElementAnomalies()
-trackAttrAnomalies()
-trackNamedNodeMapAnomalies()
+function main() {
+  trackGeneralCases()
+
+  trackHTMLElementAnomalies()
+  trackElementAnomalies()
+  trackAttrAnomalies()
+  trackNamedNodeMapAnomalies()
+}
 
 function trackGeneralCases() {
+
   for (let ctr in ActionTypeMap) {
     const proto = window[ctr].prototype
 
@@ -366,16 +371,11 @@ function setAttrNodeDecorator(
 
 function parseTrackAttr(attr: Attr): Attr {
   if (attr._owner) {
-    let clone
-
-    if (attr.namespaceURI) {
-      clone = document.createAttributeNS(
-        attr.namespaceURI,
-        attr.name // @NOTE not sure to use name or localname ? 
-      )
-    } else {
-      clone = document.createAttribute(attr.name)
-    }
+    const clone =
+      attr.namespaceURI ?
+        // @NOTE: use name or localname ?
+        document.createAttributeNS(attr.namespaceURI, attr.name) :
+        document.createAttribute(attr.name);
     clone.value = <any>{
       off: true,
       value: attr.value
