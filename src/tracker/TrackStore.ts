@@ -5,6 +5,7 @@ import TrackidManager from './TrackidManager'
 const trackidManager = new TrackidManager()
 
 export default class TrackStore implements ITrackStore {
+
   /* static */
 
   static generateID = function () {

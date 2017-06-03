@@ -7,6 +7,10 @@ type TrackTarget =
   | DOMTokenList
   | NamedNodeMap
 
+interface TrackTargetInf {
+  _owner: HTMLElement;
+}
+
 type TrackInfo = {
   caller: TrackTarget,
   target: string,
@@ -31,4 +35,19 @@ interface ITrackStore {
   retrieve(trackid: string): any;
 }
 
+type TrackSwitchValue<T> = T | {
+  off?: boolean;
+  value: T;
+}
 
+/**
+ * Extend Native Interfaces
+ */
+
+interface HTMLElement extends TrackTargetInf { }
+interface Attr extends TrackTargetInf { }
+interface CSSStyleDeclaration extends TrackTargetInf { }
+interface DOMTokenList extends TrackTargetInf {
+  _which: string;
+}
+interface NamedNodeMap extends TrackTargetInf { }

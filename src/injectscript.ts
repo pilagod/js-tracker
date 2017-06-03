@@ -1,4 +1,4 @@
-/// <reference path='./injectscript.d.ts' />
+///<reference path='./tracker/TrackStore.d.ts'/>
 
 import ActionTypeMap from './tracker/ActionTypeMap'
 import TrackStore from './tracker/TrackStore'
