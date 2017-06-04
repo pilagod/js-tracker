@@ -47,13 +47,8 @@ type TrackSwitchValue<T> = T | {
  * Extend Native Interfaces
  */
 
-// interface HTMLElement extends TrackTargetInf { }
-// interface SVGElement extends TrackTargetInf {
-// @TODO: make pull request to typescript
-// dataset: DOMStringMap
-// }
 interface SVGElement {
-  dataset: DOMStringMap
+  readonly dataset: DOMStringMap
 }
 interface Element extends TrackTargetInf { }
 interface Attr extends TrackTargetInf { }
