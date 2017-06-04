@@ -3,7 +3,7 @@ import ActionTypeMap from '../src/tracker/ActionTypeMap'
 
 const expect = chai.expect
 
-describe('track coverage', function () {
+describe('tracker\'s coverage', function () {
   describe('property setter coverage', function () {
     const EXCLUDE_PROPS: Object = {
       'attributes': true,

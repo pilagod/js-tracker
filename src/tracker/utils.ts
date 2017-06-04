@@ -1,6 +1,6 @@
 import Anomalies from './Anomalies'
 
-const utils: {
+const Utils: {
   isAnomaly(target, action: PropertyKey): boolean;
   isMethodDescriptor(descriptor: PropertyDescriptor): boolean;
   isSettableDescriptor(descriptor: PropertyDescriptor): boolean;
@@ -16,4 +16,4 @@ const utils: {
       return !!descriptor.set
     },
   }
-export default utils
+export default Utils

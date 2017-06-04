@@ -1,5 +1,7 @@
 /// <reference path="TrackStore.d.ts" />
 
+import * as StackTrace from 'stacktrace-js'
+
 import TrackidManager from './TrackidManager'
 
 const trackidManager = new TrackidManager()
@@ -25,7 +27,8 @@ export default class TrackStore implements ITrackStore {
     const trackData = {
       trackid: getTrackid(info.caller),
       target: info.target,
-      action: info.action
+      action: info.action,
+      stacktrace: StackTrace.getSync()
     }
     if (info.merge) {
       Object.assign(trackData, {
@@ -48,7 +51,7 @@ export default class TrackStore implements ITrackStore {
 }
 
 function getTrackid(caller: TrackTarget): string {
-  const owner: HTMLElement = caller._owner
+  const owner: Owner = caller._owner
 
   if (!owner.dataset.trackid) {
     owner.dataset.trackid = TrackStore.generateID()

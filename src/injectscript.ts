@@ -2,7 +2,7 @@
 
 import ActionTypeMap from './tracker/ActionTypeMap'
 import TrackStore from './tracker/TrackStore'
-import utils from './tracker/utils'
+import Utils from './tracker/Utils'
 
 main()
 
@@ -21,7 +21,7 @@ function trackGeneralCases() {
     const proto = window[ctr].prototype
 
     Object.getOwnPropertyNames(proto).forEach((prop) => {
-      if (!utils.isAnomaly(ctr, prop)) {
+      if (!Utils.isAnomaly(ctr, prop)) {
         const descriptor =
           Object.getOwnPropertyDescriptor(proto, prop)
 
@@ -39,10 +39,10 @@ function trackGeneralCases() {
     action: Action,
     descriptor: PropertyDescriptor
   ): PropertyDescriptor {
-    if (utils.isMethodDescriptor(descriptor)) {
+    if (Utils.isMethodDescriptor(descriptor)) {
       descriptor.value =
         trackDecorator(target, action, descriptor.value)
-    } else if (utils.isSettableDescriptor(descriptor)) {
+    } else if (Utils.isSettableDescriptor(descriptor)) {
       descriptor.set =
         trackDecorator(target, action, descriptor.set)
     }
@@ -69,17 +69,8 @@ function trackGeneralCases() {
 }
 
 function trackHTMLElementAnomalies() {
-  setupOwner()
   proxyDataset()
   proxyStyle()
-
-  function setupOwner() {
-    Object.defineProperty(HTMLElement.prototype, '_owner', {
-      get: function () {
-        return this
-      }
-    })
-  }
 
   function proxyDataset() {
     const datasetDescriptor =
@@ -172,10 +163,19 @@ function trackHTMLElementAnomalies() {
 }
 
 function trackElementAnomalies() {
+  setupOwner()
   setupAttributes()
   setupClassList()
   trackSetAttributeNode()
   trackSetAttributeNodeNS()
+
+  function setupOwner() {
+    Object.defineProperty(Element.prototype, '_owner', {
+      get: function () {
+        return this
+      }
+    })
+  }
 
   function setupAttributes() {
     const attributesDescriptor =

@@ -2,13 +2,16 @@ type Action = PropertyKey
 
 type TrackTarget =
   HTMLElement
+  | SVGElement
   | Attr
   | CSSStyleDeclaration
   | DOMTokenList
   | NamedNodeMap
 
+type Owner = HTMLElement | SVGElement
+
 interface TrackTargetInf {
-  _owner: HTMLElement;
+  _owner: Owner;
 }
 
 type TrackInfo = {
@@ -22,9 +25,9 @@ type TrackData = {
   trackid: string,
   target: string,
   action: Action,
+  stacktrace: StackTrace.StackFrame[],
   actionTag?: string,
-  merge?: string,
-  stacktrace?: any
+  merge?: string
 }
 
 type TrackStoreData = {
@@ -44,7 +47,15 @@ type TrackSwitchValue<T> = T | {
  * Extend Native Interfaces
  */
 
-interface HTMLElement extends TrackTargetInf { }
+// interface HTMLElement extends TrackTargetInf { }
+// interface SVGElement extends TrackTargetInf {
+// @TODO: make pull request to typescript
+// dataset: DOMStringMap
+// }
+interface SVGElement {
+  dataset: DOMStringMap
+}
+interface Element extends TrackTargetInf { }
 interface Attr extends TrackTargetInf { }
 interface CSSStyleDeclaration extends TrackTargetInf { }
 interface DOMTokenList extends TrackTargetInf {

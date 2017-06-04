@@ -2,7 +2,7 @@ import * as chai from 'chai'
 
 const expect = chai.expect
 
-describe('compatibility of default behaviors', function () {
+describe('tracker\'s compatibility of native behaviors', function () {
   describe('HTMLElement', function () {
     it('should set property properly', function () {
       const div = document.createElement('div')
