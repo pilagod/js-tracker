@@ -3,7 +3,7 @@ import * as chai from 'chai'
 const expect = chai.expect
 
 describe('tracker\'s behaviors', function () {
-  let msgs: TrackData[]
+  let msgs: TrackInfo[]
 
   before(function () {
     window.postMessage = function (msg) {
@@ -15,7 +15,7 @@ describe('tracker\'s behaviors', function () {
     msgs = []
   })
 
-  type ExpectData = {
+  type ExpectInfo = {
     caller: TrackTarget,
     trackid: string,
     target: string,
@@ -25,7 +25,7 @@ describe('tracker\'s behaviors', function () {
     merge?: string,
   }
 
-  function matchTrackData(got: TrackData, expected: ExpectData) {
+  function matchTrackData(got: TrackInfo, expected: ExpectInfo) {
     expect(expected.caller._owner)
       .to.have.property('_trackid')
       .to.equal(expected.trackid)

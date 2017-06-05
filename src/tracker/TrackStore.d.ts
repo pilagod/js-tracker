@@ -14,14 +14,14 @@ interface TrackTargetInf {
   _owner: Element;
 }
 
-type TrackInfo = {
+type TrackData = {
   caller: TrackTarget,
   target: string,
   action: Action,
   merge?: string
 }
 
-type TrackData = {
+type TrackInfo = {
   trackid: string,
   target: string,
   action: Action,
@@ -30,7 +30,7 @@ type TrackData = {
   merge?: string
 }
 
-type TrackStoreData = {
+type TrackRecord = {
 }
 
 interface ITrackStore {
