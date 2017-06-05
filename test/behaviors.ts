@@ -121,8 +121,39 @@ describe('tracker\'s behaviors', function () {
 
   describe('Element', () => {
     it('should track property assignment', () => {
+      const div = document.createElement('div')
 
+      div.id = 'id'
+
+      expect(msgs).to.have.length(1)
+
+      matchTrackData(msgs[0], {
+        caller: div,
+        trackid: '1',
+        target: 'Element',
+        action: 'id'
+      })
     })
+
+    it('should track method call', () => {
+      const div = document.createElement('div')
+      const div2 = document.createElement('div')
+
+      div.insertAdjacentElement('afterbegin', div2)
+
+      expect(msgs).to.have.length(1)
+
+      matchTrackData(msgs[0], {
+        caller: div,
+        trackid: '1',
+        target: 'Element',
+        action: 'insertAdjacentElement'
+      })
+    })
+
+    /* anomalies */
+
+
   })
 
   describe('Node', () => {

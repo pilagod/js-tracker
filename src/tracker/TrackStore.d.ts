@@ -3,6 +3,7 @@ type Action = PropertyKey
 type TrackTarget =
   HTMLElement
   | SVGElement
+  | Element
   | Attr
   | CSSStyleDeclaration
   | DOMStringMap
@@ -47,6 +48,7 @@ type TrackSwitchValue<T> = T | {
  */
 
 interface SVGElement {
+  // @TODO: pull request to typescript repo
   readonly dataset: DOMStringMap
 }
 interface Element extends TrackTargetInf { }

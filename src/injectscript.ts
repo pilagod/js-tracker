@@ -37,6 +37,7 @@ function trackGeneralCases() {
       }
     })
   }
+
   function trackDecorator(
     target: string,
     action: Action,
@@ -341,10 +342,7 @@ function setAttrNodeDecorator(
   action: Action,
   actionFunc: (attr: Attr) => void
 ): (
-    // @TODO: 
-    //  this api built on Element, but there are other
-    //  interfaces built on Element, such as SVGElement
-    this: HTMLElement | NamedNodeMap,
+    this: Element | NamedNodeMap,
     tsvAttr: TrackSwitchValue<Attr>
   ) => void {
   return function (tsvAttr) {
