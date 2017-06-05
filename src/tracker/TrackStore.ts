@@ -16,19 +16,8 @@ export default class TrackStore implements ITrackStore {
   static resetID = function () {
     trackidManager.resetID()
   }
-  static createTrackInfo = function (data: TrackData): TrackInfo {
-    const info = {
-      trackid: getTrackid(data.caller),
-      target: data.target,
-      action: data.action,
-      stacktrace: StackTrace.getSync()
-    }
-    if (data.merge) {
-      Object.assign(info, {
-        merge: data.merge
-      })
-    }
-    return info
+  static store = function (data: TrackData) {
+    window.postMessage(createInfo(data), '*')
   }
 
   /* private */
@@ -41,6 +30,21 @@ export default class TrackStore implements ITrackStore {
 
   public register(trackData: TrackData) { }
   public retrieve(trackid: string) { }
+}
+
+function createInfo(data: TrackData): TrackInfo {
+  const info = {
+    trackid: getTrackid(data.caller),
+    target: data.target,
+    action: data.action,
+    stacktrace: StackTrace.getSync()
+  }
+  if (data.merge) {
+    Object.assign(info, {
+      merge: data.merge
+    })
+  }
+  return info
 }
 
 function getTrackid(caller: TrackTarget): string {

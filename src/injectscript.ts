@@ -44,21 +44,17 @@ function trackGeneralCases() {
     actionFunc: (...args: any[]) => any
   ): (...args: any[]) => any {
     return function (...args) {
-      storeTrackData(TrackStore.createTrackInfo({
+      TrackStore.store({
         // @NOTE: 
         //    type of target might be different from type of caller
         //    e.g. caller: HTMLDivElement, target: Element, action: id
         caller: this,
         target,
         action
-      }))
+      })
       return actionFunc.call(this, ...args)
     }
   }
-}
-
-function storeTrackData(info: TrackInfo) {
-  window.postMessage(info, '*')
 }
 
 function trackHTMLElementAnomalies() {
@@ -84,11 +80,11 @@ function trackHTMLElementAnomalies() {
           })
           datasetProxy = new Proxy<DOMStringMap>(dataset, {
             set: function (target, action, value) {
-              storeTrackData(TrackStore.createTrackInfo({
+              TrackStore.store({
                 caller: target,
                 target: 'DOMStringMap',
                 action
-              }))
+              })
               target[action] = value
               return true
             }
@@ -130,11 +126,11 @@ function trackHTMLElementAnomalies() {
               return target[action]
             },
             set: function (target, action, value) {
-              storeTrackData(TrackStore.createTrackInfo({
+              TrackStore.store({
                 caller: target,
                 target: 'CSSStyleDeclaration',
                 action: action
-              }))
+              })
               target[action] = value
               return true
             }
@@ -273,11 +269,11 @@ function trackAttrAnomalies(): void {
               value: this
             })
           }
-          storeTrackData(TrackStore.createTrackInfo({
+          TrackStore.store({
             caller: this,
             target: 'Attr',
             action: 'value'
-          }))
+          })
           return setter.call(this, tsvString)
         }
         return setter.call(this, tsvString.value)
@@ -340,11 +336,11 @@ function setAttrNodeDecorator(
   return function (tsvAttr) {
     if (tsvAttr instanceof Attr) {
       // @TODO: setup merge
-      storeTrackData(TrackStore.createTrackInfo({
+      TrackStore.store({
         caller: this,
         target,
         action
-      }))
+      })
       return actionFunc.call(this, parseTrackAttr(tsvAttr))
     }
     return actionFunc.call(this, tsvAttr.value)
