@@ -1,5 +1,7 @@
 ///<reference path='./tracker/TrackStore.d.ts'/>
 
+// @TODO: refactor with template pattern
+
 import ActionTypeMap from './tracker/ActionTypeMap'
 import TrackStore from './tracker/TrackStore'
 import Utils from './tracker/Utils'
@@ -69,6 +71,7 @@ function trackGeneralCases() {
 }
 
 function trackHTMLElementAnomalies() {
+
   proxyDataset()
   proxyStyle()
 
@@ -84,18 +87,21 @@ function trackHTMLElementAnomalies() {
           const dataset = getter.call(this)
           const owner = this
 
+          Object.defineProperty(dataset, '_owner', {
+            get: function () {
+              return owner
+            }
+          })
           datasetProxy = new Proxy<DOMStringMap>(dataset, {
             set: function (target, action, value) {
-              if (action !== 'trackid') {
-                window.postMessage(
-                  TrackStore.createTrackData({
-                    caller: owner,
-                    target: 'DOMStringMap',
-                    action
-                  }),
-                  '*'
-                )
-              }
+              window.postMessage(
+                TrackStore.createTrackData({
+                  caller: target,
+                  target: 'DOMStringMap',
+                  action
+                }),
+                '*'
+              )
               target[action] = value
               return true
             }
@@ -355,6 +361,7 @@ function setAttrNodeDecorator(
   ) => void {
   return function (tsvAttr) {
     if (tsvAttr instanceof Attr) {
+      // @TODO: setup merge
       window.postMessage(
         TrackStore.createTrackData({
           caller: this,

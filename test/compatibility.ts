@@ -23,15 +23,6 @@ describe('tracker\'s compatibility of native behaviors', function () {
 
     /* anomalies */
 
-    it('should keep style\'s default behaviors', function () {
-      const div = document.createElement('div')
-
-      div.style.color = 'red'
-
-      expect(div.style).to.be.instanceof(CSSStyleDeclaration)
-      expect(div.style.color).to.equal('red')
-    })
-
     it('should keep dataset\'s default behaviors', function () {
       const div = document.createElement('div')
 
@@ -39,6 +30,15 @@ describe('tracker\'s compatibility of native behaviors', function () {
 
       expect(div.dataset).to.be.instanceof(DOMStringMap)
       expect(div.dataset.data).to.equal('data')
+    })
+
+    it('should keep style\'s default behaviors', function () {
+      const div = document.createElement('div')
+
+      div.style.color = 'red'
+
+      expect(div.style).to.be.instanceof(CSSStyleDeclaration)
+      expect(div.style.color).to.equal('red')
     })
   })
 

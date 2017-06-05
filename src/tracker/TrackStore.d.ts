@@ -5,13 +5,12 @@ type TrackTarget =
   | SVGElement
   | Attr
   | CSSStyleDeclaration
+  | DOMStringMap
   | DOMTokenList
   | NamedNodeMap
 
-type Owner = HTMLElement | SVGElement
-
 interface TrackTargetInf {
-  _owner: Owner;
+  _owner: Element;
 }
 
 type TrackInfo = {
@@ -53,6 +52,10 @@ interface SVGElement {
 interface Element extends TrackTargetInf { }
 interface Attr extends TrackTargetInf { }
 interface CSSStyleDeclaration extends TrackTargetInf { }
+interface DOMStringMap extends TrackTargetInf {
+  // @NOTE: use any to bypass original map type
+  _owner: any
+}
 interface DOMTokenList extends TrackTargetInf {
   _which: string;
 }

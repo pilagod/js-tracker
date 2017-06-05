@@ -15,8 +15,7 @@ describe('tracker\'s behaviors', function () {
     msgs = []
   })
 
-  type ExpectedData = {
-    caller: TrackTarget,
+  type ExpectData = {
     trackid: string,
     target: string,
     action: Action,
@@ -24,11 +23,7 @@ describe('tracker\'s behaviors', function () {
     merge?: string
   }
 
-  function matchTrackData(got: TrackData, expected: ExpectedData) {
-    expect(expected.caller._owner.dataset)
-      .to.have.property('trackid')
-      .to.equal(expected.trackid)
-
+  function matchTrackData(got: TrackData, expected: ExpectData) {
     expect(got)
       .to.have.property('trackid')
       .to.equal(expected.trackid)
@@ -40,10 +35,6 @@ describe('tracker\'s behaviors', function () {
     expect(got)
       .to.have.property('action')
       .to.equal(expected.action)
-
-    expect(got.stacktrace[1])
-      .property('functionName')
-      .to.equal(`${expected.caller.constructor.name}.${expected.action}`)
   }
 
   describe('HTMLElement', () => {
@@ -55,7 +46,6 @@ describe('tracker\'s behaviors', function () {
       expect(msgs).to.have.length(1)
 
       matchTrackData(msgs[0], {
-        caller: div,
         trackid: '1',
         target: 'HTMLElement',
         action: 'accessKey',
@@ -63,7 +53,26 @@ describe('tracker\'s behaviors', function () {
     })
 
     it('should track method call', () => {
+      const div = document.createElement('div')
 
+      div.click()
+
+      expect(msgs).to.have.length(1)
+
+      matchTrackData(msgs[0], {
+        trackid: '1',
+        target: 'HTMLElement',
+        action: 'click'
+      })
+    })
+
+    /* anomalies */
+
+    // @NOTE: dataset is a specially special case
+    it('should track dataset property assignment', () => {
+    })
+
+    it('should track style property assignment', () => {
     })
   })
 
