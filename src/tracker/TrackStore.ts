@@ -1,35 +1,26 @@
 /// <reference path="TrackStore.d.ts" />
 
 import * as StackTrace from 'stacktrace-js'
-
 import TrackidManager from './TrackidManager'
-
-const trackidManager = new TrackidManager()
 
 export default class TrackStore implements ITrackStore {
 
   /* static */
 
-  static generateID = function () {
-    return trackidManager.generateID()
-  }
-  static resetID = function () {
-    trackidManager.resetID()
-  }
   static store = function (data: TrackData) {
     window.postMessage(createInfo(data), '*')
   }
+
+  /* public */
+
+  public register(trackData: TrackData) { }
+  public retrieve(trackid: string) { }
 
   /* private */
 
   private store: {
     [key: string]: Array<TrackRecord>
   } = {};
-
-  /* public */
-
-  public register(trackData: TrackData) { }
-  public retrieve(trackid: string) { }
 }
 
 function createInfo(data: TrackData): TrackInfo {
@@ -51,7 +42,7 @@ function getTrackid(caller: TrackTarget): string {
   const owner = caller._owner
 
   if (!owner._trackid) {
-    owner._trackid = TrackStore.generateID()
+    owner._trackid = TrackidManager.generateID()
   }
   return owner._trackid
 }

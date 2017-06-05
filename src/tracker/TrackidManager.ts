@@ -1,12 +1,17 @@
 /// <reference path='./TrackidManager.d.ts' />
 
-export default class TrackidManager implements ITrackidManager {
-  private trackid = 0
+class TrackidManager implements ITrackidManager {
+  /* public */
 
-  resetID() {
+  public resetID() {
     this.trackid = 0
   }
-  generateID() {
+  public generateID(): string {
     return (++this.trackid).toString()
   }
+
+  /* private */
+
+  private trackid = 0
 }
+export default new TrackidManager()
