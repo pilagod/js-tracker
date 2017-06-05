@@ -16,14 +16,20 @@ describe('tracker\'s behaviors', function () {
   })
 
   type ExpectData = {
+    caller: TrackTarget,
     trackid: string,
     target: string,
     action: Action,
+    stacktrace?: string,
     actionTag?: string,
-    merge?: string
+    merge?: string,
   }
 
   function matchTrackData(got: TrackData, expected: ExpectData) {
+    expect(expected.caller._owner)
+      .to.have.property('_trackid')
+      .to.equal(expected.trackid)
+
     expect(got)
       .to.have.property('trackid')
       .to.equal(expected.trackid)
@@ -35,6 +41,16 @@ describe('tracker\'s behaviors', function () {
     expect(got)
       .to.have.property('action')
       .to.equal(expected.action)
+
+    if (!expected.stacktrace) {
+      expect(got.stacktrace[1])
+        .to.have.property('functionName')
+        .to.equal(`${expected.caller.constructor.name}.${expected.action}`)
+    } else {
+      expect(got.stacktrace[1])
+        .to.have.property('functionName')
+        .to.equal(expected.stacktrace)
+    }
   }
 
   describe('HTMLElement', () => {
@@ -46,6 +62,7 @@ describe('tracker\'s behaviors', function () {
       expect(msgs).to.have.length(1)
 
       matchTrackData(msgs[0], {
+        caller: div,
         trackid: '1',
         target: 'HTMLElement',
         action: 'accessKey',
@@ -60,6 +77,7 @@ describe('tracker\'s behaviors', function () {
       expect(msgs).to.have.length(1)
 
       matchTrackData(msgs[0], {
+        caller: div,
         trackid: '1',
         target: 'HTMLElement',
         action: 'click'
@@ -68,16 +86,43 @@ describe('tracker\'s behaviors', function () {
 
     /* anomalies */
 
-    // @NOTE: dataset is a specially special case
     it('should track dataset property assignment', () => {
+      const div = document.createElement('div')
+
+      div.dataset.data = 'data'
+
+      expect(msgs).to.have.length(1)
+
+      matchTrackData(msgs[0], {
+        caller: div.dataset,
+        trackid: '1',
+        target: 'DOMStringMap',
+        action: 'data',
+        stacktrace: 'Object.set'
+      })
     })
 
     it('should track style property assignment', () => {
+      const div = document.createElement('div')
+
+      div.style.color = 'red'
+
+      expect(msgs).to.have.length(1)
+
+      matchTrackData(msgs[0], {
+        caller: div.style,
+        trackid: '1',
+        target: 'CSSStyleDeclaration',
+        action: 'color',
+        stacktrace: 'Object.set'
+      })
     })
   })
 
   describe('Element', () => {
+    it('should track property assignment', () => {
 
+    })
   })
 
   describe('Node', () => {

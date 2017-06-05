@@ -18,39 +18,25 @@ function main() {
 }
 
 function trackGeneralCases() {
+  for (let target in ActionTypeMap) {
+    const proto = window[target].prototype
 
-  for (let ctr in ActionTypeMap) {
-    const proto = window[ctr].prototype
-
-    Object.getOwnPropertyNames(proto).forEach((prop) => {
-      if (!Utils.isAnomaly(ctr, prop)) {
+    Object.getOwnPropertyNames(proto).forEach((action) => {
+      if (!Utils.isAnomaly(target, action)) {
         const descriptor =
-          Object.getOwnPropertyDescriptor(proto, prop)
+          Object.getOwnPropertyDescriptor(proto, action)
 
-        Object.defineProperty(
-          proto,
-          prop,
-          decorate(ctr, prop, descriptor)
-        )
+        if (Utils.isMethodDescriptor(descriptor)) {
+          descriptor.value =
+            trackDecorator(target, action, descriptor.value)
+        } else if (Utils.isSettableDescriptor(descriptor)) {
+          descriptor.set =
+            trackDecorator(target, action, descriptor.set)
+        }
+        Object.defineProperty(proto, action, descriptor)
       }
     })
   }
-
-  function decorate(
-    target: string,
-    action: Action,
-    descriptor: PropertyDescriptor
-  ): PropertyDescriptor {
-    if (Utils.isMethodDescriptor(descriptor)) {
-      descriptor.value =
-        trackDecorator(target, action, descriptor.value)
-    } else if (Utils.isSettableDescriptor(descriptor)) {
-      descriptor.set =
-        trackDecorator(target, action, descriptor.set)
-    }
-    return descriptor
-  }
-
   function trackDecorator(
     target: string,
     action: Action,
@@ -59,6 +45,9 @@ function trackGeneralCases() {
     return function (...args) {
       window.postMessage(
         TrackStore.createTrackData({
+          // @NOTE: 
+          //    type of target might be different from type of caller
+          //    e.g. caller: HTMLDivElement, target: Element, action: id
           caller: this,
           target,
           action
@@ -71,7 +60,6 @@ function trackGeneralCases() {
 }
 
 function trackHTMLElementAnomalies() {
-
   proxyDataset()
   proxyStyle()
 
