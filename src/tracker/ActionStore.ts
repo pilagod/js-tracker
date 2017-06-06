@@ -1,4 +1,4 @@
-/// <reference path="ActionStore.d.ts" />
+/// <reference path="tracker.d.ts" />
 
 export default class ActionStore implements IActionStore {
   /* public */

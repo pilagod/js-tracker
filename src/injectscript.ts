@@ -1,4 +1,4 @@
-///<reference path='./tracker/ActionStore.d.ts'/>
+///<reference path='./tracker/tracker.d.ts'/>
 
 import * as StackTrace from 'stacktrace-js'
 import utils from './tracker/utils'
