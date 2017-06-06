@@ -18,6 +18,7 @@ type TrackData = {
   caller: TrackTarget,
   target: string,
   action: Action,
+  actionTag?: string,
   merge?: string
 }
 

@@ -43,11 +43,11 @@ describe('tracker\'s behaviors', function () {
       .to.equal(expected.action)
 
     if (!expected.stacktrace) {
-      expect(got.stacktrace[2])
+      expect(got.stacktrace[1])
         .to.have.property('functionName')
         .to.equal(`${expected.caller.constructor.name}.${expected.action}`)
     } else {
-      expect(got.stacktrace[2])
+      expect(got.stacktrace[1])
         .to.have.property('functionName')
         .to.equal(expected.stacktrace)
     }

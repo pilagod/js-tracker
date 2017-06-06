@@ -2,8 +2,10 @@
 
 // @TODO: refactor with template pattern
 
+import * as StackTrace from 'stacktrace-js'
+
 import ActionTypeMap from './tracker/ActionTypeMap'
-import TrackStore from './tracker/TrackStore'
+import TrackidManager from './tracker/TrackidManager'
 import Utils from './tracker/Utils'
 
 main()
@@ -44,7 +46,7 @@ function trackGeneralCases() {
     actionFunc: (...args: any[]) => any
   ): (...args: any[]) => any {
     return function (...args) {
-      TrackStore.store({
+      storeTrackData({
         // @NOTE: 
         //    type of target might be different from type of caller
         //    e.g. caller: HTMLDivElement, target: Element, action: id
@@ -55,6 +57,25 @@ function trackGeneralCases() {
       return actionFunc.call(this, ...args)
     }
   }
+}
+
+function storeTrackData(data: TrackData) {
+  const info = {
+    trackid: getTrackid(data.caller),
+    target: data.target,
+    action: data.action,
+    stacktrace: StackTrace.getSync()
+  }
+  window.postMessage(info, '*')
+}
+
+function getTrackid(caller: TrackTarget): string {
+  const owner = caller._owner
+
+  if (!owner._trackid) {
+    owner._trackid = TrackidManager.generateID()
+  }
+  return owner._trackid
 }
 
 function trackHTMLElementAnomalies() {
@@ -80,7 +101,7 @@ function trackHTMLElementAnomalies() {
           })
           datasetProxy = new Proxy<DOMStringMap>(dataset, {
             set: function (target, action, value) {
-              TrackStore.store({
+              storeTrackData({
                 caller: target,
                 target: 'DOMStringMap',
                 action
@@ -126,7 +147,7 @@ function trackHTMLElementAnomalies() {
               return target[action]
             },
             set: function (target, action, value) {
-              TrackStore.store({
+              storeTrackData({
                 caller: target,
                 target: 'CSSStyleDeclaration',
                 action: action
@@ -269,7 +290,7 @@ function trackAttrAnomalies(): void {
               value: this
             })
           }
-          TrackStore.store({
+          storeTrackData({
             caller: this,
             target: 'Attr',
             action: 'value'
@@ -336,7 +357,7 @@ function setAttrNodeDecorator(
   return function (tsvAttr) {
     if (tsvAttr instanceof Attr) {
       // @TODO: setup merge
-      TrackStore.store({
+      storeTrackData({
         caller: this,
         target,
         action
