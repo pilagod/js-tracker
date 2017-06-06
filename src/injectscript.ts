@@ -1,7 +1,5 @@
 ///<reference path='./tracker/ActionStore.d.ts'/>
 
-// @TODO: refactor with template pattern
-
 import * as StackTrace from 'stacktrace-js'
 
 import ActionTypeMap from './tracker/ActionTypeMap'
@@ -10,7 +8,7 @@ import Utils from './tracker/Utils'
 
 main()
 
-function main() {
+function main(): void {
   trackGeneralCases()
 
   trackHTMLElementAnomalies()
@@ -19,70 +17,53 @@ function main() {
   trackNamedNodeMapAnomalies()
 }
 
-function trackGeneralCases() {
+function trackTemplate(
+  template: {
+    target: string,
+    action: Action,
+    decorator: (...args: any[]) => any,
+    getter?: boolean
+  }
+) {
+  const { target, action, decorator } = template
+  const descriptor =
+    Object.getOwnPropertyDescriptor(window[target].prototype, action)
+  // @NOTE: getter & setter are mutual exclusive with value
+  if (template.getter && Utils.hasGetter(descriptor)) {
+    descriptor.get =
+      decorator(target, action, descriptor.get)
+  } else if (Utils.hasSetter(descriptor)) {
+    descriptor.set =
+      decorator(target, action, descriptor.set)
+  } else if (Utils.hasMethod(descriptor)) {
+    descriptor.value =
+      decorator(target, action, descriptor.value)
+  }
+  Object.defineProperty(window[target].prototype, action, descriptor)
+}
+
+function trackGeneralCases(): void {
   for (let target in ActionTypeMap) {
     const proto = window[target].prototype
 
     Object.getOwnPropertyNames(proto).forEach((action) => {
       if (!Utils.isAnomaly(target, action)) {
-        trackDecoratorTemplate({
-          target,
-          action,
-          decorator: trackDecorator(target, action)
-        })
-        // const descriptor =
-        //   Object.getOwnPropertyDescriptor(proto, action)
-
-        // if (Utils.isMethodDescriptor(descriptor)) {
-        //   descriptor.value =
-        //     trackDecorator(target, action, descriptor.value)
-        // } else if (Utils.isSettableDescriptor(descriptor)) {
-        //   descriptor.set =
-        //     trackDecorator(target, action, descriptor.set)
-        // }
-        // Object.defineProperty(proto, action, descriptor)
+        trackTemplate({ target, action, decorator })
       }
     })
   }
-
-  function trackDecorator(
+  function decorator(
     target: string,
     action: Action,
+    actionFunc: (...args: any[]) => any
   ): (...args: any[]) => any {
-    return function (
-      actionFunc: (...args: any[]) => any
-    ): (...args: any[]) => any {
-      return function (...args) {
-        storeAction({
-          // @NOTE: 
-          //    type of target might be different from type of caller
-          //    e.g. caller: HTMLDivElement, target: Element, action: id
-          caller: this,
-          target,
-          action
-        })
-        return actionFunc.call(this, ...args)
-      }
+    return function (...args) {
+      // @NOTE: type of target might be different from type of caller
+      // e.g. caller: HTMLDivElement, target: Element, action: id
+      storeAction({ caller: this, target, action })
+      return actionFunc.call(this, ...args)
     }
   }
-
-  // function trackDecorator(
-  //   target: string,
-  //   action: Action,
-  //   actionFunc: (...args: any[]) => any
-  // ): (...args: any[]) => any {
-  //   return function (...args) {
-  //     storeAction({
-  //       // @NOTE: 
-  //       //    type of target might be different from type of caller
-  //       //    e.g. caller: HTMLDivElement, target: Element, action: id
-  //       caller: this,
-  //       target,
-  //       action
-  //     })
-  //     return actionFunc.call(this, ...args)
-  //   }
-  // }
 }
 
 function storeAction(
@@ -93,7 +74,7 @@ function storeAction(
     actionTag?: string,
     merge?: string
   }
-) {
+): void {
   const actionInfo: ActionInfo = {
     trackid: getTrackID(data.caller),
     target: data.target,
@@ -112,27 +93,32 @@ function getTrackID(caller: ActionTarget): string {
   return owner._trackid
 }
 
-function trackHTMLElementAnomalies() {
+function trackHTMLElementAnomalies(): void {
   proxyDataset()
   proxyStyle()
 
-  function proxyDataset() {
-    const datasetDescriptor =
-      Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'dataset')
-
-    datasetDescriptor.get = (function (getter) {
+  function proxyDataset(): void {
+    trackTemplate({
+      target: 'HTMLElement',
+      action: 'dataset',
+      decorator: datasetProxyDecorator,
+      getter: true
+    })
+    function datasetProxyDecorator(_, __: any,
+      getter: () => DOMStringMap
+    ): () => DOMStringMap {
       let datasetProxy: DOMStringMap
 
       return function (this: HTMLElement): DOMStringMap {
         if (!datasetProxy) {
-          const dataset = getter.call(this)
-          const owner = this
-
-          Object.defineProperty(dataset, '_owner', {
-            get: function () {
-              return owner
-            }
-          })
+          const dataset = getter.call(this);
+          (function (owner) {
+            Object.defineProperty(dataset, '_owner', {
+              get: function () {
+                return owner
+              }
+            })
+          })(this)
           datasetProxy = new Proxy<DOMStringMap>(dataset, {
             set: function (target, action, value) {
               storeAction({
@@ -147,20 +133,19 @@ function trackHTMLElementAnomalies() {
         }
         return datasetProxy
       }
-    })(datasetDescriptor.get)
-
-    Object.defineProperty(
-      HTMLElement.prototype,
-      'dataset',
-      datasetDescriptor
-    )
+    }
   }
 
-  function proxyStyle() {
-    const styleDescriptor =
-      Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'style')
-
-    styleDescriptor.get = (function (getter) {
+  function proxyStyle(): void {
+    trackTemplate({
+      target: 'HTMLElement',
+      action: 'style',
+      decorator: styleProxyDecorator,
+      getter: true
+    })
+    function styleProxyDecorator(_, __: any,
+      getter: () => CSSStyleDeclaration
+    ): () => CSSStyleDeclaration {
       let styleProxy: CSSStyleDeclaration
 
       return function (this: HTMLElement): CSSStyleDeclaration {
@@ -171,10 +156,8 @@ function trackHTMLElementAnomalies() {
 
           styleProxy = new Proxy<CSSStyleDeclaration>(style, {
             get: function (target, action) {
-              // @NOTE: 
-              //    function should redirect caller to target, or caller will be Proxy,
-              //    and if methods need to be called by the right caller, it will raise
-              //    Illegal Invocation Error.
+              // @NOTE: function should bind to target, otherwise, 
+              // its context will be Proxy, and throwing Illegal Invocation Error.
               if (typeof target[action] === 'function') {
                 return target[action].bind(target)
               }
@@ -184,7 +167,7 @@ function trackHTMLElementAnomalies() {
               storeAction({
                 caller: target,
                 target: 'CSSStyleDeclaration',
-                action: action
+                action
               })
               target[action] = value
               return true
@@ -193,23 +176,32 @@ function trackHTMLElementAnomalies() {
         }
         return styleProxy
       }
-    })(styleDescriptor.get)
-
-    Object.defineProperty(
-      HTMLElement.prototype,
-      'style',
-      styleDescriptor
-    )
+    }
   }
 }
 
 function trackElementAnomalies() {
   setupOwner()
-  setupAttributes()
-  setupClassList()
-  trackSetAttributeNode()
-  trackSetAttributeNodeNS()
-
+  // track attributes and classList
+  for (let anomaly of ['attributes', 'classList']) {
+    trackTemplate({
+      target: 'Element',
+      action: anomaly,
+      decorator: subDecorator,
+      getter: true
+    })
+  }
+  // track setAttributeNode{NS}
+  for (let anomaly of [
+    'setAttributeNode',
+    'setAttributeNodeNS'
+  ]) {
+    trackTemplate({
+      target: 'Element',
+      action: anomaly,
+      decorator: setAttrNodeDecorator
+    })
+  }
   function setupOwner() {
     Object.defineProperty(Element.prototype, '_owner', {
       get: function () {
@@ -217,81 +209,17 @@ function trackElementAnomalies() {
       }
     })
   }
+  function subDecorator<T>(_, __: any,
+    getter: () => T
+  ): () => T {
+    return function (this: Element): T {
+      const target = getter.call(this)
 
-  function setupAttributes() {
-    const attributesDescriptor =
-      Object.getOwnPropertyDescriptor(Element.prototype, 'attributes')
-
-    attributesDescriptor.get = (function (getter) {
-      return function (this: Element): NamedNodeMap {
-        const attributes = getter.call(this)
-
-        if (!attributes._owner) {
-          attributes._owner = this
-        }
-        return attributes
+      if (!target._owner) {
+        target._owner = this
       }
-    })(attributesDescriptor.get)
-
-    Object.defineProperty(
-      Element.prototype,
-      'attributes',
-      attributesDescriptor
-    )
-  }
-
-  function setupClassList() {
-    const classListDescriptor =
-      Object.getOwnPropertyDescriptor(Element.prototype, 'classList')
-
-    classListDescriptor.get = (function (getter) {
-      return function (this: Element): DOMTokenList {
-        const classList = getter.call(this)
-
-        if (!classList._owner) {
-          classList._owner = this
-        }
-        return classList
-      }
-    })(classListDescriptor.get)
-
-    Object.defineProperty(
-      Element.prototype,
-      'classList',
-      classListDescriptor
-    )
-  }
-
-  function trackSetAttributeNode() {
-    const setAttributeNodeDescriptor =
-      Object.getOwnPropertyDescriptor(Element.prototype, 'setAttributeNode')
-
-    setAttributeNodeDescriptor.value = setAttrNodeDecorator(
-      'Element',
-      'setAttributeNode',
-      setAttributeNodeDescriptor.value
-    )
-    Object.defineProperty(
-      Element.prototype,
-      'setAttributeNode',
-      setAttributeNodeDescriptor
-    )
-  }
-
-  function trackSetAttributeNodeNS() {
-    const setAttributeNodeNSDescriptor =
-      Object.getOwnPropertyDescriptor(Element.prototype, 'setAttributeNodeNS')
-
-    setAttributeNodeNSDescriptor.value = setAttrNodeDecorator(
-      'Element',
-      'setAttributeNodeNS',
-      setAttributeNodeNSDescriptor.value
-    )
-    Object.defineProperty(
-      Element.prototype,
-      'setAttributeNodeNS',
-      setAttributeNodeNSDescriptor
-    )
+      return target
+    }
   }
 }
 
@@ -306,16 +234,18 @@ function trackAttrAnomalies(): void {
       }
     })
   }
-
   function trackValue(): void {
-    const valueDescriptor =
-      Object.getOwnPropertyDescriptor(Attr.prototype, 'value')
-
-    valueDescriptor.set = (function (setter) {
-      return function (
-        this: Attr,
-        tsvString: TrackSwitchValue<string>
-      ): void {
+    trackTemplate({
+      target: 'Attr',
+      action: 'value',
+      decorator: valueDecorator
+    })
+    function valueDecorator(
+      target: string,
+      action: Action,
+      setter: (value: string) => void
+    ): (tsvString: TrackSwitchValue<string>) => void {
+      return function (tsvString) {
         if (typeof tsvString === 'string') {
           if (this._owner === null) {
             // @TODO: check namespaceURI
@@ -324,59 +254,26 @@ function trackAttrAnomalies(): void {
               value: this
             })
           }
-          storeAction({
-            caller: this,
-            target: 'Attr',
-            action: 'value'
-          })
+          storeAction({ caller: this, target, action })
           return setter.call(this, tsvString)
         }
         return setter.call(this, tsvString.value)
       }
-    })(valueDescriptor.set)
-
-    Object.defineProperty(
-      Attr.prototype,
-      'value',
-      valueDescriptor
-    )
+    }
   }
 }
 
 function trackNamedNodeMapAnomalies(): void {
-  trackSetNamedItem()
-  trackSetNamedItemNS()
-
-  function trackSetNamedItem(): void {
-    const setNamedItemDescriptor =
-      Object.getOwnPropertyDescriptor(NamedNodeMap.prototype, 'setNamedItem')
-
-    setNamedItemDescriptor.value = setAttrNodeDecorator(
-      'NamedNodeMap',
-      'setNamedItem',
-      setNamedItemDescriptor.value
-    )
-    Object.defineProperty(
-      NamedNodeMap.prototype,
-      'setNamedItem',
-      setNamedItemDescriptor
-    )
-  }
-
-  function trackSetNamedItemNS(): void {
-    const setNamedItemNSDescriptor =
-      Object.getOwnPropertyDescriptor(NamedNodeMap.prototype, 'setNamedItemNS')
-
-    setNamedItemNSDescriptor.value = setAttrNodeDecorator(
-      'NamedNodeMap',
-      'setNamedItemNS',
-      setNamedItemNSDescriptor.value
-    )
-    Object.defineProperty(
-      NamedNodeMap.prototype,
-      'setNamedItemNS',
-      setNamedItemNSDescriptor
-    )
+  // track setNamedItem{NS}
+  for (let anomaly of [
+    'setNamedItem',
+    'setNamedItemNS'
+  ]) {
+    trackTemplate({
+      target: 'NamedNodeMap',
+      action: anomaly,
+      decorator: setAttrNodeDecorator
+    })
   }
 }
 
@@ -384,18 +281,11 @@ function setAttrNodeDecorator(
   target: string,
   action: Action,
   actionFunc: (attr: Attr) => void
-): (
-    this: Element | NamedNodeMap,
-    tsvAttr: TrackSwitchValue<Attr>
-  ) => void {
+): (tsvAttr: TrackSwitchValue<Attr>) => void {
   return function (tsvAttr) {
     if (tsvAttr instanceof Attr) {
       // @TODO: setup merge
-      storeAction({
-        caller: this,
-        target,
-        action
-      })
+      storeAction({ caller: this, target, action })
       return actionFunc.call(this, parseActionAttr(tsvAttr))
     }
     return actionFunc.call(this, tsvAttr.value)
@@ -404,11 +294,11 @@ function setAttrNodeDecorator(
 
 function parseActionAttr(attr: Attr): Attr {
   if (attr._owner) {
-    const clone =
-      attr.namespaceURI ?
-        // @NOTE: use name or localname ?
-        document.createAttributeNS(attr.namespaceURI, attr.name) :
-        document.createAttribute(attr.name);
+    // @NOTE: use name or localname in createAttributeNS ?
+    const clone = attr.namespaceURI ?
+      document.createAttributeNS(attr.namespaceURI, attr.name) :
+      document.createAttribute(attr.name);
+
     clone.value = <any>{
       off: true,
       value: attr.value
@@ -416,25 +306,4 @@ function parseActionAttr(attr: Attr): Attr {
     return clone
   }
   return attr
-}
-
-function trackDecoratorTemplate(
-  track: {
-    target: string,
-    action: Action,
-    decorator: (...args: any[]) => any,
-    getter?: boolean
-  }
-) {
-  const { target, action, decorator } = track
-  const targetProto = window[target].prototype
-  const descriptor =
-    Object.getOwnPropertyDescriptor(targetProto, action)
-
-  if (Utils.isMethodDescriptor(descriptor)) {
-    descriptor.value = decorator(descriptor.value)
-  } else if (Utils.isSettableDescriptor(descriptor)) {
-    descriptor.set = decorator(descriptor.set)
-  }
-  Object.defineProperty(targetProto, action, descriptor)
 }

@@ -92,7 +92,9 @@ describe('tracker\'s behaviors', function () {
       div.dataset.data = 'data'
 
       expect(msgs).to.have.length(1)
-
+      expect(div)
+        .to.have.property('_trackid')
+        .to.equal('1')
       matchActionData(msgs[0], {
         caller: div.dataset,
         trackid: '1',
