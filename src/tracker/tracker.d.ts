@@ -26,11 +26,6 @@ type ActionInfo = {
 type ActionRecord = {
 }
 
-interface IActionStore {
-  register(data: ActionRecord): void;
-  retrieve(trackid: string): any;
-}
-
 type TrackSwitchValue<T> = T | {
   off?: boolean;
   value: T;
