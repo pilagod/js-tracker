@@ -1,11 +1,11 @@
-///<reference path='./tracker/TrackStore.d.ts'/>
+///<reference path='./tracker/ActionStore.d.ts'/>
 
 // @TODO: refactor with template pattern
 
 import * as StackTrace from 'stacktrace-js'
 
 import ActionTypeMap from './tracker/ActionTypeMap'
-import TrackidManager from './tracker/TrackidManager'
+import TrackIDManager from './tracker/TrackIDManager'
 import Utils from './tracker/Utils'
 
 main()
@@ -25,17 +25,22 @@ function trackGeneralCases() {
 
     Object.getOwnPropertyNames(proto).forEach((action) => {
       if (!Utils.isAnomaly(target, action)) {
-        const descriptor =
-          Object.getOwnPropertyDescriptor(proto, action)
+        trackDecoratorTemplate({
+          target,
+          action,
+          decorator: trackDecorator(target, action)
+        })
+        // const descriptor =
+        //   Object.getOwnPropertyDescriptor(proto, action)
 
-        if (Utils.isMethodDescriptor(descriptor)) {
-          descriptor.value =
-            trackDecorator(target, action, descriptor.value)
-        } else if (Utils.isSettableDescriptor(descriptor)) {
-          descriptor.set =
-            trackDecorator(target, action, descriptor.set)
-        }
-        Object.defineProperty(proto, action, descriptor)
+        // if (Utils.isMethodDescriptor(descriptor)) {
+        //   descriptor.value =
+        //     trackDecorator(target, action, descriptor.value)
+        // } else if (Utils.isSettableDescriptor(descriptor)) {
+        //   descriptor.set =
+        //     trackDecorator(target, action, descriptor.set)
+        // }
+        // Object.defineProperty(proto, action, descriptor)
       }
     })
   }
@@ -43,37 +48,66 @@ function trackGeneralCases() {
   function trackDecorator(
     target: string,
     action: Action,
-    actionFunc: (...args: any[]) => any
   ): (...args: any[]) => any {
-    return function (...args) {
-      storeTrackData({
-        // @NOTE: 
-        //    type of target might be different from type of caller
-        //    e.g. caller: HTMLDivElement, target: Element, action: id
-        caller: this,
-        target,
-        action
-      })
-      return actionFunc.call(this, ...args)
+    return function (
+      actionFunc: (...args: any[]) => any
+    ): (...args: any[]) => any {
+      return function (...args) {
+        storeAction({
+          // @NOTE: 
+          //    type of target might be different from type of caller
+          //    e.g. caller: HTMLDivElement, target: Element, action: id
+          caller: this,
+          target,
+          action
+        })
+        return actionFunc.call(this, ...args)
+      }
     }
   }
+
+  // function trackDecorator(
+  //   target: string,
+  //   action: Action,
+  //   actionFunc: (...args: any[]) => any
+  // ): (...args: any[]) => any {
+  //   return function (...args) {
+  //     storeAction({
+  //       // @NOTE: 
+  //       //    type of target might be different from type of caller
+  //       //    e.g. caller: HTMLDivElement, target: Element, action: id
+  //       caller: this,
+  //       target,
+  //       action
+  //     })
+  //     return actionFunc.call(this, ...args)
+  //   }
+  // }
 }
 
-function storeTrackData(data: TrackData) {
-  const info = {
-    trackid: getTrackid(data.caller),
+function storeAction(
+  data: {
+    caller: ActionTarget,
+    target: string,
+    action: Action,
+    actionTag?: string,
+    merge?: string
+  }
+) {
+  const actionInfo: ActionInfo = {
+    trackid: getTrackID(data.caller),
     target: data.target,
     action: data.action,
     stacktrace: StackTrace.getSync()
   }
-  window.postMessage(info, '*')
+  window.postMessage(actionInfo, '*')
 }
 
-function getTrackid(caller: TrackTarget): string {
+function getTrackID(caller: ActionTarget): string {
   const owner = caller._owner
 
   if (!owner._trackid) {
-    owner._trackid = TrackidManager.generateID()
+    owner._trackid = TrackIDManager.generateID()
   }
   return owner._trackid
 }
@@ -101,7 +135,7 @@ function trackHTMLElementAnomalies() {
           })
           datasetProxy = new Proxy<DOMStringMap>(dataset, {
             set: function (target, action, value) {
-              storeTrackData({
+              storeAction({
                 caller: target,
                 target: 'DOMStringMap',
                 action
@@ -147,7 +181,7 @@ function trackHTMLElementAnomalies() {
               return target[action]
             },
             set: function (target, action, value) {
-              storeTrackData({
+              storeAction({
                 caller: target,
                 target: 'CSSStyleDeclaration',
                 action: action
@@ -290,7 +324,7 @@ function trackAttrAnomalies(): void {
               value: this
             })
           }
-          storeTrackData({
+          storeAction({
             caller: this,
             target: 'Attr',
             action: 'value'
@@ -357,18 +391,18 @@ function setAttrNodeDecorator(
   return function (tsvAttr) {
     if (tsvAttr instanceof Attr) {
       // @TODO: setup merge
-      storeTrackData({
+      storeAction({
         caller: this,
         target,
         action
       })
-      return actionFunc.call(this, parseTrackAttr(tsvAttr))
+      return actionFunc.call(this, parseActionAttr(tsvAttr))
     }
     return actionFunc.call(this, tsvAttr.value)
   }
 }
 
-function parseTrackAttr(attr: Attr): Attr {
+function parseActionAttr(attr: Attr): Attr {
   if (attr._owner) {
     const clone =
       attr.namespaceURI ?
@@ -382,4 +416,25 @@ function parseTrackAttr(attr: Attr): Attr {
     return clone
   }
   return attr
+}
+
+function trackDecoratorTemplate(
+  track: {
+    target: string,
+    action: Action,
+    decorator: (...args: any[]) => any,
+    getter?: boolean
+  }
+) {
+  const { target, action, decorator } = track
+  const targetProto = window[target].prototype
+  const descriptor =
+    Object.getOwnPropertyDescriptor(targetProto, action)
+
+  if (Utils.isMethodDescriptor(descriptor)) {
+    descriptor.value = decorator(descriptor.value)
+  } else if (Utils.isSettableDescriptor(descriptor)) {
+    descriptor.set = decorator(descriptor.set)
+  }
+  Object.defineProperty(targetProto, action, descriptor)
 }

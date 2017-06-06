@@ -1,6 +1,6 @@
-/// <reference path='./TrackidManager.d.ts' />
+/// <reference path='./TrackIDManager.d.ts' />
 
-class TrackidManager implements ITrackidManager {
+class TrackidManager implements ITrackIDManager {
   /* public */
 
   public resetID() {

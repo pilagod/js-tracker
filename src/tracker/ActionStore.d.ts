@@ -1,6 +1,6 @@
 type Action = PropertyKey
 
-type TrackTarget =
+type ActionTarget =
   HTMLElement
   | SVGElement
   | Element
@@ -10,19 +10,11 @@ type TrackTarget =
   | DOMTokenList
   | NamedNodeMap
 
-interface TrackTargetInf {
+interface ActionTargetInf {
   _owner: Element;
 }
 
-type TrackData = {
-  caller: TrackTarget,
-  target: string,
-  action: Action,
-  actionTag?: string,
-  merge?: string
-}
-
-type TrackInfo = {
+type ActionInfo = {
   trackid: string,
   target: string,
   action: Action,
@@ -31,11 +23,11 @@ type TrackInfo = {
   merge?: string
 }
 
-type TrackRecord = {
+type ActionRecord = {
 }
 
-interface ITrackStore {
-  register(trackData: TrackData): void;
+interface IActionStore {
+  register(data: ActionRecord): void;
   retrieve(trackid: string): any;
 }
 
@@ -52,14 +44,14 @@ interface SVGElement {
   // @TODO: pull request to typescript repo
   readonly dataset: DOMStringMap
 }
-interface Element extends TrackTargetInf { }
-interface Attr extends TrackTargetInf { }
-interface CSSStyleDeclaration extends TrackTargetInf { }
-interface DOMStringMap extends TrackTargetInf {
+interface Element extends ActionTargetInf { }
+interface Attr extends ActionTargetInf { }
+interface CSSStyleDeclaration extends ActionTargetInf { }
+interface DOMStringMap extends ActionTargetInf {
   // @NOTE: use any to bypass original map type
   _owner: any
 }
-interface DOMTokenList extends TrackTargetInf {
+interface DOMTokenList extends ActionTargetInf {
   _which: string;
 }
-interface NamedNodeMap extends TrackTargetInf { }
+interface NamedNodeMap extends ActionTargetInf { }

@@ -1,10 +1,10 @@
 import * as chai from 'chai'
-import TrackidManager from '../src/tracker/TrackidManager'
+import TrackIDManager from '../src/tracker/TrackIDManager'
 
 const expect = chai.expect;
 
 beforeEach(function () {
-  TrackidManager.resetID()
+  TrackIDManager.resetID()
 })
 
 describe('__init__', function () {

@@ -1,4 +1,4 @@
-interface ITrackidManager {
+interface ITrackIDManager {
   resetID(): void;
   generateID(): string;
 }

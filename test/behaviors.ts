@@ -3,7 +3,7 @@ import * as chai from 'chai'
 const expect = chai.expect
 
 describe('tracker\'s behaviors', function () {
-  let msgs: TrackInfo[]
+  let msgs: ActionInfo[]
 
   before(function () {
     window.postMessage = function (msg) {
@@ -16,7 +16,7 @@ describe('tracker\'s behaviors', function () {
   })
 
   type ExpectInfo = {
-    caller: TrackTarget,
+    caller: ActionTarget,
     trackid: string,
     target: string,
     action: Action,
@@ -25,7 +25,7 @@ describe('tracker\'s behaviors', function () {
     merge?: string,
   }
 
-  function matchTrackData(got: TrackInfo, expected: ExpectInfo) {
+  function matchActionData(got: ActionInfo, expected: ExpectInfo) {
     expect(expected.caller._owner)
       .to.have.property('_trackid')
       .to.equal(expected.trackid)
@@ -61,7 +61,7 @@ describe('tracker\'s behaviors', function () {
 
       expect(msgs).to.have.length(1)
 
-      matchTrackData(msgs[0], {
+      matchActionData(msgs[0], {
         caller: div,
         trackid: '1',
         target: 'HTMLElement',
@@ -76,7 +76,7 @@ describe('tracker\'s behaviors', function () {
 
       expect(msgs).to.have.length(1)
 
-      matchTrackData(msgs[0], {
+      matchActionData(msgs[0], {
         caller: div,
         trackid: '1',
         target: 'HTMLElement',
@@ -93,7 +93,7 @@ describe('tracker\'s behaviors', function () {
 
       expect(msgs).to.have.length(1)
 
-      matchTrackData(msgs[0], {
+      matchActionData(msgs[0], {
         caller: div.dataset,
         trackid: '1',
         target: 'DOMStringMap',
@@ -109,7 +109,7 @@ describe('tracker\'s behaviors', function () {
 
       expect(msgs).to.have.length(1)
 
-      matchTrackData(msgs[0], {
+      matchActionData(msgs[0], {
         caller: div.style,
         trackid: '1',
         target: 'CSSStyleDeclaration',
@@ -127,7 +127,7 @@ describe('tracker\'s behaviors', function () {
 
       expect(msgs).to.have.length(1)
 
-      matchTrackData(msgs[0], {
+      matchActionData(msgs[0], {
         caller: div,
         trackid: '1',
         target: 'Element',
@@ -143,7 +143,7 @@ describe('tracker\'s behaviors', function () {
 
       expect(msgs).to.have.length(1)
 
-      matchTrackData(msgs[0], {
+      matchActionData(msgs[0], {
         caller: div,
         trackid: '1',
         target: 'Element',
