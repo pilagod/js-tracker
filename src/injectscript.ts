@@ -1,10 +1,7 @@
 ///<reference path='./tracker/ActionStore.d.ts'/>
 
 import * as StackTrace from 'stacktrace-js'
-
-import ActionTypeMap from './tracker/ActionTypeMap'
-import TrackIDManager from './tracker/TrackIDManager'
-import Utils from './tracker/Utils'
+import utils from './tracker/utils'
 
 main()
 
@@ -29,13 +26,13 @@ function trackTemplate(
   const descriptor =
     Object.getOwnPropertyDescriptor(window[target].prototype, action)
   // @NOTE: getter & setter are mutual exclusive with value
-  if (template.getter && Utils.hasGetter(descriptor)) {
+  if (template.getter && utils.hasGetter(descriptor)) {
     descriptor.get =
       decorator(target, action, descriptor.get)
-  } else if (Utils.hasSetter(descriptor)) {
+  } else if (utils.hasSetter(descriptor)) {
     descriptor.set =
       decorator(target, action, descriptor.set)
-  } else if (Utils.hasMethod(descriptor)) {
+  } else if (utils.hasMethod(descriptor)) {
     descriptor.value =
       decorator(target, action, descriptor.value)
   }
@@ -43,11 +40,11 @@ function trackTemplate(
 }
 
 function trackGeneralCases(): void {
-  for (let target in ActionTypeMap) {
+  for (let target in utils.getActionTypeMap()) {
     const proto = window[target].prototype
 
     Object.getOwnPropertyNames(proto).forEach((action) => {
-      if (!Utils.isAnomaly(target, action)) {
+      if (!utils.isAnomaly(target, action)) {
         trackTemplate({ target, action, decorator })
       }
     })
@@ -88,7 +85,7 @@ function getTrackID(caller: ActionTarget): string {
   const owner = caller._owner
 
   if (!owner._trackid) {
-    owner._trackid = TrackIDManager.generateID()
+    owner._trackid = utils.generateTrackID()
   }
   return owner._trackid
 }

@@ -1,25 +1,25 @@
 import ActionTypes from './ActionTypes'
 
-const Attribute = ActionTypes.Attribute
-const Behavior = ActionTypes.Behavior
-const Event = ActionTypes.Event
-const Node = ActionTypes.Node
-const Style = ActionTypes.Style
+const {
+  Attribute,
+  Behavior,
+  Event,
+  Node,
+  Style
+} = ActionTypes
 
-// @NOTE: 
-//    those actions whose type determined by argument or property
-//    (1) Element.attributes methods (e.g. setAttribute, removeAttribute)
-//    (2) Attr value setter
+// @NOTE: those actions whose type determined by argument or property
+// (1) Element.attributes methods (e.g. setAttribute, removeAttribute)
+// (2) Attr value setter
 const AttrActionTagMap: object = {
   'class': Style,
   'style': Style,
   'default': Attribute
 }
 
-// @NOTE:
-//    those actions whose type determined by caller object
-//    (1) classList -> Style
-//    (2) others -> Attribute
+// @NOTE: those actions whose type determined by caller object
+// (1) classList -> Style
+// (2) others -> Attribute
 const DOMTokenListActionTagMap: object = {
   'classList': Style,
   'default': Attribute
