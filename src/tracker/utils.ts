@@ -42,7 +42,8 @@ const utils: {
         && Anomalies[target].hasOwnProperty(action)
     },
     isTrackAction(target, action) {
-      return ActionTypeMap[target].hasOwnProperty(action)
+      return ActionTypeMap.hasOwnProperty(target)
+        && ActionTypeMap[target].hasOwnProperty(action)
     }
   }
 export default utils

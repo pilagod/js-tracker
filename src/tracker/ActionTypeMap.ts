@@ -1,3 +1,5 @@
+/// <reference path="tracker.d.ts" />
+
 import ActionTypes from './ActionTypes'
 
 const {
@@ -26,16 +28,7 @@ const DOMTokenListActionTagMap: object = {
 }
 
 const ActionTypeMap: {
-  'HTMLElement': object,
-  'Element': object,
-  'Node': object,
-  'EventTarget': object,
-  /* shadow targets */
-  'Attr': object, // attr (e.g. attributes[0])
-  'CSSStyleDeclaration': object, // style
-  'DOMStringMap': object, // dataset
-  'DOMTokenList': object, // classList
-  'NamedNodeMap': object, // attributes
+  [target in Target]: object
 } = {
     'HTMLElement': {
       // https://developer.mozilla.org/zh-TW/docs/Web/API/HTMLElement

@@ -16,7 +16,7 @@ function main(): void {
 
 function trackTemplate(
   template: {
-    target: string,
+    target: Target,
     action: Action,
     decorator: (...args: any[]) => any,
     getter?: boolean
@@ -44,16 +44,18 @@ function trackGeneralCases(): void {
     const proto = window[target].prototype
 
     Object.getOwnPropertyNames(proto).forEach((action) => {
-      if (
-        utils.isTrackAction(target, action) &&
-        !utils.isAnomaly(target, action)
-      ) {
-        trackTemplate({ target, action, decorator })
+      if (utils.isTrackAction(target, action)
+        && !utils.isAnomaly(target, action)) {
+        trackTemplate({
+          target: <Target>target,
+          action,
+          decorator
+        })
       }
     })
   }
   function decorator(
-    target: string,
+    target: Target,
     action: Action,
     actionFunc: (...args: any[]) => any
   ): (...args: any[]) => any {
@@ -69,7 +71,7 @@ function trackGeneralCases(): void {
 function record(
   data: {
     caller: ActionTarget,
-    target: string,
+    target: Target,
     action: Action,
     actionTag?: string,
     merge?: string
@@ -249,7 +251,7 @@ function trackAttrAnomalies(): void {
       decorator: valueDecorator
     })
     function valueDecorator(
-      target: string,
+      target: Target,
       action: Action,
       setter: (value: string) => void
     ): (tsvString: TrackSwitchValue<string>) => void {
@@ -289,7 +291,7 @@ function trackNamedNodeMapAnomalies(): void {
 }
 
 function setAttrNodeDecorator(
-  target: string,
+  target: Target,
   action: Action,
   actionFunc: (attr: Attr) => void
 ): (tsvAttr: TrackSwitchValue<Attr>) => void {

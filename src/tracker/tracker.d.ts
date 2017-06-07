@@ -1,3 +1,14 @@
+type Target =
+  'HTMLElement'
+  | 'Element'
+  | 'Node'
+  | 'EventTarget'
+  | 'Attr' // attr (e.g. attributes[0])
+  | 'CSSStyleDeclaration' // style
+  | 'DOMStringMap' // dataset
+  | 'DOMTokenList' // classList
+  | 'NamedNodeMap' // attributes
+
 type Action = PropertyKey
 
 type ActionTarget =
@@ -21,7 +32,7 @@ interface ActionTargetInf {
 
 type ActionInfo = {
   trackid: string,
-  target: string,
+  target: Target,
   action: Action,
   stacktrace: StackTrace.StackFrame[],
   actionTag?: string,
