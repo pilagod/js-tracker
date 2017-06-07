@@ -12,7 +12,9 @@ const utils: {
   hasGetter(descriptor: PropertyDescriptor): boolean;
   hasMethod(descriptor: PropertyDescriptor): boolean;
   hasSetter(descriptor: PropertyDescriptor): boolean;
-  isAnomaly(target, action: PropertyKey): boolean;
+
+  isAnomaly(target: string, action: PropertyKey): boolean;
+  isTrackAction(target: string, action: PropertyKey): boolean;
 } = {
     getActionTypeMap() {
       return ActionTypeMap
@@ -34,9 +36,13 @@ const utils: {
     hasSetter(descriptor) {
       return !!descriptor.set
     },
+
     isAnomaly(target, action) {
       return Anomalies.hasOwnProperty(target)
         && Anomalies[target].hasOwnProperty(action)
     },
+    isTrackAction(target, action) {
+      return ActionTypeMap[target].hasOwnProperty(action)
+    }
   }
 export default utils

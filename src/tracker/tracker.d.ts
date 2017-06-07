@@ -10,8 +10,13 @@ type ActionTarget =
   | DOMTokenList
   | NamedNodeMap
 
+interface Owner {
+  _trackid: string;
+  _isShadow: boolean;
+}
+
 interface ActionTargetInf {
-  _owner: Element;
+  _owner: Owner;
 }
 
 type ActionInfo = {
@@ -34,7 +39,7 @@ interface SVGElement {
   // @TODO: pull request to typescript repo
   readonly dataset: DOMStringMap
 }
-interface Element extends ActionTargetInf { }
+interface Element extends Owner, ActionTargetInf { }
 interface Attr extends ActionTargetInf { }
 interface CSSStyleDeclaration extends ActionTargetInf { }
 interface DOMStringMap extends ActionTargetInf {

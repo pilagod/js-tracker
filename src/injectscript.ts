@@ -44,7 +44,10 @@ function trackGeneralCases(): void {
     const proto = window[target].prototype
 
     Object.getOwnPropertyNames(proto).forEach((action) => {
-      if (!utils.isAnomaly(target, action)) {
+      if (
+        utils.isTrackAction(target, action) &&
+        !utils.isAnomaly(target, action)
+      ) {
         trackTemplate({ target, action, decorator })
       }
     })
@@ -78,11 +81,14 @@ function record(
     action: data.action,
     stacktrace: StackTrace.getSync()
   }
+  if (data.merge) {
+    actionInfo.merge = data.merge
+  }
   window.postMessage(actionInfo, '*')
 }
 
 function getTrackID(caller: ActionTarget): string {
-  const owner = caller._owner
+  const owner: Owner = caller._owner
 
   if (!owner._trackid) {
     owner._trackid = utils.generateTrackID()
@@ -251,7 +257,10 @@ function trackAttrAnomalies(): void {
         if (typeof tsvString === 'string') {
           if (this._owner === null) {
             // @TODO: check namespaceURI
-            document.createElement('div').setAttributeNode(<any>{
+            const shadowOwner = document.createElement('div')
+
+            shadowOwner._isShadow = true
+            shadowOwner.setAttributeNode(<any>{
               off: true,
               value: this
             })
@@ -286,16 +295,22 @@ function setAttrNodeDecorator(
 ): (tsvAttr: TrackSwitchValue<Attr>) => void {
   return function (tsvAttr) {
     if (tsvAttr instanceof Attr) {
-      // @TODO: setup merge
-      record({ caller: this, target, action })
-      return actionFunc.call(this, extractAttr(tsvAttr))
+      const result = actionFunc.call(this, extractAttr(tsvAttr))
+
+      record({
+        caller: this,
+        target,
+        action,
+        merge: tsvAttr._owner && tsvAttr._owner._trackid
+      })
+      return result
     }
     return actionFunc.call(this, tsvAttr.value)
   }
 }
 
 function extractAttr(attr: Attr): Attr {
-  if (attr._owner) {
+  if (attr._owner && attr._owner._isShadow) {
     // @NOTE: use name or localname in createAttributeNS ?
     const clone = attr.namespaceURI ?
       document.createAttributeNS(attr.namespaceURI, attr.name) :

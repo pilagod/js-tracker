@@ -51,6 +51,9 @@ describe('tracker\'s behaviors', function () {
         .to.have.property('functionName')
         .to.equal(expected.stacktrace)
     }
+    if (expected.merge) {
+      expect(got.merge).to.equal(expected.merge)
+    }
   }
 
   describe('HTMLElement', () => {
@@ -91,10 +94,9 @@ describe('tracker\'s behaviors', function () {
 
       div.dataset.data = 'data'
 
+      expect(div.dataset._owner).to.equal(div)
       expect(msgs).to.have.length(1)
-      expect(div)
-        .to.have.property('_trackid')
-        .to.equal('1')
+
       matchActionData(msgs[0], {
         caller: div.dataset,
         trackid: '1',
@@ -109,6 +111,7 @@ describe('tracker\'s behaviors', function () {
 
       div.style.color = 'red'
 
+      expect(div.style._owner).to.equal(div)
       expect(msgs).to.have.length(1)
 
       matchActionData(msgs[0], {
@@ -155,7 +158,53 @@ describe('tracker\'s behaviors', function () {
 
     /* anomalies */
 
+    // @NOTE: setAttributeNode & setAttributeNodeNS track behaviors
+    // are identical, only test setAttributeNode here of two scenarios
+    it('should track setAttributeNode{NS}', () => {
+      const div = document.createElement('div')
+      const idAttr = document.createAttribute('id')
 
+      div.setAttributeNode(idAttr)
+
+      expect(msgs).to.have.length(1)
+
+      matchActionData(msgs[0], {
+        caller: div,
+        trackid: '1',
+        target: 'Element',
+        action: 'setAttributeNode'
+      })
+    })
+
+    it('should track setAttributeNode{NS} (merge scenario)', () => {
+      const div = document.createElement('div')
+      const idAttr = document.createAttribute('id')
+
+      idAttr.value = 'id' // msgs[0] generate trackid 1
+      div.setAttributeNode(idAttr) // msgs[1] generate trackid 2
+
+      expect(msgs).to.have.length(2)
+
+      matchActionData(msgs[1], {
+        caller: div,
+        trackid: '2',
+        target: 'Element',
+        action: 'setAttributeNode',
+        merge: '1'
+      })
+    })
+
+    it('should track setAttributeNode{NS} (error scenario)', () => {
+      const div = document.createElement('div')
+      const div2 = document.createElement('div')
+
+      div.id = 'id'
+
+      const error = function () {
+        div2.setAttributeNode(div.attributes[0])
+      }
+      expect(error).to.throw()
+    })
   })
 
   describe('Node', () => {
@@ -167,7 +216,20 @@ describe('tracker\'s behaviors', function () {
   })
 
   describe('Attr', () => {
+    it('should track value assignment', () => {
+      const idAttr = document.createAttribute('id')
 
+      idAttr.value = 'id'
+
+      expect(msgs).to.have.length(1)
+
+      matchActionData(msgs[0], {
+        caller: idAttr,
+        trackid: '1',
+        target: 'Attr',
+        action: 'value'
+      })
+    })
   })
 
   describe('CSSStyleDeclaration', () => {
