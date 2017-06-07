@@ -177,6 +177,11 @@ function trackHTMLElementAnomalies(): void {
   }
 }
 
+type TrackSwitchValue<T> = T | {
+  off?: boolean;
+  value: T;
+}
+
 function trackElementAnomalies() {
   setupOwner()
   // track attributes and classList

@@ -26,11 +26,6 @@ type ActionInfo = {
 type ActionRecord = {
 }
 
-type TrackSwitchValue<T> = T | {
-  off?: boolean;
-  value: T;
-}
-
 /**
  * Extend Native Interfaces
  */
