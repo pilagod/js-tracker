@@ -1,4 +1,4 @@
-/// <reference path="tracker.d.ts" />
+/// <reference path="./tracker.d.ts" />
 
 import ActionTypes from './ActionTypes'
 
