@@ -57,13 +57,13 @@ function trackGeneralCases(): void {
     return function (...args) {
       // @NOTE: type of target might be different from type of caller
       // e.g. caller: HTMLDivElement, target: Element, action: id
-      storeAction({ caller: this, target, action })
+      record({ caller: this, target, action })
       return actionFunc.call(this, ...args)
     }
   }
 }
 
-function storeAction(
+function record(
   data: {
     caller: ActionTarget,
     target: string,
@@ -118,7 +118,7 @@ function trackHTMLElementAnomalies(): void {
           })(this)
           datasetProxy = new Proxy<DOMStringMap>(dataset, {
             set: function (target, action, value) {
-              storeAction({
+              record({
                 caller: target,
                 target: 'DOMStringMap',
                 action
@@ -161,7 +161,7 @@ function trackHTMLElementAnomalies(): void {
               return target[action]
             },
             set: function (target, action, value) {
-              storeAction({
+              record({
                 caller: target,
                 target: 'CSSStyleDeclaration',
                 action
@@ -256,7 +256,7 @@ function trackAttrAnomalies(): void {
               value: this
             })
           }
-          storeAction({ caller: this, target, action })
+          record({ caller: this, target, action })
           return setter.call(this, tsvString)
         }
         return setter.call(this, tsvString.value)
@@ -287,14 +287,14 @@ function setAttrNodeDecorator(
   return function (tsvAttr) {
     if (tsvAttr instanceof Attr) {
       // @TODO: setup merge
-      storeAction({ caller: this, target, action })
-      return actionFunc.call(this, parseActionAttr(tsvAttr))
+      record({ caller: this, target, action })
+      return actionFunc.call(this, extractAttr(tsvAttr))
     }
     return actionFunc.call(this, tsvAttr.value)
   }
 }
 
-function parseActionAttr(attr: Attr): Attr {
+function extractAttr(attr: Attr): Attr {
   if (attr._owner) {
     // @NOTE: use name or localname in createAttributeNS ?
     const clone = attr.namespaceURI ?
