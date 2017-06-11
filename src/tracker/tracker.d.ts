@@ -53,7 +53,10 @@ interface SVGElement {
 interface Element extends Owner, ActionTargetInf { }
 interface Attr extends ActionTargetInf { }
 interface CSSStyleDeclaration extends ActionTargetInf { }
-interface DOMStringMap extends ActionTargetInf { }
+interface DOMStringMap extends ActionTargetInf {
+  // @NOTE: bypass index signature of DOMStringMap in typescript/lib/lib.es6.d.ts
+  _owner: any
+}
 interface DOMTokenList extends ActionTargetInf {
   _which: string;
 }
