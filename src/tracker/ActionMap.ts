@@ -1,4 +1,4 @@
-/// <reference path="./tracker.d.ts" />
+/// <reference path='./ActionMap.d.ts'/>
 
 import ActionTypes from './ActionTypes'
 
@@ -13,7 +13,7 @@ const {
 // @NOTE: those actions whose type determined by argument or property
 // (1) Element.attributes methods (e.g. setAttribute, removeAttribute)
 // (2) Attr value setter
-const AttrActionTagMap: object = {
+const AttrActionTag: object = {
   'class': Style,
   'style': Style,
   'default': Attribute
@@ -22,12 +22,12 @@ const AttrActionTagMap: object = {
 // @NOTE: those actions whose type determined by caller object
 // (1) classList -> Style
 // (2) others -> Attribute
-const DOMTokenListActionTagMap: object = {
+const DOMTokenListActionTag: object = {
   'classList': Style,
   'default': Attribute
 }
 
-const ActionTypeMap: {
+const ActionMap: {
   [target in Target]: object
 } = {
     'HTMLElement': {
@@ -175,13 +175,13 @@ const ActionTypeMap: {
 
       /* methods */
 
-      'removeAttribute': AttrActionTagMap,
-      'removeAttributeNode': AttrActionTagMap,
-      'removeAttributeNS': AttrActionTagMap,
-      'setAttribute': AttrActionTagMap,
-      'setAttributeNode': AttrActionTagMap, // #anomaly
-      'setAttributeNodeNS': AttrActionTagMap, // #anomaly
-      'setAttributeNS': AttrActionTagMap,
+      'removeAttribute': AttrActionTag,
+      'removeAttributeNode': AttrActionTag,
+      'removeAttributeNS': AttrActionTag,
+      'setAttribute': AttrActionTag,
+      'setAttributeNode': AttrActionTag, // #anomaly
+      'setAttributeNodeNS': AttrActionTag, // #anomaly
+      'setAttributeNS': AttrActionTag,
 
       'scrollIntoView': Behavior,
 
@@ -235,7 +235,7 @@ const ActionTypeMap: {
 
       /* properties */
 
-      'value': AttrActionTagMap // #anomaly
+      'value': AttrActionTag // #anomaly
     },
     'CSSStyleDeclaration': {
       // https://developer.mozilla.org/zh-TW/docs/Web/API/CSSStyleDeclaration
@@ -253,24 +253,37 @@ const ActionTypeMap: {
 
       /* properties */
 
-      'value': DOMTokenListActionTagMap,
+      'value': DOMTokenListActionTag,
 
       /* methods */
 
-      'add': DOMTokenListActionTagMap,
-      'remove': DOMTokenListActionTagMap,
-      'replace': DOMTokenListActionTagMap,
-      'toggle': DOMTokenListActionTagMap
+      'add': DOMTokenListActionTag,
+      'remove': DOMTokenListActionTag,
+      'replace': DOMTokenListActionTag,
+      'toggle': DOMTokenListActionTag
     },
     'NamedNodeMap': {
       // https://developer.mozilla.org/zh-TW/docs/Web/API/NamedNodeMap
 
       /* methods */
 
-      'removeNamedItem': AttrActionTagMap,
-      'removeNamedItemNS': AttrActionTagMap,
-      'setNamedItem': AttrActionTagMap, // #anomaly
-      'setNamedItemNS': AttrActionTagMap, // #anomaly
+      'removeNamedItem': AttrActionTag,
+      'removeNamedItemNS': AttrActionTag,
+      'setNamedItem': AttrActionTag, // #anomaly
+      'setNamedItemNS': AttrActionTag, // #anomaly
     },
   }
-export default ActionTypeMap
+const _: IActionMap = {
+  visit: (callback) => {
+    Object.keys(ActionMap).map(
+      (target: Target) => {
+        callback(target, ActionMap[target])
+      }
+    )
+  },
+  has: (target, action) => {
+    return ActionMap[target].hasOwnProperty(action)
+  }
+}
+export default _
+// export default ActionMap

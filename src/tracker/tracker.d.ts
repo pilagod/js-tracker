@@ -26,7 +26,7 @@ interface Owner {
   _isShadow: boolean;
 }
 
-interface ActionTargetInf {
+interface IActionTarget {
   _owner: Owner;
 }
 
@@ -50,14 +50,14 @@ interface SVGElement {
   // @TODO: pull request to typescript repo
   readonly dataset: DOMStringMap
 }
-interface Element extends Owner, ActionTargetInf { }
-interface Attr extends ActionTargetInf { }
-interface CSSStyleDeclaration extends ActionTargetInf { }
-interface DOMStringMap extends ActionTargetInf {
+interface Element extends Owner, IActionTarget { }
+interface Attr extends IActionTarget { }
+interface CSSStyleDeclaration extends IActionTarget { }
+interface DOMStringMap extends IActionTarget {
   // @NOTE: bypass index signature of DOMStringMap in typescript/lib/lib.es6.d.ts
   _owner: any
 }
-interface DOMTokenList extends ActionTargetInf {
+interface DOMTokenList extends IActionTarget {
   _which: string;
 }
-interface NamedNodeMap extends ActionTargetInf { }
+interface NamedNodeMap extends IActionTarget { }

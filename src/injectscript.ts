@@ -1,7 +1,9 @@
-///<reference path='./tracker/tracker.d.ts'/>
+/// <reference path='./tracker/tracker.d.ts'/>
 
 import * as StackTrace from 'stacktrace-js'
-import utils from './tracker/utils'
+import ActionMap from './tracker/ActionMap'
+import Anomalies from './tracker/Anomalies'
+import TrackIDManager from './tracker/TrackIDManager'
 
 main()
 
@@ -23,37 +25,45 @@ function trackTemplate(
   }
 ) {
   const { target, action, decorator } = template
+  const shouldTrackGetter = template.getter
   const descriptor =
     Object.getOwnPropertyDescriptor(window[target].prototype, action)
-  // @NOTE: getter & setter are mutual exclusive with value
-  if (template.getter && utils.hasGetter(descriptor)) {
+  // @NOTE: getter, setter, method are mutual exclusive
+  if (shouldTrackGetter && hasGetter(descriptor)) {
     descriptor.get =
       decorator(target, action, descriptor.get)
-  } else if (utils.hasSetter(descriptor)) {
+  } else if (hasSetter(descriptor)) {
     descriptor.set =
       decorator(target, action, descriptor.set)
-  } else if (utils.hasMethod(descriptor)) {
+  } else if (hasMethod(descriptor)) {
     descriptor.value =
       decorator(target, action, descriptor.value)
   }
   Object.defineProperty(window[target].prototype, action, descriptor)
 }
 
+function hasGetter(descriptor: PropertyDescriptor): boolean {
+  return !!descriptor.get
+}
+
+function hasMethod(descriptor: PropertyDescriptor): boolean {
+  return !!descriptor.value && (typeof descriptor.value === 'function')
+}
+
+function hasSetter(descriptor: PropertyDescriptor): boolean {
+  return !!descriptor.set
+}
+
 function trackGeneralCases(): void {
-  for (let target in utils.getActionTypeMap()) {
+  ActionMap.visit(function (target) {
     const proto = window[target].prototype
 
     Object.getOwnPropertyNames(proto).forEach((action) => {
-      if (utils.isTrackAction(target, action)
-        && !utils.isAnomaly(target, action)) {
-        trackTemplate({
-          target: <Target>target,
-          action,
-          decorator
-        })
+      if (ActionMap.has(target, action) && !Anomalies.has(target, action)) {
+        trackTemplate({ target, action, decorator })
       }
     })
-  }
+  })
   function decorator(
     target: Target,
     action: Action,
@@ -93,7 +103,7 @@ function getTrackID(caller: ActionTarget): string {
   const owner: Owner = caller._owner
 
   if (!owner._trackid) {
-    owner._trackid = utils.generateTrackID()
+    owner._trackid = TrackIDManager.generateID()
   }
   return owner._trackid
 }

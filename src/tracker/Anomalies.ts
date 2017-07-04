@@ -1,4 +1,6 @@
-export default {
+/// <reference path='./Anomalies.d.ts'/>
+
+const Anomalies = {
   'HTMLElement': {
     'dataset': true,
     'style': true
@@ -18,3 +20,10 @@ export default {
     'setNamedItemNS': true
   }
 }
+const _: IAnomalies = {
+  has: (target, action) => {
+    return Anomalies.hasOwnProperty(target)
+      && Anomalies[target].hasOwnProperty(action)
+  }
+}
+export default _

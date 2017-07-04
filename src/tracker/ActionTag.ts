@@ -1,4 +1,4 @@
-const ActionTagMap: object = {
+const ActionTag: object = {
   'Element': {
     'removeAttribute': ['#arg', '0'],
     'removeAttributeNode': ['#arg', '0', 'name'],
@@ -26,4 +26,4 @@ const ActionTagMap: object = {
     'setNamedItemNS': ['#arg', '0', 'name'],
   }
 }
-export default ActionTagMap
+export default ActionTag

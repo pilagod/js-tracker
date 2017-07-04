@@ -1,16 +1,10 @@
 import * as chai from 'chai'
-import utils from '../src/tracker/utils'
+import TrackIDManager from '../src/tracker/TrackIDManager'
 
 const expect = chai.expect;
 
-before(function () {
-  const attr = document.createAttribute('id')
-
-  console.log(attr.constructor)
-})
-
 beforeEach(function () {
-  utils.resetTrackID()
+  TrackIDManager.resetID()
 })
 
 describe('__init__', function () {

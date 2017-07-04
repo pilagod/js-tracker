@@ -1,59 +1,57 @@
 import * as chai from 'chai'
-import ActionTypeMap from '../src/tracker/ActionTypeMap'
+import ActionMap from '../src/tracker/ActionMap'
 
 const expect = chai.expect
 
 describe('tracker\'s coverage', function () {
   describe('property setter coverage', function () {
-    const EXCLUDE_PROPS: Object = {
+    const PROXY_TARGETS: object = {
+      'CSSStyleDeclaration': true,
+      'DOMStringMap': true
+    }
+    const EXCLUDE_ACTIONS: object = {
       'attributes': true,
       'classList': true,
       'dataset': true,
       'style': true
     }
-    function isExcludedProp(prop) {
-      return EXCLUDE_PROPS.hasOwnProperty(prop)
+    function isProxyTargets(ctr) {
+      return PROXY_TARGETS.hasOwnProperty(ctr)
     }
-    const PROXY_CTRS: Object = {
-      'CSSStyleDeclaration': true,
-      'DOMStringMap': true
+    function isExcludedActions(prop) {
+      return EXCLUDE_ACTIONS.hasOwnProperty(prop)
     }
-    function isProxyCtr(ctr) {
-      return PROXY_CTRS.hasOwnProperty(ctr)
-    }
-    for (let ctr in ActionTypeMap) {
-      if (!isProxyCtr(ctr)) {
-        const proto = window[ctr].prototype
-        const trackProps = ActionTypeMap[ctr]
+    ActionMap.visit(function (target, actionMap) {
+      if (!isProxyTargets(target)) {
+        const proto = window[target].prototype
 
-        it(`should track ${ctr} all property setters`, function () {
-          Object.getOwnPropertyNames(proto).forEach((prop) => {
-            const descriptor = Object.getOwnPropertyDescriptor(proto, prop)
+        it(`should track ${target} all property setters`, function () {
+          Object.getOwnPropertyNames(proto).forEach((action) => {
+            const descriptor = Object.getOwnPropertyDescriptor(proto, action)
 
-            if (descriptor.set && !isExcludedProp(prop)) {
-              expect(trackProps).to.have.property(prop)
+            if (descriptor.set && !isExcludedActions(action)) {
+              expect(actionMap).to.have.property(action)
             }
           })
         })
       }
-    }
+    })
   })
 
   describe('manipulation method coverage', function () {
     function isManipulationMethod(method) {
       return /^(set|add|append|prepend|insert|remove|replace|toggle)/.test(method)
     }
-    for (let ctr in ActionTypeMap) {
-      const proto = window[ctr].prototype
-      const trackProps = ActionTypeMap[ctr]
+    ActionMap.visit(function (target, actionMap) {
+      const proto = window[target].prototype
 
-      it(`should track ${ctr} all manipulation methods`, function () {
+      it(`should track ${target} all manipulation methods`, function () {
         Object.getOwnPropertyNames(proto).forEach((prop) => {
           if (isManipulationMethod(prop)) {
-            expect(trackProps).to.have.property(prop)
+            expect(actionMap).to.have.property(prop)
           }
         })
       })
-    }
+    })
   })
 })
