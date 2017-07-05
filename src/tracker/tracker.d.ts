@@ -58,6 +58,7 @@ interface DOMStringMap extends IActionTarget {
   _owner: any
 }
 interface DOMTokenList extends IActionTarget {
+  value: string;
   _which: string;
 }
 interface NamedNodeMap extends IActionTarget { }

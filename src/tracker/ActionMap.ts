@@ -274,14 +274,14 @@ const ActionMap: {
     },
   }
 const _: IActionMap = {
-  visit: (callback) => {
+  visit(callback) {
     Object.keys(ActionMap).map(
       (target: Target) => {
         callback(target, ActionMap[target])
       }
     )
   },
-  has: (target, action) => {
+  has(target, action) {
     return ActionMap[target].hasOwnProperty(action)
   }
 }

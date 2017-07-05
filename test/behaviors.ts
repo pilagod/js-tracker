@@ -42,17 +42,19 @@ describe('tracker\'s behaviors', function () {
       .to.have.property('action')
       .to.equal(expected.action)
 
-    if (!expected.stacktrace) {
-      expect(got.stacktrace[1])
-        .to.have.property('functionName')
-        .to.equal(`${expected.caller.constructor.name}.${expected.action}`)
-    } else {
-      expect(got.stacktrace[1])
-        .to.have.property('functionName')
-        .to.equal(expected.stacktrace)
-    }
+    const expectedStacktrace =
+      expected.stacktrace || `${expected.caller.constructor.name}.${expected.action}`
+
+    expect(got.stacktrace[1])
+      .to.have.property('functionName')
+      .to.equal(expectedStacktrace)
+
     if (expected.merge) {
       expect(got.merge).to.equal(expected.merge)
+    }
+
+    if (expected.actionTag) {
+      expect(got.actionTag).to.equal(expected.actionTag)
     }
   }
 
@@ -89,37 +91,41 @@ describe('tracker\'s behaviors', function () {
 
     /* anomalies */
 
-    it('should track dataset property assignment', () => {
-      const div = document.createElement('div')
+    describe('dataset', () => {
+      it('should track its property assignment', () => {
+        const div = document.createElement('div')
 
-      div.dataset.data = 'data'
+        div.dataset.data = 'data'
 
-      expect(div.dataset._owner).to.equal(div)
-      expect(msgs).to.have.length(1)
+        expect(div.dataset._owner).to.equal(div)
+        expect(msgs).to.have.length(1)
 
-      matchActionData(msgs[0], {
-        caller: div.dataset,
-        trackid: '1',
-        target: 'DOMStringMap',
-        action: 'data',
-        stacktrace: 'Object.set'
+        matchActionData(msgs[0], {
+          caller: div.dataset,
+          trackid: '1',
+          target: 'DOMStringMap',
+          action: 'data',
+          stacktrace: 'Object.set'
+        })
       })
     })
 
-    it('should track style property assignment', () => {
-      const div = document.createElement('div')
+    describe('style', () => {
+      it('should track its property assignment', () => {
+        const div = document.createElement('div')
 
-      div.style.color = 'red'
+        div.style.color = 'red'
 
-      expect(div.style._owner).to.equal(div)
-      expect(msgs).to.have.length(1)
+        expect(div.style._owner).to.equal(div)
+        expect(msgs).to.have.length(1)
 
-      matchActionData(msgs[0], {
-        caller: div.style,
-        trackid: '1',
-        target: 'CSSStyleDeclaration',
-        action: 'color',
-        stacktrace: 'Object.set'
+        matchActionData(msgs[0], {
+          caller: div.style,
+          trackid: '1',
+          target: 'CSSStyleDeclaration',
+          action: 'color',
+          stacktrace: 'Object.set'
+        })
       })
     })
   })
@@ -160,50 +166,92 @@ describe('tracker\'s behaviors', function () {
 
     // @NOTE: setAttributeNode & setAttributeNodeNS track behaviors
     // are identical, only test setAttributeNode here of two scenarios
-    it('should track setAttributeNode{NS}', () => {
-      const div = document.createElement('div')
-      const idAttr = document.createAttribute('id')
+    describe('setAttributeNode{NS}', () => {
+      it('should track setAttributeNode{NS} (basic scenario)', () => {
+        const div = document.createElement('div')
+        const idAttr = document.createAttribute('id')
 
-      div.setAttributeNode(idAttr)
+        div.setAttributeNode(idAttr)
 
-      expect(msgs).to.have.length(1)
+        expect(msgs).to.have.length(1)
 
-      matchActionData(msgs[0], {
-        caller: div,
-        trackid: '1',
-        target: 'Element',
-        action: 'setAttributeNode'
+        matchActionData(msgs[0], {
+          caller: div,
+          trackid: '1',
+          target: 'Element',
+          action: 'setAttributeNode',
+          actionTag: 'id'
+        })
+      })
+
+      it('should track setAttributeNode{NS} (merge scenario)', () => {
+        const div = document.createElement('div')
+        const idAttr = document.createAttribute('id')
+
+        idAttr.value = 'id' // msgs[0] -> generate trackid 1
+        div.setAttributeNode(idAttr) // msgs[1] -> generate trackid 2
+
+        expect(msgs).to.have.length(2)
+
+        matchActionData(msgs[1], {
+          caller: div,
+          trackid: '2',
+          target: 'Element',
+          action: 'setAttributeNode',
+          actionTag: 'id',
+          merge: '1',
+        })
+      })
+
+      it('should track setAttributeNode{NS} (error scenario)', () => {
+        const div = document.createElement('div')
+        const div2 = document.createElement('div')
+
+        div.id = 'id'
+
+        const error = function () {
+          div2.setAttributeNode(div.attributes[0])
+        }
+        expect(error).to.throw()
       })
     })
 
-    it('should track setAttributeNode{NS} (merge scenario)', () => {
-      const div = document.createElement('div')
-      const idAttr = document.createAttribute('id')
+    describe('attributes', () => {
 
-      idAttr.value = 'id' // msgs[0] generate trackid 1
-      div.setAttributeNode(idAttr) // msgs[1] generate trackid 2
-
-      expect(msgs).to.have.length(2)
-
-      matchActionData(msgs[1], {
-        caller: div,
-        trackid: '2',
-        target: 'Element',
-        action: 'setAttributeNode',
-        merge: '1'
-      })
     })
 
-    it('should track setAttributeNode{NS} (error scenario)', () => {
-      const div = document.createElement('div')
-      const div2 = document.createElement('div')
+    describe('classList', () => {
+      it('should track its value property assignment', () => {
+        const div = document.createElement('div')
 
-      div.id = 'id'
+        div.classList.value = 'class'
 
-      const error = function () {
-        div2.setAttributeNode(div.attributes[0])
-      }
-      expect(error).to.throw()
+        expect(msgs).to.have.length(1)
+
+        matchActionData(msgs[0], {
+          caller: div.classList,
+          trackid: '1',
+          target: 'DOMTokenList',
+          action: 'value',
+          actionTag: 'classList'
+        })
+      })
+
+      it('should track its methods', () => {
+        const div = document.createElement('div')
+
+        div.classList.add('class')
+
+        expect(msgs).to.have.length(1)
+
+        matchActionData(msgs[0], {
+          caller: div.classList,
+          trackid: '1',
+          target: 'DOMTokenList',
+          action: 'add',
+          actionTag: 'classList'
+        })
+      })
     })
   })
 
@@ -227,24 +275,9 @@ describe('tracker\'s behaviors', function () {
         caller: idAttr,
         trackid: '1',
         target: 'Attr',
-        action: 'value'
+        action: 'value',
+        actionTag: 'id'
       })
     })
-  })
-
-  describe('CSSStyleDeclaration', () => {
-
-  })
-
-  describe('DOMStringMap', () => {
-
-  })
-
-  describe('DOMTokenList', () => {
-
-  })
-
-  describe('NamedNodeMap', () => {
-
   })
 })

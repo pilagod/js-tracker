@@ -21,7 +21,7 @@ const Anomalies = {
   }
 }
 const _: IAnomalies = {
-  has: (target, action) => {
+  has(target, action) {
     return Anomalies.hasOwnProperty(target)
       && Anomalies[target].hasOwnProperty(action)
   }

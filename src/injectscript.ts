@@ -2,6 +2,7 @@
 
 import * as StackTrace from 'stacktrace-js'
 import ActionMap from './tracker/ActionMap'
+import ActionTag from './tracker/ActionTag'
 import Anomalies from './tracker/Anomalies'
 import TrackIDManager from './tracker/TrackIDManager'
 
@@ -9,7 +10,6 @@ main()
 
 function main(): void {
   trackGeneralCases()
-
   trackHTMLElementAnomalies()
   trackElementAnomalies()
   trackAttrAnomalies()
@@ -20,7 +20,11 @@ function trackTemplate(
   template: {
     target: Target,
     action: Action,
-    decorator: (...args: any[]) => any,
+    decorator: (
+      target: Target,
+      action: Action,
+      actionFunc: (...args: any[]) => any
+    ) => (...args: any[]) => any,
     getter?: boolean
   }
 ) {
@@ -72,7 +76,10 @@ function trackGeneralCases(): void {
     return function (...args) {
       // @NOTE: type of target might be different from type of caller
       // e.g. caller: HTMLDivElement, target: Element, action: id
-      record({ caller: this, target, action })
+      record({
+        caller: this, target, action,
+        actionTag: ActionTag.parse(this, target, action, args)
+      })
       return actionFunc.call(this, ...args)
     }
   }
@@ -95,6 +102,9 @@ function record(
   }
   if (data.merge) {
     actionInfo.merge = data.merge
+  }
+  if (data.actionTag) {
+    actionInfo.actionTag = data.actionTag
   }
   window.postMessage(actionInfo, '*')
 }
@@ -197,26 +207,10 @@ function trackHTMLElementAnomalies(): void {
 
 function trackElementAnomalies() {
   setupOwner()
-  // track attributes and classList
-  for (let anomaly of ['attributes', 'classList']) {
-    trackTemplate({
-      target: 'Element',
-      action: anomaly,
-      decorator: subDecorator,
-      getter: true
-    })
-  }
-  // track setAttributeNode{NS}
-  for (let anomaly of [
-    'setAttributeNode',
-    'setAttributeNodeNS'
-  ]) {
-    trackTemplate({
-      target: 'Element',
-      action: anomaly,
-      decorator: setAttrNodeDecorator
-    })
-  }
+  trackAttributes()
+  trackClassList()
+  trackSetAttributeNode()
+
   function setupOwner() {
     Object.defineProperty(Element.prototype, '_owner', {
       get: function () {
@@ -224,18 +218,104 @@ function trackElementAnomalies() {
       }
     })
   }
-  function subDecorator<T>(_, __: any,
-    getter: () => T
-  ): () => T {
-    return function (this: Element): T {
-      const target = getter.call(this)
 
-      if (!target._owner) {
-        target._owner = this
+  function trackAttributes() {
+    trackTemplate({
+      target: 'Element',
+      action: 'attributes',
+      decorator: NamedNodeMapDecorator,
+      getter: true
+    })
+    function NamedNodeMapDecorator(
+      _, __: any,
+      getter: () => NamedNodeMap
+    ): () => NamedNodeMap {
+      return function (this: Element): NamedNodeMap {
+        const target = <NamedNodeMap>getter.call(this)
+
+        if (!target._owner) {
+          target._owner = this
+        }
+        return target
       }
-      return target
     }
   }
+
+  function trackClassList() {
+    trackTemplate({
+      target: 'Element',
+      action: 'classList',
+      decorator: DOMTokenListDecorator,
+      getter: true
+    })
+    function DOMTokenListDecorator(
+      _: any,
+      which: string,
+      getter: () => DOMTokenList
+    ): () => DOMTokenList {
+      return function (this: Element): DOMTokenList {
+        const target = <DOMTokenList>getter.call(this)
+
+        if (!target._owner) {
+          target._owner = this
+        }
+        if (!target._which) {
+          target._which = which
+        }
+        return target
+      }
+    }
+  }
+
+  function trackSetAttributeNode() {
+    for (let anomaly of [
+      'setAttributeNode',
+      'setAttributeNodeNS'
+    ]) {
+      trackTemplate({
+        target: 'Element',
+        action: anomaly,
+        decorator: setAttrNodeDecorator
+      })
+    }
+  }
+}
+
+function setAttrNodeDecorator(
+  target: Target,
+  action: Action,
+  actionFunc: (attr: Attr) => void
+): (tsvAttr: TrackSwitchValue<Attr>) => void {
+  return function (tsvAttr) {
+    if (tsvAttr instanceof Attr) {
+      const result = actionFunc.call(this, extractAttr(tsvAttr))
+
+      record({
+        caller: this, target, action,
+        actionTag: tsvAttr.name,
+        merge: tsvAttr._owner && tsvAttr._owner._trackid
+      })
+      return result
+    }
+    // @NOTE: bypass record process
+    return actionFunc.call(this, tsvAttr.value)
+  }
+}
+
+function extractAttr(attr: Attr): Attr {
+  if (attr._owner && attr._owner._isShadow) {
+    // @NOTE: use name or localname in createAttributeNS ?
+    const clone = attr.namespaceURI ?
+      document.createAttributeNS(attr.namespaceURI, attr.name) :
+      document.createAttribute(attr.name);
+
+    clone.value = <any>{
+      off: true,
+      value: attr.value
+    }
+    return clone
+  }
+  return attr
 }
 
 type TrackSwitchValue<T> = T | {
@@ -277,9 +357,13 @@ function trackAttrAnomalies(): void {
               value: this
             })
           }
-          record({ caller: this, target, action })
+          record({
+            caller: this, target, action,
+            actionTag: this.name
+          })
           return setter.call(this, tsvString)
         }
+        // @NOTE: bypass record process
         return setter.call(this, tsvString.value)
       }
     }
@@ -287,7 +371,6 @@ function trackAttrAnomalies(): void {
 }
 
 function trackNamedNodeMapAnomalies(): void {
-  // track setNamedItem{NS}
   for (let anomaly of [
     'setNamedItem',
     'setNamedItemNS'
@@ -298,41 +381,4 @@ function trackNamedNodeMapAnomalies(): void {
       decorator: setAttrNodeDecorator
     })
   }
-}
-
-function setAttrNodeDecorator(
-  target: Target,
-  action: Action,
-  actionFunc: (attr: Attr) => void
-): (tsvAttr: TrackSwitchValue<Attr>) => void {
-  return function (tsvAttr) {
-    if (tsvAttr instanceof Attr) {
-      const result = actionFunc.call(this, extractAttr(tsvAttr))
-
-      record({
-        caller: this,
-        target,
-        action,
-        merge: tsvAttr._owner && tsvAttr._owner._trackid
-      })
-      return result
-    }
-    return actionFunc.call(this, tsvAttr.value)
-  }
-}
-
-function extractAttr(attr: Attr): Attr {
-  if (attr._owner && attr._owner._isShadow) {
-    // @NOTE: use name or localname in createAttributeNS ?
-    const clone = attr.namespaceURI ?
-      document.createAttributeNS(attr.namespaceURI, attr.name) :
-      document.createAttribute(attr.name);
-
-    clone.value = <any>{
-      off: true,
-      value: attr.value
-    }
-    return clone
-  }
-  return attr
 }
