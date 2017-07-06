@@ -2,7 +2,7 @@ import * as chai from 'chai'
 
 const expect = chai.expect
 
-describe('tracker\'s behaviors', function () {
+describe('DOM APIs tracker', function () {
   let msgs: ActionInfo[]
 
   before(function () {
@@ -16,7 +16,7 @@ describe('tracker\'s behaviors', function () {
   })
 
   type ExpectInfo = {
-    caller: ActionTarget,
+    caller: IActionTarget,
     trackid: string,
     target: string,
     action: Action,
@@ -86,46 +86,6 @@ describe('tracker\'s behaviors', function () {
         trackid: '1',
         target: 'HTMLElement',
         action: 'click'
-      })
-    })
-
-    /* anomalies */
-
-    describe('dataset', () => {
-      it('should track its property assignment', () => {
-        const div = document.createElement('div')
-
-        div.dataset.data = 'data'
-
-        expect(div.dataset._owner).to.equal(div)
-        expect(msgs).to.have.length(1)
-
-        matchActionData(msgs[0], {
-          caller: div.dataset,
-          trackid: '1',
-          target: 'DOMStringMap',
-          action: 'data',
-          stacktrace: 'Object.set'
-        })
-      })
-    })
-
-    describe('style', () => {
-      it('should track its property assignment', () => {
-        const div = document.createElement('div')
-
-        div.style.color = 'red'
-
-        expect(div.style._owner).to.equal(div)
-        expect(msgs).to.have.length(1)
-
-        matchActionData(msgs[0], {
-          caller: div.style,
-          trackid: '1',
-          target: 'CSSStyleDeclaration',
-          action: 'color',
-          stacktrace: 'Object.set'
-        })
       })
     })
   })
@@ -277,6 +237,44 @@ describe('tracker\'s behaviors', function () {
         target: 'Attr',
         action: 'value',
         actionTag: 'id'
+      })
+    })
+  })
+
+  describe('CSSStyleDeclaration', () => {
+    it('should track its property assignment', () => {
+      const div = document.createElement('div')
+
+      div.style.color = 'red'
+
+      expect(div.style._owner).to.equal(div)
+      expect(msgs).to.have.length(1)
+
+      matchActionData(msgs[0], {
+        caller: div.style,
+        trackid: '1',
+        target: 'CSSStyleDeclaration',
+        action: 'color',
+        stacktrace: 'Object.set'
+      })
+    })
+  })
+
+  describe('DOMStringMap', () => {
+    it('should track its property assignment', () => {
+      const div = document.createElement('div')
+
+      div.dataset.data = 'data'
+
+      expect(div.dataset._owner).to.equal(div)
+      expect(msgs).to.have.length(1)
+
+      matchActionData(msgs[0], {
+        caller: div.dataset,
+        trackid: '1',
+        target: 'DOMStringMap',
+        action: 'data',
+        stacktrace: 'Object.set'
       })
     })
   })

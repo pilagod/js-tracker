@@ -6,15 +6,11 @@ import ActionTag from './tracker/ActionTag'
 import Anomalies from './tracker/Anomalies'
 import TrackIDManager from './tracker/TrackIDManager'
 
-main()
-
-function main(): void {
-  trackGeneralCases()
-  trackHTMLElementAnomalies()
-  trackElementAnomalies()
-  trackAttrAnomalies()
-  trackNamedNodeMapAnomalies()
-}
+trackGeneralCases()
+trackHTMLElementAnomalies()
+trackElementAnomalies()
+trackAttrAnomalies()
+trackNamedNodeMapAnomalies()
 
 function trackTemplate(
   template: {
@@ -58,6 +54,10 @@ function hasSetter(descriptor: PropertyDescriptor): boolean {
   return !!descriptor.set
 }
 
+/**
+ * trackGeneralCases
+ */
+
 function trackGeneralCases(): void {
   ActionMap.visit(function (target) {
     const proto = window[target].prototype
@@ -68,6 +68,7 @@ function trackGeneralCases(): void {
       }
     })
   })
+
   function decorator(
     target: Target,
     action: Action,
@@ -77,7 +78,9 @@ function trackGeneralCases(): void {
       // @NOTE: type of target might be different from type of caller
       // e.g. caller: HTMLDivElement, target: Element, action: id
       record({
-        caller: this, target, action,
+        caller: this,
+        target,
+        action,
         actionTag: ActionTag.parse(this, target, action, args)
       })
       return actionFunc.call(this, ...args)
@@ -87,7 +90,7 @@ function trackGeneralCases(): void {
 
 function record(
   data: {
-    caller: ActionTarget,
+    caller: IActionTarget,
     target: Target,
     action: Action,
     actionTag?: string,
@@ -109,8 +112,8 @@ function record(
   window.postMessage(actionInfo, '*')
 }
 
-function getTrackID(caller: ActionTarget): string {
-  const owner: Owner = caller._owner
+function getTrackID(caller: IActionTarget): string {
+  const owner = caller._owner
 
   if (!owner._trackid) {
     owner._trackid = TrackIDManager.generateID()
@@ -118,33 +121,34 @@ function getTrackID(caller: ActionTarget): string {
   return owner._trackid
 }
 
-function trackHTMLElementAnomalies(): void {
-  proxyDataset()
-  proxyStyle()
+/**
+ * trackHTMLElementAnomalies
+ */
 
-  function proxyDataset(): void {
+function trackHTMLElementAnomalies(): void {
+  trackDataset()
+  trackStyle()
+
+  function trackDataset(): void {
     trackTemplate({
       target: 'HTMLElement',
       action: 'dataset',
-      decorator: datasetProxyDecorator,
+      decorator: datasetDecorator,
       getter: true
     })
-    function datasetProxyDecorator(_, __: any,
+
+    function datasetDecorator(
+      _, __: any,
       getter: () => DOMStringMap
     ): () => DOMStringMap {
-      let datasetProxy: DOMStringMap
-
       return function (this: HTMLElement): DOMStringMap {
-        if (!datasetProxy) {
-          const dataset = getter.call(this);
-          (function (owner) {
-            Object.defineProperty(dataset, '_owner', {
-              get: function () {
-                return owner
-              }
-            })
-          })(this)
-          datasetProxy = new Proxy<DOMStringMap>(dataset, {
+        const dataset = <DOMStringMap>getter.call(this)
+
+        if (!dataset._owner) {
+          Object.defineProperty(dataset, '_owner', {
+            get: () => this
+          })
+          const datasetProxy = new Proxy<DOMStringMap>(dataset, {
             set: function (target, action, value) {
               record({
                 caller: target,
@@ -155,31 +159,33 @@ function trackHTMLElementAnomalies(): void {
               return true
             }
           })
+          Object.defineProperty(dataset, '_proxy', {
+            get: () => datasetProxy
+          })
         }
-        return datasetProxy
+        return dataset._proxy
       }
     }
   }
 
-  function proxyStyle(): void {
+  function trackStyle(): void {
     trackTemplate({
       target: 'HTMLElement',
       action: 'style',
-      decorator: styleProxyDecorator,
+      decorator: styleDecorator,
       getter: true
     })
-    function styleProxyDecorator(_, __: any,
+
+    function styleDecorator(
+      _, __: any,
       getter: () => CSSStyleDeclaration
     ): () => CSSStyleDeclaration {
-      let styleProxy: CSSStyleDeclaration
-
       return function (this: HTMLElement): CSSStyleDeclaration {
-        if (!styleProxy) {
-          const style = getter.call(this)
+        const style = <CSSStyleDeclaration>getter.call(this)
 
+        if (!style._owner) {
           style._owner = this
-
-          styleProxy = new Proxy<CSSStyleDeclaration>(style, {
+          style._proxy = new Proxy<CSSStyleDeclaration>(style, {
             get: function (target, action) {
               // @NOTE: function should bind to target, otherwise, 
               // its context will be Proxy, and throwing Illegal Invocation Error.
@@ -199,11 +205,15 @@ function trackHTMLElementAnomalies(): void {
             }
           })
         }
-        return styleProxy
+        return style._proxy
       }
     }
   }
 }
+
+/**
+ * trackElementAnomalies
+ */
 
 function trackElementAnomalies() {
   setupOwner()
@@ -226,6 +236,7 @@ function trackElementAnomalies() {
       decorator: NamedNodeMapDecorator,
       getter: true
     })
+
     function NamedNodeMapDecorator(
       _, __: any,
       getter: () => NamedNodeMap
@@ -248,23 +259,6 @@ function trackElementAnomalies() {
       decorator: DOMTokenListDecorator,
       getter: true
     })
-    function DOMTokenListDecorator(
-      _: any,
-      which: string,
-      getter: () => DOMTokenList
-    ): () => DOMTokenList {
-      return function (this: Element): DOMTokenList {
-        const target = <DOMTokenList>getter.call(this)
-
-        if (!target._owner) {
-          target._owner = this
-        }
-        if (!target._which) {
-          target._which = which
-        }
-        return target
-      }
-    }
   }
 
   function trackSetAttributeNode() {
@@ -281,6 +275,24 @@ function trackElementAnomalies() {
   }
 }
 
+function DOMTokenListDecorator(
+  _: any,
+  which: string,
+  getter: () => DOMTokenList
+): () => DOMTokenList {
+  return function (this: Element): DOMTokenList {
+    const target = <DOMTokenList>getter.call(this)
+
+    if (!target._owner) {
+      target._owner = this
+    }
+    if (!target._which) {
+      target._which = which
+    }
+    return target
+  }
+}
+
 function setAttrNodeDecorator(
   target: Target,
   action: Action,
@@ -291,7 +303,9 @@ function setAttrNodeDecorator(
       const result = actionFunc.call(this, extractAttr(tsvAttr))
 
       record({
-        caller: this, target, action,
+        caller: this,
+        target,
+        action,
         actionTag: tsvAttr.name,
         merge: tsvAttr._owner && tsvAttr._owner._trackid
       })
@@ -323,6 +337,10 @@ type TrackSwitchValue<T> = T | {
   value: T;
 }
 
+/**
+ * trackAttrAnomalies
+ */
+
 function trackAttrAnomalies(): void {
   setupAttr()
   trackValue()
@@ -334,12 +352,14 @@ function trackAttrAnomalies(): void {
       }
     })
   }
+
   function trackValue(): void {
     trackTemplate({
       target: 'Attr',
       action: 'value',
       decorator: valueDecorator
     })
+
     function valueDecorator(
       target: Target,
       action: Action,
@@ -358,7 +378,9 @@ function trackAttrAnomalies(): void {
             })
           }
           record({
-            caller: this, target, action,
+            caller: this,
+            target,
+            action,
             actionTag: this.name
           })
           return setter.call(this, tsvString)
@@ -369,6 +391,10 @@ function trackAttrAnomalies(): void {
     }
   }
 }
+
+/**
+ * trackNamedNodeMapAnomalies
+ */
 
 function trackNamedNodeMapAnomalies(): void {
   for (let anomaly of [

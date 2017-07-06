@@ -2,9 +2,9 @@ import * as chai from 'chai'
 
 const expect = chai.expect
 
-describe('tracker\'s compatibility of native behaviors', function () {
-  describe('HTMLElement', function () {
-    it('should set property properly', function () {
+describe('tracker\'s compatibility of native behaviors', () => {
+  describe('HTMLElement', () => {
+    it('should set property properly', () => {
       const div = document.createElement('div')
 
       div.accessKey = 'accessKey'
@@ -15,35 +15,15 @@ describe('tracker\'s compatibility of native behaviors', function () {
     it('should call method properly', function (done) {
       const div = document.createElement('div')
 
-      div.onclick = function () {
+      div.onclick = () => {
         done()
       }
       div.click()
     })
-
-    /* anomalies */
-
-    it('should keep dataset\'s default behaviors', function () {
-      const div = document.createElement('div')
-
-      div.dataset.data = 'data'
-
-      expect(div.dataset).to.be.instanceof(DOMStringMap)
-      expect(div.dataset.data).to.equal('data')
-    })
-
-    it('should keep style\'s default behaviors', function () {
-      const div = document.createElement('div')
-
-      div.style.color = 'red'
-
-      expect(div.style).to.be.instanceof(CSSStyleDeclaration)
-      expect(div.style.color).to.equal('red')
-    })
   })
 
-  describe('Element', function () {
-    it('should set property properly', function () {
+  describe('Element', () => {
+    it('should set property properly', () => {
       const div = document.createElement('div')
 
       div.id = 'id'
@@ -51,7 +31,7 @@ describe('tracker\'s compatibility of native behaviors', function () {
       expect(div.id).to.equal('id')
     })
 
-    it('should call method properly', function () {
+    it('should call method properly', () => {
       const div = document.createElement('div')
       const div2 = document.createElement('div')
 
@@ -63,7 +43,7 @@ describe('tracker\'s compatibility of native behaviors', function () {
 
     /* anomalies */
 
-    it('should call setAttributeNode properly', function () {
+    it('should call setAttributeNode properly', () => {
       const div = document.createElement('div')
       const id = document.createAttribute('id')
 
@@ -73,7 +53,7 @@ describe('tracker\'s compatibility of native behaviors', function () {
       expect(div.id).to.equal('id')
     })
 
-    it('should call setAttributeNodeNS properly', function () {
+    it('should call setAttributeNodeNS properly', () => {
       const div = document.createElement('div')
       const nsid = document.createAttributeNS('ns', 'id')
 
@@ -84,8 +64,8 @@ describe('tracker\'s compatibility of native behaviors', function () {
     })
   })
 
-  describe('Node', function () {
-    it('should set property properly', function () {
+  describe('Node', () => {
+    it('should set property properly', () => {
       const div = document.createElement('div')
 
       div.innerText = 'text'
@@ -93,7 +73,7 @@ describe('tracker\'s compatibility of native behaviors', function () {
       expect(div.innerText).to.equal('text')
     })
 
-    it('should call method properly', function () {
+    it('should call method properly', () => {
       const div = document.createElement('div')
       const div2 = document.createElement('div')
 
@@ -104,21 +84,21 @@ describe('tracker\'s compatibility of native behaviors', function () {
     })
   })
 
-  describe('EventTarget', function () {
+  describe('EventTarget', () => {
     it('should call method properly', function (done) {
       const div = document.createElement('div')
 
-      div.addEventListener('click', function () {
+      div.addEventListener('click', () => {
         done()
       })
       div.click()
     })
   })
 
-  describe('Attr', function () {
+  describe('Attr', () => {
     /* anomalies */
 
-    it('should keep value\'s default behaviors', function () {
+    it('should keep value\'s default behaviors', () => {
       const id = document.createAttribute('id')
 
       id.value = 'id'
@@ -127,25 +107,62 @@ describe('tracker\'s compatibility of native behaviors', function () {
     })
   })
 
-  describe('CSSStyleDeclaration', function () {
-    it('should call method properly', function () {
+  describe('CSSStyleDeclaration', () => {
+    it('should set property properly', () => {
+      const div = document.createElement('div')
+
+      div.style.color = 'red'
+
+      expect(div.style).to.be.instanceof(CSSStyleDeclaration)
+      expect(div.style.color).to.equal('red')
+    })
+
+    it('should call method properly', () => {
       const div = document.createElement('div')
 
       div.style.setProperty('color', 'red')
 
       expect(div.style.color).to.equal('red')
     })
+
+    it('should handle each style independently', () => {
+      const div = document.createElement('div')
+      const div2 = document.createElement('div2')
+
+      div.style.color = 'red'
+      div2.style.color = 'blue'
+
+      expect(div.style.color).to.equal('red')
+      expect(div2.style.color).to.equal('blue')
+      expect(div.style).to.not.equal(div2.style)
+    })
   })
 
-  it('should compatible with DOMStringMap default behaviors', () => {
-    const div = document.createElement('div')
+  describe('DOMStringMap', () => {
+    it('should set property properly', () => {
+      const div = document.createElement('div')
 
-    div.dataset.data = 'data'
-    expect(div.dataset.data).to.equal('data')
+      div.dataset.data = 'data'
+
+      expect(div.dataset).to.be.instanceof(DOMStringMap)
+      expect(div.dataset.data).to.equal('data')
+    })
+
+    it('should handle each dataset independently', () => {
+      const div = document.createElement('div')
+      const div2 = document.createElement('div2')
+
+      div.dataset.data = 'data1'
+      div2.dataset.data = 'data2'
+
+      expect(div.dataset.data).to.equal('data1')
+      expect(div2.dataset.data).to.equal('data2')
+      expect(div.dataset).to.not.equal(div2.dataset)
+    })
   })
 
-  describe('DOMTokenList', function () {
-    it('should set property properly', function () {
+  describe('DOMTokenList', () => {
+    it('should set property properly', () => {
       const div = document.createElement('div');
 
       // @NOTE: chrome has 'value' property
@@ -154,7 +171,7 @@ describe('tracker\'s compatibility of native behaviors', function () {
       expect(div.classList.contains('class')).to.be.true
     })
 
-    it('should call method properly', function () {
+    it('should call method properly', () => {
       const div = document.createElement('div');
 
       div.classList.add('class')
@@ -163,8 +180,8 @@ describe('tracker\'s compatibility of native behaviors', function () {
     })
   })
 
-  describe('NamedNodeMap', function () {
-    it('should call method properly', function () {
+  describe('NamedNodeMap', () => {
+    it('should call method properly', () => {
       const div = document.createElement('div')
 
       div.id = 'id'
@@ -175,7 +192,7 @@ describe('tracker\'s compatibility of native behaviors', function () {
 
     /* anomalies */
 
-    it('should call setNamedItem properly', function () {
+    it('should call setNamedItem properly', () => {
       const div = document.createElement('div')
       const id = document.createAttribute('id')
 
@@ -185,7 +202,7 @@ describe('tracker\'s compatibility of native behaviors', function () {
       expect(div.id).to.equal('id')
     })
 
-    it('should call setNamedItemNS properly', function () {
+    it('should call setNamedItemNS properly', () => {
       const div = document.createElement('div')
       const nsid = document.createAttributeNS('ns', 'id')
 

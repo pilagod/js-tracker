@@ -11,23 +11,13 @@ type Target =
 
 type Action = PropertyKey
 
-type ActionTarget =
-  HTMLElement
-  | SVGElement
-  | Element
-  | Attr
-  | CSSStyleDeclaration
-  | DOMStringMap
-  | DOMTokenList
-  | NamedNodeMap
+interface IActionTarget {
+  _owner: Owner;
+}
 
 interface Owner {
   _trackid: string;
   _isShadow: boolean;
-}
-
-interface IActionTarget {
-  _owner: Owner;
 }
 
 type ActionInfo = {
@@ -47,18 +37,20 @@ type ActionRecord = {
  */
 
 interface SVGElement {
-  // @TODO: pull request to typescript repo
-  readonly dataset: DOMStringMap
+  readonly dataset: DOMStringMap; // @TODO: pull request to typescript repo
 }
 interface Element extends Owner, IActionTarget { }
 interface Attr extends IActionTarget { }
-interface CSSStyleDeclaration extends IActionTarget { }
+interface CSSStyleDeclaration extends IActionTarget {
+  _proxy: CSSStyleDeclaration;
+}
 interface DOMStringMap extends IActionTarget {
   // @NOTE: bypass index signature of DOMStringMap in typescript/lib/lib.es6.d.ts
-  _owner: any
+  _owner: any; // interface Owner 
+  _proxy: any; // interface DOMStringMap
 }
 interface DOMTokenList extends IActionTarget {
-  value: string;
+  value: string; // @TODO: pull request to typescript repo
   _which: string;
 }
 interface NamedNodeMap extends IActionTarget { }

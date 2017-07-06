@@ -3,7 +3,7 @@
 interface IActionTag {
   has(target: Target, action: Action): boolean;
   parse(
-    caller: ActionTarget,
+    caller: IActionTarget,
     target: Target,
     action: Action,
     args: any[]
