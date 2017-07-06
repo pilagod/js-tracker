@@ -2,7 +2,7 @@
 
 import * as StackTrace from 'stacktrace-js'
 import ActionMap from './tracker/ActionMap'
-import ActionTag from './tracker/ActionTag'
+import ActionTagMap from './tracker/ActionTagMap'
 import Anomalies from './tracker/Anomalies'
 import TrackIDManager from './tracker/TrackIDManager'
 
@@ -81,7 +81,7 @@ function trackGeneralCases(): void {
         caller: this,
         target,
         action,
-        actionTag: ActionTag.parse(this, target, action, args)
+        actionTag: ActionTagMap.parse(this, target, action, args)
       })
       return actionFunc.call(this, ...args)
     }

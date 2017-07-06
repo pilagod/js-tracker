@@ -1,6 +1,6 @@
-/// <reference path='./ActionTag.d.ts'/>
+/// <reference path='./ActionTagMap.d.ts'/>
 
-const ActionTag: object = {
+const ActionTagMap: object = {
   'Element': {
     // general
     'removeAttribute': ['#arg', '0'],
@@ -9,13 +9,13 @@ const ActionTag: object = {
     'setAttribute': ['#arg', '0'],
     'setAttributeNS': ['#arg', '1'],
     // anomalies
-    'setAttributeNode': ['#arg', '0', 'name'],
-    'setAttributeNodeNS': ['#arg', '0', 'name'],
+    // 'setAttributeNode': ['#arg', '0', 'name'],
+    // 'setAttributeNodeNS': ['#arg', '0', 'name'],
   },
-  'Attr': {
-    // anomalies
-    'value': ['#name']
-  },
+  // 'Attr': {
+  //   anomalies
+  //   'value': ['#name']
+  // },
   'DOMTokenList': {
     // general
     'value': ['#which'],
@@ -29,24 +29,24 @@ const ActionTag: object = {
     'removeNamedItem': ['#arg', '0'],
     'removeNamedItemNS': ['#arg', '1'],
     // anomalies
-    'setNamedItem': ['#arg', '0', 'name'],
-    'setNamedItemNS': ['#arg', '0', 'name'],
+    // 'setNamedItem': ['#arg', '0', 'name'],
+    // 'setNamedItemNS': ['#arg', '0', 'name'],
   }
 }
-const _: IActionTag = {
+const _: IActionTagMap = {
   has(target, action) {
-    return ActionTag.hasOwnProperty(target)
-      && ActionTag[target].hasOwnProperty(action)
+    return ActionTagMap.hasOwnProperty(target)
+      && ActionTagMap[target].hasOwnProperty(action)
   },
   parse(caller, target, action, args = []) {
     if (this.has(target, action)) {
-      const tags = ActionTag[target][action]
+      const tags = <string[]>ActionTagMap[target][action]
 
       switch (tags[0]) {
         case '#arg':
-          return tags.slice(1).reduce((pre, cur) => pre[cur], args)
-        case '#name':
-          return (<Attr>caller).name
+          return tags.slice(1).reduce((pre: object, cur: string) => pre[cur], args)
+        // case '#name':
+        // return (<Attr>caller).name
         case '#which':
           return (<DOMTokenList>caller)._which
       }
