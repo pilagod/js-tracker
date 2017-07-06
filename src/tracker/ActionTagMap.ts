@@ -38,9 +38,9 @@ const _: IActionTagMap = {
     return ActionTagMap.hasOwnProperty(target)
       && ActionTagMap[target].hasOwnProperty(action)
   },
-  parse(caller, target, action, args = []) {
+  fetchActionTag(caller, target, action, args = []) {
     if (this.has(target, action)) {
-      const tags = <string[]>ActionTagMap[target][action]
+      const tags = <ActionTags>ActionTagMap[target][action]
 
       switch (tags[0]) {
         case '#arg':

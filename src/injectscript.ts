@@ -19,8 +19,8 @@ function trackTemplate(
     decorator: (
       target: Target,
       action: Action,
-      actionFunc: (...args: any[]) => any
-    ) => (...args: any[]) => any,
+      actionFunc: (this: IActionTarget, ...args: any[]) => any
+    ) => (this: IActionTarget, ...args: any[]) => any,
     getter?: boolean
   }
 ) {
@@ -81,7 +81,7 @@ function trackGeneralCases(): void {
         caller: this,
         target,
         action,
-        actionTag: ActionTagMap.parse(this, target, action, args)
+        actionTag: ActionTagMap.fetchActionTag(this, target, action, args)
       })
       return actionFunc.call(this, ...args)
     }
@@ -300,7 +300,7 @@ function setAttrNodeDecorator(
 ): (tsvAttr: TrackSwitchValue<Attr>) => void {
   return function (tsvAttr) {
     if (tsvAttr instanceof Attr) {
-      const result = actionFunc.call(this, extractAttr(tsvAttr))
+      const result = actionFunc.call(this, extractTSVAttr(tsvAttr))
 
       record({
         caller: this,
@@ -316,7 +316,7 @@ function setAttrNodeDecorator(
   }
 }
 
-function extractAttr(attr: Attr): Attr {
+function extractTSVAttr(attr: Attr): Attr {
   if (attr._owner && attr._owner._isShadow) {
     // @NOTE: use name or localname in createAttributeNS ?
     const clone = attr.namespaceURI ?
