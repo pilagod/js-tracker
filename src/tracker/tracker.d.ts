@@ -46,8 +46,8 @@ interface CSSStyleDeclaration extends IActionTarget {
 }
 interface DOMStringMap extends IActionTarget {
   // @NOTE: bypass index signature of DOMStringMap in typescript/lib/lib.es6.d.ts
-  _owner: any; // interface Owner 
-  _proxy: any; // interface DOMStringMap
+  _owner: Owner | any; // interface Owner 
+  _proxy: DOMStringMap | any; // interface DOMStringMap
 }
 interface DOMTokenList extends IActionTarget {
   value: string; // @TODO: pull request to typescript repo
