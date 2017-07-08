@@ -1,17 +1,18 @@
 import * as chai from 'chai'
+import * as StackTrace from 'stacktrace-js'
 
 const expect = chai.expect
 
-describe('DOM APIs tracker', function () {
+describe('DOM APIs tracker', () => {
   let msgs: ActionInfo[]
 
-  before(function () {
+  before(() => {
     window.postMessage = function (msg) {
       msgs.push(msg)
     }
   })
 
-  beforeEach(function () {
+  beforeEach(() => {
     msgs = []
   })
 
@@ -20,12 +21,22 @@ describe('DOM APIs tracker', function () {
     trackid: string,
     target: string,
     action: Action,
-    stacktrace?: string,
+    stackframe: StackTrace.StackFrame,
     actionTag?: string,
     merge?: string,
   }
 
-  function matchActionData(got: ActionInfo, expected: ExpectInfo) {
+  // @NOTE: getStackFrameWithLineOffset should call immediately 
+  // after tracked actions on default
+  function getStackFrameWithLineOffset(lineOffset: number = -1) {
+    const stackframe = StackTrace.getSync()[1]
+
+    return Object.assign({}, stackframe, {
+      lineNumber: stackframe.lineNumber + lineOffset
+    })
+  }
+
+  function matchActionInfo(got: ActionInfo, expected: ExpectInfo) {
     expect(expected.caller._owner)
       .to.have.property('_trackid')
       .to.equal(expected.trackid)
@@ -42,12 +53,9 @@ describe('DOM APIs tracker', function () {
       .to.have.property('action')
       .to.equal(expected.action)
 
-    const expectedStacktrace =
-      expected.stacktrace || `${expected.caller.constructor.name}.${expected.action}`
-
-    expect(got.stacktrace[1])
-      .to.have.property('functionName')
-      .to.equal(expectedStacktrace)
+    if (expected.stackframe) {
+      matchStackFrame(got.stacktrace[2], expected.stackframe)
+    }
 
     if (expected.merge) {
       expect(got.merge).to.equal(expected.merge)
@@ -58,19 +66,29 @@ describe('DOM APIs tracker', function () {
     }
   }
 
+  function matchStackFrame(
+    got: StackTrace.StackFrame,
+    expected: StackTrace.StackFrame
+  ) {
+    expect(got.fileName).to.equal(expected.fileName)
+    expect(got.lineNumber).to.equal(expected.lineNumber)
+  }
+
   describe('HTMLElement', () => {
     it('should track property assignment', () => {
       const div = document.createElement('div')
 
       div.accessKey = 'accessKey'
+      const stackframe = getStackFrameWithLineOffset()
 
       expect(msgs).to.have.length(1)
 
-      matchActionData(msgs[0], {
+      matchActionInfo(msgs[0], {
         caller: div,
         trackid: '1',
         target: 'HTMLElement',
         action: 'accessKey',
+        stackframe
       })
     })
 
@@ -78,14 +96,16 @@ describe('DOM APIs tracker', function () {
       const div = document.createElement('div')
 
       div.click()
+      const stackframe = getStackFrameWithLineOffset()
 
       expect(msgs).to.have.length(1)
 
-      matchActionData(msgs[0], {
+      matchActionInfo(msgs[0], {
         caller: div,
         trackid: '1',
         target: 'HTMLElement',
-        action: 'click'
+        action: 'click',
+        stackframe
       })
     })
   })
@@ -95,14 +115,16 @@ describe('DOM APIs tracker', function () {
       const div = document.createElement('div')
 
       div.id = 'id'
+      const stackframe = getStackFrameWithLineOffset()
 
       expect(msgs).to.have.length(1)
 
-      matchActionData(msgs[0], {
+      matchActionInfo(msgs[0], {
         caller: div,
         trackid: '1',
         target: 'Element',
-        action: 'id'
+        action: 'id',
+        stackframe
       })
     })
 
@@ -111,14 +133,16 @@ describe('DOM APIs tracker', function () {
       const div2 = document.createElement('div')
 
       div.insertAdjacentElement('afterbegin', div2)
+      const stackframe = getStackFrameWithLineOffset()
 
       expect(msgs).to.have.length(1)
 
-      matchActionData(msgs[0], {
+      matchActionInfo(msgs[0], {
         caller: div,
         trackid: '1',
         target: 'Element',
-        action: 'insertAdjacentElement'
+        action: 'insertAdjacentElement',
+        stackframe
       })
     })
 
@@ -132,15 +156,17 @@ describe('DOM APIs tracker', function () {
         const idAttr = document.createAttribute('id')
 
         div.setAttributeNode(idAttr)
+        const stackframe = getStackFrameWithLineOffset()
 
         expect(msgs).to.have.length(1)
 
-        matchActionData(msgs[0], {
+        matchActionInfo(msgs[0], {
           caller: div,
           trackid: '1',
           target: 'Element',
           action: 'setAttributeNode',
-          actionTag: 'id'
+          actionTag: 'id',
+          stackframe
         })
       })
 
@@ -149,17 +175,20 @@ describe('DOM APIs tracker', function () {
         const idAttr = document.createAttribute('id')
 
         idAttr.value = 'id' // msgs[0] -> generate trackid 1
+
         div.setAttributeNode(idAttr) // msgs[1] -> generate trackid 2
+        const stackframe = getStackFrameWithLineOffset()
 
         expect(msgs).to.have.length(2)
 
-        matchActionData(msgs[1], {
+        matchActionInfo(msgs[1], {
           caller: div,
           trackid: '2',
           target: 'Element',
           action: 'setAttributeNode',
           actionTag: 'id',
           merge: '1',
+          stackframe
         })
       })
 
@@ -173,44 +202,6 @@ describe('DOM APIs tracker', function () {
           div2.setAttributeNode(div.attributes[0])
         }
         expect(error).to.throw()
-      })
-    })
-
-    describe('attributes', () => {
-
-    })
-
-    describe('classList', () => {
-      it('should track its value property assignment', () => {
-        const div = document.createElement('div')
-
-        div.classList.value = 'class'
-
-        expect(msgs).to.have.length(1)
-
-        matchActionData(msgs[0], {
-          caller: div.classList,
-          trackid: '1',
-          target: 'DOMTokenList',
-          action: 'value',
-          actionTag: 'classList'
-        })
-      })
-
-      it('should track its methods', () => {
-        const div = document.createElement('div')
-
-        div.classList.add('class')
-
-        expect(msgs).to.have.length(1)
-
-        matchActionData(msgs[0], {
-          caller: div.classList,
-          trackid: '1',
-          target: 'DOMTokenList',
-          action: 'add',
-          actionTag: 'classList'
-        })
       })
     })
   })
@@ -228,15 +219,17 @@ describe('DOM APIs tracker', function () {
       const idAttr = document.createAttribute('id')
 
       idAttr.value = 'id'
+      const stackframe = getStackFrameWithLineOffset()
 
       expect(msgs).to.have.length(1)
 
-      matchActionData(msgs[0], {
+      matchActionInfo(msgs[0], {
         caller: idAttr,
         trackid: '1',
         target: 'Attr',
         action: 'value',
-        actionTag: 'id'
+        actionTag: 'id',
+        stackframe
       })
     })
   })
@@ -246,16 +239,17 @@ describe('DOM APIs tracker', function () {
       const div = document.createElement('div')
 
       div.style.color = 'red'
+      const stackframe = getStackFrameWithLineOffset()
 
       expect(div.style._owner).to.equal(div)
       expect(msgs).to.have.length(1)
 
-      matchActionData(msgs[0], {
+      matchActionInfo(msgs[0], {
         caller: div.style,
         trackid: '1',
         target: 'CSSStyleDeclaration',
         action: 'color',
-        stacktrace: 'Object.set'
+        stackframe
       })
     })
   })
@@ -265,17 +259,60 @@ describe('DOM APIs tracker', function () {
       const div = document.createElement('div')
 
       div.dataset.data = 'data'
+      const stackframe = getStackFrameWithLineOffset()
 
       expect(div.dataset._owner).to.equal(div)
       expect(msgs).to.have.length(1)
 
-      matchActionData(msgs[0], {
+      matchActionInfo(msgs[0], {
         caller: div.dataset,
         trackid: '1',
         target: 'DOMStringMap',
         action: 'data',
-        stacktrace: 'Object.set'
+        stackframe
       })
     })
+  })
+
+  describe('DOMTokenList', () => {
+    it('should track its value property assignment', () => {
+      const div = document.createElement('div')
+
+      div.classList.value = 'class'
+      const stackframe = getStackFrameWithLineOffset()
+
+      expect(msgs).to.have.length(1)
+
+      matchActionInfo(msgs[0], {
+        caller: div.classList,
+        trackid: '1',
+        target: 'DOMTokenList',
+        action: 'value',
+        actionTag: 'classList',
+        stackframe
+      })
+    })
+
+    it('should track its methods', () => {
+      const div = document.createElement('div')
+
+      div.classList.add('class')
+      const stackframe = getStackFrameWithLineOffset()
+
+      expect(msgs).to.have.length(1)
+
+      matchActionInfo(msgs[0], {
+        caller: div.classList,
+        trackid: '1',
+        target: 'DOMTokenList',
+        action: 'add',
+        actionTag: 'classList',
+        stackframe
+      })
+    })
+  })
+
+  describe('NamedNodeMap', () => {
+
   })
 })
