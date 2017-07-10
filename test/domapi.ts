@@ -3,7 +3,7 @@ import * as StackTrace from 'stacktrace-js'
 
 const expect = chai.expect
 
-describe('DOM APIs tracker', () => {
+describe('DOM API tracker', () => {
   let msgs: ActionInfo[]
 
   before(() => {
@@ -145,6 +145,70 @@ describe('DOM APIs tracker', () => {
         stackframe
       })
     })
+
+    /* action tag */
+
+    describe('set/removeAttribute', () => {
+      it('should track setAttribute with action tag', () => {
+        const div = document.createElement('div')
+
+        div.setAttribute('id', 'id')
+        const stackframe = getStackFrameWithLineOffset()
+
+        expect(msgs).to.have.length(1)
+
+        matchActionInfo(msgs[0], {
+          caller: div,
+          trackid: '1',
+          target: 'Element',
+          action: 'setAttribute',
+          actionTag: 'id',
+          stackframe
+        })
+      })
+
+      it('should track removeAttribute with action tag', () => {
+        const div = document.createElement('div')
+
+        div.setAttribute('id', 'id')
+
+        div.removeAttribute('id')
+        const stackframe = getStackFrameWithLineOffset()
+
+        expect(msgs).to.have.length(2)
+
+        matchActionInfo(msgs[1], {
+          caller: div,
+          trackid: '1',
+          target: 'Element',
+          action: 'removeAttribute',
+          actionTag: 'id',
+          stackframe
+        })
+      })
+
+      it('should track removeAttributeNode with action tag', () => {
+        const div = document.createElement('div')
+
+        div.setAttribute('id', 'id')
+
+        const id = div.getAttributeNode('id')
+        div.removeAttributeNode(id)
+        const stackframe = getStackFrameWithLineOffset()
+
+        expect(msgs).to.have.length(2)
+
+        matchActionInfo(msgs[1], {
+          caller: div,
+          trackid: '1',
+          target: 'Element',
+          action: 'removeAttributeNode',
+          actionTag: 'id',
+          stackframe
+        })
+      })
+    })
+
 
     /* anomalies */
 

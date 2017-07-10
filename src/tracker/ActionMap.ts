@@ -13,7 +13,7 @@ const {
 // @NOTE: those actions whose type determined by argument or property
 // (1) Element.attributes methods (e.g. setAttribute, removeAttribute)
 // (2) Attr value setter
-const AttrActionTag: object = {
+const AttrActionTagMap: object = {
   'class': Style,
   'style': Style,
   'default': Attribute
@@ -22,7 +22,7 @@ const AttrActionTag: object = {
 // @NOTE: those actions whose type determined by caller object
 // (1) classList -> Style
 // (2) others -> Attribute
-const DOMTokenListActionTag: object = {
+const DOMTokenListActionTagMap: object = {
   'classList': Style,
   'default': Attribute
 }
@@ -177,13 +177,13 @@ const ActionMap: {
 
       /* methods */
 
-      'removeAttribute': AttrActionTag,
-      'removeAttributeNode': AttrActionTag,
-      'removeAttributeNS': AttrActionTag,
-      'setAttribute': AttrActionTag,
-      'setAttributeNode': AttrActionTag, // #anomaly
-      'setAttributeNodeNS': AttrActionTag, // #anomaly
-      'setAttributeNS': AttrActionTag,
+      'removeAttribute': AttrActionTagMap,
+      'removeAttributeNode': AttrActionTagMap,
+      'removeAttributeNS': AttrActionTagMap,
+      'setAttribute': AttrActionTagMap,
+      'setAttributeNode': AttrActionTagMap, // #anomaly
+      'setAttributeNodeNS': AttrActionTagMap, // #anomaly
+      'setAttributeNS': AttrActionTagMap,
 
       'scrollIntoView': Behavior,
 
@@ -236,7 +236,7 @@ const ActionMap: {
 
       /* properties */
 
-      'value': AttrActionTag // #anomaly
+      'value': AttrActionTagMap // #anomaly
     },
     'CSSStyleDeclaration': {
       // https://developer.mozilla.org/zh-TW/docs/Web/API/CSSStyleDeclaration
@@ -254,24 +254,24 @@ const ActionMap: {
 
       /* properties */
 
-      'value': DOMTokenListActionTag,
+      'value': DOMTokenListActionTagMap,
 
       /* methods */
 
-      'add': DOMTokenListActionTag,
-      'remove': DOMTokenListActionTag,
-      'replace': DOMTokenListActionTag,
-      'toggle': DOMTokenListActionTag
+      'add': DOMTokenListActionTagMap,
+      'remove': DOMTokenListActionTagMap,
+      'replace': DOMTokenListActionTagMap,
+      'toggle': DOMTokenListActionTagMap
     },
     'NamedNodeMap': {
       // https://developer.mozilla.org/zh-TW/docs/Web/API/NamedNodeMap
 
       /* methods */
 
-      'removeNamedItem': AttrActionTag,
-      'removeNamedItemNS': AttrActionTag,
-      'setNamedItem': AttrActionTag, // #anomaly
-      'setNamedItemNS': AttrActionTag, // #anomaly
+      'removeNamedItem': AttrActionTagMap,
+      'removeNamedItemNS': AttrActionTagMap,
+      'setNamedItem': AttrActionTagMap, // #anomaly
+      'setNamedItemNS': AttrActionTagMap, // #anomaly
     },
   }
 const _: IActionMap = {
