@@ -308,11 +308,26 @@ describe('DOM API tracker', () => {
   })
 
   describe('EventTarget', () => {
+    it('should track its method call', () => {
+      const div = document.createElement('div')
 
+      div.addEventListener('click', () => { })
+      const stackframe = getStackFrameWithLineOffset()
+
+      expect(msgs).to.have.length(1)
+
+      matchActionInfo(msgs[0], {
+        caller: div,
+        trackid: '1',
+        target: 'EventTarget',
+        action: 'addEventListener',
+        stackframe
+      })
+    })
   })
 
   describe('Attr', () => {
-    it('should track value assignment', () => {
+    it('should track its property assignment', () => {
       const idAttr = document.createAttribute('id')
 
       idAttr.value = 'id'
