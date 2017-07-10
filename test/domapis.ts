@@ -75,7 +75,7 @@ describe('DOM APIs tracker', () => {
   }
 
   describe('HTMLElement', () => {
-    it('should track property assignment', () => {
+    it('should track its property assignment', () => {
       const div = document.createElement('div')
 
       div.accessKey = 'accessKey'
@@ -92,7 +92,7 @@ describe('DOM APIs tracker', () => {
       })
     })
 
-    it('should track method call', () => {
+    it('should track its method call', () => {
       const div = document.createElement('div')
 
       div.click()
@@ -111,7 +111,7 @@ describe('DOM APIs tracker', () => {
   })
 
   describe('Element', () => {
-    it('should track property assignment', () => {
+    it('should track its property assignment', () => {
       const div = document.createElement('div')
 
       div.id = 'id'
@@ -128,7 +128,7 @@ describe('DOM APIs tracker', () => {
       })
     })
 
-    it('should track method call', () => {
+    it('should track its method call', () => {
       const div = document.createElement('div')
       const div2 = document.createElement('div')
 
@@ -207,7 +207,40 @@ describe('DOM APIs tracker', () => {
   })
 
   describe('Node', () => {
+    it('should track its property assignment', () => {
+      const div = document.createElement('div')
 
+      div.textContent = 'content'
+      const stackframe = getStackFrameWithLineOffset()
+
+      expect(msgs).to.have.length(1)
+
+      matchActionInfo(msgs[0], {
+        caller: div,
+        trackid: '1',
+        target: 'Node',
+        action: 'textContent',
+        stackframe
+      })
+    })
+
+    it('should track its method call', () => {
+      const div = document.createElement('div')
+      const div2 = document.createElement('div')
+
+      div.appendChild(div2)
+      const stackframe = getStackFrameWithLineOffset()
+
+      expect(msgs).to.have.length(1)
+
+      matchActionInfo(msgs[0], {
+        caller: div,
+        trackid: '1',
+        target: 'Node',
+        action: 'appendChild',
+        stackframe
+      })
+    })
   })
 
   describe('EventTarget', () => {

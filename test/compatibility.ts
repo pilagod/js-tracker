@@ -2,9 +2,9 @@ import * as chai from 'chai'
 
 const expect = chai.expect
 
-describe('tracker\'s compatibility of native behaviors', () => {
+describe('tracker\'s compatibility with native api behaviors', () => {
   describe('HTMLElement', () => {
-    it('should set property properly', () => {
+    it('should set its property properly', () => {
       const div = document.createElement('div')
 
       div.accessKey = 'accessKey'
@@ -12,7 +12,7 @@ describe('tracker\'s compatibility of native behaviors', () => {
       expect(div.accessKey).to.equal('accessKey')
     })
 
-    it('should call method properly', function (done) {
+    it('should call its method properly', function (done) {
       const div = document.createElement('div')
 
       div.onclick = () => {
@@ -23,7 +23,7 @@ describe('tracker\'s compatibility of native behaviors', () => {
   })
 
   describe('Element', () => {
-    it('should set property properly', () => {
+    it('should set its property properly', () => {
       const div = document.createElement('div')
 
       div.id = 'id'
@@ -31,7 +31,7 @@ describe('tracker\'s compatibility of native behaviors', () => {
       expect(div.id).to.equal('id')
     })
 
-    it('should call method properly', () => {
+    it('should call its method properly', () => {
       const div = document.createElement('div')
       const div2 = document.createElement('div')
 
@@ -65,15 +65,15 @@ describe('tracker\'s compatibility of native behaviors', () => {
   })
 
   describe('Node', () => {
-    it('should set property properly', () => {
+    it('should set its property properly', () => {
       const div = document.createElement('div')
 
-      div.innerText = 'text'
+      div.textContent = 'content'
 
-      expect(div.innerText).to.equal('text')
+      expect(div.textContent).to.equal('content')
     })
 
-    it('should call method properly', () => {
+    it('should call its method properly', () => {
       const div = document.createElement('div')
       const div2 = document.createElement('div')
 
@@ -85,7 +85,7 @@ describe('tracker\'s compatibility of native behaviors', () => {
   })
 
   describe('EventTarget', () => {
-    it('should call method properly', function (done) {
+    it('should call its method properly', function (done) {
       const div = document.createElement('div')
 
       div.addEventListener('click', () => {
@@ -98,7 +98,7 @@ describe('tracker\'s compatibility of native behaviors', () => {
   describe('Attr', () => {
     /* anomalies */
 
-    it('should keep value\'s default behaviors', () => {
+    it('should set its property properly', () => {
       const id = document.createAttribute('id')
 
       id.value = 'id'
@@ -108,7 +108,7 @@ describe('tracker\'s compatibility of native behaviors', () => {
   })
 
   describe('CSSStyleDeclaration', () => {
-    it('should set property properly', () => {
+    it('should set its property properly', () => {
       const div = document.createElement('div')
 
       div.style.color = 'red'
@@ -117,7 +117,7 @@ describe('tracker\'s compatibility of native behaviors', () => {
       expect(div.style.color).to.equal('red')
     })
 
-    it('should call method properly', () => {
+    it('should call its method properly', () => {
       const div = document.createElement('div')
 
       div.style.setProperty('color', 'red')
@@ -139,7 +139,7 @@ describe('tracker\'s compatibility of native behaviors', () => {
   })
 
   describe('DOMStringMap', () => {
-    it('should set property properly', () => {
+    it('should set its property properly', () => {
       const div = document.createElement('div')
 
       div.dataset.data = 'data'
@@ -162,7 +162,7 @@ describe('tracker\'s compatibility of native behaviors', () => {
   })
 
   describe('DOMTokenList', () => {
-    it('should set property properly', () => {
+    it('should set its property properly', () => {
       const div = document.createElement('div');
 
       // @NOTE: chrome has 'value' property
@@ -171,7 +171,7 @@ describe('tracker\'s compatibility of native behaviors', () => {
       expect(div.classList.contains('class')).to.be.true
     })
 
-    it('should call method properly', () => {
+    it('should call its method properly', () => {
       const div = document.createElement('div');
 
       div.classList.add('class')
@@ -181,7 +181,7 @@ describe('tracker\'s compatibility of native behaviors', () => {
   })
 
   describe('NamedNodeMap', () => {
-    it('should call method properly', () => {
+    it('should call its method properly', () => {
       const div = document.createElement('div')
 
       div.id = 'id'

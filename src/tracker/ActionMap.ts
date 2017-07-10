@@ -41,6 +41,8 @@ const ActionMap: {
       'dir': Attribute,
       'draggable': Attribute,
       'hidden': Attribute,
+      // @NOTE: innerText on MDN is in Node.prototype,
+      // but chrome put it in HTMLElement.prototype 
       'innerText': Node,
       'lang': Attribute,
       'outerText': Node,
@@ -211,7 +213,6 @@ const ActionMap: {
       'nodeValue': Attribute,
 
       'textContent': Node,
-      'innerText': Node,
 
       /* methods */
 
