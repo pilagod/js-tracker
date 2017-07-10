@@ -170,9 +170,9 @@ describe('DOM API tracker', () => {
       it('should track removeAttribute with action tag', () => {
         const div = document.createElement('div')
 
-        div.setAttribute('id', 'id')
+        div.setAttribute('id', 'id') // msgs[0]
 
-        div.removeAttribute('id')
+        div.removeAttribute('id') // msgs[1]
         const stackframe = getStackFrameWithLineOffset()
 
         expect(msgs).to.have.length(2)
@@ -425,6 +425,47 @@ describe('DOM API tracker', () => {
   })
 
   describe('NamedNodeMap', () => {
+    it('should track removeNamedItem with action tag', () => {
+      const div = document.createElement('div')
 
+      div.id = 'id' // msgs[0]
+
+      div.attributes.removeNamedItem('id') // msgs[1]
+      const stackframe = getStackFrameWithLineOffset()
+
+      expect(msgs).to.have.length(2)
+
+      matchActionInfo(msgs[1], {
+        caller: div.attributes,
+        trackid: '1',
+        target: 'NamedNodeMap',
+        action: 'removeNamedItem',
+        actionTag: 'id',
+        stackframe
+      })
+    })
+
+    /* anomalies */
+
+    it('should track setNamedItem', () => {
+      const div = document.createElement('div')
+      const id = document.createAttribute('id')
+
+      id.value = 'id' // msgs[0] -> generate trackid 1
+
+      div.attributes.setNamedItem(id) // msgs[1] -> generate trackid 2
+      const stackframe = getStackFrameWithLineOffset()
+
+      expect(msgs).to.have.length(2)
+
+      matchActionInfo(msgs[1], {
+        caller: div.attributes,
+        trackid: '2',
+        target: 'NamedNodeMap',
+        action: 'setNamedItem',
+        actionTag: 'id',
+        stackframe
+      })
+    })
   })
 })
