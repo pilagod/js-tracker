@@ -17,7 +17,7 @@ describe('DOM API tracker', () => {
   })
 
   type ExpectInfo = {
-    caller: IActionTarget,
+    caller: ActionTarget,
     trackid: string,
     target: string,
     action: Action,

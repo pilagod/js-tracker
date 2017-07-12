@@ -6,7 +6,7 @@ type ActionTags = string[]
 interface IActionTagMap {
   has(target: Target, action: Action): boolean;
   fetchActionTag(
-    caller: IActionTarget,
+    caller: ActionTarget,
     target: Target,
     action: Action,
     args: any[]

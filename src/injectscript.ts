@@ -19,8 +19,8 @@ function trackTemplate(
     decorator: (
       target: Target,
       action: Action,
-      actionFunc: (this: IActionTarget, ...args: any[]) => any
-    ) => (this: IActionTarget, ...args: any[]) => any,
+      actionFunc: (this: ActionTarget, ...args: any[]) => any
+    ) => (this: ActionTarget, ...args: any[]) => any,
     getter?: boolean
   }
 ) {
@@ -90,7 +90,7 @@ function trackGeneralCases(): void {
 
 function record(
   data: {
-    caller: IActionTarget,
+    caller: ActionTarget,
     target: Target,
     action: Action,
     actionTag?: string,
@@ -112,7 +112,7 @@ function record(
   window.postMessage(actionInfo, '*')
 }
 
-function getTrackID(caller: IActionTarget): string {
+function getTrackID(caller: ActionTarget): string {
   const owner = caller._owner
 
   if (!owner._trackid) {
