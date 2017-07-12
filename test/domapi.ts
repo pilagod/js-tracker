@@ -4,12 +4,17 @@ import * as StackTrace from 'stacktrace-js'
 const expect = chai.expect
 
 describe('DOM API tracker', () => {
+  let postMessage = window.postMessage
   let msgs: ActionInfo[]
 
   before(() => {
-    window.postMessage = function (msg) {
+    window.postMessage = (msg) => {
       msgs.push(msg)
     }
+  })
+
+  after(() => {
+    window.postMessage = postMessage
   })
 
   beforeEach(() => {
@@ -24,16 +29,6 @@ describe('DOM API tracker', () => {
     stackframe: StackTrace.StackFrame,
     actionTag?: string,
     merge?: string,
-  }
-
-  // @NOTE: getStackFrameWithLineOffset should call immediately 
-  // after tracked actions on default
-  function getStackFrameWithLineOffset(lineOffset: number = -1) {
-    const stackframe = StackTrace.getSync()[1]
-
-    return Object.assign({}, stackframe, {
-      lineNumber: stackframe.lineNumber + lineOffset
-    })
   }
 
   function matchActionInfo(got: ActionInfo, expected: ExpectInfo) {
@@ -53,9 +48,7 @@ describe('DOM API tracker', () => {
       .to.have.property('action')
       .to.equal(expected.action)
 
-    if (expected.stackframe) {
-      matchStackFrame(got.stacktrace[2], expected.stackframe)
-    }
+    matchStackFrame(got.stacktrace[2], expected.stackframe)
 
     if (expected.merge) {
       expect(got.merge).to.equal(expected.merge)
@@ -72,6 +65,16 @@ describe('DOM API tracker', () => {
   ) {
     expect(got.fileName).to.equal(expected.fileName)
     expect(got.lineNumber).to.equal(expected.lineNumber)
+  }
+
+  // @NOTE: getStackFrameWithLineOffset should call immediately 
+  // after tracked actions on default
+  function getStackFrameWithLineOffset(lineOffset: number = -1) {
+    const stackframe = StackTrace.getSync()[1]
+
+    return Object.assign({}, stackframe, {
+      lineNumber: stackframe.lineNumber + lineOffset
+    })
   }
 
   describe('HTMLElement', () => {
@@ -209,7 +212,6 @@ describe('DOM API tracker', () => {
       })
     })
 
-
     /* anomalies */
 
     // @NOTE: setAttributeNode & setAttributeNodeNS track behaviors
@@ -262,7 +264,7 @@ describe('DOM API tracker', () => {
 
         div.id = 'id'
 
-        const error = function () {
+        const error = () => {
           div2.setAttributeNode(div.attributes[0])
         }
         expect(error).to.throw()
