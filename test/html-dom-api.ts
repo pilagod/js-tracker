@@ -3,7 +3,7 @@ import * as StackTrace from 'stacktrace-js'
 
 const expect = chai.expect
 
-describe('DOM API tracker', () => {
+describe('HTML DOM API tracker', () => {
   let postMessage = window.postMessage
   let msgs: ActionInfo[]
 
