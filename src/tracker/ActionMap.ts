@@ -13,7 +13,7 @@ const {
 // @NOTE: those actions whose type determined by argument or property
 // (1) Element.attributes methods (e.g. setAttribute, removeAttribute)
 // (2) Attr value setter
-const AttrActionTagMap: object = {
+const AttrActionTagMap: ActionTagMap = {
   'class': Style,
   'style': Style,
   'default': Attribute
@@ -22,7 +22,7 @@ const AttrActionTagMap: object = {
 // @NOTE: those actions whose type determined by caller object
 // (1) classList -> Style
 // (2) others -> Attribute
-const DOMTokenListActionTagMap: object = {
+const DOMTokenListActionTagMap: ActionTagMap = {
   'classList': Style,
   'default': Attribute
 }
@@ -238,8 +238,6 @@ const ActionMap: {
       // https://developer.mozilla.org/zh-TW/docs/Web/API/CSSStyleDeclaration
       // refer to HTMLElement.style
 
-      'default': Style,
-
       /* methods */
 
       'removeProperty': Style,
@@ -248,8 +246,6 @@ const ActionMap: {
     'DOMStringMap': {
       // https://developer.mozilla.org/zh-TW/docs/Web/API/DOMStringMap
       // refer to HTMLElement.dataset
-
-      'default': Attribute
     },
     'DOMTokenList': {
       // https://developer.mozilla.org/zh-TW/docs/Web/API/DOMTokenList
@@ -280,14 +276,19 @@ const ActionMap: {
   }
 const _: IActionMap = {
   getActionType(target, action, actionTag) {
-    if (this.has(target, action)) {
-      const type = ActionMap[target][action]
-
-      return actionTag ? (type[actionTag] || type.default) : type
-    } else if (this.has(target, 'default')) {
-      return ActionMap[target].default
+    switch (target) {
+      case 'DOMStringMap':
+        return ActionTypes.Attribute
+      case 'CSSStyleDeclaration':
+        return ActionTypes.Style
+      default:
+        if (this.has(target, action)) {
+          return function (type: ActionTypes | ActionTagMap): ActionTypes {
+            return actionTag ? (type[actionTag] || type['default']) : type
+          }(ActionMap[target][action])
+        }
+        return ActionTypes.None
     }
-    return ActionTypes.None
   },
   has(target, action) {
     return ActionMap.hasOwnProperty(target)

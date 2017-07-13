@@ -1,6 +1,11 @@
 /// <reference path='./tracker.d.ts'/>
 /// <reference path='./ActionTypes.d.ts' />
 
+type ActionTagMap = {
+  'default': ActionTypes;
+  [tag: string]: ActionTypes;
+}
+
 interface IActionMap {
   getActionType(
     target: string,
