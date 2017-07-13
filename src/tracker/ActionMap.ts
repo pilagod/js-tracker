@@ -37,7 +37,6 @@ const ActionMap: {
 
       'accessKey': Attribute,
       'contentEditable': Attribute,
-      'dataset': Attribute, // #anomaly
       'dir': Attribute,
       'draggable': Attribute,
       'hidden': Attribute,
@@ -47,7 +46,6 @@ const ActionMap: {
       'lang': Attribute,
       'outerText': Node,
       'spellcheck': Attribute,
-      'style': Style, // #anomaly
       'tabIndex': Attribute,
       'title': Attribute,
       'translate': Attribute,
@@ -149,8 +147,6 @@ const ActionMap: {
 
       /* properties */
 
-      'attributes': Attribute, // #anomaly
-      'classList': Style, // #anomaly
       'id': Attribute,
       'name': Attribute,
       'slot': Attribute,
@@ -240,6 +236,9 @@ const ActionMap: {
     },
     'CSSStyleDeclaration': {
       // https://developer.mozilla.org/zh-TW/docs/Web/API/CSSStyleDeclaration
+      // refer to HTMLElement.style
+
+      'default': Style,
 
       /* methods */
 
@@ -248,9 +247,13 @@ const ActionMap: {
     },
     'DOMStringMap': {
       // https://developer.mozilla.org/zh-TW/docs/Web/API/DOMStringMap
+      // refer to HTMLElement.dataset
+
+      'default': Attribute
     },
     'DOMTokenList': {
       // https://developer.mozilla.org/zh-TW/docs/Web/API/DOMTokenList
+      // refer to Element.classList
 
       /* properties */
 
@@ -265,6 +268,7 @@ const ActionMap: {
     },
     'NamedNodeMap': {
       // https://developer.mozilla.org/zh-TW/docs/Web/API/NamedNodeMap
+      // refer to Element.attributes
 
       /* methods */
 
@@ -275,16 +279,26 @@ const ActionMap: {
     },
   }
 const _: IActionMap = {
+  getActionType(target, action, actionTag) {
+    if (this.has(target, action)) {
+      const type = ActionMap[target][action]
+
+      return actionTag ? (type[actionTag] || type.default) : type
+    } else if (this.has(target, 'default')) {
+      return ActionMap[target].default
+    }
+    return ActionTypes.None
+  },
+  has(target, action) {
+    return ActionMap.hasOwnProperty(target)
+      && ActionMap[target].hasOwnProperty(action)
+  },
   visit(callback) {
     Object.keys(ActionMap).map(
       (target: Target) => {
         callback(target, ActionMap[target])
       }
     )
-  },
-  has(target, action) {
-    return ActionMap[target].hasOwnProperty(action)
   }
 }
 export default _
-// export default ActionMap
