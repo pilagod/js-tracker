@@ -275,7 +275,7 @@ const ActionMap: {
     },
   }
 const _: IActionMap = {
-  getActionType(target, action, actionTag) {
+  filterActionType(target, action, actionTag) {
     switch (target) {
       case 'DOMStringMap':
         return ActionTypes.Attribute
