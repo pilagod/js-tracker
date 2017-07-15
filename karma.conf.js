@@ -28,11 +28,9 @@ module.exports = function (config) {
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
-      'src/tracker/*.ts': ['karma-typescript'],
-      'test/*.ts': ['karma-typescript'],
-
-      'src/injectscript.ts': ['karma-typescript', 'coverage']
-      // 'src/tracker/TrackStore.ts': ['karma-typescript', 'coverage']
+      'src/tracker/*[!(.d)].ts': ['karma-typescript', 'coverage'],
+      'src/injectscript.ts': ['karma-typescript', 'coverage'],
+      'test/*.ts': ['karma-typescript']
     },
 
     karmaTypescriptConfig: {

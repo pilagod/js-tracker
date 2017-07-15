@@ -94,4 +94,28 @@ describe('ActionMap', () => {
       expect(ActionMap.has('InvalidTarget', 'InvalidAction')).to.be.false
     })
   })
+
+  describe('visit', () => {
+    it('should iterate all tracked target in ActionMap', () => {
+      const expected = [
+        'HTMLElement'
+        , 'Element'
+        , 'Node'
+        , 'EventTarget'
+        , 'Attr'
+        , 'CSSStyleDeclaration'
+        , 'DOMStringMap'
+        , 'DOMTokenList'
+        , 'NamedNodeMap'
+      ].sort()
+      const got = []
+
+      ActionMap.visit((target: Target) => {
+        got.push(target)
+      })
+      got.sort()
+
+      expect(got).to.deep.equal(expected)
+    })
+  })
 })
