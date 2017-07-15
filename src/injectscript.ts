@@ -97,19 +97,19 @@ function record(
     merge?: string
   }
 ): void {
-  const actionInfo: ActionInfo = {
+  const info: ActionInfo = {
     trackid: getTrackID(data.caller),
     target: data.target,
     action: data.action,
     stacktrace: StackTrace.getSync()
   }
   if (data.merge) {
-    actionInfo.merge = data.merge
+    info.merge = data.merge
   }
   if (data.actionTag) {
-    actionInfo.actionTag = data.actionTag
+    info.actionTag = data.actionTag
   }
-  window.postMessage(actionInfo, '*')
+  window.postMessage(info, '*')
 }
 
 function getTrackID(caller: ActionTarget): string {

@@ -35,8 +35,7 @@ const ActionTagMap: object = {
 }
 const _: IActionTagMap = {
   has(target, action) {
-    return ActionTagMap.hasOwnProperty(target)
-      && ActionTagMap[target].hasOwnProperty(action)
+    return !!(ActionTagMap[target] && ActionTagMap[target][action])
   },
   fetchActionTag(caller, target, action, args = []) {
     if (this.has(target, action)) {

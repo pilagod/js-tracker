@@ -19,7 +19,8 @@ module.exports = function (config) {
     files: [
       { pattern: 'src/tracker/*.ts' },
       { pattern: 'src/injectscript.ts' },
-      { pattern: 'test/*.ts' }
+      { pattern: 'test/*.ts' },
+      { pattern: 'test/test-script.js', served: true, included: false }
     ],
 
     // list of files to exclude
@@ -30,6 +31,8 @@ module.exports = function (config) {
     preprocessors: {
       'src/tracker/*[!(.d)].ts': ['karma-typescript', 'coverage'],
       'src/injectscript.ts': ['karma-typescript', 'coverage'],
+
+      'src/tracker/*.d.ts': ['karma-typescript'],
       'test/*.ts': ['karma-typescript']
     },
 

@@ -11,6 +11,17 @@ type Target =
 
 type Action = PropertyKey
 
+type TrackID = string
+
+type ActionInfo = {
+  trackid: TrackID,
+  target: Target,
+  action: Action,
+  stacktrace: StackTrace.StackFrame[],
+  actionTag?: string,
+  merge?: TrackID
+}
+
 interface ActionTarget {
   _owner: Owner;
 }
@@ -20,25 +31,13 @@ interface Owner {
   _isShadow: boolean;
 }
 
-type ActionInfo = {
-  trackid: string,
-  target: Target,
-  action: Action,
-  stacktrace: StackTrace.StackFrame[],
-  actionTag?: string,
-  merge?: string
-}
-
-type ActionRecord = {
-}
-
 /**
  * Extend Native Interfaces
  */
 
-interface SVGElement {
-  readonly dataset: DOMStringMap; // @TODO: pull request to typescript repo
-}
+// interface SVGElement {
+//   readonly dataset: DOMStringMap; // @TODO: pull request to typescript repo
+// }
 interface Element extends Owner, ActionTarget { }
 interface Attr extends ActionTarget { }
 interface CSSStyleDeclaration extends ActionTarget {

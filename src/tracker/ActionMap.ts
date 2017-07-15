@@ -291,8 +291,7 @@ const _: IActionMap = {
     }
   },
   has(target, action) {
-    return ActionMap.hasOwnProperty(target)
-      && ActionMap[target].hasOwnProperty(action)
+    return !!(ActionMap[target] && ActionMap[target][action])
   },
   visit(callback) {
     Object.keys(ActionMap).map(
