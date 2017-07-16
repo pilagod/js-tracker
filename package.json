@@ -61,6 +61,7 @@
     "mocha": "^3.0.2",
     "sinon": "^1.17.4",
     "source-map-loader": "^0.2.1",
+    "stackframe": "^1.0.3",
     "stacktrace-js": "^2.0.0",
     "typescript": "^2.4.1",
     "watchify": "^3.9.0",

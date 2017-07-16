@@ -48,3 +48,20 @@ interface ILocMap {
     loc: string
   ): boolean;
 }
+
+interface IScriptCache {
+  add(
+    scriptUrl: string,
+    scriptText: string
+  ): void;
+
+  get(
+    scriptUrl: string,
+    lineNumber: number,
+    columnNumber: number
+  ): string;
+
+  has(
+    scriptUrl: string
+  ): boolean;
+}

@@ -8,8 +8,8 @@ type ActionTagMap = {
 
 interface IActionMap {
   filterActionType(
-    target: string,
-    action: string,
+    target: Target,
+    action: Action,
     actionTag?: string
   ): ActionTypes;
 

@@ -1,10 +1,13 @@
 /// <reference path='ActionStore.d.ts'/>
 
+import ActionMap from './ActionMap'
+
 export default class ActionStore implements IActionStore {
 
   constructor() {
     this._store = new Store()
-    this._locmap = new LocMap()
+    this._locMap = new LocMap()
+    this._scriptCache = new ScriptCache()
   }
 
   /* public */
@@ -13,28 +16,69 @@ export default class ActionStore implements IActionStore {
     return this._store.get(trackid)
   }
 
-  public register(trackid: TrackID, record: ActionRecord): void {
-    if (!this._locmap.has(trackid, record.source.loc)) {
-      this._store.add(trackid, record)
-      this._locmap.add(trackid, record.source.loc)
+  public async register(trackid: TrackID, record: ActionRecord): Promise<void> {
+    if (!this._locMap.has(trackid, record.source.loc)) {
+      this._register(trackid, record)
     }
   }
 
-  public registerFromActionInfo(info: ActionInfo): void {
+  public async registerFromActionInfo(info: ActionInfo): Promise<void> {
+    // @TODO: merge
+    const record =
+      await this._parseActionInfoIntoActionRecord(info)
 
+    await this.register(info.trackid, record)
   }
 
   /* private */
 
-  private _store: IStore
-  private _locmap: ILocMap
+  private _HTML_DOM_API_FRAME_INDEX = 2
 
-  private transformActionInfoIntoActionRecord(info: ActionInfo): ActionRecord {
-    return <any>{}
+  private _store: IStore
+  private _locMap: ILocMap
+  private _scriptCache: IScriptCache
+
+  private _register(trackid: TrackID, record: ActionRecord): void {
+    this._store.add(trackid, record)
+    this._locMap.add(trackid, record.source.loc)
+  }
+
+  private async _parseActionInfoIntoActionRecord(info: ActionInfo): Promise<ActionRecord> {
+    const {
+      fileName: scriptUrl,
+      lineNumber,
+      columnNumber
+    } = this._filterStackTrace(info.stacktrace)
+
+    return {
+      type: ActionMap.filterActionType(info.target, info.action, info.actionTag),
+      source: await this._fetchSource(scriptUrl, lineNumber, columnNumber)
+    }
+  }
+
+  private _filterStackTrace(stacktrace: StackTrace.StackFrame[]): StackTrace.StackFrame {
+    return stacktrace[this._HTML_DOM_API_FRAME_INDEX]
+  }
+
+  private async _fetchSource(scriptUrl: string, lineNumber: number, columnNumber: number): Promise<Source> {
+    if (!this._scriptCache.has(scriptUrl)) {
+      await this._fetchScriptSourceToCache(scriptUrl)
+    }
+    return {
+      loc: `${scriptUrl}:${lineNumber}:${columnNumber}`,
+      code: this._scriptCache.get(scriptUrl, lineNumber, columnNumber)
+    }
+  }
+
+  private async _fetchScriptSourceToCache(scriptUrl: string): Promise<void> {
+    const response = await fetch(scriptUrl)
+    const scriptText = await response.text()
+
+    this._scriptCache.add(scriptUrl, scriptText)
   }
 }
 
-class Store {
+class Store implements IStore {
 
   constructor() {
     this._ = {}
@@ -76,7 +120,7 @@ class LocMap implements ILocMap {
   }
 
   public has(trackid: TrackID, loc: string): boolean {
-    return this._[loc] && this._[loc][trackid]
+    return !!(this._[loc] && this._[loc][trackid])
   }
 
   /* private */
@@ -88,3 +132,29 @@ class LocMap implements ILocMap {
   }
 }
 
+class ScriptCache implements IScriptCache {
+
+  constructor() {
+    this._ = {}
+  }
+
+  /* public */
+
+  public add(scriptUrl: string, scriptText: string): void {
+    this._[scriptUrl] = scriptText.split('\n')
+  }
+
+  public get(scriptUrl: string, lineNumber: number, columnNumber: number): string {
+    return this._[scriptUrl][lineNumber - 1]
+  }
+
+  public has(scriptUrl: string): boolean {
+    return !!this._[scriptUrl]
+  }
+
+  /* private */
+
+  private _: {
+    [scriptUrl: string]: string[]
+  }
+}

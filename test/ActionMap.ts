@@ -21,7 +21,7 @@ describe('ActionMap', () => {
 
       it('should return action type None given invalid target', () => {
         expect(
-          ActionMap.filterActionType('InvalidTarget', 'InvalidAction')
+          ActionMap.filterActionType(<any>'InvalidTarget', 'InvalidAction')
         ).to.equal(ActionTypes.None)
       })
 
