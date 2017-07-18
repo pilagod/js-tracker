@@ -26,7 +26,7 @@ export default class ActionStore implements IActionStore {
     if (info.merge) {
       this._merge(info.merge, info.trackid)
     }
-    const record =
+    const record: ActionRecord =
       await this._parseActionInfoIntoActionRecord(info)
 
     await this.register(info.trackid, record)
@@ -61,7 +61,7 @@ export default class ActionStore implements IActionStore {
       columnNumber
     } = this._filterStackTrace(info.stacktrace)
 
-    return {
+    return <ActionRecord>{
       type: ActionMap.filterActionType(info.target, info.action, info.actionTag),
       source: await this._fetchSource(scriptUrl, lineNumber, columnNumber)
     }
@@ -75,7 +75,7 @@ export default class ActionStore implements IActionStore {
     if (!this._scriptCache.has(scriptUrl)) {
       await this._fetchScriptSourceToCache(scriptUrl)
     }
-    return {
+    return <Source>{
       loc: `${scriptUrl}:${lineNumber}:${columnNumber}`,
       code: this._scriptCache.get(scriptUrl, lineNumber, columnNumber)
     }
