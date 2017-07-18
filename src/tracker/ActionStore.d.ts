@@ -30,11 +30,16 @@ interface IStore {
   add(
     trackid: TrackID,
     record: ActionRecord
-  ): void
+  ): void;
 
   get(
     trackid: TrackID
-  ): ActionRecord[]
+  ): ActionRecord[];
+
+  merge(
+    from: TrackID,
+    to: TrackID
+  ): ActionRecord[];
 }
 
 interface ILocMap {
@@ -47,6 +52,11 @@ interface ILocMap {
     trackid: TrackID,
     loc: string
   ): boolean;
+
+  remove(
+    trackid: TrackID,
+    loc: string,
+  ): void;
 }
 
 interface IScriptCache {

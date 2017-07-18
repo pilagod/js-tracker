@@ -23,7 +23,9 @@ export default class ActionStore implements IActionStore {
   }
 
   public async registerFromActionInfo(info: ActionInfo): Promise<void> {
-    // @TODO: merge
+    if (info.merge) {
+      this._merge(info.merge, info.trackid)
+    }
     const record =
       await this._parseActionInfoIntoActionRecord(info)
 
@@ -41,6 +43,15 @@ export default class ActionStore implements IActionStore {
   private _register(trackid: TrackID, record: ActionRecord): void {
     this._store.add(trackid, record)
     this._locMap.add(trackid, record.source.loc)
+  }
+
+  private _merge(from: TrackID, to: TrackID) {
+    const merged = this._store.merge(from, to)
+
+    merged.map((record) => {
+      this._locMap.add(to, record.source.loc)
+      this._locMap.remove(from, record.source.loc)
+    })
   }
 
   private async _parseActionInfoIntoActionRecord(info: ActionInfo): Promise<ActionRecord> {
@@ -97,6 +108,17 @@ class Store implements IStore {
     return this._[trackid]
   }
 
+  public merge(from: TrackID, to: TrackID): ActionRecord[] {
+    const merged: ActionRecord[] = this._[from] || []
+
+    delete this._[from]
+
+    if (merged.length > 0) {
+      merged.map((record) => { this.add(to, record) })
+    }
+    return merged
+  }
+
   /* private */
 
   private _: {
@@ -121,6 +143,10 @@ class LocMap implements ILocMap {
 
   public has(trackid: TrackID, loc: string): boolean {
     return !!(this._[loc] && this._[loc][trackid])
+  }
+
+  public remove(trackid: TrackID, loc: string): void {
+    this._[loc] && delete this._[loc][trackid]
   }
 
   /* private */

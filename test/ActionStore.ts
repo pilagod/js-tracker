@@ -8,7 +8,7 @@ const HOST = `http://localhost:${PORT}`
 const expect = chai.expect
 
 describe('ActionStore', () => {
-  let actionStore
+  let actionStore: IActionStore
 
   beforeEach(() => {
     actionStore = new ActionStore()
@@ -194,6 +194,50 @@ describe('ActionStore', () => {
 
       expect(actionStore.get('1')).to.deep.equal([record])
       expect(actionStore.get('2')).to.deep.equal([record])
+    })
+
+    it('should merge trackid group specified in action info \'merge\' to target before adding new record', async () => {
+      const record1: ActionRecord = {
+        type: ActionTypes.Attribute,
+        source: {
+          loc: HOST + '/base/test/test-script.js:2:1',
+          code: `div.id = 'id'`
+        }
+      }
+      const info2: ActionInfo = {
+        trackid: '2',
+        target: 'CSSStyleDeclaration',
+        action: 'color',
+        stacktrace: [_, _, new StackFrame({
+          functionName: 'Object.set',
+          fileName: HOST + '/base/test/test-script.js',
+          lineNumber: 3,
+          columnNumber: 1
+        })],
+        merge: '1'
+      }
+      const record2: ActionRecord = {
+        type: ActionTypes.Style,
+        source: {
+          loc: HOST + '/base/test/test-script.js:3:1',
+          code: `div.style.color = 'red'`
+        }
+      }
+      await actionStore.register('1', record1)
+      await actionStore.registerFromActionInfo(info2)
+
+      expect(actionStore.get('1')).to.be.undefined
+      expect(actionStore.get('2')).to.deep.equal([record1, record2])
+
+      // should avoid duplication after merging
+      await actionStore.register('2', record1)
+
+      expect(actionStore.get('2')).to.deep.equal([record1, record2])
+
+      // should allow adding original records to the merged trackid group
+      await actionStore.register('1', record1)
+
+      expect(actionStore.get('1')).to.deep.equal([record1])
     })
   })
 })
