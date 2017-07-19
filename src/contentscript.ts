@@ -10,11 +10,9 @@ window.addEventListener('message', (event) => {
   // actionStore.registerFromActionInfo(<ActionInfo>event.data)
 })
 
-console.log('content script loaded')
-console.log(document.querySelectorAll('script').length)
-
 const script = document.createElement('script')
-script.textContent = fs.readFileSync(__dirname + '/src/injectscript.ts', 'utf-8')
+// issue: [https://stackoverflow.com/questions/15730869/my-injected-script-runs-after-the-target-pages-javascript-despite-using-run]
+script.textContent = fs.readFileSync(__dirname + '/../dist/injectscript.js', 'utf-8')
 // script.src = chrome.extension.getURL('dist/injectscript.js')
 // script.async = false
 document.documentElement.appendChild(script)

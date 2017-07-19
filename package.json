@@ -4,10 +4,8 @@
   "description": "A chrome extension tracks front-end JavaScript using DOM or jQuery APIs to manipulate html dom elements at runtime.",
   "main": "index.js",
   "scripts": {
-    "test-unit": "node node_modules/istanbul/lib/cli.js cover node_modules/mocha/bin/_mocha test/EsprimaParser-unit.js",
-    "test-integration": "karma start --reporters mocha",
     "test": "karma start",
-    "build": "webpack",
+    "build": "node webpack/compiler.js",
     "watch": "webpack --watch",
     "dev": "webpack-dev-server --port 3000",
     "deploy": "rm ~/Desktop/JS-Tracker.zip & zip -r ~/Desktop/JS-Tracker.zip manifest.json assets/ background.js devtools.* contentscript-dist.js"
@@ -47,7 +45,6 @@
     "chai": "^3.5.0",
     "diff-dom": "^2.1.0",
     "es6-promise": "^3.3.1",
-    "file-loader": "^0.11.1",
     "isomorphic-fetch": "^2.2.1",
     "istanbul": "^0.4.5",
     "karma": "^1.6.0",
@@ -63,15 +60,20 @@
     "karma-typescript-es6-transform": "^1.0.0",
     "mocha": "^3.0.2",
     "sinon": "^1.17.4",
-    "source-map-loader": "^0.2.1",
     "stackframe": "^1.0.3",
     "stacktrace-js": "^2.0.0",
+    "transform-loader": "^0.2.4",
     "typescript": "^2.4.1",
     "watchify": "^3.9.0",
-    "webpack": "^2.4.1",
-    "webpack-dev-server": "^2.4.2"
+    "webpack": "^3.3.0",
+    "webpack-dev-server": "^2.5.1"
   },
   "browserify": {
+    "options": {
+      "browserifyOptions": {
+        "debug": true
+      }
+    },
     "transform": [
       [
         "babelify",
@@ -81,7 +83,8 @@
             "stage-3"
           ]
         }
-      ]
+      ],
+      "brfs"
     ]
   }
 }

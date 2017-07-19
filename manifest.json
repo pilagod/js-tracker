@@ -11,13 +11,13 @@
   "browser_action": {},
   "background": {
     "scripts": [
-      "src/background.js"
+      "dist/background.js"
     ],
     "persistent": false
   },
   "devtools_page": "devtools.html",
   "web_accessible_resources": [
-    "src/injectscript.js"
+    "dist/injectscript.js"
   ],
   "permissions": [
     "tabs",
