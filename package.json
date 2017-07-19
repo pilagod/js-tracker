@@ -34,10 +34,13 @@
   "dependencies": {},
   "devDependencies": {
     "@types/chai": "^3.5.1",
+    "@types/chrome": "0.0.47",
     "@types/mocha": "^2.2.41",
+    "@types/node": "^8.0.14",
     "@types/stacktrace-js": "0.0.32",
     "awesome-typescript-loader": "^3.1.2",
     "babel-preset-es2015": "^6.9.0",
+    "babel-preset-stage-3": "^6.24.1",
     "babelify": "^7.3.0",
     "brfs": "^1.4.3",
     "browserify": "^13.3.0",
@@ -74,7 +77,8 @@
         "babelify",
         {
           "presets": [
-            "es2015"
+            "es2015",
+            "stage-3"
           ]
         }
       ]
