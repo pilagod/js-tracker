@@ -19,13 +19,15 @@ function listenOnActionTriggered() {
 
 function listenOnDevtoolsSelectionChanged() {
   window.onDevtoolsSelectionChanged = (owner: Owner) => {
-    const actionRecord = actionStore.get(owner._trackid)
+    const record = actionStore.get(owner._trackid)
 
-    chrome.runtime.sendMessage(actionRecord, (res) => {
-      console.group('from contentscript to background')
+    chrome.runtime.sendMessage(record, (res) => {
+      console.group('contentscript')
+      console.log('--- forward record to background ---')
       console.log('target:', owner)
-      console.log('sent:', actionRecord)
+      console.log('sent:', record)
       console.log('received:', res)
+      console.log('------------------------------------')
       console.groupEnd()
     })
   }
