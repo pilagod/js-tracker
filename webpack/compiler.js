@@ -24,7 +24,8 @@ const injectscriptConfig = Object.assign({}, config, {
 const extensionConfig = Object.assign({}, config, {
   entry: {
     contentscript: './src/contentscript.ts',
-    background: './src/background.ts'
+    background: './src/background.ts',
+    devtools: './src/devtools.ts'
   }
 })
 compile(injectscriptConfig)

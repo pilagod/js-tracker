@@ -45,6 +45,7 @@
     "chai": "^3.5.0",
     "diff-dom": "^2.1.0",
     "es6-promise": "^3.3.1",
+    "file-loader": "^0.11.2",
     "isomorphic-fetch": "^2.2.1",
     "istanbul": "^0.4.5",
     "karma": "^1.6.0",

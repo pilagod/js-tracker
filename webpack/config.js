@@ -19,6 +19,10 @@ module.exports = {
         test: /\.tsx?$/,
         enforce: 'pre',
         loader: 'transform-loader?brfs!awesome-typescript-loader'
+      },
+      {
+        test: /\.html/,
+        loader: 'file-loader?name=[name].[ext]'
       }
     ]
   }

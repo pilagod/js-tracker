@@ -15,7 +15,7 @@
     ],
     "persistent": false
   },
-  "devtools_page": "devtools.html",
+  "devtools_page": "dist/devtools.html",
   "web_accessible_resources": [
     "dist/injectscript.js"
   ],
