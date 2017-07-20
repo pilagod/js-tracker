@@ -38,6 +38,9 @@ interface Owner {
 // interface SVGElement {
 //   readonly dataset: DOMStringMap; // @TODO: pull request to typescript repo
 // }
+interface Window {
+  onDevtoolsSelectionChanged: (owner: Owner) => void
+}
 interface Element extends Owner, ActionTarget { }
 interface Attr extends ActionTarget { }
 interface CSSStyleDeclaration extends ActionTarget {
