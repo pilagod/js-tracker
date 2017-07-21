@@ -32,7 +32,7 @@ describe('HTML DOM API tracker', () => {
   }
 
   function matchActionInfo(got: ActionInfo, expected: ExpectInfo) {
-    expect(expected.caller._owner)
+    expect(expected.caller._owner.dataset)
       .to.have.property('_trackid')
       .to.equal(expected.trackid)
 

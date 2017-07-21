@@ -61,15 +61,13 @@ function listenOnDevtoolsConnected(cache: ConnectionCache) {
 function listenOnActionRecordFromContentScript(cache: ConnectionCache) {
   // message listener for content script
   chrome.runtime.onMessage.addListener((record, sender, sendResponseToContentScript) => {
-    console.log('background on contentscript message')
-
     let message: string
     // messages from contentscript should have sender.tab set
     if (sender.tab) {
       let tabID = (sender.tab.id).toString()
 
       if (cache.has(tabID)) {
-        // cache.get(tabID).postMessage(record)
+        cache.get(tabID).postMessage(record)
         message = 'done'
       } else {
         message = 'target tab has no devtools opened'
@@ -79,9 +77,10 @@ function listenOnActionRecordFromContentScript(cache: ConnectionCache) {
     }
     console.group('background')
     console.log('--- forward record from content script to devtools ---')
+    console.log('record:', record)
     message === 'done'
-      ? console.log(message)
-      : console.error(message)
+      ? console.log('message:', message)
+      : console.error('message:', message)
     console.log('------------------------------------------------------')
     console.groupEnd()
     sendResponseToContentScript({ message })

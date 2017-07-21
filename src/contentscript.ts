@@ -20,8 +20,7 @@ function listenOnActionTriggered() {
 
 function listenOnDevtoolsSelectionChanged() {
   window.onDevtoolsSelectionChanged = (owner: Owner) => {
-    // @TODO: owner (element) has no _trackid got from devtool
-    const record = actionStore.get(owner._trackid)
+    const record = actionStore.get(owner.dataset._trackid)
 
     chrome.runtime.sendMessage(record, (res) => {
       console.group('contentscript')

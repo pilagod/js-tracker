@@ -167,7 +167,9 @@ class ScriptCache implements IScriptCache {
   /* public */
 
   public add(scriptUrl: string, scriptText: string): void {
-    this._[scriptUrl] = scriptText.split('\n')
+    this._[scriptUrl] = scriptText.split('\n').map((line) => {
+      return line.trim()
+    })
   }
 
   public get(scriptUrl: string, lineNumber: number, columnNumber: number): string {

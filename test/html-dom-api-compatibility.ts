@@ -187,7 +187,7 @@ describe('tracker\'s compatibility with html dom api', () => {
       div.id = 'id'
       div.attributes.removeNamedItem('id')
 
-      expect(div.attributes).to.have.length(0)
+      expect(div.attributes.getNamedItem('id')).to.be.null
     })
 
     /* anomalies */
