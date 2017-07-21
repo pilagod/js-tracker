@@ -1,4 +1,5 @@
 /// <reference path='../node_modules/@types/chrome/index.d.ts' />
+/// <reference path='./contentscript.d.ts'/>
 
 import * as fs from 'fs'
 import ActionStore from './tracker/ActionStore'
@@ -19,6 +20,7 @@ function listenOnActionTriggered() {
 
 function listenOnDevtoolsSelectionChanged() {
   window.onDevtoolsSelectionChanged = (owner: Owner) => {
+    // @TODO: owner (element) has no _trackid got from devtool
     const record = actionStore.get(owner._trackid)
 
     chrome.runtime.sendMessage(record, (res) => {

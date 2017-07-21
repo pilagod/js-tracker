@@ -1,6 +1,7 @@
 /// <reference path='../node_modules/@types/chrome/index.d.ts' />
+/// <reference path='./background.d.ts'/>
 
-class ConnectionCache {
+class ConnectionCache implements IConnectionCache {
 
   constructor() {
     this._connections = {}
@@ -21,7 +22,7 @@ class ConnectionCache {
   }
 
   public remove(port: chrome.runtime.Port): void {
-    for (let tabID of this._connections.keys()) {
+    for (let tabID of Object.keys(this._connections)) {
       if (this._connections[tabID] === port) {
         delete this._connections[tabID]
         break
@@ -41,8 +42,13 @@ listenOnExtensionStarted()
 
 function listenOnDevtoolsConnected(cache: ConnectionCache) {
   chrome.runtime.onConnect.addListener((devtool) => {
-    const initHandler = (message) => {
-      message.type === 'init' && cache.add(message.tabId, devtool)
+    const initHandler = (
+      message: {
+        type: string,
+        tabID: string
+      }
+    ) => {
+      message.type === 'init' && cache.add(message.tabID, devtool)
     }
     devtool.onMessage.addListener(initHandler);
     devtool.onDisconnect.addListener(() => {
@@ -55,8 +61,9 @@ function listenOnDevtoolsConnected(cache: ConnectionCache) {
 function listenOnActionRecordFromContentScript(cache: ConnectionCache) {
   // message listener for content script
   chrome.runtime.onMessage.addListener((record, sender, sendResponseToContentScript) => {
-    let message: string
+    console.log('background on contentscript message')
 
+    let message: string
     // messages from contentscript should have sender.tab set
     if (sender.tab) {
       let tabID = (sender.tab.id).toString()
