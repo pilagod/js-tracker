@@ -51,6 +51,8 @@ interface HTMLElement extends Owner { }
 
 /* ActionTarget */
 
+interface Window extends ActionTarget { }
+interface Document extends ActionTarget { }
 interface Element extends ActionTarget { }
 interface Attr extends ActionTarget { }
 interface CSSStyleDeclaration extends ActionTarget {

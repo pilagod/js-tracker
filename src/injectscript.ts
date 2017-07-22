@@ -1,16 +1,61 @@
 /// <reference path='./tracker/tracker.d.ts'/>
 
+// class HelloElement extends HTMLElement {
+//   // Monitor the 'name' attribute for changes.
+//   static get observedAttributes() { return ['name']; }
+
+//   // Respond to attribute changes.
+//   attributeChangedCallback(attr, oldValue, newValue) {
+//     if (attr == 'name') {
+//       this.textContent = `Hello, ${newValue}`;
+//     }
+//   }
+// }
+// // Define the new element
+// customElements.define('hello-element', HelloElement);
+// console.log(document.createElement('hello-element'))
+
 import * as StackTrace from 'stacktrace-js'
 import ActionMap from './tracker/ActionMap'
 import ActionTagMap from './tracker/ActionTagMap'
 import Anomalies from './tracker/Anomalies'
 import TrackIDManager from './tracker/TrackIDManager'
 
+setUpWindowAndDocument()
 trackGeneralCases()
 trackHTMLElementAnomalies()
 trackElementAnomalies()
 trackAttrAnomalies()
 trackNamedNodeMapAnomalies()
+
+/** 
+ * setup window and document
+ */
+
+function setUpWindowAndDocument() {
+  class WindowInfoElement extends HTMLElement { }
+  class DocumentInfoElement extends HTMLElement { }
+
+  customElements.define('window-info-element', WindowInfoElement)
+  customElements.define('document-info-element', DocumentInfoElement)
+
+  const windowInfoElement = document.createElement('window-info-element')
+  const documentInfoElement = document.createElement('document-info-element')
+
+  document.documentElement.appendChild(windowInfoElement)
+  document.documentElement.appendChild(documentInfoElement)
+
+  Object.defineProperty(window, '_owner', {
+    get: () => windowInfoElement
+  })
+  Object.defineProperty(document, '_owner', {
+    get: () => documentInfoElement
+  })
+}
+
+/**
+ * tracker utils
+ */
 
 function trackTemplate(
   template: {

@@ -3,6 +3,27 @@ import * as chai from 'chai'
 const expect = chai.expect
 
 describe('tracker\'s compatibility with html dom api', () => {
+  describe('Window', () => {
+    it('should be able to add event listener', (done) => {
+      window.addEventListener('test', () => {
+        expect(true).to.be.true
+        done()
+      })
+      window.dispatchEvent(new Event('test'))
+    })
+  })
+
+  describe('Document', () => {
+    it('should be able to add event listener', (done) => {
+      document.addEventListener('test', () => {
+        expect(true).to.be.true
+        done()
+      })
+      document.dispatchEvent(new Event('test'))
+    })
+  })
+
+
   describe('HTMLElement', () => {
     it('should set its property properly', () => {
       const div = document.createElement('div')
