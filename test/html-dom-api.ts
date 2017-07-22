@@ -78,9 +78,9 @@ describe('HTML DOM API tracker', () => {
   }
 
   describe('Window', () => {
-    it('should have owner \'window-info-element\' on page', () => {
+    it('should have owner \'window-info\' element on page', () => {
       const windowInfoElement =
-        document.getElementsByTagName('window-info-element')[0]
+        document.getElementsByTagName('window-info')[0]
 
       expect(windowInfoElement).to.be.not.undefined
       expect(window._owner).to.equal(windowInfoElement)
@@ -88,12 +88,43 @@ describe('HTML DOM API tracker', () => {
   })
 
   describe('Document', () => {
-    it('should have owner \'document-info-element\' on page', () => {
+    it('should have owner \'document-info\' element on page', () => {
       const documentInfoElement =
-        document.getElementsByTagName('document-info-element')[0]
+        document.getElementsByTagName('document-info')[0]
 
       expect(documentInfoElement).to.be.not.undefined
       expect(document._owner).to.equal(documentInfoElement)
+    })
+  })
+
+  describe('DocumentFragment', () => {
+    it('should not track any action on fragment', () => {
+      const fragment = document.createDocumentFragment()
+
+      fragment.appendChild(document.createElement('div'))
+
+      expect(msgs).to.have.length(0)
+    })
+
+    it('should track other element appending a fragment', () => {
+      const div = document.createElement('div')
+      const child = document.createElement('div')
+      const fragment = document.createDocumentFragment()
+
+      fragment.appendChild(child)
+
+      div.appendChild(fragment)
+      const stackframe = getStackFrameWithLineOffset()
+
+      expect(msgs).to.have.length(1)
+
+      matchActionInfo(msgs[0], {
+        caller: div,
+        trackid: '1',
+        target: 'Node',
+        action: 'appendChild',
+        stackframe
+      })
     })
   })
 

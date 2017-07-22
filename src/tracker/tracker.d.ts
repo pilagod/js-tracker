@@ -17,9 +17,9 @@ type ActionInfo = {
   trackid: TrackID,
   target: Target,
   action: Action,
-  stacktrace: StackTrace.StackFrame[],
   actionTag?: string,
-  merge?: TrackID
+  merge?: TrackID,
+  stacktrace: StackTrace.StackFrame[]
 }
 
 type TrackSwitchValue<T> = T | { value: T; }

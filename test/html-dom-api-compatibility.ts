@@ -3,6 +3,7 @@ import * as chai from 'chai'
 const expect = chai.expect
 
 describe('tracker\'s compatibility with html dom api', () => {
+
   describe('Window', () => {
     it('should be able to add event listener', (done) => {
       window.addEventListener('test', () => {
@@ -23,6 +24,17 @@ describe('tracker\'s compatibility with html dom api', () => {
     })
   })
 
+  describe('DocumentFragment', () => {
+    const div = document.createElement('div')
+    const child = document.createElement('div')
+    const fragment = document.createDocumentFragment()
+
+    fragment.appendChild(child)
+    div.appendChild(fragment)
+
+    expect(div.children).to.have.length(1)
+    expect(div.children[0]).to.equal(child)
+  })
 
   describe('HTMLElement', () => {
     it('should set its property properly', () => {

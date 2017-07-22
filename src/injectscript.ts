@@ -1,27 +1,13 @@
 /// <reference path='./tracker/tracker.d.ts'/>
 
-// class HelloElement extends HTMLElement {
-//   // Monitor the 'name' attribute for changes.
-//   static get observedAttributes() { return ['name']; }
-
-//   // Respond to attribute changes.
-//   attributeChangedCallback(attr, oldValue, newValue) {
-//     if (attr == 'name') {
-//       this.textContent = `Hello, ${newValue}`;
-//     }
-//   }
-// }
-// // Define the new element
-// customElements.define('hello-element', HelloElement);
-// console.log(document.createElement('hello-element'))
-
 import * as StackTrace from 'stacktrace-js'
 import ActionMap from './tracker/ActionMap'
 import ActionTagMap from './tracker/ActionTagMap'
 import Anomalies from './tracker/Anomalies'
 import TrackIDManager from './tracker/TrackIDManager'
 
-setUpWindowAndDocument()
+setupWindow()
+setupDocument()
 trackGeneralCases()
 trackHTMLElementAnomalies()
 trackElementAnomalies()
@@ -32,24 +18,28 @@ trackNamedNodeMapAnomalies()
  * setup window and document
  */
 
-function setUpWindowAndDocument() {
-  class WindowInfoElement extends HTMLElement { }
-  class DocumentInfoElement extends HTMLElement { }
+function setupWindow(): void {
+  setupNonElementTarget(window, 'window')
+}
 
-  customElements.define('window-info-element', WindowInfoElement)
-  customElements.define('document-info-element', DocumentInfoElement)
+function setupDocument(): void {
+  setupNonElementTarget(document, 'document')
+}
 
-  const windowInfoElement = document.createElement('window-info-element')
-  const documentInfoElement = document.createElement('document-info-element')
+function setupNonElementTarget(target: ActionTarget, name: string) {
+  const infoElementName = `${name}-info`
 
-  document.documentElement.appendChild(windowInfoElement)
-  document.documentElement.appendChild(documentInfoElement)
+  customElements.define(
+    infoElementName,
+    class extends HTMLElement { }
+  )
+  const infoElement =
+    document.createElement(infoElementName)
 
-  Object.defineProperty(window, '_owner', {
-    get: () => windowInfoElement
-  })
-  Object.defineProperty(document, '_owner', {
-    get: () => documentInfoElement
+  document.documentElement.appendChild(infoElement)
+
+  Object.defineProperty(target, '_owner', {
+    get: () => infoElement
   })
 }
 
@@ -99,13 +89,52 @@ function hasSetter(descriptor: PropertyDescriptor): boolean {
   return !!descriptor.set
 }
 
-function NonTrackedSetter(
+function record(
+  data: {
+    caller: ActionTarget,
+    target: Target,
+    action: Action,
+    actionTag?: string,
+    merge?: string
+  }
+): void {
+  if (isNotValidActionTarget(data.caller)) {
+    // @NOTE: although typescript predefine caller should be ActionTarget,
+    // caller is determined in runtime, and there are possible invalid callers
+    return
+  }
+  window.postMessage(<ActionInfo>{
+    trackid: getTrackIDFrom(data.caller),
+    target: data.target,
+    action: data.action,
+    actionTag: data.actionTag,
+    merge: data.merge,
+    stacktrace: StackTrace.getSync()
+  }, '*')
+}
+
+function isNotValidActionTarget(caller: ActionTarget) {
+  return caller instanceof DocumentFragment
+}
+
+function getTrackIDFrom(caller: ActionTarget): string {
+  const owner = caller._owner
+
+  if (!owner.dataset._trackid) {
+    const trackid = TrackIDManager.generateID()
+
+    NonTrackedSetter(owner.dataset, '_trackid', trackid)
+  }
+  return owner.dataset._trackid
+}
+
+function NonTrackedSetter<T>(
   target: object,
   prop: PropertyKey,
-  value: any
-): boolean {
+  value: T
+): T {
   target[prop] = { value }
-  return true
+  return value
 }
 
 function NonTrackedCaller<T>(
@@ -148,41 +177,6 @@ function trackGeneralCases(): void {
       return actionFunc.call(this, ...args)
     }
   }
-}
-
-function record(
-  data: {
-    caller: ActionTarget,
-    target: Target,
-    action: Action,
-    actionTag?: string,
-    merge?: string
-  }
-): void {
-  const info: ActionInfo = {
-    trackid: getTrackID(data.caller),
-    target: data.target,
-    action: data.action,
-    stacktrace: StackTrace.getSync()
-  }
-  if (data.merge) {
-    info.merge = data.merge
-  }
-  if (data.actionTag) {
-    info.actionTag = data.actionTag
-  }
-  window.postMessage(info, '*')
-}
-
-function getTrackID(caller: ActionTarget): string {
-  const owner = caller._owner
-
-  if (!owner.dataset._trackid) {
-    const trackid = TrackIDManager.generateID()
-
-    NonTrackedSetter(owner.dataset, '_trackid', trackid)
-  }
-  return owner.dataset._trackid
 }
 
 /**
