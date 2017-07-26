@@ -2,6 +2,7 @@
     "compilerOptions": {
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
+        "jsx": "react",
         "module": "commonjs",
         "removeComments": true,
         "sourceMap": true,

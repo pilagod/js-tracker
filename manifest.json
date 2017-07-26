@@ -17,7 +17,8 @@
   },
   "devtools_page": "dist/devtools.html",
   "web_accessible_resources": [
-    "dist/injectscript.js"
+    "dist/injectscript.js",
+    "dist/sidebar.html"
   ],
   "permissions": [
     "tabs",

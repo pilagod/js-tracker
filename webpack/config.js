@@ -21,7 +21,7 @@ module.exports = {
         loader: 'transform-loader?brfs!awesome-typescript-loader'
       },
       {
-        test: /\.html/,
+        test: /\.(html|css)$/,
         loader: 'file-loader?name=[name].[ext]'
       }
     ]
