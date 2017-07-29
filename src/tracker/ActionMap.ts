@@ -275,6 +275,7 @@ const ActionMap: {
     },
   }
 const _: IActionMap = {
+
   filterActionType(target, action, actionTag) {
     switch (target) {
       case 'DOMStringMap':
@@ -290,9 +291,11 @@ const _: IActionMap = {
         return ActionType.None
     }
   },
+
   has(target, action) {
     return !!(ActionMap[target] && ActionMap[target][action])
   },
+
   visit(callback) {
     Object.keys(ActionMap).map(
       (target: Target) => {

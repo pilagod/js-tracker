@@ -1,4 +1,4 @@
-/// <reference path='../src/tracker/tracker.d.ts'/>
+/// <reference path='./injectscript.d.ts'/>
 
 interface Window {
   onDevtoolSelectionChanged: (owner: Owner) => void

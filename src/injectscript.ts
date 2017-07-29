@@ -1,4 +1,4 @@
-/// <reference path='./tracker/tracker.d.ts'/>
+/// <reference path='./injectscript.d.ts'/>
 
 import * as StackTrace from 'stacktrace-js'
 import ActionMap from './tracker/ActionMap'

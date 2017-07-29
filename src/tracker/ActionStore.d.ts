@@ -1,5 +1,16 @@
-/// <reference path='./tracker.d.ts'/>
+/// <reference path='./ActionMap.d.ts'/>
 /// <reference path='./ActionType.d.ts'/>
+
+type TrackID = string
+
+type ActionInfo = {
+  trackid: TrackID,
+  target: Target,
+  action: Action,
+  actionTag?: string,
+  merge?: TrackID,
+  stacktrace: StackTrace.StackFrame[]
+}
 
 type ActionRecord = {
   key: string;

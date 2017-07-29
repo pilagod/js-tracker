@@ -1,5 +1,8 @@
-/// <reference path='./tracker.d.ts'/>
+/// <reference path='./ActionMap.d.ts'/>
 
 interface IAnomalies {
-  has(target: Target, action: Action): boolean;
+  has(
+    target: Target,
+    action: Action
+  ): boolean;
 }

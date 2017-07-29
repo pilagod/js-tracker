@@ -34,9 +34,7 @@ const ActionTagMap: object = {
   }
 }
 const _: IActionTagMap = {
-  has(target, action) {
-    return !!(ActionTagMap[target] && ActionTagMap[target][action])
-  },
+
   fetchActionTag(caller, target, action, args = []) {
     if (this.has(target, action)) {
       const tags = <ActionTags>ActionTagMap[target][action]
@@ -50,6 +48,10 @@ const _: IActionTagMap = {
           return (<DOMTokenList>caller)._which
       }
     }
-  }
+  },
+
+  has(target, action) {
+    return !!(ActionTagMap[target] && ActionTagMap[target][action])
+  },
 }
 export default _

@@ -1,5 +1,17 @@
-/// <reference path='./tracker.d.ts'/>
 /// <reference path='./ActionType.d.ts' />
+
+type Target =
+  'HTMLElement'
+  | 'Element'
+  | 'Node'
+  | 'EventTarget'
+  | 'Attr' // attr (e.g. attributes[0])
+  | 'CSSStyleDeclaration' // style
+  | 'DOMStringMap' // dataset
+  | 'DOMTokenList' // classList
+  | 'NamedNodeMap' // attributes
+
+type Action = PropertyKey
 
 type ActionTagMap = {
   'default': ActionType;
