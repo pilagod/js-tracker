@@ -1,11 +1,8 @@
 /// <reference path='../node_modules/@types/chrome/index.d.ts'/>
 /// <reference path='./background.d.ts'/>
 
-import * as React from 'react'
-import * as ReactDOM from 'react-dom'
-
 import MessageType from './MessageType'
-import Sidebar from './sidebar'
+import Sidebar from './Sidebar'
 
 packFilesToDist()
 
@@ -75,12 +72,10 @@ function updateStateBy(message: Message) {
 function renderSidebar(window: chrome.windows.Window, records: ActionRecord[] = []) {
   if (window) {
     // @TODO: pull request to @types/chrome
-    const document = <Document>(<any>window).document
+    const document: Document = (<any>window).document
+    const main: Element = document.getElementsByTagName('main')[0]
 
-    ReactDOM.render(
-      React.createElement(Sidebar),
-      document.getElementById('main')
-    )
+    Sidebar.render(main, records)
   }
 }
 

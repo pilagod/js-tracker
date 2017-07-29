@@ -114,7 +114,7 @@ function record(
 }
 
 function isNotValidActionTarget(caller: ActionTarget) {
-  return caller instanceof DocumentFragment
+  return !caller._owner
 }
 
 function getTrackIDFrom(caller: ActionTarget): string {
