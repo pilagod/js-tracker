@@ -34,13 +34,13 @@ class ConnectionCache implements IConnectionCache {
 
   private _connections
 }
-const cache = new ConnectionCache()
+const connectionCache = new ConnectionCache()
 
-listenOnDevtoolsConnected(cache)
-listenOnActionRecordFromContentScript(cache)
+listenOnDevtoolsConnected()
+listenOnActionRecordFromContentScript()
 listenOnExtensionStarted()
 
-function listenOnDevtoolsConnected(cache: ConnectionCache) {
+function listenOnDevtoolsConnected() {
   chrome.runtime.onConnect.addListener((devtool) => {
     const initHandler = (
       message: {
@@ -48,57 +48,52 @@ function listenOnDevtoolsConnected(cache: ConnectionCache) {
         tabID: string
       }
     ) => {
-      message.type === 'init' && cache.add(message.tabID, devtool)
+      message.type === 'init' && connectionCache.add(message.tabID, devtool)
     }
     devtool.onMessage.addListener(initHandler);
     devtool.onDisconnect.addListener(() => {
       devtool.onMessage.removeListener(initHandler);
-      cache.remove(devtool)
+      connectionCache.remove(devtool)
     })
   })
 }
 
-function listenOnActionRecordFromContentScript(cache: ConnectionCache) {
+function listenOnActionRecordFromContentScript() {
   // message listener for content script
-  chrome.runtime.onMessage.addListener((record, sender, sendResponseToContentScript) => {
-    let message: string
-    // messages from contentscript should have sender.tab set
-    if (sender.tab) {
-      let tabID = (sender.tab.id).toString()
+  chrome.runtime.onMessage.addListener((message, sender, sendResponseToContentScript) => {
+    const tabID = sender.tab && sender.tab.id.toString()
+    const { status, description } = validateTabID(tabID)
 
-      if (cache.has(tabID)) {
-        cache.get(tabID).postMessage(record)
-        message = 'done'
-      } else {
-        message = 'target tab has no devtools opened'
-      }
-    } else {
-      message = 'target tab is not defined'
+    if (status === 'OK') {
+      connectionCache.get(tabID).postMessage(message)
     }
     console.group('background')
-    console.log('--- forward record from content script to devtools ---')
-    console.log('record:', record)
-    message === 'done'
-      ? console.log('message:', message)
-      : console.error('message:', message)
-    console.log('------------------------------------------------------')
+    console.log('--- forward message from content script to devtools ---')
+    console.log('message:', message);
+    (status === 'OK'
+      ? console.log
+      : console.error
+    )('status:', `${status}, ${description}`)
+    console.log('-------------------------------------------------------')
     console.groupEnd()
-    sendResponseToContentScript({ message })
+    sendResponseToContentScript({ status, description })
   })
+
+  function validateTabID(tabID: string): { status: string, description: string } {
+    if (tabID && connectionCache.has(tabID)) {
+      return { status: 'OK', description: 'done' }
+    }
+    return { status: 'ERR', description: 'target tab has no devtools opened' }
+  }
 }
 
 function listenOnExtensionStarted() {
   // Called when the user clicks on the browser action.
   chrome.browserAction.onClicked.addListener(() => {
     // get current active tab
-    chrome.tabs.query({
-      active: true,
-      currentWindow: true
-    }, (tabs) => {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       // create a new tab with current active tab url
-      chrome.tabs.create({
-        url: tabs[0].url
-      }, (tab) => {
+      chrome.tabs.create({ url: tabs[0].url }, (tab) => {
         // inject script to new created tab, start tracking javascript
         chrome.tabs.executeScript(tab.id, {
           file: 'dist/contentscript.js',

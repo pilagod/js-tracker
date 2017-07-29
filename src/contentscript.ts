@@ -12,9 +12,7 @@ injectTrackerScript()
 
 function listenOnActionTriggered() {
   window.addEventListener('message', (event) => {
-    const actionInfo = <ActionInfo>event.data
-
-    actionStore.registerFromActionInfo(actionInfo)
+    actionStore.registerFromActionInfo(<ActionInfo>event.data)
   })
 }
 
@@ -22,12 +20,12 @@ function listenOnDevtoolsSelectionChanged() {
   window.onDevtoolsSelectionChanged = (owner: Owner) => {
     const record = actionStore.get(owner.dataset._trackid)
 
-    chrome.runtime.sendMessage(record, (res) => {
+    chrome.runtime.sendMessage(record, (response) => {
       console.group('contentscript')
       console.log('--- forward record to background ---')
       console.log('target:', owner)
       console.log('sent:', record)
-      console.log('received:', res)
+      console.log('received:', response)
       console.log('------------------------------------')
       console.groupEnd()
     })
@@ -36,9 +34,13 @@ function listenOnDevtoolsSelectionChanged() {
 
 function injectTrackerScript() {
   const script = document.createElement('script')
-  // issue: [https://stackoverflow.com/questions/15730869/my-injected-script-runs-after-the-target-pages-javascript-despite-using-run]
+
   script.textContent = fs.readFileSync(__dirname + '/../dist/injectscript.js', 'utf-8')
+
+  document.documentElement.appendChild(script)
+  document.documentElement.removeChild(script)
+
+  // issue: [https://stackoverflow.com/questions/15730869/my-injected-script-runs-after-the-target-pages-javascript-despite-using-run]
   // script.src = chrome.extension.getURL('dist/injectscript.js')
   // script.async = false
-  document.documentElement.appendChild(script)
 }
