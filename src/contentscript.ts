@@ -1,30 +1,36 @@
 /// <reference path='../node_modules/@types/chrome/index.d.ts' />
+/// <reference path='./background.d.ts'/>
 /// <reference path='./contentscript.d.ts'/>
 
 import * as fs from 'fs'
 import ActionStore from './tracker/ActionStore'
+import MessageType from './MessageType'
 
-const actionStore = new ActionStore()
+const store = new ActionStore()
 
 listenOnActionTriggered()
-listenOnDevtoolsSelectionChanged()
+listenOnDevtoolSelectionChanged()
 injectTrackerScript()
 
 function listenOnActionTriggered() {
   window.addEventListener('message', (event) => {
-    actionStore.registerFromActionInfo(<ActionInfo>event.data)
+    store.registerFromActionInfo(<ActionInfo>event.data)
   })
 }
 
-function listenOnDevtoolsSelectionChanged() {
-  window.onDevtoolsSelectionChanged = (owner: Owner) => {
-    const records = actionStore.get(owner.dataset._trackid)
-
-    chrome.runtime.sendMessage(records, (response) => {
+function listenOnDevtoolSelectionChanged() {
+  window.onDevtoolSelectionChanged = (owner: Owner) => {
+    const trackid = owner.dataset._trackid
+    const message: Message = {
+      type: MessageType.DevtoolSelectionChanged,
+      trackid: trackid,
+      records: store.get(trackid)
+    }
+    chrome.runtime.sendMessage(message, (response) => {
       console.group('contentscript')
       console.log('--- forward record to background ---')
       console.log('target:', owner)
-      console.log('sent:', records)
+      console.log('sent:', message)
       console.log('received:', response)
       console.log('------------------------------------')
       console.groupEnd()

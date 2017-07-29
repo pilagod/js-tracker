@@ -79,11 +79,10 @@ function listenOnActionRecordFromContentScript() {
     sendResponseToContentScript({ status, description })
   })
 
-  function validateTabID(tabID: string): { status: string, description: string } {
-    if (tabID && connectionCache.has(tabID)) {
-      return { status: 'OK', description: 'done' }
-    }
-    return { status: 'ERR', description: 'target tab has no devtools opened' }
+  function validateTabID(tabID: string = ''): { status: string, description: string } {
+    return connectionCache.has(tabID)
+      ? { status: 'OK', description: 'done' }
+      : { status: 'ERR', description: 'target tab has no devtools opened' }
   }
 }
 

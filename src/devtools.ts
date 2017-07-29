@@ -1,4 +1,5 @@
 /// <reference path='../node_modules/@types/chrome/index.d.ts'/>
+/// <reference path='./background.d.ts'/>
 
 require('./devtools.html')
 require('./sidebar.html')
@@ -10,7 +11,7 @@ import * as ReactDOM from 'react-dom'
 import Sidebar from './sidebar'
 
 const background = chrome.runtime.connect({
-  name: 'js-tracking devtool panel'
+  name: 'JS-Tracer Devtool'
 })
 
 background.postMessage({
@@ -18,29 +19,29 @@ background.postMessage({
   tabID: (chrome.devtools.inspectedWindow.tabId).toString()
 })
 
+background.onMessage.addListener((message: Message) => {
+  console.group('devtool page')
+  console.log('--- message got from background ---')
+  console.log('message:', message)
+  console.log('-----------------------------------')
+  console.groupEnd()
+});
+
 chrome.devtools.panels.elements.createSidebarPane('JS Tracker', (sidebar) => {
-  background.onMessage.addListener((record) => {
-    console.group('devtools page')
-    console.log('--- record got from background ---')
-    console.log('record:', record)
-    console.log('----------------------------------')
-    console.groupEnd()
+  sidebar.setPage('dist/sidebar.html');
+  sidebar.onShown.addListener((window) => {
+    // @TODO: pull request to @types/chrome
+    const document = <Document>(<any>window).document
 
-    sidebar.setPage('dist/sidebar.html');
-    sidebar.onShown.addListener((window) => {
-      // @TODO: pull request to @types/chrome
-      const document = <Document>(<any>window).document
-
-      ReactDOM.render(
-        React.createElement(Sidebar),
-        document.getElementById('main')
-      )
-    })
-  });
+    ReactDOM.render(
+      React.createElement(Sidebar),
+      document.getElementById('main')
+    )
+  })
 });
 
 chrome.devtools.panels.elements.onSelectionChanged.addListener(() => {
   // send selected element to content script
   // @TODO: pull request to @types/chrome
-  chrome.devtools.inspectedWindow.eval('onDevtoolsSelectionChanged($0)', <any>{ useContentScriptContext: true });
+  chrome.devtools.inspectedWindow.eval('onDevtoolSelectionChanged($0)', <any>{ useContentScriptContext: true });
 });
