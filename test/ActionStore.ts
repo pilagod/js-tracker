@@ -7,6 +7,23 @@ const PORT = 9876
 const HOST = `http://localhost:${PORT}`
 const expect = chai.expect
 
+function createActionRecord(
+  type: ActionTypes,
+  scriptUrl: string,
+  lineNumber: number,
+  columnNumber: number,
+  code: string,
+): ActionRecord {
+  return {
+    key: `${scriptUrl}:${lineNumber}:${columnNumber}`,
+    type: type,
+    source: {
+      loc: { scriptUrl, lineNumber, columnNumber },
+      code: code
+    }
+  }
+}
+
 describe('ActionStore', () => {
   let actionStore: IActionStore
 
@@ -15,20 +32,22 @@ describe('ActionStore', () => {
   })
 
   describe('register', () => {
+    const type = ActionTypes.None
+    const scriptUrl = 'js-tracker.js'
+    const lineNumber = 1
+    const columnNumber = 1
+    const code = 'console.log(\'Hello JS-Tracker\')'
+
     it('should add action record to ActionStore grouped by trackid', async () => {
       const records: ActionRecord[] = (function () {
-        const results: ActionRecord[] = []
+        const result: ActionRecord[] = []
 
         for (let i = 0; i < 3; i++) {
-          results.push({
-            type: ActionTypes.None,
-            source: {
-              loc: `js-tracker.js:${i + 1}:1`,
-              code: `console.log('this is line ${i + 1}');`
-            }
-          })
+          result.push(
+            createActionRecord(type, scriptUrl, lineNumber + i, columnNumber, code + ` // ${i + 1}`)
+          )
         }
-        return results
+        return result
       })()
       await actionStore.register('1', records[0])
       await actionStore.register('1', records[1])
@@ -39,13 +58,9 @@ describe('ActionStore', () => {
     })
 
     it('should not allow ActionStore to add duplicate (same source.loc) records to same trackid group', async () => {
-      const record: ActionRecord = {
-        type: ActionTypes.None,
-        source: {
-          loc: 'js-tracker.js:1:1',
-          code: `console.log('Hello JS-Tracker')`
-        }
-      }
+      const record: ActionRecord =
+        createActionRecord(type, scriptUrl, lineNumber, columnNumber, code)
+
       await actionStore.register('1', record)
       await actionStore.register('1', record)
 
@@ -53,13 +68,9 @@ describe('ActionStore', () => {
     })
 
     it('should allow ActionStore to add duplicate (same source.loc) records to different trackid group', async () => {
-      const record: ActionRecord = {
-        type: ActionTypes.None,
-        source: {
-          loc: 'js-tracker.js:1:1',
-          code: `console.log('Hello JS-Tracker')`
-        }
-      }
+      const record: ActionRecord =
+        createActionRecord(type, scriptUrl, lineNumber, columnNumber, code)
+
       await actionStore.register('1', record)
       await actionStore.register('2', record)
 
@@ -69,6 +80,7 @@ describe('ActionStore', () => {
   })
 
   describe('registerFromActionInfo', () => {
+    const scriptUrl = HOST + '/base/test/test-script.js'
     // dummy stackframe 
     const _: StackTrace.StackFrame = new StackFrame({
       functionName: 'dummy',
@@ -84,36 +96,34 @@ describe('ActionStore', () => {
         action: 'id',
         stacktrace: [_, _, new StackFrame({
           functionName: 'Element.id',
-          fileName: HOST + '/base/test/test-script.js',
+          fileName: scriptUrl,
           lineNumber: 2,
           columnNumber: 1
         })]
       }
-      const record1: ActionRecord = {
-        type: ActionTypes.Attribute,
-        source: {
-          loc: HOST + '/base/test/test-script.js:2:1',
-          code: `div.id = 'id'`
-        }
-      }
+      const record1: ActionRecord =
+        createActionRecord(
+          ActionTypes.Attribute,
+          scriptUrl, 2, 1,
+          `div.id = 'id'`
+        )
       const info2: ActionInfo = {
         trackid: '1',
         target: 'CSSStyleDeclaration',
         action: 'color',
         stacktrace: [_, _, new StackFrame({
           functionName: 'Object.set',
-          fileName: HOST + '/base/test/test-script.js',
+          fileName: scriptUrl,
           lineNumber: 3,
           columnNumber: 1
         })]
       }
-      const record2: ActionRecord = {
-        type: ActionTypes.Style,
-        source: {
-          loc: HOST + '/base/test/test-script.js:3:1',
-          code: `div.style.color = 'red'`
-        }
-      }
+      const record2: ActionRecord =
+        createActionRecord(
+          ActionTypes.Style,
+          scriptUrl, 3, 1,
+          `div.style.color = 'red'`
+        )
       await actionStore.registerFromActionInfo(info1)
       await actionStore.registerFromActionInfo(info2)
 
@@ -128,18 +138,17 @@ describe('ActionStore', () => {
         actionTag: 'style',
         stacktrace: [_, _, new StackFrame({
           functionName: 'Element.removeAttribute',
-          fileName: HOST + '/base/test/test-script.js',
+          fileName: scriptUrl,
           lineNumber: 4,
           columnNumber: 1
         })]
       }
-      const record: ActionRecord = {
-        type: ActionTypes.Style,
-        source: {
-          loc: HOST + '/base/test/test-script.js:4:1',
-          code: `div.removeAttribute('style')`
-        }
-      }
+      const record: ActionRecord =
+        createActionRecord(
+          ActionTypes.Style,
+          scriptUrl, 4, 1,
+          `div.removeAttribute('style')`
+        )
       await actionStore.registerFromActionInfo(info)
 
       expect(actionStore.get('1')).to.deep.equal([record])
@@ -152,18 +161,17 @@ describe('ActionStore', () => {
         action: 'id',
         stacktrace: [_, _, new StackFrame({
           functionName: 'Element.id',
-          fileName: HOST + '/base/test/test-script.js',
+          fileName: scriptUrl,
           lineNumber: 2,
           columnNumber: 1
         })]
       }
-      const record: ActionRecord = {
-        type: ActionTypes.Attribute,
-        source: {
-          loc: HOST + '/base/test/test-script.js:2:1',
-          code: `div.id = 'id'`
-        }
-      }
+      const record: ActionRecord =
+        createActionRecord(
+          ActionTypes.Attribute,
+          scriptUrl, 2, 1,
+          `div.id = 'id'`
+        )
       await actionStore.registerFromActionInfo(info)
       await actionStore.registerFromActionInfo(info)
 
@@ -177,18 +185,17 @@ describe('ActionStore', () => {
         action: 'id',
         stacktrace: [_, _, new StackFrame({
           functionName: 'Element.id',
-          fileName: HOST + '/base/test/test-script.js',
+          fileName: scriptUrl,
           lineNumber: 2,
           columnNumber: 1
         })]
       }
-      const record: ActionRecord = {
-        type: ActionTypes.Attribute,
-        source: {
-          loc: HOST + '/base/test/test-script.js:2:1',
-          code: `div.id = 'id'`
-        }
-      }
+      const record: ActionRecord =
+        createActionRecord(
+          ActionTypes.Attribute,
+          scriptUrl, 2, 1,
+          `div.id = 'id'`
+        )
       await actionStore.registerFromActionInfo(Object.assign({}, info, { trackid: '1' }))
       await actionStore.registerFromActionInfo(Object.assign({}, info, { trackid: '2' }))
 
@@ -197,32 +204,30 @@ describe('ActionStore', () => {
     })
 
     it('should merge trackid group specified in action info \'merge\' to target before adding new record', async () => {
-      const record1: ActionRecord = {
-        type: ActionTypes.Attribute,
-        source: {
-          loc: HOST + '/base/test/test-script.js:2:1',
-          code: `div.id = 'id'`
-        }
-      }
+      const record1: ActionRecord =
+        createActionRecord(
+          ActionTypes.Attribute,
+          scriptUrl, 2, 1,
+          `div.id = 'id'`
+        )
       const info2: ActionInfo = {
         trackid: '2',
         target: 'CSSStyleDeclaration',
         action: 'color',
         stacktrace: [_, _, new StackFrame({
           functionName: 'Object.set',
-          fileName: HOST + '/base/test/test-script.js',
+          fileName: scriptUrl,
           lineNumber: 3,
           columnNumber: 1
         })],
         merge: '1'
       }
-      const record2: ActionRecord = {
-        type: ActionTypes.Style,
-        source: {
-          loc: HOST + '/base/test/test-script.js:3:1',
-          code: `div.style.color = 'red'`
-        }
-      }
+      const record2: ActionRecord =
+        createActionRecord(
+          ActionTypes.Style,
+          scriptUrl, 3, 1,
+          `div.style.color = 'red'`
+        )
       await actionStore.register('1', record1)
       await actionStore.registerFromActionInfo(info2)
 

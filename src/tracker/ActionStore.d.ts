@@ -2,12 +2,17 @@
 /// <reference path='tracker.d.ts'/>
 
 type ActionRecord = {
+  key: string;
   type: ActionTypes;
   source: Source;
 }
 
 type Source = {
-  loc: string;
+  loc: {
+    scriptUrl: string;
+    lineNumber: number;
+    columnNumber: number;
+  }
   code: string;
 }
 

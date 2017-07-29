@@ -17,7 +17,7 @@ export default class ActionStore implements IActionStore {
   }
 
   public async register(trackid: TrackID, record: ActionRecord): Promise<void> {
-    if (!this._locMap.has(trackid, record.source.loc)) {
+    if (!this._locMap.has(trackid, record.key)) {
       this._register(trackid, record)
     }
   }
@@ -42,15 +42,15 @@ export default class ActionStore implements IActionStore {
 
   private _register(trackid: TrackID, record: ActionRecord): void {
     this._store.add(trackid, record)
-    this._locMap.add(trackid, record.source.loc)
+    this._locMap.add(trackid, record.key)
   }
 
   private _merge(from: TrackID, to: TrackID) {
     const merged = this._store.merge(from, to)
 
     merged.map((record) => {
-      this._locMap.add(to, record.source.loc)
-      this._locMap.remove(from, record.source.loc)
+      this._locMap.add(to, record.key)
+      this._locMap.remove(from, record.key)
     })
   }
 
@@ -62,8 +62,12 @@ export default class ActionStore implements IActionStore {
     } = this._filterStackTrace(info.stacktrace)
 
     return <ActionRecord>{
+      key: `${scriptUrl}:${lineNumber}:${columnNumber}`,
       type: ActionMap.filterActionType(info.target, info.action, info.actionTag),
-      source: await this._fetchSource(scriptUrl, lineNumber, columnNumber)
+      source: <Source>{
+        loc: { scriptUrl, lineNumber, columnNumber },
+        code: await this._fetchSourceCode(scriptUrl, lineNumber, columnNumber)
+      }
     }
   }
 
@@ -71,14 +75,11 @@ export default class ActionStore implements IActionStore {
     return stacktrace[this._HTML_DOM_API_FRAME_INDEX]
   }
 
-  private async _fetchSource(scriptUrl: string, lineNumber: number, columnNumber: number): Promise<Source> {
+  private async _fetchSourceCode(scriptUrl: string, lineNumber: number, columnNumber: number): Promise<string> {
     if (!this._scriptCache.has(scriptUrl)) {
       await this._fetchScriptSourceToCache(scriptUrl)
     }
-    return <Source>{
-      loc: `${scriptUrl}:${lineNumber}:${columnNumber}`,
-      code: this._scriptCache.get(scriptUrl, lineNumber, columnNumber)
-    }
+    return this._scriptCache.get(scriptUrl, lineNumber, columnNumber)
   }
 
   private async _fetchScriptSourceToCache(scriptUrl: string): Promise<void> {
