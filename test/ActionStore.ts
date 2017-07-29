@@ -1,14 +1,14 @@
 import * as chai from 'chai'
 import StackFrame from 'stackframe'
 import ActionStore from '../src/tracker/ActionStore'
-import ActionTypes from '../src/tracker/ActionTypes'
+import ActionType from '../src/tracker/ActionType'
 
 const PORT = 9876
 const HOST = `http://localhost:${PORT}`
 const expect = chai.expect
 
 function createActionRecord(
-  type: ActionTypes,
+  type: ActionType,
   scriptUrl: string,
   lineNumber: number,
   columnNumber: number,
@@ -32,7 +32,7 @@ describe('ActionStore', () => {
   })
 
   describe('register', () => {
-    const type = ActionTypes.None
+    const type = ActionType.None
     const scriptUrl = 'js-tracker.js'
     const lineNumber = 1
     const columnNumber = 1
@@ -103,7 +103,7 @@ describe('ActionStore', () => {
       }
       const record1: ActionRecord =
         createActionRecord(
-          ActionTypes.Attribute,
+          ActionType.Attribute,
           scriptUrl, 2, 1,
           `div.id = 'id'`
         )
@@ -120,7 +120,7 @@ describe('ActionStore', () => {
       }
       const record2: ActionRecord =
         createActionRecord(
-          ActionTypes.Style,
+          ActionType.Style,
           scriptUrl, 3, 1,
           `div.style.color = 'red'`
         )
@@ -145,7 +145,7 @@ describe('ActionStore', () => {
       }
       const record: ActionRecord =
         createActionRecord(
-          ActionTypes.Style,
+          ActionType.Style,
           scriptUrl, 4, 1,
           `div.removeAttribute('style')`
         )
@@ -168,7 +168,7 @@ describe('ActionStore', () => {
       }
       const record: ActionRecord =
         createActionRecord(
-          ActionTypes.Attribute,
+          ActionType.Attribute,
           scriptUrl, 2, 1,
           `div.id = 'id'`
         )
@@ -192,7 +192,7 @@ describe('ActionStore', () => {
       }
       const record: ActionRecord =
         createActionRecord(
-          ActionTypes.Attribute,
+          ActionType.Attribute,
           scriptUrl, 2, 1,
           `div.id = 'id'`
         )
@@ -206,7 +206,7 @@ describe('ActionStore', () => {
     it('should merge trackid group specified in action info \'merge\' to target before adding new record', async () => {
       const record1: ActionRecord =
         createActionRecord(
-          ActionTypes.Attribute,
+          ActionType.Attribute,
           scriptUrl, 2, 1,
           `div.id = 'id'`
         )
@@ -224,7 +224,7 @@ describe('ActionStore', () => {
       }
       const record2: ActionRecord =
         createActionRecord(
-          ActionTypes.Style,
+          ActionType.Style,
           scriptUrl, 3, 1,
           `div.style.color = 'red'`
         )

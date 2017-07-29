@@ -1,6 +1,6 @@
 /// <reference path='./ActionMap.d.ts'/>
 
-import ActionTypes from './ActionTypes'
+import ActionType from './ActionType'
 
 const {
   Attribute,
@@ -8,7 +8,7 @@ const {
   Event,
   Node,
   Style
-} = ActionTypes
+} = ActionType
 
 // @NOTE: those actions whose type determined by argument or property
 // (1) Element.attributes methods (e.g. setAttribute, removeAttribute)
@@ -278,16 +278,16 @@ const _: IActionMap = {
   filterActionType(target, action, actionTag) {
     switch (target) {
       case 'DOMStringMap':
-        return ActionTypes.Attribute
+        return ActionType.Attribute
       case 'CSSStyleDeclaration':
-        return ActionTypes.Style
+        return ActionType.Style
       default:
         if (this.has(target, action)) {
-          return function (type: ActionTypes | ActionTagMap): ActionTypes {
+          return function (type: ActionType | ActionTagMap): ActionType {
             return actionTag ? (type[actionTag] || type['default']) : type
           }(ActionMap[target][action])
         }
-        return ActionTypes.None
+        return ActionType.None
     }
   },
   has(target, action) {

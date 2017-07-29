@@ -1,9 +1,9 @@
 /// <reference path='./tracker.d.ts'/>
-/// <reference path='./ActionTypes.d.ts' />
+/// <reference path='./ActionType.d.ts' />
 
 type ActionTagMap = {
-  'default': ActionTypes;
-  [tag: string]: ActionTypes;
+  'default': ActionType;
+  [tag: string]: ActionType;
 }
 
 interface IActionMap {
@@ -11,7 +11,7 @@ interface IActionMap {
     target: Target,
     action: Action,
     actionTag?: string
-  ): ActionTypes;
+  ): ActionType;
 
   has(
     target: string,

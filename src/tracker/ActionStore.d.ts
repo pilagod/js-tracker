@@ -1,9 +1,9 @@
-/// <reference path='ActionTypes.d.ts'/>
 /// <reference path='tracker.d.ts'/>
+/// <reference path='ActionType.d.ts'/>
 
 type ActionRecord = {
   key: string;
-  type: ActionTypes;
+  type: ActionType;
   source: Source;
 }
 

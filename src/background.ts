@@ -1,7 +1,7 @@
 /// <reference path='../node_modules/@types/chrome/index.d.ts' />
 /// <reference path='./background.d.ts'/>
 
-class ConnectionCache implements IConnectionCache {
+class ConnectionCache {
 
   constructor() {
     this._connections = {}

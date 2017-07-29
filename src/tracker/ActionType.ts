@@ -1,4 +1,4 @@
-declare enum ActionTypes {
+enum ActionType {
   None = 0,
   Attribute = 1 << 0,
   Behavior = 1 << 1,
@@ -6,3 +6,4 @@ declare enum ActionTypes {
   Node = 1 << 3,
   Style = 1 << 4
 }
+export default ActionType
