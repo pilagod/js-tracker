@@ -1,4 +1,4 @@
-/// <reference path='ActionStore.d.ts'/>
+/// <reference path='./ActionStore.d.ts'/>
 
 import ActionMap from './ActionMap'
 

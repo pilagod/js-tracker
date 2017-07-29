@@ -1,5 +1,5 @@
-/// <reference path='tracker.d.ts'/>
-/// <reference path='ActionType.d.ts'/>
+/// <reference path='./tracker.d.ts'/>
+/// <reference path='./ActionType.d.ts'/>
 
 type ActionRecord = {
   key: string;
