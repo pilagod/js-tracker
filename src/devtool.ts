@@ -1,7 +1,7 @@
 /// <reference path='../node_modules/@types/chrome/index.d.ts'/>
 /// <reference path='./background.d.ts'/>
 
-require('./devtools.html')
+require('./devtool.html')
 require('./sidebar.html')
 require('./sidebar.css')
 

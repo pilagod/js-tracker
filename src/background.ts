@@ -68,7 +68,7 @@ function listenOnActionRecordFromContentScript() {
       connectionCache.get(tabID).postMessage(message)
     }
     console.group('background')
-    console.log('--- forward message from content script to devtools ---')
+    console.log('--- forward message from content script to devtool ---')
     console.log('message:', message);
     (status === 'OK'
       ? console.log
@@ -82,7 +82,7 @@ function listenOnActionRecordFromContentScript() {
   function validateTabID(tabID: string = ''): { status: string, description: string } {
     return connectionCache.has(tabID)
       ? { status: 'OK', description: 'done' }
-      : { status: 'ERR', description: 'target tab has no devtools opened' }
+      : { status: 'ERR', description: 'target tab has no devtool opened' }
   }
 }
 
