@@ -319,6 +319,7 @@ describe('HTML DOM API tracker', () => {
           div2.setAttributeNode(div.attributes[0])
         }
         expect(error).to.throw()
+        expect(msgs).to.have.length(1)
       })
     })
   })
