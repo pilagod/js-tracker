@@ -12,26 +12,24 @@ function packFilesToDist() {
   require('./sidebar.css')
 }
 
-const background = setupConnectionToBackground()
 const state = {
   trackid: null,
   records: []
 }
+let background
 let sidebarWindow
 
+setupConnectionToBackground()
 setupJSTrackerSidebar()
 updateSidebarOnMessage()
 listenOnSelectionChanged()
 emitSelectionToContentScript()
 
-function setupConnectionToBackground(): chrome.runtime.Port {
+function setupConnectionToBackground() {
   const tabID = chrome.devtools.inspectedWindow.tabId.toString()
-  const background = chrome.runtime.connect({
-    name: `JS-Tracer Devtool ${tabID}`
-  })
-  background.postMessage({ type: 'init', tabID })
 
-  return background
+  background = chrome.runtime.connect({ name: `JS-Tracer Devtool ${tabID}` })
+  background.postMessage({ type: 'init', tabID })
 }
 
 function setupJSTrackerSidebar() {
@@ -73,9 +71,9 @@ function renderSidebar(window: chrome.windows.Window, records: ActionRecord[] = 
   if (window) {
     // @TODO: pull request to @types/chrome
     const document: Document = (<any>window).document
-    const main: Element = document.getElementsByTagName('main')[0]
+    const container: Element = document.getElementsByTagName('main')[0]
 
-    Sidebar.render(main, records)
+    Sidebar.render(container, records)
   }
 }
 
@@ -86,9 +84,9 @@ function listenOnSelectionChanged() {
 }
 
 function emitSelectionToContentScript() {
-  // @TODO: pull request to @types/chrome
   chrome.devtools.inspectedWindow.eval(
     'onDevtoolSelectionChanged($0)',
+    // @TODO: pull request to @types/chrome
     <any>{
       useContentScriptContext: true
     }
