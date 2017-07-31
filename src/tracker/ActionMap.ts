@@ -3,28 +3,28 @@
 import ActionType from './ActionType'
 
 const {
-  Attribute,
-  Behavior,
+  Attr,
+  Behav,
   Event,
   Node,
   Style
 } = ActionType
 
 // @NOTE: those actions whose type determined by argument or property
-// (1) Element.attributes methods (e.g. setAttribute, removeAttribute)
+// (1) Element.attributes methods (e.g. setAttr, removeAttr)
 // (2) Attr value setter
 const AttrActionTagMap: ActionTagMap = {
   'class': Style,
   'style': Style,
-  'default': Attribute
+  'default': Attr
 }
 
 // @NOTE: those actions whose type determined by caller object
 // (1) classList -> Style
-// (2) others -> Attribute
+// (2) others -> Attr
 const DOMTokenListActionTagMap: ActionTagMap = {
   'classList': Style,
-  'default': Attribute
+  'default': Attr
 }
 
 const ActionMap: {
@@ -35,20 +35,20 @@ const ActionMap: {
 
       /* properties */
 
-      'accessKey': Attribute,
-      'contentEditable': Attribute,
-      'dir': Attribute,
-      'draggable': Attribute,
-      'hidden': Attribute,
+      'accessKey': Attr,
+      'contentEditable': Attr,
+      'dir': Attr,
+      'draggable': Attr,
+      'hidden': Attr,
       // @NOTE: innerText on MDN is in Node.prototype,
       // but chrome put it in HTMLElement.prototype 
       'innerText': Node,
-      'lang': Attribute,
+      'lang': Attr,
       'outerText': Node,
-      'spellcheck': Attribute,
-      'tabIndex': Attribute,
-      'title': Attribute,
-      'translate': Attribute,
+      'spellcheck': Attr,
+      'tabIndex': Attr,
+      'title': Attr,
+      'translate': Attr,
 
       'onabort': Event,
       'onanimationcancel': Event,
@@ -137,22 +137,22 @@ const ActionMap: {
 
       /* methods */
 
-      'blur': Behavior,
-      'click': Behavior,
-      'focus': Behavior,
-      'forceSpellCheck': Behavior,
+      'blur': Behav,
+      'click': Behav,
+      'focus': Behav,
+      'forceSpellCheck': Behav,
     },
     'Element': {
       // https://developer.mozilla.org/zh-TW/docs/Web/API/Element
 
       /* properties */
 
-      'id': Attribute,
-      'name': Attribute,
-      'slot': Attribute,
+      'id': Attr,
+      'name': Attr,
+      'slot': Attr,
 
-      'scrollTop': Behavior,
-      'scrollLeft': Behavior,
+      'scrollTop': Behav,
+      'scrollLeft': Behav,
 
       'onbeforecopy': Event,
       'onbeforecut': Event,
@@ -181,7 +181,7 @@ const ActionMap: {
       'setAttributeNodeNS': AttrActionTagMap, // #anomaly
       'setAttributeNS': AttrActionTagMap,
 
-      'scrollIntoView': Behavior,
+      'scrollIntoView': Behav,
 
       'setPointerCapture': Event,
 
@@ -206,7 +206,7 @@ const ActionMap: {
 
       /* properties */
 
-      'nodeValue': Attribute,
+      'nodeValue': Attr,
 
       'textContent': Node,
 
@@ -279,7 +279,7 @@ const _: IActionMap = {
   filterActionType(target, action, actionTag) {
     switch (target) {
       case 'DOMStringMap':
-        return ActionType.Attribute
+        return ActionType.Attr
       case 'CSSStyleDeclaration':
         return ActionType.Style
       default:

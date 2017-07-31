@@ -10,7 +10,7 @@ describe('ActionMap', () => {
       it('should return correct action type', () => {
         expect(
           ActionMap.filterActionType('Element', 'id')
-        ).to.equal(ActionType.Attribute)
+        ).to.equal(ActionType.Attr)
       })
 
       it('should return action type None given invalid action', () => {
@@ -37,23 +37,23 @@ describe('ActionMap', () => {
       })
 
       describe('DOMStringMap', () => {
-        it('should always return action type Attribute', () => {
+        it('should always return action type Attr', () => {
           expect(
             ActionMap.filterActionType('DOMStringMap', 'id')
-          ).to.equal(ActionType.Attribute)
+          ).to.equal(ActionType.Attr)
           expect(
             ActionMap.filterActionType('DOMStringMap', 'style')
-          ).to.equal(ActionType.Attribute)
+          ).to.equal(ActionType.Attr)
         })
       })
     })
 
     describe('with action tag', () => {
       describe('Attr', () => {
-        it('should return action type Attribute on default', () => {
+        it('should return action type Attr on default', () => {
           expect(
             ActionMap.filterActionType('Element', 'setAttribute', 'id')
-          ).to.equal(ActionType.Attribute)
+          ).to.equal(ActionType.Attr)
         })
 
         it('should return action type Style given action tag \'class\'', () => {

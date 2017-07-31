@@ -103,7 +103,7 @@ describe('ActionStore', () => {
       }
       const record1: ActionRecord =
         createActionRecord(
-          ActionType.Attribute,
+          ActionType.Attr,
           scriptUrl, 2, 1,
           `div.id = 'id'`
         )
@@ -168,7 +168,7 @@ describe('ActionStore', () => {
       }
       const record: ActionRecord =
         createActionRecord(
-          ActionType.Attribute,
+          ActionType.Attr,
           scriptUrl, 2, 1,
           `div.id = 'id'`
         )
@@ -192,7 +192,7 @@ describe('ActionStore', () => {
       }
       const record: ActionRecord =
         createActionRecord(
-          ActionType.Attribute,
+          ActionType.Attr,
           scriptUrl, 2, 1,
           `div.id = 'id'`
         )
@@ -206,7 +206,7 @@ describe('ActionStore', () => {
     it('should merge trackid group specified in action info \'merge\' to target before adding new record', async () => {
       const record1: ActionRecord =
         createActionRecord(
-          ActionType.Attribute,
+          ActionType.Attr,
           scriptUrl, 2, 1,
           `div.id = 'id'`
         )
