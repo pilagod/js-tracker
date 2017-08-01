@@ -63,18 +63,14 @@ interface ISidebarFilterProps {
   ) => void;
 }
 
-interface ISidebarFilterState {
-  filterButtons: JSX.Element[];
-}
+class SidebarFilter extends React.Component<ISidebarFilterProps> {
+  private filterButtons: JSX.Element[]
 
-class SidebarFilter extends React.Component<ISidebarFilterProps, ISidebarFilterState> {
   // background: #F4F4F4
   constructor(props) {
     super(props)
 
-    this.state = {
-      filterButtons: this._createFilterButtons()
-    }
+    this.filterButtons = this._createFilterButtons()
   }
 
   _createFilterButtons(): JSX.Element[] {
@@ -101,7 +97,6 @@ class SidebarFilter extends React.Component<ISidebarFilterProps, ISidebarFilterS
     const button: HTMLButtonElement = e.target
     const action =
       button.classList.contains('selected') ? 'remove' : 'add'
-
     button.classList[action]('selected')
     this.props.updateFilter(action, parseInt(button.value, 10))
   }
@@ -109,7 +104,7 @@ class SidebarFilter extends React.Component<ISidebarFilterProps, ISidebarFilterS
   render() {
     return (
       <div className="sidebar-filter">
-        {this.state.filterButtons}
+        {this.filterButtons}
       </div>
     )
   }
