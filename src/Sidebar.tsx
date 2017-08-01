@@ -64,47 +64,50 @@ interface ISidebarFilterProps {
 }
 
 class SidebarFilter extends React.Component<ISidebarFilterProps> {
-  private filterButtons: JSX.Element[]
+  private filterTypes: string[]
+  private onFilterClicked: (e: any) => void
 
   // background: #F4F4F4
   constructor(props) {
     super(props)
 
-    this.filterButtons = this._createFilterButtons()
+    this.filterTypes = Object.keys(ActionType).filter((type) => {
+      // @NOTE: typescript enum has both name and value key,
+      // name key passing through parseInt will return NaN
+      return isNaN(parseInt(type)) && (type !== 'None')
+    })
+    this.onFilterClicked = this._onFilterClicked.bind(this)
   }
 
-  _createFilterButtons(): JSX.Element[] {
-    const onFilterClicked = this.onFilterClicked.bind(this)
-
-    return Object.keys(ActionType)
-      .filter((type) => {
-        // @NOTE: typescript enum has both name and value key,
-        // name key passing through parseInt will return NaN
-        return isNaN(parseInt(type)) && (type !== 'None')
-      })
-      .map((type, index) => {
-        return (
-          <button key={index} value={ActionType[type]} onClick={onFilterClicked}>
-            {type.toLowerCase()}
-          </button>
-        )
-      })
-  }
-
-  onFilterClicked(e) {
+  private _onFilterClicked(e) {
     e.preventDefault()
 
     const button: HTMLButtonElement = e.target
-    const action =
-      button.classList.contains('selected') ? 'remove' : 'add'
-    button.classList[action]('selected')
-    this.props.updateFilter(action, parseInt(button.value, 10))
+    const action = button.classList.contains('selected') ? 'remove' : 'add'
+    const filter = parseInt(button.value, 10)
+
+    this.props.updateFilter(action, filter)
   }
 
   render() {
+    const filterButtons = this.filterTypes.map((type, index) => {
+      const filter = ActionType[type]
+      const selected = (this.props.filter & filter) ? 'selected' : ''
+
+      return (
+        <button
+          key={index}
+          value={filter}
+          className={selected}
+          onClick={this.onFilterClicked}
+        >
+          {type.toLowerCase()}
+        </button>
+      )
+    })
     return (
       <div className="sidebar-filter">
-        {this.filterButtons}
+        {filterButtons}
       </div>
     )
   }
