@@ -23,7 +23,7 @@ export default class SidebarFilter extends React.Component<ISidebarFilterProps> 
     this.filterTypes = Object.keys(ActionType).filter((type) => {
       // @NOTE: typescript enum has both name and value key,
       // name key passing through parseInt will return NaN
-      return isNaN(parseInt(type)) && (type !== 'None')
+      return isNaN(parseInt(type)) && type !== 'None'
     })
     this.onFilterClicked = this._onFilterClicked.bind(this)
   }
@@ -46,11 +46,12 @@ export default class SidebarFilter extends React.Component<ISidebarFilterProps> 
       return (
         <button
           key={index}
+          name={type}
           value={filter}
           className={selected}
           onClick={this.onFilterClicked}
         >
-          {type.toLowerCase()}
+          {type}
         </button>
       )
     })

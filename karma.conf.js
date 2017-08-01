@@ -19,6 +19,7 @@ module.exports = function (config) {
     files: [
       { pattern: 'src/tracker/*.ts' },
       { pattern: 'src/injectscript.ts' },
+      { pattern: 'src/*.tsx' },
       { pattern: 'test/*.ts' },
       { pattern: 'test/test-script.js', served: true, included: false }
     ],
@@ -31,8 +32,8 @@ module.exports = function (config) {
     preprocessors: {
       'src/tracker/*[!(.d)].ts': ['karma-typescript', 'coverage'],
       'src/injectscript.ts': ['karma-typescript', 'coverage'],
+      'src/*.tsx': ['karma-typescript', 'coverage'],
 
-      'src/tracker/*.d.ts': ['karma-typescript'],
       'test/*.ts': ['karma-typescript']
     },
 
@@ -70,6 +71,11 @@ module.exports = function (config) {
     // start these browsers
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
     browsers: ['Chrome'],
+
+    browserConsoleLogOptions: {
+      level: 'log',
+      terminal: true
+    },
 
     // http://blog.500tech.com/setting-up-travis-ci-to-run-tests-on-latest-google-chrome-version/
     customLaunchers: {
