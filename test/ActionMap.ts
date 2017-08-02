@@ -1,8 +1,6 @@
-import * as chai from 'chai'
+import { expect } from 'chai'
 import ActionMap from '../src/tracker/ActionMap'
 import ActionType from '../src/tracker/ActionType'
-
-const expect = chai.expect
 
 describe('ActionMap', () => {
   describe('filterActionType', () => {

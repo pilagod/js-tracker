@@ -1,7 +1,5 @@
-import * as chai from 'chai'
+import { expect } from 'chai'
 import * as StackTrace from 'stacktrace-js'
-
-const expect = chai.expect
 
 describe('HTML DOM API tracker', () => {
   let postMessage = window.postMessage

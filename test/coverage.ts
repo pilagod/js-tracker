@@ -1,7 +1,5 @@
-import * as chai from 'chai'
+import { expect } from 'chai'
 import ActionMap from '../src/tracker/ActionMap'
-
-const expect = chai.expect
 
 describe('tracker\'s coverage', function () {
   describe('property setter coverage', function () {

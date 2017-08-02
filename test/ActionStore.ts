@@ -1,11 +1,10 @@
-import * as chai from 'chai'
+import { expect } from 'chai'
 import StackFrame from 'stackframe'
 import ActionStore from '../src/tracker/ActionStore'
 import ActionType from '../src/tracker/ActionType'
 
 const PORT = 9876
 const HOST = `http://localhost:${PORT}`
-const expect = chai.expect
 
 function createActionRecord(
   type: ActionType,
