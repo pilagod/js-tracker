@@ -33,16 +33,10 @@ module.exports = function (config) {
       'src/tracker/*[!(.d)].ts': ['karma-typescript', 'coverage'],
       'src/injectscript.ts': ['karma-typescript', 'coverage'],
       'src/*.tsx': ['karma-typescript', 'coverage'],
-
       'test/*.ts': ['karma-typescript']
     },
 
     karmaTypescriptConfig: {
-      // bundlerOptions: {
-      //   transforms: [
-      //     require('karma-typescript-es6-transform')()
-      //   ]
-      // },
       reports: {
         'html': 'coverage',
         'text-summary': ''

@@ -21,7 +21,7 @@ describe('SidebarFilter', () => {
     const totalTypesInButtons = buttons.reduce((set, button) => {
       expect(ActionType).to.have.property(button.name)
       expect(button.value).to.equal(ActionType[button.name].toString())
-      expect(button.innerText).to.equal(button.name)
+      expect(button.textContent).to.equal(button.name)
       expect(button.classList.contains('filter')).to.be.true
 
       return set.add(button.name)
@@ -67,7 +67,7 @@ describe('SidebarFilter', () => {
     ).to.equal(0)
   })
 
-  it('should call updateFilter with action \'add\' and proper filter when button is clicked, given that button is not selected', () => {
+  it('should call prop updateFilter with action \'add\' and proper filter when button is clicked, given that button is not selected', () => {
     let action, filter
 
     const updateFilter = (_action, _filter) => {
@@ -91,7 +91,7 @@ describe('SidebarFilter', () => {
     expect(filter).to.equal(ActionType.Attr)
   })
 
-  it('should call updateFilter with action \'remove\' and proper filter when button is clicked, given that button is selected ', () => {
+  it('should call prop updateFilter with action \'remove\' and proper filter when button is clicked, given that button is selected ', () => {
     let action, filter
 
     const updateFilter = (_action, _filter) => {
