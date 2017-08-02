@@ -22,6 +22,7 @@ describe('SidebarFilter', () => {
       expect(ActionType).to.have.property(button.name)
       expect(button.value).to.equal(ActionType[button.name].toString())
       expect(button.innerText).to.equal(button.name)
+      expect(button.classList.contains('filter')).to.be.true
 
       return set.add(button.name)
     }, new Set()).size

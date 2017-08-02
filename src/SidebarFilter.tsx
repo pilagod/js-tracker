@@ -48,7 +48,7 @@ export default class SidebarFilter extends React.Component<ISidebarFilterProps> 
           key={index}
           name={type}
           value={filter}
-          className={selected}
+          className={`filter ${selected}`}
           onClick={this.onFilterClicked}
         >
           {type}
