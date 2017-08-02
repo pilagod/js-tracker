@@ -1,4 +1,5 @@
 import { expect } from 'chai'
+import * as sinon from 'sinon'
 import * as React from 'react'
 import * as ReactTestUtils from 'react-dom/test-utils'
 
@@ -68,36 +69,29 @@ describe('SidebarFilter', () => {
   })
 
   it('should call prop updateFilter with action \'add\' and proper filter when button is clicked, given that button is not selected', () => {
-    let action, filter
-
-    const updateFilter = (_action, _filter) => {
-      action = _action
-      filter = _filter
-    }
+    const updateFilter = sinon.spy()
     const sidebarFilter = ReactTestUtils.renderIntoDocument(
       React.createElement(SidebarFilter, {
         filter: ActionType.Style,
         updateFilter: updateFilter
       })
     )
-    const attrButton = ReactTestUtils.scryRenderedDOMComponentsWithTag(
+    const attrButton = <HTMLButtonElement>ReactTestUtils.scryRenderedDOMComponentsWithTag(
       sidebarFilter,
       'button'
     ).filter((button: HTMLButtonElement) => {
       return button.name === 'Attr'
     })[0]
+
     ReactTestUtils.Simulate.click(attrButton)
-    expect(action).to.equal('add')
-    expect(filter).to.equal(ActionType.Attr)
+
+    expect(
+      updateFilter.calledWith('add', ActionType.Attr)
+    ).to.be.true
   })
 
   it('should call prop updateFilter with action \'remove\' and proper filter when button is clicked, given that button is selected ', () => {
-    let action, filter
-
-    const updateFilter = (_action, _filter) => {
-      action = _action
-      filter = _filter
-    }
+    const updateFilter = sinon.spy()
     const sidebarFilter = ReactTestUtils.renderIntoDocument(
       React.createElement(SidebarFilter, {
         filter: ActionType.Style,
@@ -108,8 +102,11 @@ describe('SidebarFilter', () => {
       sidebarFilter,
       'selected'
     )
+
     ReactTestUtils.Simulate.click(styleButton)
-    expect(action).to.equal('remove')
-    expect(filter).to.equal(ActionType.Style)
+
+    expect(
+      updateFilter.calledWith('remove', ActionType.Style)
+    ).to.be.true
   })
 })
