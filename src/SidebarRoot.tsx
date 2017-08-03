@@ -8,6 +8,8 @@ import SidebarFilter from './SidebarFilter'
 import SidebarList from './SidebarList'
 
 interface ISidebarRootProps {
+  // trackid
+  // openResource
   records: ActionRecord[];
 }
 
@@ -29,7 +31,6 @@ export default class SidebarRoot extends React.Component<ISidebarRootProps, ISid
     filter: ActionType
   ) {
     this.setState((preState) => {
-      console.log(preState.filter + filter * (action === 'add' ? 1 : -1))
       return {
         filter: preState.filter + filter * (action === 'add' ? 1 : -1)
       }
@@ -37,13 +38,20 @@ export default class SidebarRoot extends React.Component<ISidebarRootProps, ISid
   }
 
   render() {
+    const filteredRecords = this.props.records.filter((record) => {
+      return this.state.filter === ActionType.None
+        || this.state.filter & record.type
+    })
     return (
       <div className="sidebar-root">
         <SidebarFilter
           filter={this.state.filter}
           updateFilter={this.updateFilter.bind(this)}
         />
-        <SidebarList />
+        <SidebarList
+          records={filteredRecords}
+          openResource={() => { }}
+        />
       </div>
     )
   }
