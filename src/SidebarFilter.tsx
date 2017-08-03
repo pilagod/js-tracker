@@ -28,10 +28,10 @@ export default class SidebarFilter extends React.Component<ISidebarFilterProps> 
     this.onFilterClicked = this._onFilterClicked.bind(this)
   }
 
-  private _onFilterClicked(e) {
+  _onFilterClicked(e) {
     e.preventDefault()
 
-    const button: HTMLButtonElement = e.target
+    const button = e.target as HTMLButtonElement
     const action = button.classList.contains('selected') ? 'remove' : 'add'
     const filter = parseInt(button.value, 10)
 

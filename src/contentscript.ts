@@ -4,7 +4,6 @@
 
 import * as fs from 'fs'
 import ActionStore from './tracker/ActionStore'
-import MessageType from './MessageType'
 
 const store = new ActionStore()
 
@@ -20,9 +19,10 @@ function listenOnActionTriggered() {
 
 function listenOnDevtoolSelectionChanged() {
   window.onDevtoolSelectionChanged = (owner: Owner) => {
-    const trackid = owner.dataset._trackid
+    // @TODO: a better way to organize trackid status
+    // between contentscript and devtool
+    const trackid = owner.dataset._trackid || 'TRACK_ID_NOT_EXIST'
     const message: Message = {
-      type: MessageType.DevtoolSelectionChanged,
       trackid: trackid,
       records: store.get(trackid)
     }

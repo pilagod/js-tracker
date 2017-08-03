@@ -106,11 +106,11 @@ class Store implements IStore {
   }
 
   public get(trackid: TrackID): ActionRecord[] {
-    return this._[trackid]
+    return this._[trackid] || []
   }
 
   public merge(from: TrackID, to: TrackID): ActionRecord[] {
-    const merged: ActionRecord[] = this._[from] || []
+    const merged: ActionRecord[] = this.get(from)
 
     delete this._[from]
 

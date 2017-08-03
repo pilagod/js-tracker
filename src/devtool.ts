@@ -1,7 +1,6 @@
 /// <reference path='../node_modules/@types/chrome/index.d.ts'/>
 /// <reference path='./background.d.ts'/>
 
-import MessageType from './MessageType'
 import Sidebar from './Sidebar'
 
 packFilesToDist()
@@ -12,8 +11,10 @@ function packFilesToDist() {
   require('./sidebar.css')
 }
 
-const state = {
-  trackid: null,
+let state: Message = {
+  // @TODO: a better way to organize trackid status
+  // between contentscript and devtool
+  trackid: 'TRACK_ID_NOT_EXIST',
   records: []
 }
 let background
@@ -37,7 +38,7 @@ function setupJSTrackerSidebar() {
     sidebar.setPage('dist/sidebar.html');
     sidebar.onShown.addListener((window) => {
       !sidebarWindow && (sidebarWindow = window)
-      renderSidebar(sidebarWindow, state.records)
+      renderSidebar()
     })
   })
 }
@@ -47,33 +48,31 @@ function updateSidebarOnMessage() {
     console.group('devtool page')
     console.log('--- message got from background ---')
     console.log('message:', message)
+    console.log('state before update:', Object.assign({}, state))
+
+    updateStateBy(message)
+
+    console.log('state after update:', Object.assign({}, state))
     console.log('-----------------------------------')
     console.groupEnd()
 
-    updateStateBy(message)
-    renderSidebar(sidebarWindow, state.records)
+    renderSidebar()
   })
 }
 
 function updateStateBy(message: Message) {
-  switch (message.type) {
-    case MessageType.ActionStoreUpdated:
-      if (state.trackid === message.trackid) {
-        state.records = message.records
-      }
-    case MessageType.DevtoolSelectionChanged:
-      state.trackid = message.trackid
-      state.records = message.records
-  }
+  state = Object.assign({}, state, message)
 }
 
-function renderSidebar(window: chrome.windows.Window, records: ActionRecord[] = []) {
-  if (window) {
+function renderSidebar() {
+  if (sidebarWindow) {
     // @TODO: pull request to @types/chrome
-    const document: Document = (<any>window).document
+    const document: Document = (<any>sidebarWindow).document
     const container: Element = document.getElementsByTagName('main')[0]
 
-    Sidebar.render(container, records)
+    Sidebar.render(container, Object.assign({}, state, {
+      openSource: chrome.devtools.panels.openResource
+    }))
   }
 }
 

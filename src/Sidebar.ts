@@ -3,12 +3,12 @@
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 
-import SidebarRoot from './SidebarRoot'
+import SidebarRoot, { ISidebarRootProps } from './SidebarRoot'
 
 export default {
-  render(container: Element, records: ActionRecord[] = []): void {
+  render(container: Element, props: ISidebarRootProps): void {
     ReactDOM.render(
-      React.createElement(SidebarRoot, { records }),
+      React.createElement(SidebarRoot, { ...props }),
       container
     )
   }

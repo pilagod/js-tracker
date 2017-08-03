@@ -17,7 +17,6 @@ describe('SidebarRoot', () => {
   const _trackid = '1'
   const _records: ActionRecord[] = []
   const _openSource = () => { }
-  // open function
 
   let sidebarRoot, sidebarFilter, sidebarList
 

@@ -7,12 +7,13 @@ import ActionType from './tracker/ActionType'
 import SidebarFilter from './SidebarFilter'
 import SidebarList from './SidebarList'
 
-interface ISidebarRootProps {
+export interface ISidebarRootProps {
   trackid: TrackID;
   records: ActionRecord[];
   openSource: (
     url: string,
-    line: number
+    line: number,
+    callback?: () => void
   ) => void
 }
 

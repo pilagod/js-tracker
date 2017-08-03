@@ -30,6 +30,15 @@ describe('ActionStore', () => {
     actionStore = new ActionStore()
   })
 
+  describe('get', () => {
+    it('should return [] given non-exsiting trackid', () => {
+      expect(actionStore.get(undefined)).to.deep.equal([])
+      expect(actionStore.get(null)).to.deep.equal([])
+      expect(actionStore.get('-1')).to.deep.equal([])
+      expect(actionStore.get('')).to.deep.equal([])
+    })
+  })
+
   describe('register', () => {
     const type = ActionType.None
     const scriptUrl = 'js-tracker.js'
@@ -230,7 +239,7 @@ describe('ActionStore', () => {
       await actionStore.register('1', record1)
       await actionStore.registerFromActionInfo(info2)
 
-      expect(actionStore.get('1')).to.be.undefined
+      expect(actionStore.get('1')).to.deep.equal([])
       expect(actionStore.get('2')).to.deep.equal([record1, record2])
 
       // should avoid duplication after merging
