@@ -13,6 +13,7 @@ const HOST = `http://localhost:${PORT}`
 const TEST_SCRIPT = HOST + '/test-script.js'
 
 describe('SidebarList', () => {
+  const _trackid = 'TRACK_ID_NOT_EXIST'
   const _records: ActionRecord[] = []
 
   before(() => {
@@ -58,6 +59,7 @@ describe('SidebarList', () => {
   it('should render all records passed to it', () => {
     const sidebarList = ReactTestUtils.renderIntoDocument(
       React.createElement(SidebarList, {
+        trackid: _trackid,
         records: _records,
         openSource: () => { }
       })
@@ -99,6 +101,7 @@ describe('SidebarList', () => {
     const openSourceSpy = sinon.spy()
     const sidebarList = ReactTestUtils.renderIntoDocument(
       React.createElement(SidebarList, {
+        trackid: _trackid,
         records: _records,
         openSource: openSourceSpy
       })
@@ -119,5 +122,33 @@ describe('SidebarList', () => {
         )
       ).to.be.true
     })
+  })
+
+  it('should add class record-diff to new records given records updated but not trackid', () => {
+    class SidebarListWrapper extends React.Component {
+      constructor(props) {
+        super(props)
+        this.state = Object.assign({}, this.props)
+      }
+      render() {
+        return React.createElement(SidebarList, this.state)
+      }
+    }
+    const sidebarListWrapper = ReactTestUtils.renderIntoDocument(
+      React.createElement(SidebarListWrapper, {
+        trackid: '1',
+        records: _records.slice(_records.length - 1),
+        openSource: () => { }
+      })
+    )
+    sidebarListWrapper.setState({
+      trackid: '1',
+      records: _records
+    })
+    const diffs = ReactTestUtils.scryRenderedDOMComponentsWithClass(
+      sidebarListWrapper,
+      'record-diff'
+    )
+    expect(diffs).to.have.length(2)
   })
 })
