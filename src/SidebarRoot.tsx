@@ -8,9 +8,12 @@ import SidebarFilter from './SidebarFilter'
 import SidebarList from './SidebarList'
 
 interface ISidebarRootProps {
-  // trackid
-  // openResource
+  trackid: TrackID;
   records: ActionRecord[];
+  openSource: (
+    url: string,
+    line: number
+  ) => void
 }
 
 interface ISidebarRootState {
@@ -49,8 +52,9 @@ export default class SidebarRoot extends React.Component<ISidebarRootProps, ISid
           updateFilter={this.updateFilter.bind(this)}
         />
         <SidebarList
+          trackid={this.props.trackid}
           records={filteredRecords}
-          openResource={() => { }}
+          openSource={this.props.openSource}
         />
       </div>
     )

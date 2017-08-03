@@ -13,10 +13,13 @@ const PORT = 9876
 const HOST = `http://localhost:${PORT}`
 const TEST_SCRIPT = HOST + '/test-script.js'
 
-// @TODO: trackid, openResource to sidebarlist
-
 describe('SidebarRoot', () => {
+  const _trackid = '1'
   const _records: ActionRecord[] = []
+  const _openSource = () => { }
+  // open function
+
+  let sidebarRoot, sidebarFilter, sidebarList
 
   before(() => {
     // refer to ./test-script.js
@@ -58,19 +61,30 @@ describe('SidebarRoot', () => {
     })
   })
 
-  it('should send its state\'s filter and filter updater as prop to SidebarFilter', () => {
-    const sidebarRoot = ReactTestUtils.renderIntoDocument(
+  beforeEach(() => {
+    sidebarRoot = ReactTestUtils.renderIntoDocument(
       React.createElement(SidebarRoot, {
-        records: _records
+        trackid: _trackid,
+        records: _records,
+        openSource: _openSource
       })
     )
-    const sidebarFilter = ReactTestUtils.findRenderedComponentWithType(
+    sidebarFilter = ReactTestUtils.findRenderedComponentWithType(
       sidebarRoot,
       SidebarFilter
     )
+    sidebarList = ReactTestUtils.findRenderedComponentWithType(
+      sidebarRoot,
+      SidebarList
+    )
+  })
+
+  it('should send its state\'s filter and update filter function as prop to SidebarFilter', () => {
     expect(sidebarFilter.props.filter).to.equal(ActionType.None)
     expect(sidebarFilter.props.updateFilter).to.be.a('function')
+  })
 
+  it('should update its state\'s filter by update filter function sent to SidebarFilter', () => {
     const updateFilter = sidebarFilter.props.updateFilter
 
     updateFilter('add', ActionType.Attr)
@@ -86,22 +100,13 @@ describe('SidebarRoot', () => {
     expect(sidebarFilter.props.filter).to.equal(ActionType.None)
   })
 
-  it('should send records filtered by state\'s filter to SidebarList', () => {
-    const sidebarRoot = ReactTestUtils.renderIntoDocument(
-      React.createElement(SidebarRoot, {
-        records: _records
-      })
-    )
-    const sidebarList = ReactTestUtils.findRenderedComponentWithType(
-      sidebarRoot,
-      SidebarList
-    )
+  it('should send trackid, records, and openSource function as prop to SidebarList', () => {
+    expect(sidebarList.props.trackid).to.equal(_trackid)
     expect(sidebarList.props.records).to.deep.equal(_records)
+    expect(sidebarList.props.openSource).to.equal(_openSource)
+  })
 
-    const sidebarFilter = ReactTestUtils.findRenderedComponentWithType(
-      sidebarRoot,
-      SidebarFilter
-    )
+  it('should filter records by its state\'s filter and send result as records prop to SidebarList', () => {
     const updateFilter = sidebarFilter.props.updateFilter
 
     updateFilter('add', ActionType.Attr)

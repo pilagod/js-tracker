@@ -59,7 +59,7 @@ describe('SidebarList', () => {
     const sidebarList = ReactTestUtils.renderIntoDocument(
       React.createElement(SidebarList, {
         records: _records,
-        openResource: () => { }
+        openSource: () => { }
       })
     )
     const records = ReactTestUtils.scryRenderedDOMComponentsWithClass(
@@ -95,12 +95,12 @@ describe('SidebarList', () => {
     expect(info.textContent).to.equal(data.source.code)
   }
 
-  it('should call prop openResource with proper url and line when record link is clicked', () => {
-    const openResource = sinon.spy()
+  it('should call prop openSource with proper url and line number when record link is clicked', () => {
+    const openSourceSpy = sinon.spy()
     const sidebarList = ReactTestUtils.renderIntoDocument(
       React.createElement(SidebarList, {
         records: _records,
-        openResource: openResource
+        openSource: openSourceSpy
       })
     )
     const links = ReactTestUtils.scryRenderedDOMComponentsWithClass(
@@ -113,7 +113,7 @@ describe('SidebarList', () => {
       ReactTestUtils.Simulate.click(link)
 
       expect(
-        openResource.calledWith(
+        openSourceSpy.calledWith(
           record.source.loc.scriptUrl,
           record.source.loc.lineNumber
         )
