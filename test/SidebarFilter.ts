@@ -69,11 +69,11 @@ describe('SidebarFilter', () => {
   })
 
   it('should call prop updateFilter with action \'add\' and proper filter when button is clicked, given that button is not selected', () => {
-    const updateFilter = sinon.spy()
+    const updateFilterSpy = sinon.spy()
     const sidebarFilter = ReactTestUtils.renderIntoDocument(
       React.createElement(SidebarFilter, {
         filter: ActionType.Style,
-        updateFilter: updateFilter
+        updateFilter: updateFilterSpy
       })
     )
     const attrButton = <HTMLButtonElement>ReactTestUtils.scryRenderedDOMComponentsWithTag(
@@ -86,27 +86,26 @@ describe('SidebarFilter', () => {
     ReactTestUtils.Simulate.click(attrButton)
 
     expect(
-      updateFilter.calledWith('add', ActionType.Attr)
+      updateFilterSpy.calledWith('add', ActionType.Attr)
     ).to.be.true
   })
 
   it('should call prop updateFilter with action \'remove\' and proper filter when button is clicked, given that button is selected ', () => {
-    const updateFilter = sinon.spy()
+    const updateFilterSpy = sinon.spy()
     const sidebarFilter = ReactTestUtils.renderIntoDocument(
       React.createElement(SidebarFilter, {
         filter: ActionType.Style,
-        updateFilter: updateFilter
+        updateFilter: updateFilterSpy
       })
     )
     const styleButton = <HTMLButtonElement>ReactTestUtils.findRenderedDOMComponentWithClass(
       sidebarFilter,
       'selected'
     )
-
     ReactTestUtils.Simulate.click(styleButton)
 
     expect(
-      updateFilter.calledWith('remove', ActionType.Style)
+      updateFilterSpy.calledWith('remove', ActionType.Style)
     ).to.be.true
   })
 })
