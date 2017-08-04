@@ -19,6 +19,7 @@ module.exports = function (config) {
     files: [
       { pattern: 'src/tracker/*.ts' },
       { pattern: 'src/Sidebar/*.tsx' },
+      { pattern: 'src/contentscript.ts' },
       { pattern: 'test/*.ts' },
       { pattern: 'test/test-script.js', served: true, included: false }
     ],
@@ -31,6 +32,7 @@ module.exports = function (config) {
     preprocessors: {
       'src/tracker/*[!(.d)].ts': ['karma-typescript', 'coverage'],
       'src/Sidebar/*.tsx': ['karma-typescript', 'coverage'],
+      'src/contentscript.ts': ['karma-typescript', 'coverage'],
       'test/*.ts': ['karma-typescript']
     },
 

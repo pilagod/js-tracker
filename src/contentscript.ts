@@ -10,7 +10,12 @@ const store = new ActionStore()
 
 listenOnActionTriggered()
 listenOnDevtoolSelectionChanged()
-injectTrackerScript()
+try {
+  // in production environment
+  injectTrackerScript()
+} catch (e) {
+  // in testing environment
+}
 
 function listenOnActionTriggered() {
   window.addEventListener('message', (event) => {

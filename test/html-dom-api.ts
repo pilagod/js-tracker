@@ -1,18 +1,18 @@
 import { expect } from 'chai'
+import * as sinon from 'sinon'
 import * as StackTrace from 'stacktrace-js'
 
 describe('HTML DOM API tracker', () => {
-  let postMessage = window.postMessage
   let msgs: ActionInfo[]
 
   before(() => {
-    window.postMessage = (msg) => {
+    (<sinon.SinonStub>window.postMessage).callsFake((msg) => {
       msgs.push(msg)
-    }
+    })
   })
 
   after(() => {
-    window.postMessage = postMessage
+    (<sinon.SinonStub>window.postMessage).reset()
   })
 
   beforeEach(() => {
