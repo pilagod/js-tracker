@@ -41,7 +41,7 @@ function listenOnDevtoolSelectionChanged() {
 function injectTrackerScript() {
   const script = document.createElement('script')
 
-  script.textContent = fs.readFileSync(__dirname + '/../dist/injectscript.js', 'utf-8')
+  script.textContent = fs.readFileSync(__dirname + '/../dist/tracker.js', 'utf-8')
 
   document.documentElement.appendChild(script)
   document.documentElement.removeChild(script)

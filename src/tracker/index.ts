@@ -1,10 +1,10 @@
-/// <reference path='./injectscript.d.ts'/>
+/// <reference path='./index.d.ts'/>
 
 import * as StackTrace from 'stacktrace-js'
-import ActionMap from './tracker/ActionMap'
-import ActionTagMap from './tracker/ActionTagMap'
-import Anomalies from './tracker/Anomalies'
-import TrackIDManager from './tracker/TrackIDManager'
+import ActionMap from './ActionMap'
+import ActionTagMap from './ActionTagMap'
+import Anomalies from './Anomalies'
+import TrackIDManager from './TrackIDManager'
 
 setupWindow()
 setupDocument()

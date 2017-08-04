@@ -18,7 +18,7 @@ const compile = (config, callback) => {
 }
 const injectscriptConfig = Object.assign({}, config, {
   entry: {
-    injectscript: './src/injectscript.ts'
+    tracker: './src/tracker/index.ts'
   }
 })
 const extensionConfig = Object.assign({}, config, {

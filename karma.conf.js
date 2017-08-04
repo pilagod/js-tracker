@@ -18,7 +18,6 @@ module.exports = function (config) {
     // all modules including in tests should be included here
     files: [
       { pattern: 'src/tracker/*.ts' },
-      { pattern: 'src/injectscript.ts' },
       { pattern: 'src/*.tsx' },
       { pattern: 'test/*.ts' },
       { pattern: 'test/test-script.js', served: true, included: false }
@@ -31,7 +30,6 @@ module.exports = function (config) {
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
       'src/tracker/*[!(.d)].ts': ['karma-typescript', 'coverage'],
-      'src/injectscript.ts': ['karma-typescript', 'coverage'],
       'src/*.tsx': ['karma-typescript', 'coverage'],
       'test/*.ts': ['karma-typescript']
     },

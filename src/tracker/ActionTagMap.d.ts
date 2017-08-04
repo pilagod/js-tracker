@@ -1,5 +1,5 @@
+/// <reference path='./index.d.ts'/>
 /// <reference path='./ActionMap.d.ts'/>
-/// <reference path='../injectscript.d.ts'/>
 
 type ActionTag = string | undefined
 
