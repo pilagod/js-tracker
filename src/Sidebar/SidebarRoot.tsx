@@ -1,4 +1,5 @@
 /// <reference path='../tracker/ActionStore.d.ts'/>
+/// <reference path='../tracker/TrackIDManager.d.ts'/>
 
 import * as React from 'react'
 
@@ -10,11 +11,7 @@ import SidebarList from './SidebarList'
 export interface ISidebarRootProps {
   trackid: TrackID;
   records: ActionRecord[];
-  openSource: (
-    url: string,
-    line: number,
-    callback?: () => void
-  ) => void
+  openSource: (url: string, line: number) => void
 }
 
 interface ISidebarRootState {

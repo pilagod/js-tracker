@@ -65,14 +65,20 @@ function updateStateBy(message: Message) {
 
 function renderSidebar() {
   if (sidebarWindow) {
-    // @TODO: pull request to @types/chrome
+    // @TODO: pull request to @types/chrome, document should be on chrome.windows.Window
     const document: Document = (<any>sidebarWindow).document
     const container: Element = document.getElementsByTagName('main')[0]
 
     Sidebar.render(container, Object.assign({}, state, {
-      openSource: chrome.devtools.panels.openResource
+      openSource: openSource
     }))
   }
+}
+
+function openSource(url: string, line: number): void {
+  // @TODO: pull request to @types/chrome, callback should be optional
+  // @NOTE: line add a '-1' offset, it seems that openResource counting lines from 0
+  chrome.devtools.panels.openResource(url, line - 1, () => { })
 }
 
 function listenOnSelectionChanged() {
