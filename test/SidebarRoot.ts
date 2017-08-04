@@ -5,9 +5,9 @@ import * as React from 'react'
 import * as ReactTestUtils from 'react-dom/test-utils'
 
 import ActionType from '../src/tracker/ActionType'
-import SidebarRoot from '../src/SidebarRoot'
-import SidebarFilter from '../src/SidebarFilter'
-import SidebarList from '../src/SidebarList'
+import SidebarRoot from '../src/Sidebar/SidebarRoot'
+import SidebarFilter from '../src/Sidebar/SidebarFilter'
+import SidebarList from '../src/Sidebar/SidebarList'
 
 const PORT = 9876
 const HOST = `http://localhost:${PORT}`

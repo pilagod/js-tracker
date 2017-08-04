@@ -7,9 +7,9 @@ import Sidebar from './Sidebar'
 packFilesToDist()
 
 function packFilesToDist() {
-  require('./devtool.html')
-  require('./sidebar.html')
-  require('./sidebar.css')
+  require('file-loader?name=[name].[ext]!./devtool.html')
+  require('file-loader?name=sidebar.html!./Sidebar/index.html')
+  require('file-loader?name=sidebar.css!./Sidebar/index.css')
 }
 
 let state: Message = {

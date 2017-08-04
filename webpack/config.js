@@ -14,15 +14,12 @@ module.exports = {
     fs: 'empty'
   },
   module: {
+    // @NOTE: loader parsing order is right to left
     loaders: [
       {
         test: /\.tsx?$/,
         enforce: 'pre',
         loader: 'transform-loader?brfs!awesome-typescript-loader'
-      },
-      {
-        test: /\.(html|css)$/,
-        loader: 'file-loader?name=[name].[ext]'
       }
     ]
   }

@@ -1,8 +1,8 @@
-/// <reference path='./tracker/ActionStore.d.ts'/>
+/// <reference path='../tracker/ActionStore.d.ts'/>
 
 import * as React from 'react'
 
-import ActionType from './tracker/ActionType'
+import ActionType from '../tracker/ActionType'
 
 interface ISidebarListProps {
   trackid: TrackID;

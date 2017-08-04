@@ -4,7 +4,7 @@ import * as React from 'react'
 import * as ReactTestUtils from 'react-dom/test-utils'
 
 import ActionType from '../src/tracker/ActionType'
-import SidebarFilter from '../src/SidebarFilter'
+import SidebarFilter from '../src/Sidebar/SidebarFilter'
 
 describe('SidebarFilter', () => {
   it('should render each action type as a button, with name, value and text set properly', () => {
