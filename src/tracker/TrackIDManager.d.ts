@@ -1,4 +1,5 @@
+type TrackID = string
+
 interface ITrackIDManager {
-  resetID(): void;
-  generateID(): string;
+  generateID(): TrackID;
 }

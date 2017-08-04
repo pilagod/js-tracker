@@ -1,7 +1,6 @@
 /// <reference path='./ActionMap.d.ts'/>
 /// <reference path='./ActionType.d.ts'/>
-
-type TrackID = string
+/// <reference path='./TrackIDManager.d.ts'/>
 
 type ActionInfo = {
   trackid: TrackID,

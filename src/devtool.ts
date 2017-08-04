@@ -1,6 +1,7 @@
 /// <reference path='../node_modules/@types/chrome/index.d.ts'/>
 /// <reference path='./background.d.ts'/>
 
+import { Null_TrackID } from './tracker/TrackIDManager'
 import Sidebar from './Sidebar'
 
 packFilesToDist()
@@ -12,9 +13,7 @@ function packFilesToDist() {
 }
 
 let state: Message = {
-  // @TODO: a better way to organize trackid status
-  // between contentscript and devtool
-  trackid: 'TRACK_ID_NOT_EXIST',
+  trackid: Null_TrackID,
   records: []
 }
 let background

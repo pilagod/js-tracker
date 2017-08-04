@@ -4,6 +4,7 @@
 
 import * as fs from 'fs'
 import ActionStore from './tracker/ActionStore'
+import { Null_TrackID } from './tracker/TrackIDManager'
 
 const store = new ActionStore()
 
@@ -19,9 +20,7 @@ function listenOnActionTriggered() {
 
 function listenOnDevtoolSelectionChanged() {
   window.onDevtoolSelectionChanged = (owner: Owner) => {
-    // @TODO: a better way to organize trackid status
-    // between contentscript and devtool
-    const trackid = owner.dataset._trackid || 'TRACK_ID_NOT_EXIST'
+    const trackid = owner.dataset._trackid || Null_TrackID
     const message: Message = {
       trackid: trackid,
       records: store.get(trackid)

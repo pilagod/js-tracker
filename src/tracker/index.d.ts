@@ -1,3 +1,5 @@
+/// <reference path='./TrackIDManager.d.ts'/>
+
 type TrackSwitchValue<T> = T | { value: T; }
 
 interface ActionTarget {
