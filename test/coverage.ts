@@ -1,13 +1,13 @@
 import { expect } from 'chai'
 import ActionMap from '../src/tracker/ActionMap'
 
-describe('tracker\'s coverage', function () {
-  describe('property setter coverage', function () {
-    const PROXY_TARGETS: object = {
+describe('tracker\'s coverage', () => {
+  describe('property setter coverage', () => {
+    const PROXY_TARGETS = {
       'CSSStyleDeclaration': true,
       'DOMStringMap': true
     }
-    const EXCLUDE_ACTIONS: object = {
+    const EXCLUDE_ACTIONS = {
       'attributes': true,
       'classList': true,
       'dataset': true,
@@ -19,11 +19,11 @@ describe('tracker\'s coverage', function () {
     function isExcludedActions(prop) {
       return EXCLUDE_ACTIONS.hasOwnProperty(prop)
     }
-    ActionMap.visit(function (target, actionMap) {
+    ActionMap.visit((target, actionMap) => {
       if (!isProxyTargets(target)) {
         const proto = window[target].prototype
 
-        it(`should track ${target} all property setters`, function () {
+        it(`should track ${target} all property setters`, () => {
           Object.getOwnPropertyNames(proto).forEach((action) => {
             const descriptor = Object.getOwnPropertyDescriptor(proto, action)
 
@@ -36,14 +36,14 @@ describe('tracker\'s coverage', function () {
     })
   })
 
-  describe('manipulation method coverage', function () {
+  describe('manipulation method coverage', () => {
     function isManipulationMethod(method) {
       return /^(set|add|append|prepend|insert|remove|replace|toggle)/.test(method)
     }
-    ActionMap.visit(function (target, actionMap) {
+    ActionMap.visit((target, actionMap) => {
       const proto = window[target].prototype
 
-      it(`should track ${target} all manipulation methods`, function () {
+      it(`should track ${target} all manipulation methods`, () => {
         Object.getOwnPropertyNames(proto).forEach((prop) => {
           if (isManipulationMethod(prop)) {
             expect(actionMap).to.have.property(prop)
