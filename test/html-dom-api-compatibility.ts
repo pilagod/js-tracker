@@ -23,15 +23,17 @@ describe('tracker\'s compatibility with html dom api', () => {
   })
 
   describe('DocumentFragment', () => {
-    const div = document.createElement('div')
-    const child = document.createElement('div')
-    const fragment = document.createDocumentFragment()
+    it('should be compatible with DocumentFragment API', () => {
+      const div = document.createElement('div')
+      const child = document.createElement('div')
+      const fragment = document.createDocumentFragment()
 
-    fragment.appendChild(child)
-    div.appendChild(fragment)
+      fragment.appendChild(child)
+      div.appendChild(fragment)
 
-    expect(div.children).to.have.length(1)
-    expect(div.children[0]).to.equal(child)
+      expect(div.children).to.have.length(1)
+      expect(div.children[0]).to.equal(child)
+    })
   })
 
   describe('HTMLElement', () => {
