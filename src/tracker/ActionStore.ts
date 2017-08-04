@@ -102,7 +102,7 @@ class Store implements IStore {
     if (!this._[trackid]) {
       this._[trackid] = []
     }
-    this._[trackid].push(record)
+    this._[trackid].unshift(record)
   }
 
   public get(trackid: TrackID): ActionRecord[] {
