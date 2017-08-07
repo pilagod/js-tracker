@@ -4,6 +4,7 @@ import * as StackTrace from 'stacktrace-js'
 import ActionMap from './ActionMap'
 import ActionTagMap from './ActionTagMap'
 import Anomalies from './Anomalies'
+import Symbols from './Symbols'
 import TrackIDManager from './TrackIDManager'
 
 setupWindow()
@@ -81,12 +82,12 @@ function hasGetter(descriptor: PropertyDescriptor): boolean {
   return !!descriptor.get
 }
 
-function hasMethod(descriptor: PropertyDescriptor): boolean {
-  return !!descriptor.value && (typeof descriptor.value === 'function')
-}
-
 function hasSetter(descriptor: PropertyDescriptor): boolean {
   return !!descriptor.set
+}
+
+function hasMethod(descriptor: PropertyDescriptor): boolean {
+  return !!descriptor.value && (typeof descriptor.value === 'function')
 }
 
 function record(
@@ -121,7 +122,7 @@ function isNotValidActionTarget(caller: ActionTarget) {
 }
 
 function getTrackIDFrom(caller: ActionTarget): string {
-  const owner = caller._owner
+  const owner: Owner = caller._owner
 
   if (!owner.dataset._trackid) {
     owner.dataset._trackid = NonTracked(TrackIDManager.generateID())
@@ -211,11 +212,11 @@ function trackHTMLElementAnomalies(): void {
         Reflect.defineProperty(dataset, '_owner', {
           get: () => this
         })
-        Reflect.defineProperty(dataset, '_proxy', {
+        Reflect.defineProperty(dataset, Symbols.Proxy, {
           get: () => datasetProxy
         })
       }
-      return dataset._proxy
+      return Reflect.get(dataset, Symbols.Proxy)
     }
   }
 
@@ -236,8 +237,7 @@ function trackHTMLElementAnomalies(): void {
       const style = <CSSStyleDeclaration>getter.call(this)
 
       if (!style._owner) {
-        style._owner = this
-        style._proxy = new Proxy<CSSStyleDeclaration>(style, {
+        const styleProxy = new Proxy<CSSStyleDeclaration>(style, {
           get: function (target, action) {
             // @NOTE: function should bind to target, otherwise, 
             // its context will be Proxy, and throwing Illegal Invocation Error.
@@ -257,8 +257,14 @@ function trackHTMLElementAnomalies(): void {
             return true
           }
         })
+        Reflect.defineProperty(style, '_owner', {
+          get: () => this
+        })
+        Reflect.defineProperty(style, Symbols.Proxy, {
+          get: () => styleProxy
+        })
       }
-      return style._proxy
+      return Reflect.get(style, Symbols.Proxy)
     }
   }
 }
@@ -356,6 +362,7 @@ function setAttrNodeDecorator(
     if (tsvAttr instanceof Attr) {
       // @NOTE: error might raise here, it should call
       // action before record
+      const owner = tsvAttr._owner
       const result =
         actionFunc.call(this, parseAttr(tsvAttr))
 
@@ -364,7 +371,7 @@ function setAttrNodeDecorator(
         target,
         action,
         actionTag: tsvAttr.name,
-        merge: tsvAttr._owner && tsvAttr._owner.dataset._trackid
+        merge: owner && owner.dataset._trackid
       })
       return result
     }
@@ -387,7 +394,9 @@ function parseAttr(attr: Attr): Attr {
 }
 
 function hasShadowOwner(target: ActionTarget): boolean {
-  return !!(target._owner && target._owner.dataset._isShadow)
+  const owner: Owner = target._owner
+
+  return !!(owner && owner._isShadow)
 }
 
 /**
@@ -421,7 +430,7 @@ function trackAttrAnomalies(): void {
   ): (tsvString: TrackSwitchValue<string>) => void {
     return function (tsvString) {
       if (typeof tsvString === 'string') {
-        if (this._owner === null) {
+        if (!this._owner) {
           attachAttrToShadowOwner(this)
         }
         const result = setter.call(this, tsvString)
@@ -442,7 +451,7 @@ function trackAttrAnomalies(): void {
     // @TODO: check namespaceURI
     const owner = document.createElement('div')
 
-    owner.dataset._isShadow = NonTracked('true')
+    owner._isShadow = true
     owner.setAttributeNode(NonTracked(attr))
   }
 }

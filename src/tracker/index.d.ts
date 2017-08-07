@@ -9,9 +9,12 @@ interface ActionTarget {
 interface Owner {
   readonly dataset: {
     [key: string]: string;
+    // @NOTE: element using $0 to get in devtool can only access those 
+    // properties natively defined on the element, trackid can't be
+    // an alone extended property, so I store it on dataset 
     _trackid?: TrackID;
-    _isShadow?: string;
   };
+  _isShadow?: boolean;
 }
 
 /* Owner */
