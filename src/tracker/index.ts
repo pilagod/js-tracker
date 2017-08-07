@@ -4,7 +4,7 @@ import * as StackTrace from 'stacktrace-js'
 import ActionMap from './ActionMap'
 import ActionTagMap from './ActionTagMap'
 import Anomalies from './Anomalies'
-import Symbols from './Symbols'
+import OwnerManager from './OwnerManager'
 import TrackIDManager from './TrackIDManager'
 
 setupWindow()
@@ -39,7 +39,7 @@ function setupNonElementTarget(target: ActionTarget, name: string) {
 
   document.documentElement.appendChild(infoElement)
 
-  Reflect.defineProperty(target, Symbols.Owner, {
+  OwnerManager.defineOwnerOf(target, {
     get: () => infoElement
   })
 }
@@ -101,8 +101,7 @@ function record(
 ): void {
   // @NOTE: target might be different from type of caller
   // e.g. caller: HTMLDivElement, target: Element, action: id
-
-  if (isNotValidActionTarget(data.caller)) {
+  if (!OwnerManager.hasOwner(data.caller)) {
     // @NOTE: although typescript predefine caller should be ActionTarget,
     // caller is determined in runtime, and it's possible to get invalid callers
     return
@@ -117,12 +116,8 @@ function record(
   }, '*')
 }
 
-function isNotValidActionTarget(caller: ActionTarget) {
-  return !caller[Symbols.Owner]
-}
-
 function getTrackIDFrom(caller: ActionTarget): string {
-  const owner: Owner = caller[Symbols.Owner]
+  const owner: Owner = OwnerManager.getOwnerOf(caller)
 
   if (!owner.dataset._trackid) {
     owner.dataset._trackid = NonTracked(TrackIDManager.generateID())
@@ -203,14 +198,14 @@ function trackHTMLElementAnomalies(): void {
     })
   }
 
-  function proxyDecoratorTemplate<T extends Object>(proxyHandler: ProxyHandler<T>) {
+  function proxyDecoratorTemplate<T extends ActionTarget>(proxyHandler: ProxyHandler<T>) {
     return function (_: any, __: any, getter: () => T): () => T {
       return function (this: HTMLElement): T {
         const target = <T>getter.call(this)
         const proxy = new Proxy<T>(target, proxyHandler)
 
-        if (!Reflect.has(target, Symbols.Owner)) {
-          Reflect.defineProperty(target, Symbols.Owner, {
+        if (!OwnerManager.hasOwner(target)) {
+          OwnerManager.defineOwnerOf(target, {
             get: () => this
           })
         }
@@ -261,10 +256,10 @@ function trackElementAnomalies() {
   trackSetAttributeNode()
 
   function setupOwner() {
-    Reflect.defineProperty(Element.prototype, Symbols.Owner, {
+    OwnerManager.defineOwnerOf(Element.prototype, {
       get: function () {
-        // @NOTE: this here refers to all possible
-        // HTML elements inheriting Element
+        // @NOTE: 'this' here refers to all possible
+        // inheritors of Element, e.g. HTMLElement, SVGElement
         return this
       }
     })
@@ -286,8 +281,10 @@ function trackElementAnomalies() {
     return function (this: Element): NamedNodeMap {
       const target = <NamedNodeMap>getter.call(this)
 
-      if (!Reflect.has(target, Symbols.Owner)) {
-        target[Symbols.Owner] = this[Symbols.Owner]
+      if (!OwnerManager.hasOwner(target)) {
+        OwnerManager.defineOwnerOf(target, {
+          get: () => OwnerManager.getOwnerOf(this)
+        })
       }
       return target
     }
@@ -324,8 +321,10 @@ function DOMTokenListDecorator(
   return function (this: Element): DOMTokenList {
     const target = <DOMTokenList>getter.call(this)
 
-    if (!Reflect.has(target, Symbols.Owner)) {
-      target[Symbols.Owner] = this[Symbols.Owner]
+    if (!OwnerManager.hasOwner(target)) {
+      OwnerManager.defineOwnerOf(target, {
+        get: () => OwnerManager.getOwnerOf(this)
+      })
     }
     if (!target._which) {
       target._which = which /* classList, relList */
@@ -344,7 +343,7 @@ function setAttrNodeDecorator(
       // @NOTE: error might raise here, it should call
       // action before record
       const result = actionFunc.call(this, parseAttr(tsvAttr))
-      const owner = tsvAttr[Symbols.Owner]
+      const owner = OwnerManager.getOwnerOf(tsvAttr)
 
       record({
         caller: this,
@@ -374,9 +373,8 @@ function parseAttr(attr: Attr): Attr {
 }
 
 function hasShadowOwner(target: ActionTarget): boolean {
-  const owner: Owner = target[Symbols.Owner]
-
-  return !!(owner && owner._isShadow)
+  return OwnerManager.hasOwner(target)
+    && OwnerManager.getOwnerOf(target)._isShadow
 }
 
 /**
@@ -388,9 +386,9 @@ function trackAttrAnomalies(): void {
   trackValue()
 
   function setupAttr() {
-    Reflect.defineProperty(Attr.prototype, Symbols.Owner, {
-      get: function (this: Attr): Element {
-        return this.ownerElement
+    OwnerManager.defineOwnerOf(Attr.prototype, {
+      get: function (this: Attr): Owner {
+        return this.ownerElement && OwnerManager.getOwnerOf(this.ownerElement)
       }
     })
   }
@@ -410,7 +408,7 @@ function trackAttrAnomalies(): void {
   ): (tsvString: TrackSwitchValue<string>) => void {
     return function (tsvString) {
       if (typeof tsvString === 'string') {
-        if (!this[Symbols.Owner]) {
+        if (!OwnerManager.hasOwner(this)) {
           attachAttrToShadowOwner(this)
         }
         const result = setter.call(this, tsvString)

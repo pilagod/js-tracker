@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import Symbols from '../src/tracker/Symbols'
+import OwnerManager from '../src/tracker/OwnerManager'
 import * as StackTrace from 'stacktrace-js'
 
 describe('HTML DOM API tracker', () => {
@@ -31,7 +31,9 @@ describe('HTML DOM API tracker', () => {
   }
 
   function matchActionInfo(got: ActionInfo, expected: ExpectInfo) {
-    expect(expected.caller[Symbols.Owner].dataset)
+    const owner = OwnerManager.getOwnerOf(expected.caller)
+
+    expect(owner.dataset)
       .to.have.property('_trackid')
       .to.equal(expected.trackid)
 
@@ -82,7 +84,7 @@ describe('HTML DOM API tracker', () => {
         document.getElementsByTagName('window-info')[0]
 
       expect(windowInfoElement).to.be.not.undefined
-      expect(window[Symbols.Owner]).to.equal(windowInfoElement)
+      expect(OwnerManager.getOwnerOf(window)).to.equal(windowInfoElement)
     })
   })
 
@@ -92,7 +94,7 @@ describe('HTML DOM API tracker', () => {
         document.getElementsByTagName('document-info')[0]
 
       expect(documentInfoElement).to.be.not.undefined
-      expect(document[Symbols.Owner]).to.equal(documentInfoElement)
+      expect(OwnerManager.getOwnerOf(document)).to.equal(documentInfoElement)
     })
   })
 
@@ -405,8 +407,9 @@ describe('HTML DOM API tracker', () => {
 
       div.style.color = 'red'
       const stackframe = getStackFrameWithLineOffset()
+      const owner = OwnerManager.getOwnerOf(div.style)
 
-      expect(div.style[Symbols.Owner]).to.equal(div)
+      expect(owner).to.equal(div)
       expect(msgs).to.have.length(1)
 
       matchActionInfo(msgs[0], {
@@ -425,8 +428,9 @@ describe('HTML DOM API tracker', () => {
 
       div.dataset.data = 'data'
       const stackframe = getStackFrameWithLineOffset()
+      const owner = OwnerManager.getOwnerOf(div.dataset)
 
-      expect(div.dataset[Symbols.Owner]).to.equal(div)
+      expect(owner).to.equal(div)
       expect(msgs).to.have.length(1)
 
       matchActionInfo(msgs[0], {
