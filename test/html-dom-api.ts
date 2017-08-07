@@ -1,4 +1,5 @@
 import { expect } from 'chai'
+import Symbols from '../src/tracker/Symbols'
 import * as StackTrace from 'stacktrace-js'
 
 describe('HTML DOM API tracker', () => {
@@ -30,7 +31,7 @@ describe('HTML DOM API tracker', () => {
   }
 
   function matchActionInfo(got: ActionInfo, expected: ExpectInfo) {
-    expect(expected.caller._owner.dataset)
+    expect(expected.caller[Symbols.Owner].dataset)
       .to.have.property('_trackid')
       .to.equal(expected.trackid)
 
@@ -81,7 +82,7 @@ describe('HTML DOM API tracker', () => {
         document.getElementsByTagName('window-info')[0]
 
       expect(windowInfoElement).to.be.not.undefined
-      expect(window._owner).to.equal(windowInfoElement)
+      expect(window[Symbols.Owner]).to.equal(windowInfoElement)
     })
   })
 
@@ -91,7 +92,7 @@ describe('HTML DOM API tracker', () => {
         document.getElementsByTagName('document-info')[0]
 
       expect(documentInfoElement).to.be.not.undefined
-      expect(document._owner).to.equal(documentInfoElement)
+      expect(document[Symbols.Owner]).to.equal(documentInfoElement)
     })
   })
 
@@ -405,7 +406,7 @@ describe('HTML DOM API tracker', () => {
       div.style.color = 'red'
       const stackframe = getStackFrameWithLineOffset()
 
-      expect(div.style._owner).to.equal(div)
+      expect(div.style[Symbols.Owner]).to.equal(div)
       expect(msgs).to.have.length(1)
 
       matchActionInfo(msgs[0], {
@@ -425,7 +426,7 @@ describe('HTML DOM API tracker', () => {
       div.dataset.data = 'data'
       const stackframe = getStackFrameWithLineOffset()
 
-      expect(div.dataset._owner).to.equal(div)
+      expect(div.dataset[Symbols.Owner]).to.equal(div)
       expect(msgs).to.have.length(1)
 
       matchActionInfo(msgs[0], {
