@@ -38,7 +38,7 @@ function setupNonElementTarget(target: ActionTarget, name: string) {
 
   document.documentElement.appendChild(infoElement)
 
-  Object.defineProperty(target, '_owner', {
+  Reflect.defineProperty(target, '_owner', {
     get: () => infoElement
   })
 }
@@ -62,7 +62,7 @@ function trackTemplate(
   const { target, action, decorator } = template
   const shouldTrackGetter = template.getter
   const descriptor =
-    Object.getOwnPropertyDescriptor(window[target].prototype, action)
+    Reflect.getOwnPropertyDescriptor(window[target].prototype, action)
   // @NOTE: getter, setter, method are mutual exclusive
   if (shouldTrackGetter && hasGetter(descriptor)) {
     descriptor.get =
@@ -74,7 +74,7 @@ function trackTemplate(
     descriptor.value =
       decorator(target, action, descriptor.value)
   }
-  Object.defineProperty(window[target].prototype, action, descriptor)
+  Reflect.defineProperty(window[target].prototype, action, descriptor)
 }
 
 function hasGetter(descriptor: PropertyDescriptor): boolean {
@@ -208,10 +208,10 @@ function trackHTMLElementAnomalies(): void {
             return true
           }
         })
-        Object.defineProperty(dataset, '_owner', {
+        Reflect.defineProperty(dataset, '_owner', {
           get: () => this
         })
-        Object.defineProperty(dataset, '_proxy', {
+        Reflect.defineProperty(dataset, '_proxy', {
           get: () => datasetProxy
         })
       }
@@ -274,7 +274,7 @@ function trackElementAnomalies() {
   trackSetAttributeNode()
 
   function setupOwner() {
-    Object.defineProperty(Element.prototype, '_owner', {
+    Reflect.defineProperty(Element.prototype, '_owner', {
       get: function () {
         // @NOTE: this here refers to all possible
         // HTML elements inheriting Element
@@ -399,7 +399,7 @@ function trackAttrAnomalies(): void {
   trackValue()
 
   function setupAttr() {
-    Object.defineProperty(Attr.prototype, '_owner', {
+    Reflect.defineProperty(Attr.prototype, '_owner', {
       get: function (this: Attr): Element {
         return this.ownerElement
       }
