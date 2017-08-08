@@ -4,7 +4,7 @@
 
 import * as fs from 'fs'
 import ActionStore from './tracker/ActionStore'
-import { Null_TrackID } from './tracker/TrackIDManager'
+import OwnerManager from './tracker/OwnerManager'
 
 const store = new ActionStore()
 
@@ -20,7 +20,7 @@ function listenOnActionTriggered() {
 
 function listenOnDevtoolSelectionChanged() {
   window.onDevtoolSelectionChanged = (owner: Owner) => {
-    const trackid = owner.dataset._trackid || Null_TrackID
+    const trackid = OwnerManager.getTrackIDFromOwner(owner)
     const message: Message = {
       trackid: trackid,
       records: store.get(trackid)

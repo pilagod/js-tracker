@@ -4,8 +4,8 @@ class TrackIDManager implements ITrackIDManager {
 
   /* public */
 
-  public generateID(): TrackID {
-    return (++this.trackid).toString()
+  public isValid(trackid: string) {
+    return trackid !== Track_ID_Does_Not_Exist
   }
 
   /* private */
@@ -15,9 +15,13 @@ class TrackIDManager implements ITrackIDManager {
   private resetID() {
     this.trackid = 0
   }
+
+  private generateID(): TrackID {
+    return (++this.trackid).toString()
+  }
 }
 // @NOTE: TrackIDManager should be a global singleton
 // it will be used both in tracker and tests
 export default (new TrackIDManager())
-export const Null_TrackID = 'TRACK_ID_NOT_EXIST'
 
+export const Track_ID_Does_Not_Exist = 'Track_ID_Does_Not_Exist'

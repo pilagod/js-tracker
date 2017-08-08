@@ -1,5 +1,5 @@
 type TrackID = string
 
 interface ITrackIDManager {
-  generateID(): TrackID;
+  isValid(trackid: string): boolean;
 }

@@ -99,30 +99,35 @@ function record(
     merge?: string
   }
 ): void {
-  // @NOTE: target might be different from type of caller
-  // e.g. caller: HTMLDivElement, target: Element, action: id
-  if (!OwnerManager.hasOwner(data.caller)) {
-    // @NOTE: although typescript predefine caller should be ActionTarget,
-    // caller is determined in runtime, and it's possible to get invalid callers
-    return
+  // @NOTE: target should not be derived from the type of caller
+  // e.g., {
+  //  caller: HTMLDivElement, 
+  //  target: Element, 
+  //  action: id
+  // }
+  const trackid = getTrackIDFrom(data.caller)
+  // @NOTE: although typescript predefine that caller should be ActionTarget,
+  // caller is actually determined in runtime, and it's possible to get invalid 
+  // callers, e.g., DocumentFragment, XHRHttpRequst
+  if (TrackIDManager.isValid(trackid)) {
+    window.postMessage(
+      <ActionInfo>{
+        trackid,
+        target: data.target,
+        action: data.action,
+        actionTag: data.actionTag,
+        merge: data.merge,
+        stacktrace: StackTrace.getSync()
+      }, '*')
   }
-  window.postMessage(<ActionInfo>{
-    trackid: getTrackIDFrom(data.caller),
-    target: data.target,
-    action: data.action,
-    actionTag: data.actionTag,
-    merge: data.merge,
-    stacktrace: StackTrace.getSync()
-  }, '*')
 }
 
-function getTrackIDFrom(caller: ActionTarget): string {
-  const owner: Owner = OwnerManager.getOwner(caller)
+function getTrackIDFrom(target: ActionTarget): TrackID {
+  OwnerManager.hasOwner(target)
+    && !OwnerManager.hasTrackIDOnOwnerOf(target)
+    && OwnerManager.setTrackIDOnOwnerOf(target)
 
-  if (!owner.dataset._trackid) {
-    owner.dataset._trackid = NonTracked(TrackIDManager.generateID())
-  }
-  return owner.dataset._trackid
+  return OwnerManager.getTrackIDFromOwnerOf(target)
 }
 
 function NonTracked(value: any): any {
@@ -226,8 +231,8 @@ function trackHTMLElementAnomalies(): void {
   function createStyleDecorator() {
     return proxyDecoratorTemplate(<ProxyHandler<CSSStyleDeclaration>>{
       get: function (target, action) {
-        // @NOTE: function should bind to target, otherwise, 
-        // its context will be Proxy, and throwing Illegal Invocation Error.
+        // @NOTE: function should bind to target, otherwise its context 
+        // will be the Proxy, and throwing Illegal Invocation Error.
         return typeof target[action] === 'function'
           ? target[action].bind(target)
           : target[action]
@@ -258,9 +263,8 @@ function trackElementAnomalies() {
   function setupOwner() {
     OwnerManager.defineOwner(Element.prototype, {
       get: function () {
-        // @NOTE: 'this' here refers to all possible
-        // inheritors of Element, e.g. HTMLElement, SVGElement
-        return this
+        // @NOTE: Element interface must be used by higher level inheritors
+        return <Owner>this
       }
     })
   }
@@ -340,17 +344,17 @@ function setAttrNodeDecorator(
 ): (tsvAttr: TrackSwitchValue<Attr>) => void {
   return function (tsvAttr) {
     if (tsvAttr instanceof Attr) {
-      // @NOTE: error might raise here, it should call
-      // action before record
+      // @NOTE: error might raise here, native operation 
+      // should call before recording
       const result = actionFunc.call(this, parseAttr(tsvAttr))
-      const owner = OwnerManager.getOwner(tsvAttr)
+      const shadowID = OwnerManager.getTrackIDFromOwnerOf(tsvAttr)
 
       record({
         caller: this,
         target,
         action,
         actionTag: tsvAttr.name,
-        merge: owner && owner.dataset._trackid
+        merge: TrackIDManager.isValid(shadowID) ? shadowID : undefined
       })
       return result
     }
@@ -387,8 +391,10 @@ function trackAttrAnomalies(): void {
 
   function setupAttr() {
     OwnerManager.defineOwner(Attr.prototype, {
-      get: function (this: Attr): Owner {
-        return this.ownerElement && OwnerManager.getOwner(this.ownerElement)
+      get: function (this: Attr) {
+        return this.ownerElement
+          ? OwnerManager.getOwner(this.ownerElement)
+          : null
       }
     })
   }
@@ -408,9 +414,9 @@ function trackAttrAnomalies(): void {
   ): (tsvString: TrackSwitchValue<string>) => void {
     return function (tsvString) {
       if (typeof tsvString === 'string') {
-        if (!OwnerManager.hasOwner(this)) {
-          attachAttrToShadowOwner(this)
-        }
+        !OwnerManager.hasOwner(this)
+          && attachAttrToShadowOwner(this)
+
         const result = setter.call(this, tsvString)
 
         record({
