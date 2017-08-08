@@ -31,7 +31,7 @@ describe('HTML DOM API tracker', () => {
   }
 
   function matchActionInfo(got: ActionInfo, expected: ExpectInfo) {
-    const owner = OwnerManager.getOwnerOf(expected.caller)
+    const owner = OwnerManager.getOwner(expected.caller)
 
     expect(owner.dataset)
       .to.have.property('_trackid')
@@ -84,7 +84,7 @@ describe('HTML DOM API tracker', () => {
         document.getElementsByTagName('window-info')[0]
 
       expect(windowInfoElement).to.be.not.undefined
-      expect(OwnerManager.getOwnerOf(window)).to.equal(windowInfoElement)
+      expect(OwnerManager.getOwner(window)).to.equal(windowInfoElement)
     })
   })
 
@@ -94,7 +94,7 @@ describe('HTML DOM API tracker', () => {
         document.getElementsByTagName('document-info')[0]
 
       expect(documentInfoElement).to.be.not.undefined
-      expect(OwnerManager.getOwnerOf(document)).to.equal(documentInfoElement)
+      expect(OwnerManager.getOwner(document)).to.equal(documentInfoElement)
     })
   })
 
@@ -407,7 +407,7 @@ describe('HTML DOM API tracker', () => {
 
       div.style.color = 'red'
       const stackframe = getStackFrameWithLineOffset()
-      const owner = OwnerManager.getOwnerOf(div.style)
+      const owner = OwnerManager.getOwner(div.style)
 
       expect(owner).to.equal(div)
       expect(msgs).to.have.length(1)
@@ -428,7 +428,7 @@ describe('HTML DOM API tracker', () => {
 
       div.dataset.data = 'data'
       const stackframe = getStackFrameWithLineOffset()
-      const owner = OwnerManager.getOwnerOf(div.dataset)
+      const owner = OwnerManager.getOwner(div.dataset)
 
       expect(owner).to.equal(div)
       expect(msgs).to.have.length(1)

@@ -2,14 +2,14 @@
 
 const symbolOwner = Symbol('owner')
 const OwnerManager: IOwnerManager = {
-  defineOwnerOf(target, descriptor) {
+  defineOwner(target, descriptor) {
     return Reflect.defineProperty(target, symbolOwner, descriptor)
   },
-  getOwnerOf(target) {
+  getOwner(target) {
     return Reflect.get(target, symbolOwner)
   },
   hasOwner(target) {
-    return !!(this.getOwnerOf(target))
+    return !!(this.getOwner(target))
   }
 }
 export default OwnerManager

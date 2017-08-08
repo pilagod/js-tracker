@@ -39,7 +39,7 @@ function setupNonElementTarget(target: ActionTarget, name: string) {
 
   document.documentElement.appendChild(infoElement)
 
-  OwnerManager.defineOwnerOf(target, {
+  OwnerManager.defineOwner(target, {
     get: () => infoElement
   })
 }
@@ -117,7 +117,7 @@ function record(
 }
 
 function getTrackIDFrom(caller: ActionTarget): string {
-  const owner: Owner = OwnerManager.getOwnerOf(caller)
+  const owner: Owner = OwnerManager.getOwner(caller)
 
   if (!owner.dataset._trackid) {
     owner.dataset._trackid = NonTracked(TrackIDManager.generateID())
@@ -205,7 +205,7 @@ function trackHTMLElementAnomalies(): void {
         const proxy = new Proxy<T>(target, proxyHandler)
 
         if (!OwnerManager.hasOwner(target)) {
-          OwnerManager.defineOwnerOf(target, {
+          OwnerManager.defineOwner(target, {
             get: () => this
           })
         }
@@ -256,7 +256,7 @@ function trackElementAnomalies() {
   trackSetAttributeNode()
 
   function setupOwner() {
-    OwnerManager.defineOwnerOf(Element.prototype, {
+    OwnerManager.defineOwner(Element.prototype, {
       get: function () {
         // @NOTE: 'this' here refers to all possible
         // inheritors of Element, e.g. HTMLElement, SVGElement
@@ -282,8 +282,8 @@ function trackElementAnomalies() {
       const target = <NamedNodeMap>getter.call(this)
 
       if (!OwnerManager.hasOwner(target)) {
-        OwnerManager.defineOwnerOf(target, {
-          get: () => OwnerManager.getOwnerOf(this)
+        OwnerManager.defineOwner(target, {
+          get: () => OwnerManager.getOwner(this)
         })
       }
       return target
@@ -322,8 +322,8 @@ function DOMTokenListDecorator(
     const target = <DOMTokenList>getter.call(this)
 
     if (!OwnerManager.hasOwner(target)) {
-      OwnerManager.defineOwnerOf(target, {
-        get: () => OwnerManager.getOwnerOf(this)
+      OwnerManager.defineOwner(target, {
+        get: () => OwnerManager.getOwner(this)
       })
     }
     if (!target._which) {
@@ -343,7 +343,7 @@ function setAttrNodeDecorator(
       // @NOTE: error might raise here, it should call
       // action before record
       const result = actionFunc.call(this, parseAttr(tsvAttr))
-      const owner = OwnerManager.getOwnerOf(tsvAttr)
+      const owner = OwnerManager.getOwner(tsvAttr)
 
       record({
         caller: this,
@@ -374,7 +374,7 @@ function parseAttr(attr: Attr): Attr {
 
 function hasShadowOwner(target: ActionTarget): boolean {
   return OwnerManager.hasOwner(target)
-    && OwnerManager.getOwnerOf(target)._isShadow
+    && OwnerManager.getOwner(target)._isShadow
 }
 
 /**
@@ -386,9 +386,9 @@ function trackAttrAnomalies(): void {
   trackValue()
 
   function setupAttr() {
-    OwnerManager.defineOwnerOf(Attr.prototype, {
+    OwnerManager.defineOwner(Attr.prototype, {
       get: function (this: Attr): Owner {
-        return this.ownerElement && OwnerManager.getOwnerOf(this.ownerElement)
+        return this.ownerElement && OwnerManager.getOwner(this.ownerElement)
       }
     })
   }
