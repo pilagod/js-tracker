@@ -37,11 +37,8 @@ function setupNonElementTarget(target: ActionTarget, name: string) {
   const infoElement =
     document.createElement(infoElementName)
 
+  OwnerManager.setOwner(target, infoElement)
   document.documentElement.appendChild(infoElement)
-
-  OwnerManager.defineOwner(target, {
-    get: () => infoElement
-  })
 }
 
 /**
@@ -105,29 +102,26 @@ function record(
   //  target: Element, 
   //  action: id
   // }
-  const trackid = getTrackIDFrom(data.caller)
-  // @NOTE: although typescript predefine that caller should be ActionTarget,
-  // caller is actually determined in runtime, and it's possible to get invalid 
-  // callers, e.g., DocumentFragment, XHRHttpRequst
-  if (TrackIDManager.isValid(trackid)) {
-    window.postMessage(
-      <ActionInfo>{
-        trackid,
-        target: data.target,
-        action: data.action,
-        actionTag: data.actionTag,
-        merge: data.merge,
-        stacktrace: StackTrace.getSync()
-      }, '*')
+  if (!OwnerManager.hasOwner(data.caller)) {
+    // @NOTE: although typescript predefine that caller should be ActionTarget,
+    // caller is actually determined in runtime, and it's possible to get invalid 
+    // callers, e.g., DocumentFragment, XHRHttpRequst
+    return
   }
-}
+  const owner = OwnerManager.getOwner(data.caller)
 
-function getTrackIDFrom(target: ActionTarget): TrackID {
-  OwnerManager.hasOwner(target)
-    && !OwnerManager.hasTrackIDOnOwnerOf(target)
-    && OwnerManager.setTrackIDOnOwnerOf(target)
-
-  return OwnerManager.getTrackIDFromOwnerOf(target)
+  if (!owner.hasTrackID()) {
+    owner.setTrackID()
+  }
+  window.postMessage(
+    <ActionInfo>{
+      trackid: owner.getTrackID(),
+      target: data.target,
+      action: data.action,
+      actionTag: data.actionTag,
+      merge: data.merge,
+      stacktrace: StackTrace.getSync()
+    }, '*')
 }
 
 function NonTracked(value: any): any {
@@ -203,22 +197,6 @@ function trackHTMLElementAnomalies(): void {
     })
   }
 
-  function proxyDecoratorTemplate<T extends ActionTarget>(proxyHandler: ProxyHandler<T>) {
-    return function (_: any, __: any, getter: () => T): () => T {
-      return function (this: HTMLElement): T {
-        const target = <T>getter.call(this)
-        const proxy = new Proxy<T>(target, proxyHandler)
-
-        if (!OwnerManager.hasOwner(target)) {
-          OwnerManager.defineOwner(target, {
-            get: () => this
-          })
-        }
-        return proxy
-      }
-    }
-  }
-
   function trackStyle(): void {
     trackTemplate({
       target: 'HTMLElement',
@@ -250,6 +228,20 @@ function trackHTMLElementAnomalies(): void {
   }
 }
 
+function proxyDecoratorTemplate<T extends ActionTarget>(proxyHandler: ProxyHandler<T>) {
+  return function (_: any, __: any, getter: () => T): () => T {
+    return function (this: HTMLElement): T {
+      const target = <T>getter.call(this)
+      const proxy = new Proxy<T>(target, proxyHandler)
+
+      if (!OwnerManager.hasOwner(target)) {
+        OwnerManager.setOwner(target, this)
+      }
+      return proxy
+    }
+  }
+}
+
 /**
  * trackElementAnomalies
  */
@@ -261,12 +253,10 @@ function trackElementAnomalies() {
   trackSetAttributeNode()
 
   function setupOwner() {
-    OwnerManager.defineOwner(Element.prototype, {
-      get: function () {
-        // @NOTE: Element interface must be used by higher level inheritors
-        return <Owner>this
-      }
-    })
+    OwnerManager.setOwnerByGetter(
+      Element.prototype,
+      (context: Element) => context
+    )
   }
 
   function trackAttributes() {
@@ -276,22 +266,6 @@ function trackElementAnomalies() {
       decorator: NamedNodeMapDecorator,
       getter: true
     })
-  }
-
-  function NamedNodeMapDecorator(
-    _, __: any,
-    getter: () => NamedNodeMap
-  ): () => NamedNodeMap {
-    return function (this: Element): NamedNodeMap {
-      const target = <NamedNodeMap>getter.call(this)
-
-      if (!OwnerManager.hasOwner(target)) {
-        OwnerManager.defineOwner(target, {
-          get: () => OwnerManager.getOwner(this)
-        })
-      }
-      return target
-    }
   }
 
   function trackClassList() {
@@ -317,6 +291,20 @@ function trackElementAnomalies() {
   }
 }
 
+function NamedNodeMapDecorator(
+  _, __: any,
+  getter: () => NamedNodeMap
+): () => NamedNodeMap {
+  return function (this: Element): NamedNodeMap {
+    const target = <NamedNodeMap>getter.call(this)
+
+    if (!OwnerManager.hasOwner(target)) {
+      OwnerManager.setOwner(target, this)
+    }
+    return target
+  }
+}
+
 function DOMTokenListDecorator(
   _: any,
   which: string,
@@ -326,9 +314,7 @@ function DOMTokenListDecorator(
     const target = <DOMTokenList>getter.call(this)
 
     if (!OwnerManager.hasOwner(target)) {
-      OwnerManager.defineOwner(target, {
-        get: () => OwnerManager.getOwner(this)
-      })
+      OwnerManager.setOwner(target, this)
     }
     if (!target._which) {
       target._which = which /* classList, relList */
@@ -347,14 +333,15 @@ function setAttrNodeDecorator(
       // @NOTE: error might raise here, native operation 
       // should call before recording
       const result = actionFunc.call(this, parseAttr(tsvAttr))
-      const shadowID = OwnerManager.getTrackIDFromOwnerOf(tsvAttr)
 
       record({
         caller: this,
         target,
         action,
         actionTag: tsvAttr.name,
-        merge: TrackIDManager.isValid(shadowID) ? shadowID : undefined
+        merge: OwnerManager.hasShadowOwner(tsvAttr)
+          ? OwnerManager.getTrackIDFromOwnerOf(tsvAttr)
+          : undefined
       })
       return result
     }
@@ -363,7 +350,7 @@ function setAttrNodeDecorator(
 }
 
 function parseAttr(attr: Attr): Attr {
-  if (hasShadowOwner(attr)) {
+  if (OwnerManager.hasShadowOwner(attr)) {
     // @TODO: use name or localname in createAttributeNS ?
     const _attr = attr.namespaceURI
       ? document.createAttributeNS(attr.namespaceURI, attr.name)
@@ -376,11 +363,6 @@ function parseAttr(attr: Attr): Attr {
   return attr
 }
 
-function hasShadowOwner(target: ActionTarget): boolean {
-  return OwnerManager.hasOwner(target)
-    && OwnerManager.getOwner(target)._isShadow
-}
-
 /**
  * trackAttrAnomalies
  */
@@ -390,13 +372,10 @@ function trackAttrAnomalies(): void {
   trackValue()
 
   function setupAttr() {
-    OwnerManager.defineOwner(Attr.prototype, {
-      get: function (this: Attr) {
-        return this.ownerElement
-          ? OwnerManager.getOwner(this.ownerElement)
-          : null
-      }
-    })
+    OwnerManager.setOwnerByGetter(
+      Attr.prototype,
+      (context: Attr) => context.ownerElement
+    )
   }
 
   function trackValue(): void {
@@ -412,10 +391,10 @@ function trackAttrAnomalies(): void {
     action: Action,
     setter: (value: string) => void
   ): (tsvString: TrackSwitchValue<string>) => void {
-    return function (tsvString) {
+    return function (this: Attr, tsvString) {
       if (typeof tsvString === 'string') {
         !OwnerManager.hasOwner(this)
-          && attachAttrToShadowOwner(this)
+          && attachAttrToShadowElement(this)
 
         const result = setter.call(this, tsvString)
 
@@ -431,12 +410,11 @@ function trackAttrAnomalies(): void {
     }
   }
 
-  function attachAttrToShadowOwner(attr: Attr) {
+  function attachAttrToShadowElement(attr: Attr) {
     // @TODO: check namespaceURI
-    const owner = document.createElement('div')
+    const shadow = OwnerManager.createShadowElement()
 
-    owner._isShadow = true
-    owner.setAttributeNode(NonTracked(attr))
+    shadow.setAttributeNode(NonTracked(attr))
   }
 }
 

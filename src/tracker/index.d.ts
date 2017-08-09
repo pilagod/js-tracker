@@ -4,12 +4,6 @@
 type TrackSwitchValue<T> = T | { value: T; }
 
 /**
- * Owners
- */
-
-interface HTMLElement extends Owner { }
-
-/**
  * ActionTargets
  */
 

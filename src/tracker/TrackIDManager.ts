@@ -4,8 +4,8 @@ class TrackIDManager implements ITrackIDManager {
 
   /* public */
 
-  public isValid(trackid: string) {
-    return trackid !== Track_ID_Does_Not_Exist
+  public generateID(): TrackID {
+    return (++this.trackid).toString()
   }
 
   /* private */
@@ -14,10 +14,6 @@ class TrackIDManager implements ITrackIDManager {
 
   private resetID() {
     this.trackid = 0
-  }
-
-  private generateID(): TrackID {
-    return (++this.trackid).toString()
   }
 }
 // @NOTE: TrackIDManager should be a global singleton

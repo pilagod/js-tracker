@@ -31,11 +31,15 @@ describe('HTML DOM API tracker', () => {
   }
 
   function matchActionInfo(got: ActionInfo, expected: ExpectInfo) {
-    const owner = OwnerManager.getOwner(expected.caller)
+    expect(
+      OwnerManager
+        .getOwner(expected.caller)
+        .getTrackID()
+    ).to.equal(expected.trackid)
 
-    expect(owner.dataset)
-      .to.have.property('_trackid')
-      .to.equal(expected.trackid)
+    // expect(owner.dataset)
+    // .to.have.property('_trackid')
+    // .to.equal(expected.trackid)
 
     expect(got)
       .to.have.property('trackid')
@@ -84,7 +88,11 @@ describe('HTML DOM API tracker', () => {
         document.getElementsByTagName('window-info')[0]
 
       expect(windowInfoElement).to.be.not.undefined
-      expect(OwnerManager.getOwner(window)).to.equal(windowInfoElement)
+      expect(
+        OwnerManager
+          .getOwner(window)
+          .getOwnerElement()
+      ).to.equal(windowInfoElement)
     })
   })
 
@@ -94,7 +102,11 @@ describe('HTML DOM API tracker', () => {
         document.getElementsByTagName('document-info')[0]
 
       expect(documentInfoElement).to.be.not.undefined
-      expect(OwnerManager.getOwner(document)).to.equal(documentInfoElement)
+      expect(
+        OwnerManager
+          .getOwner(document)
+          .getOwnerElement()
+      ).to.equal(documentInfoElement)
     })
   })
 
@@ -405,11 +417,15 @@ describe('HTML DOM API tracker', () => {
     it('should track its property assignment', () => {
       const div = document.createElement('div')
 
+      expect(
+        OwnerManager
+          .getOwner(div.style)
+          .getOwnerElement()
+      ).to.equal(div)
+
       div.style.color = 'red'
       const stackframe = getStackFrameWithLineOffset()
-      const owner = OwnerManager.getOwner(div.style)
 
-      expect(owner).to.equal(div)
       expect(msgs).to.have.length(1)
 
       matchActionInfo(msgs[0], {
@@ -426,11 +442,15 @@ describe('HTML DOM API tracker', () => {
     it('should track its property assignment', () => {
       const div = document.createElement('div')
 
+      expect(
+        OwnerManager
+          .getOwner(div.dataset)
+          .getOwnerElement()
+      ).to.equal(div)
+
       div.dataset.data = 'data'
       const stackframe = getStackFrameWithLineOffset()
-      const owner = OwnerManager.getOwner(div.dataset)
 
-      expect(owner).to.equal(div)
       expect(msgs).to.have.length(1)
 
       matchActionInfo(msgs[0], {

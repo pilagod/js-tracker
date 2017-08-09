@@ -19,8 +19,8 @@ function listenOnActionTriggered() {
 }
 
 function listenOnDevtoolSelectionChanged() {
-  window.onDevtoolSelectionChanged = (owner: Owner) => {
-    const trackid = OwnerManager.getTrackIDFromOwner(owner)
+  window.onDevtoolSelectionChanged = (element: Element) => {
+    const trackid = OwnerManager.getTrackIDFromOwnerOf(element)
     const message: Message = {
       trackid: trackid,
       records: store.get(trackid)
@@ -28,7 +28,7 @@ function listenOnDevtoolSelectionChanged() {
     chrome.runtime.sendMessage(message, (response) => {
       console.group('contentscript')
       console.log('--- forward record to background ---')
-      console.log('target:', owner)
+      console.log('target:', element)
       console.log('sent:', message)
       console.log('received:', response)
       console.log('------------------------------------')
