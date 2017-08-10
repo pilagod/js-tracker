@@ -4,7 +4,7 @@
 
 import * as fs from 'fs'
 import ActionStore from './tracker/ActionStore'
-import { Null_TrackID } from './tracker/TrackIDManager'
+import OwnerManager from './tracker/OwnerManager'
 
 const store = new ActionStore()
 
@@ -24,8 +24,8 @@ function listenOnActionTriggered() {
 }
 
 function listenOnDevtoolSelectionChanged() {
-  window.onDevtoolSelectionChanged = (owner: Owner) => {
-    const trackid = owner.dataset._trackid || Null_TrackID
+  window.onDevtoolSelectionChanged = (element: Element) => {
+    const trackid = OwnerManager.getTrackIDFromOwnerOf(element)
     const message: Message = {
       trackid: trackid,
       records: store.get(trackid)
@@ -33,7 +33,7 @@ function listenOnDevtoolSelectionChanged() {
     chrome.runtime.sendMessage(message, (response) => {
       console.group('contentscript')
       console.log('--- forward record to background ---')
-      console.log('target:', owner)
+      console.log('target:', element)
       console.log('sent:', message)
       console.log('received:', response)
       console.log('------------------------------------')

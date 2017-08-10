@@ -1,38 +1,17 @@
-/// <reference path='./TrackIDManager.d.ts'/>
-
-type TrackSwitchValue<T> = T | { value: T; }
+/**
+ * ActionTargets
+ */
 
 interface ActionTarget {
-  _owner: Owner;
+  // @NOTE: symbol index is not supported yet
+  // [owner: symbol]: Owner;
 }
-
-interface Owner {
-  readonly dataset: {
-    [key: string]: string;
-    _trackid?: TrackID;
-    _isShadow?: string;
-  };
-}
-
-/* Owner */
-
-interface HTMLElement extends Owner { }
-
-/* ActionTarget */
-
 interface Window extends ActionTarget { }
 interface Document extends ActionTarget { }
 interface Element extends ActionTarget { }
 interface Attr extends ActionTarget { }
-interface CSSStyleDeclaration extends ActionTarget {
-  _proxy: CSSStyleDeclaration;
-}
-interface DOMStringMap extends ActionTarget {
-  // @NOTE: use <any> to bypass index signature
-  // from DOMStringMap in typescript/lib/lib.es6.d.ts
-  _owner: Owner | any;
-  _proxy: DOMStringMap | any;
-}
+interface CSSStyleDeclaration extends ActionTarget { }
+interface DOMStringMap extends ActionTarget { }
 interface DOMTokenList extends ActionTarget {
   value: string; // @TODO: pull request to typescript repo
   _which: string;

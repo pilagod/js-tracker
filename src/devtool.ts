@@ -1,7 +1,8 @@
 /// <reference path='../node_modules/@types/chrome/index.d.ts'/>
 /// <reference path='./background.d.ts'/>
 
-import { Null_TrackID } from './tracker/TrackIDManager'
+import OwnerManager from './tracker/OwnerManager'
+
 import Sidebar from './Sidebar'
 
 packFilesToDist()
@@ -12,12 +13,10 @@ function packFilesToDist() {
   require('file-loader?name=sidebar.css!./Sidebar/index.css')
 }
 
-let state: Message = {
-  trackid: Null_TrackID,
-  records: []
-}
 let background
 let sidebarWindow
+
+let state: Message
 
 setupConnectionToBackground()
 setupJSTrackerSidebar()

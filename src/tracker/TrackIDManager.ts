@@ -19,5 +19,5 @@ class TrackIDManager implements ITrackIDManager {
 // @NOTE: TrackIDManager should be a global singleton
 // it will be used both in tracker and tests
 export default (new TrackIDManager())
-export const Null_TrackID = 'TRACK_ID_NOT_EXIST'
 
+export const Track_ID_Does_Not_Exist = 'Track_ID_Does_Not_Exist'

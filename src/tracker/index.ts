@@ -4,7 +4,8 @@ import * as StackTrace from 'stacktrace-js'
 import ActionMap from './ActionMap'
 import ActionTagMap from './ActionTagMap'
 import Anomalies from './Anomalies'
-import TrackIDManager from './TrackIDManager'
+import OwnerManager from './OwnerManager'
+import { attachAttr, setAttrValue } from './utils'
 
 setupWindow()
 setupDocument()
@@ -36,11 +37,8 @@ function setupNonElementTarget(target: ActionTarget, name: string) {
   const infoElement =
     document.createElement(infoElementName)
 
+  OwnerManager.setOwner(target, infoElement)
   document.documentElement.appendChild(infoElement)
-
-  Object.defineProperty(target, '_owner', {
-    get: () => infoElement
-  })
 }
 
 /**
@@ -62,7 +60,7 @@ function trackTemplate(
   const { target, action, decorator } = template
   const shouldTrackGetter = template.getter
   const descriptor =
-    Object.getOwnPropertyDescriptor(window[target].prototype, action)
+    Reflect.getOwnPropertyDescriptor(window[target].prototype, action)
   // @NOTE: getter, setter, method are mutual exclusive
   if (shouldTrackGetter && hasGetter(descriptor)) {
     descriptor.get =
@@ -74,19 +72,19 @@ function trackTemplate(
     descriptor.value =
       decorator(target, action, descriptor.value)
   }
-  Object.defineProperty(window[target].prototype, action, descriptor)
+  Reflect.defineProperty(window[target].prototype, action, descriptor)
 }
 
 function hasGetter(descriptor: PropertyDescriptor): boolean {
   return !!descriptor.get
 }
 
-function hasMethod(descriptor: PropertyDescriptor): boolean {
-  return !!descriptor.value && (typeof descriptor.value === 'function')
-}
-
 function hasSetter(descriptor: PropertyDescriptor): boolean {
   return !!descriptor.set
+}
+
+function hasMethod(descriptor: PropertyDescriptor): boolean {
+  return !!descriptor.value && (typeof descriptor.value === 'function')
 }
 
 function record(
@@ -98,39 +96,32 @@ function record(
     merge?: string
   }
 ): void {
-  // @NOTE: target might be different from type of caller
-  // e.g. caller: HTMLDivElement, target: Element, action: id
-
-  if (isNotValidActionTarget(data.caller)) {
-    // @NOTE: although typescript predefine caller should be ActionTarget,
-    // caller is determined in runtime, and it's possible to get invalid callers
+  // @NOTE: target should not be derived from the type of caller
+  // e.g., {
+  //  caller: HTMLDivElement, 
+  //  target: Element, 
+  //  action: id
+  // }
+  if (!OwnerManager.hasOwner(data.caller)) {
+    // @NOTE: although typescript predefine that caller should be ActionTarget,
+    // caller is actually determined in runtime, and it's possible to get invalid 
+    // callers, e.g., DocumentFragment, XHRHttpRequst
     return
   }
-  window.postMessage(<ActionInfo>{
-    trackid: getTrackIDFrom(data.caller),
-    target: data.target,
-    action: data.action,
-    actionTag: data.actionTag,
-    merge: data.merge,
-    stacktrace: StackTrace.getSync()
-  }, '*')
-}
+  const owner = OwnerManager.getOwner(data.caller)
 
-function isNotValidActionTarget(caller: ActionTarget) {
-  return !caller._owner
-}
-
-function getTrackIDFrom(caller: ActionTarget): string {
-  const owner = caller._owner
-
-  if (!owner.dataset._trackid) {
-    owner.dataset._trackid = NonTracked(TrackIDManager.generateID())
+  if (!owner.hasTrackID()) {
+    owner.setTrackID()
   }
-  return owner.dataset._trackid
-}
-
-function NonTracked(value: any): any {
-  return { value }
+  window.postMessage(
+    <ActionInfo>{
+      trackid: owner.getTrackID(),
+      target: data.target,
+      action: data.action,
+      actionTag: data.actionTag,
+      merge: data.merge,
+      stacktrace: StackTrace.getSync()
+    }, '*')
 }
 
 /**
@@ -179,86 +170,66 @@ function trackHTMLElementAnomalies(): void {
     trackTemplate({
       target: 'HTMLElement',
       action: 'dataset',
-      decorator: datasetDecorator,
+      decorator: createDatasetDecorator(),
       getter: true
     })
   }
 
-  function datasetDecorator(
-    _, __: any,
-    getter: () => DOMStringMap
-  ): () => DOMStringMap {
-    return function (this: HTMLElement): DOMStringMap {
-      const dataset = <DOMStringMap>getter.call(this)
-
-      if (!dataset._owner) {
-        const datasetProxy = new Proxy<DOMStringMap>(dataset, {
-          set: (target, action, tsvString: TrackSwitchValue<string>) => {
-            if (typeof tsvString === 'string') {
-              target[action] = tsvString
-
-              record({
-                caller: target,
-                target: 'DOMStringMap',
-                action
-              })
-              return true
-            }
-            target[action] = tsvString.value
-            return true
-          }
+  function createDatasetDecorator() {
+    return proxyDecoratorTemplate(<ProxyHandler<DOMStringMap>>{
+      set: (target, action, value: string) => {
+        target[action] = value
+        record({
+          caller: target,
+          target: 'DOMStringMap',
+          action
         })
-        Object.defineProperty(dataset, '_owner', {
-          get: () => this
-        })
-        Object.defineProperty(dataset, '_proxy', {
-          get: () => datasetProxy
-        })
+        return true
       }
-      return dataset._proxy
-    }
+    })
   }
 
   function trackStyle(): void {
     trackTemplate({
       target: 'HTMLElement',
       action: 'style',
-      decorator: styleDecorator,
+      decorator: createStyleDecorator(),
       getter: true
     })
   }
 
-  function styleDecorator(
-    _, __: any,
-    getter: () => CSSStyleDeclaration
-  ): () => CSSStyleDeclaration {
-    return function (this: HTMLElement): CSSStyleDeclaration {
-      const style = <CSSStyleDeclaration>getter.call(this)
-
-      if (!style._owner) {
-        style._owner = this
-        style._proxy = new Proxy<CSSStyleDeclaration>(style, {
-          get: function (target, action) {
-            // @NOTE: function should bind to target, otherwise, 
-            // its context will be Proxy, and throwing Illegal Invocation Error.
-            if (typeof target[action] === 'function') {
-              return target[action].bind(target)
-            }
-            return target[action]
-          },
-          set: function (target, action, value) {
-            target[action] = value
-
-            record({
-              caller: target,
-              target: 'CSSStyleDeclaration',
-              action
-            })
-            return true
-          }
+  function createStyleDecorator() {
+    return proxyDecoratorTemplate(<ProxyHandler<CSSStyleDeclaration>>{
+      get: function (target, action) {
+        // @NOTE: function should bind to target, otherwise its context 
+        // will be the Proxy, and throwing Illegal Invocation Error.
+        return typeof target[action] === 'function'
+          ? target[action].bind(target)
+          : target[action]
+      },
+      set: function (target, action, value) {
+        target[action] = value
+        record({
+          caller: target,
+          target: 'CSSStyleDeclaration',
+          action
         })
+        return true
       }
-      return style._proxy
+    })
+  }
+}
+
+function proxyDecoratorTemplate<T extends ActionTarget>(proxyHandler: ProxyHandler<T>) {
+  return function (_: any, __: any, getter: () => T): () => T {
+    return function (this: HTMLElement): T {
+      const target = <T>getter.call(this)
+      const proxy = new Proxy<T>(target, proxyHandler)
+
+      if (!OwnerManager.hasOwner(target)) {
+        OwnerManager.setOwner(target, this)
+      }
+      return proxy
     }
   }
 }
@@ -274,13 +245,10 @@ function trackElementAnomalies() {
   trackSetAttributeNode()
 
   function setupOwner() {
-    Object.defineProperty(Element.prototype, '_owner', {
-      get: function () {
-        // @NOTE: this here refers to all possible
-        // HTML elements inheriting Element
-        return this
-      }
-    })
+    OwnerManager.setOwnerByGetter(
+      Element.prototype,
+      (context: Element) => context
+    )
   }
 
   function trackAttributes() {
@@ -290,20 +258,6 @@ function trackElementAnomalies() {
       decorator: NamedNodeMapDecorator,
       getter: true
     })
-  }
-
-  function NamedNodeMapDecorator(
-    _, __: any,
-    getter: () => NamedNodeMap
-  ): () => NamedNodeMap {
-    return function (this: Element): NamedNodeMap {
-      const target = <NamedNodeMap>getter.call(this)
-
-      if (!target._owner) {
-        target._owner = this._owner
-      }
-      return target
-    }
   }
 
   function trackClassList() {
@@ -329,6 +283,20 @@ function trackElementAnomalies() {
   }
 }
 
+function NamedNodeMapDecorator(
+  _, __: any,
+  getter: () => NamedNodeMap
+): () => NamedNodeMap {
+  return function (this: Element): NamedNodeMap {
+    const target = <NamedNodeMap>getter.call(this)
+
+    if (!OwnerManager.hasOwner(target)) {
+      OwnerManager.setOwner(target, this)
+    }
+    return target
+  }
+}
+
 function DOMTokenListDecorator(
   _: any,
   which: string,
@@ -337,8 +305,8 @@ function DOMTokenListDecorator(
   return function (this: Element): DOMTokenList {
     const target = <DOMTokenList>getter.call(this)
 
-    if (!target._owner) {
-      target._owner = this._owner
+    if (!OwnerManager.hasOwner(target)) {
+      OwnerManager.setOwner(target, this)
     }
     if (!target._which) {
       target._which = which /* classList, relList */
@@ -351,43 +319,37 @@ function setAttrNodeDecorator(
   target: Target,
   action: Action,
   actionFunc: (attr: Attr) => void
-): (tsvAttr: TrackSwitchValue<Attr>) => void {
-  return function (tsvAttr) {
-    if (tsvAttr instanceof Attr) {
-      // @NOTE: error might raise here, it should call
-      // action before record
-      const result =
-        actionFunc.call(this, parseAttr(tsvAttr))
+): (attr: Attr) => void {
+  return function (attr: Attr) {
+    // @NOTE: error might raise here, native operation 
+    // should call before recording
+    const result = actionFunc.call(this, parseAttr(attr))
 
-      record({
-        caller: this,
-        target,
-        action,
-        actionTag: tsvAttr.name,
-        merge: tsvAttr._owner && tsvAttr._owner.dataset._trackid
-      })
-      return result
-    }
-    return actionFunc.call(this, tsvAttr.value)
+    record({
+      caller: this,
+      target,
+      action,
+      actionTag: attr.name,
+      merge: OwnerManager.hasShadowOwner(attr)
+        ? OwnerManager.getTrackIDFromOwnerOf(attr)
+        : undefined
+    })
+    return result
   }
 }
 
 function parseAttr(attr: Attr): Attr {
-  if (hasShadowOwner(attr)) {
+  if (OwnerManager.hasShadowOwner(attr)) {
     // @TODO: use name or localname in createAttributeNS ?
-    const _attr = attr.namespaceURI
+    const attrClone = attr.namespaceURI
       ? document.createAttributeNS(attr.namespaceURI, attr.name)
       : document.createAttribute(attr.name);
 
-    _attr.value = NonTracked(attr.value)
+    setAttrValue(attrClone, attr.value)
 
-    return _attr
+    return attrClone
   }
   return attr
-}
-
-function hasShadowOwner(target: ActionTarget): boolean {
-  return !!(target._owner && target._owner.dataset._isShadow)
 }
 
 /**
@@ -399,11 +361,10 @@ function trackAttrAnomalies(): void {
   trackValue()
 
   function setupAttr() {
-    Object.defineProperty(Attr.prototype, '_owner', {
-      get: function (this: Attr): Element {
-        return this.ownerElement
-      }
-    })
+    OwnerManager.setOwnerByGetter(
+      Attr.prototype,
+      (context: Attr) => context.ownerElement
+    )
   }
 
   function trackValue(): void {
@@ -418,32 +379,26 @@ function trackAttrAnomalies(): void {
     target: Target,
     action: Action,
     setter: (value: string) => void
-  ): (tsvString: TrackSwitchValue<string>) => void {
-    return function (tsvString) {
-      if (typeof tsvString === 'string') {
-        if (this._owner === null) {
-          attachAttrToShadowOwner(this)
-        }
-        const result = setter.call(this, tsvString)
-
-        record({
-          caller: this,
-          target,
-          action,
-          actionTag: this.name
-        })
-        return result
+  ): (this: Attr, value: string) => void {
+    return function (value) {
+      if (!OwnerManager.hasOwner(this)) {
+        attachAttrToShadowElement(this)
       }
-      return setter.call(this, tsvString.value)
+      const result = setter.call(this, value)
+
+      record({
+        caller: this,
+        target,
+        action,
+        actionTag: this.name
+      })
+      return result
     }
   }
 
-  function attachAttrToShadowOwner(attr: Attr) {
+  function attachAttrToShadowElement(attr: Attr) {
     // @TODO: check namespaceURI
-    const owner = document.createElement('div')
-
-    owner.dataset._isShadow = NonTracked('true')
-    owner.setAttributeNode(NonTracked(attr))
+    attachAttr(OwnerManager.createShadowElement(), attr)
   }
 }
 
