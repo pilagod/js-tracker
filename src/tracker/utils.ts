@@ -1,5 +1,9 @@
 import TrackIDManager from './TrackIDManager'
 
+/**
+ * A series of actions bypass tracker's record process
+ */
+
 export const attachAttr = (function (setAttributeNode) {
   return function (container: Element, attr: Attr) {
     setAttributeNode.call(container, attr)

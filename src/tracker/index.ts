@@ -5,11 +5,7 @@ import ActionMap from './ActionMap'
 import ActionTagMap from './ActionTagMap'
 import Anomalies from './Anomalies'
 import OwnerManager from './OwnerManager'
-import TrackIDManager from './TrackIDManager'
-import {
-  attachAttr,
-  setAttrValue
-} from './utils'
+import { attachAttr, setAttrValue } from './utils'
 
 setupWindow()
 setupDocument()
@@ -128,10 +124,6 @@ function record(
     }, '*')
 }
 
-function NonTracked(value: any): any {
-  return { value }
-}
-
 /**
  * trackGeneralCases
  */
@@ -185,17 +177,13 @@ function trackHTMLElementAnomalies(): void {
 
   function createDatasetDecorator() {
     return proxyDecoratorTemplate(<ProxyHandler<DOMStringMap>>{
-      set: (target, action, tsvString: TrackSwitchValue<string>) => {
-        if (typeof tsvString === 'string') {
-          target[action] = tsvString
-          record({
-            caller: target,
-            target: 'DOMStringMap',
-            action
-          })
-        } else {
-          target[action] = tsvString.value
-        }
+      set: (target, action, value: string) => {
+        target[action] = value
+        record({
+          caller: target,
+          target: 'DOMStringMap',
+          action
+        })
         return true
       }
     })
@@ -331,25 +319,22 @@ function setAttrNodeDecorator(
   target: Target,
   action: Action,
   actionFunc: (attr: Attr) => void
-): (tsvAttr: TrackSwitchValue<Attr>) => void {
-  return function (tsvAttr) {
-    if (tsvAttr instanceof Attr) {
-      // @NOTE: error might raise here, native operation 
-      // should call before recording
-      const result = actionFunc.call(this, parseAttr(tsvAttr))
+): (attr: Attr) => void {
+  return function (attr: Attr) {
+    // @NOTE: error might raise here, native operation 
+    // should call before recording
+    const result = actionFunc.call(this, parseAttr(attr))
 
-      record({
-        caller: this,
-        target,
-        action,
-        actionTag: tsvAttr.name,
-        merge: OwnerManager.hasShadowOwner(tsvAttr)
-          ? OwnerManager.getTrackIDFromOwnerOf(tsvAttr)
-          : undefined
-      })
-      return result
-    }
-    return actionFunc.call(this, tsvAttr.value)
+    record({
+      caller: this,
+      target,
+      action,
+      actionTag: attr.name,
+      merge: OwnerManager.hasShadowOwner(attr)
+        ? OwnerManager.getTrackIDFromOwnerOf(attr)
+        : undefined
+    })
+    return result
   }
 }
 
@@ -394,23 +379,20 @@ function trackAttrAnomalies(): void {
     target: Target,
     action: Action,
     setter: (value: string) => void
-  ): (tsvString: TrackSwitchValue<string>) => void {
-    return function (this: Attr, tsvString) {
-      if (typeof tsvString === 'string') {
-        !OwnerManager.hasOwner(this)
-          && attachAttrToShadowElement(this)
-
-        const result = setter.call(this, tsvString)
-
-        record({
-          caller: this,
-          target,
-          action,
-          actionTag: this.name
-        })
-        return result
+  ): (this: Attr, value: string) => void {
+    return function (value) {
+      if (!OwnerManager.hasOwner(this)) {
+        attachAttrToShadowElement(this)
       }
-      return setter.call(this, tsvString.value)
+      const result = setter.call(this, value)
+
+      record({
+        caller: this,
+        target,
+        action,
+        actionTag: this.name
+      })
+      return result
     }
   }
 

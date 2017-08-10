@@ -1,8 +1,3 @@
-/// <reference path='./OwnerManager.d.ts'/>
-/// <reference path='./TrackIDManager.d.ts'/>
-
-type TrackSwitchValue<T> = T | { value: T; }
-
 /**
  * ActionTargets
  */
