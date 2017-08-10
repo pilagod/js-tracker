@@ -1,5 +1,6 @@
 /// <reference path='./index.d.ts'/>
 /// <reference path='./ActionStore.d.ts'/>
+/// <reference path='./Owner.d.ts'/>
 
 interface IOwnerManager {
   createShadowElement(this: IOwnerManager): Element;

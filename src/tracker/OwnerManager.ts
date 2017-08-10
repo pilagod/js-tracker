@@ -18,7 +18,7 @@ const OwnerManager: IOwnerManager = {
   },
 
   hasOwner(target) {
-    // @NOTE: Attr has owner but might be null
+    // @NOTE: Attr has owner but might be null (created by createAttribute)
     return this.getOwner(target) !== Owner.NullOwner
   },
 
