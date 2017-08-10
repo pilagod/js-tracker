@@ -1,14 +1,7 @@
 /// <reference path='./Owner.d.ts'/>
 
-import TrackIDManager, {
-  Track_ID_Does_Not_Exist
-} from './TrackIDManager'
-
-const setTrackID = (function (setAttribute) {
-  return function (target: Element) {
-    return setAttribute.call(target, 'trackid', TrackIDManager.generateID())
-  }
-})(Element.prototype.setAttribute)
+import { Track_ID_Does_Not_Exist } from './TrackIDManager'
+import { setTrackID } from './utils'
 
 class ShadowElement extends HTMLElement {
   static TagName = 'shadow-element'
@@ -26,6 +19,8 @@ customElements.define(
   ShadowElement
 )
 export default class OwnerInstance implements Owner {
+  /* static */
+
   static NullOwner = new (class extends OwnerInstance {
     constructor() {
       super(null)
@@ -37,7 +32,12 @@ export default class OwnerInstance implements Owner {
       return false
     }
   })()
+
+  /* private */
+
   private element: Element
+
+  /* public */
 
   constructor(element: Element) {
     this.element = element

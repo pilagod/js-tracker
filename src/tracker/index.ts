@@ -6,6 +6,10 @@ import ActionTagMap from './ActionTagMap'
 import Anomalies from './Anomalies'
 import OwnerManager from './OwnerManager'
 import TrackIDManager from './TrackIDManager'
+import {
+  attachAttr,
+  setAttrValue
+} from './utils'
 
 setupWindow()
 setupDocument()
@@ -352,13 +356,13 @@ function setAttrNodeDecorator(
 function parseAttr(attr: Attr): Attr {
   if (OwnerManager.hasShadowOwner(attr)) {
     // @TODO: use name or localname in createAttributeNS ?
-    const _attr = attr.namespaceURI
+    const attrClone = attr.namespaceURI
       ? document.createAttributeNS(attr.namespaceURI, attr.name)
       : document.createAttribute(attr.name);
 
-    _attr.value = NonTracked(attr.value)
+    setAttrValue(attrClone, attr.value)
 
-    return _attr
+    return attrClone
   }
   return attr
 }
@@ -412,9 +416,7 @@ function trackAttrAnomalies(): void {
 
   function attachAttrToShadowElement(attr: Attr) {
     // @TODO: check namespaceURI
-    const shadow = OwnerManager.createShadowElement()
-
-    shadow.setAttributeNode(NonTracked(attr))
+    attachAttr(OwnerManager.createShadowElement(), attr)
   }
 }
 
