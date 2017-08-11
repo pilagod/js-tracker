@@ -10,7 +10,13 @@ const OwnerManager: IOwnerManager = {
   },
 
   getOwner(target) {
-    return <Owner>Reflect.get(target, SymbolOwner) || Owner.NullOwner
+    return (() => {
+      try {
+        return <Owner>Reflect.get(target, SymbolOwner)
+      } catch (e) {
+        return null
+      }
+    })() || Owner.NullOwner
   },
 
   getTrackIDFromOwnerOf(target) {
@@ -42,7 +48,7 @@ const OwnerManager: IOwnerManager = {
         // its owner might be null instead of Element
         return ownerElement instanceof Element
           ? new Owner(ownerElement)
-          : undefined
+          : null
       }
     })
   }

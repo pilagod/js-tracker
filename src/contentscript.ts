@@ -18,8 +18,8 @@ try {
 }
 
 function listenOnActionTriggered() {
-  window.addEventListener('message', (event) => {
-    store.registerFromActionInfo(<ActionInfo>event.data)
+  window.addEventListener('message', async (event) => {
+    await store.registerFromActionInfo(event.data as ActionInfo)
   })
 }
 
