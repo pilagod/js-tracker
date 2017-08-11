@@ -3,7 +3,7 @@ import * as sinon from 'sinon'
 
 import TrackIDManager from '../src/tracker/TrackIDManager'
 
-const postMessage = window.postMessage
+const nativePostMessage = window.postMessage
 
 before(() => {
   // @NOTE: in case contentscript get unexpected info while testing
@@ -11,7 +11,7 @@ before(() => {
 })
 
 after(() => {
-  window.postMessage = postMessage
+  window.postMessage = nativePostMessage
 })
 
 beforeEach(function () {
