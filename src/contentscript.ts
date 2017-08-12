@@ -2,9 +2,12 @@
 /// <reference path='./background.d.ts'/>
 /// <reference path='./contentscript.d.ts'/>
 
+// @NOTE: contentscript should not use same dependency with tracker
+// the only connection of these two are native HTML DOM API
+
 import * as fs from 'fs'
 import ActionStore from './tracker/ActionStore'
-import OwnerManager from './tracker/OwnerManager'
+import { Track_ID_Does_Not_Exist } from './tracker/TrackIDManager'
 
 const store = new ActionStore()
 
@@ -25,7 +28,7 @@ function listenOnActionTriggered() {
 
 function listenOnDevtoolSelectionChanged() {
   window.onDevtoolSelectionChanged = (element: Element) => {
-    const trackid = OwnerManager.getTrackIDFromOwnerOf(element)
+    const trackid = getTrackIDFromElement(element)
     const message: Message = {
       trackid: trackid,
       records: store.get(trackid)
@@ -40,6 +43,12 @@ function listenOnDevtoolSelectionChanged() {
       console.groupEnd()
     })
   }
+}
+
+function getTrackIDFromElement(element: Element) {
+  return element instanceof Element
+    ? element.getAttribute('trackid')
+    : Track_ID_Does_Not_Exist
 }
 
 function injectTrackerScript() {

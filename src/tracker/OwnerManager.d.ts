@@ -3,7 +3,6 @@
 /// <reference path='./Owner.d.ts'/>
 
 interface IOwnerManager {
-  createShadowElement(this: IOwnerManager): Element;
   getOwner(this: IOwnerManager, target: ActionTarget): Owner;
   getTrackIDFromOwnerOf(this: IOwnerManager, target: ActionTarget): TrackID;
   hasOwner(this: IOwnerManager, target: ActionTarget): boolean;

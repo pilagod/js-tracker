@@ -5,8 +5,10 @@ import ActionMap from './ActionMap'
 import ActionTagMap from './ActionTagMap'
 import Anomalies from './Anomalies'
 import OwnerManager from './OwnerManager'
+import ShadowElement from './ShadowElement'
 import { attachAttr, setAttrValue } from './utils'
 
+setupShadowElement()
 setupWindow()
 setupDocument()
 trackGeneralCases()
@@ -15,9 +17,16 @@ trackElementAnomalies()
 trackAttrAnomalies()
 trackNamedNodeMapAnomalies()
 
-/** 
- * setup window and document
+/**
+ * register custom elements
  */
+
+function setupShadowElement() {
+  customElements.define(
+    ShadowElement.TagName,
+    ShadowElement
+  )
+}
 
 function setupWindow(): void {
   setupNonElementTarget(window, 'window')
@@ -374,32 +383,35 @@ function trackAttrAnomalies(): void {
       decorator: valueDecorator
     })
   }
+}
 
-  function valueDecorator(
-    target: Target,
-    action: Action,
-    setter: (value: string) => void
-  ): (this: Attr, value: string) => void {
-    return function (value) {
-      if (!OwnerManager.hasOwner(this)) {
-        attachAttrToShadowElement(this)
-      }
-      const result = setter.call(this, value)
-
-      record({
-        caller: this,
-        target,
-        action,
-        actionTag: this.name
-      })
-      return result
+function valueDecorator(
+  target: Target,
+  action: Action,
+  setter: (value: string) => void
+): (this: Attr, value: string) => void {
+  return function (value) {
+    if (!OwnerManager.hasOwner(this)) {
+      attachAttrToShadowElement(this)
     }
-  }
+    const result = setter.call(this, value)
 
-  function attachAttrToShadowElement(attr: Attr) {
-    // @TODO: check namespaceURI
-    attachAttr(OwnerManager.createShadowElement(), attr)
+    record({
+      caller: this,
+      target,
+      action,
+      actionTag: this.name
+    })
+    return result
   }
+}
+
+function attachAttrToShadowElement(attr: Attr) {
+  // @TODO: check namespaceURI
+  attachAttr(
+    document.createElement(ShadowElement.TagName),
+    attr
+  )
 }
 
 /**

@@ -1,8 +1,6 @@
 /// <reference path='../node_modules/@types/chrome/index.d.ts'/>
 /// <reference path='./background.d.ts'/>
 
-import OwnerManager from './tracker/OwnerManager'
-
 import Sidebar from './Sidebar'
 
 packFilesToDist()

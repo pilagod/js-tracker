@@ -1,22 +1,9 @@
 /// <reference path='./Owner.d.ts'/>
 
+import ShadowElement from './ShadowElement'
 import { Track_ID_Does_Not_Exist } from './TrackIDManager'
 import { setTrackID } from './utils'
 
-class ShadowElement extends HTMLElement {
-  static TagName = 'shadow-element'
-  static [Symbol.hasInstance](instance: Element | any) {
-    return instance instanceof Element
-      && instance.tagName.toLowerCase() === ShadowElement.TagName
-  }
-  constructor() {
-    super()
-  }
-}
-customElements.define(
-  ShadowElement.TagName,
-  ShadowElement
-)
 export default class OwnerInstance implements Owner {
   /* static */
 

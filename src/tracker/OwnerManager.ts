@@ -1,22 +1,13 @@
 /// <reference path='./OwnerManager.d.ts'/>
 
+// @NOTE: this module should only be used in tracker, not contentscript
+
 import Owner from './Owner'
 
 const SymbolOwner = Symbol('owner')
 const OwnerManager: IOwnerManager = {
-
-  createShadowElement() {
-    return document.createElement('shadow-element')
-  },
-
   getOwner(target) {
-    return (() => {
-      try {
-        return <Owner>Reflect.get(target, SymbolOwner)
-      } catch (e) {
-        return null
-      }
-    })() || Owner.NullOwner
+    return <Owner>Reflect.get(target, SymbolOwner) || Owner.NullOwner
   },
 
   getTrackIDFromOwnerOf(target) {
@@ -48,7 +39,7 @@ const OwnerManager: IOwnerManager = {
         // its owner might be null instead of Element
         return ownerElement instanceof Element
           ? new Owner(ownerElement)
-          : null
+          : Owner.NullOwner
       }
     })
   }
