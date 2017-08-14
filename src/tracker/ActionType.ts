@@ -7,3 +7,8 @@ enum ActionType {
   Style = 1 << 4
 }
 export default ActionType
+export const ActionTypeNames = Object.keys(ActionType).filter((type) => {
+  // @NOTE: typescript enum has both name and value key,
+  // name key passing through parseInt will return NaN
+  return isNaN(parseInt(type)) && type !== 'None'
+})

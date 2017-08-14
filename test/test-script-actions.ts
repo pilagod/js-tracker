@@ -89,5 +89,24 @@ export default [
       scriptUrl, 4, 1,
       `div.removeAttribute('style')`
     )
+  },
+  // action[3]
+  {
+    info: <ActionInfo>{
+      trackid: '1',
+      target: 'HTMLElement',
+      action: 'innerText',
+      stacktrace: [_, _, new StackFrame({
+        functionName: 'HTMLElement.innerText',
+        fileName: scriptUrl,
+        lineNumber: 5,
+        columnNumber: 1
+      })]
+    },
+    record: createActionRecord(
+      ActionType.Attr | ActionType.Node,
+      scriptUrl, 5, 1,
+      `div.innerText = 'js-tracker'`
+    )
   }
 ]

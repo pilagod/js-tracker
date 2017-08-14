@@ -7,55 +7,17 @@ import * as ReactTestUtils from 'react-dom/test-utils'
 
 import ActionType from '../src/tracker/ActionType'
 import SidebarList from '../src/Sidebar/SidebarList'
+import { Track_ID_Does_Not_Exist } from '../src/tracker/TrackIDManager'
 
-const PORT = 9876
-const HOST = `http://localhost:${PORT}`
-const TEST_SCRIPT = HOST + '/test-script.js'
+import actions from './test-script-actions'
 
 describe('SidebarList', () => {
-  const _trackid = 'TRACK_ID_NOT_EXIST'
-  const _records: ActionRecord[] = []
-
-  before(() => {
-    // refer to ./test-script.js
-    _records.push(<ActionRecord>{
-      key: TEST_SCRIPT + ':2:1',
-      type: ActionType.Attr,
-      source: <Source>{
-        loc: {
-          scriptUrl: TEST_SCRIPT,
-          lineNumber: 2,
-          columnNumber: 1
-        },
-        code: `div.id = 'id'`
-      }
-    })
-    _records.push(<ActionRecord>{
-      key: TEST_SCRIPT + ':3:1',
-      type: ActionType.Style,
-      source: <Source>{
-        loc: {
-          scriptUrl: TEST_SCRIPT,
-          lineNumber: 3,
-          columnNumber: 1
-        },
-        code: `div.style.color = 'red'`
-      }
-    })
-    _records.push(<ActionRecord>{
-      key: TEST_SCRIPT + ':4:1',
-      type: ActionType.Style,
-      source: <Source>{
-        loc: {
-          scriptUrl: TEST_SCRIPT,
-          lineNumber: 4,
-          columnNumber: 1
-        },
-        code: `div.removeAttribute('style')`
-      }
-    })
-  })
-
+  const _trackid = Track_ID_Does_Not_Exist
+  const _records: ActionRecord[] = [
+    actions[0].record,
+    actions[1].record,
+    actions[2].record
+  ]
   it('should render all records passed to it', () => {
     const sidebarList = ReactTestUtils.renderIntoDocument(
       React.createElement(SidebarList, {
@@ -69,6 +31,7 @@ describe('SidebarList', () => {
       'record'
     )
     expect(records).to.have.length(_records.length)
+
     records.map((record, index) => {
       testRenderedRecordMatchesRecordData(record, _records[index])
     })
@@ -86,16 +49,47 @@ describe('SidebarList', () => {
   }
 
   function testRenderedRecordTitle(title: Element, data: ActionRecord) {
-    const tag = title.getElementsByClassName('record-tag')[0]
-    const link = title.getElementsByClassName('record-link')[0]
+    testRenderedElementContent(
+      title.getElementsByClassName('record-tag')[0],
+      ActionType[data.type]
+    )
+    testRenderedElementContent(
+      title.getElementsByClassName('record-link')[0],
+      data.key
+    )
+  }
 
-    expect(tag.textContent).to.equal(ActionType[data.type])
-    expect(link.textContent).to.equal(data.key)
+  function testRenderedElementContent(element: Element, content: string) {
+    expect(element.textContent).to.equal(content)
   }
 
   function testRenderedRecordInfo(info: Element, data: ActionRecord) {
-    expect(info.textContent).to.equal(data.source.code)
+    testRenderedElementContent(info, data.source.code)
   }
+
+  it('should render record with composite type properly', () => {
+    const sidebarList = ReactTestUtils.renderIntoDocument(
+      React.createElement(SidebarList, {
+        trackid: _trackid,
+        records: [actions[3].record]
+      })
+    )
+    const records = ReactTestUtils.scryRenderedDOMComponentsWithClass(
+      sidebarList,
+      'record'
+    )
+    expect(records).to.have.length(1)
+
+    const tags =
+      records[0]
+        .getElementsByClassName('record-title')[0]
+        .getElementsByClassName('record-tag')
+
+    expect(tags).to.have.length(2)
+
+    testRenderedElementContent(tags[0], 'Attr')
+    testRenderedElementContent(tags[1], 'Node')
+  })
 
   it('should call prop openSource with proper url and line number when record link is clicked', () => {
     const openSourceSpy = sinon.spy()
@@ -124,7 +118,7 @@ describe('SidebarList', () => {
     })
   })
 
-  it('should add class record-diff to new records given records updated but not trackid', () => {
+  it('should add class record-diff to new records given records is updated but not the trackid', () => {
     class SidebarListWrapper extends React.Component {
       constructor(props) {
         super(props)
@@ -141,6 +135,8 @@ describe('SidebarList', () => {
         openSource: () => { }
       })
     )
+
+    // should add record-diff class to new records
     sidebarListWrapper.setState({
       trackid: '1',
       records: _records
@@ -150,5 +146,16 @@ describe('SidebarList', () => {
       'record-diff'
     )
     expect(diffs).to.have.length(2)
+
+    // should not add record-diff class when trackid is changed
+    sidebarListWrapper.setState({
+      trackid: '2',
+      records: _records
+    })
+    const noDiffs = ReactTestUtils.scryRenderedDOMComponentsWithClass(
+      sidebarListWrapper,
+      'record-diff'
+    )
+    expect(noDiffs).to.have.length(0)
   })
 })

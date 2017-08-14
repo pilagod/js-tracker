@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 
-import ActionType from '../tracker/ActionType'
+import ActionType, { ActionTypeNames } from '../tracker/ActionType'
 
 interface ISidebarFilterProps {
   filter: number;
@@ -13,18 +13,12 @@ interface ISidebarFilterProps {
 }
 
 export default class SidebarFilter extends React.Component<ISidebarFilterProps> {
-  private filterTypes: string[]
   private onFilterClicked: (e: any) => void
 
   // background: #F4F4F4
   constructor(props) {
     super(props)
 
-    this.filterTypes = Object.keys(ActionType).filter((type) => {
-      // @NOTE: typescript enum has both name and value key,
-      // name key passing through parseInt will return NaN
-      return isNaN(parseInt(type)) && type !== 'None'
-    })
     this.onFilterClicked = this._onFilterClicked.bind(this)
   }
 
@@ -39,7 +33,7 @@ export default class SidebarFilter extends React.Component<ISidebarFilterProps> 
   }
 
   render() {
-    const filterButtons = this.filterTypes.map((type, index) => {
+    const filterButtons = ActionTypeNames.map((type, index) => {
       const filter = ActionType[type]
       const selected = (this.props.filter & filter) ? 'selected' : ''
 

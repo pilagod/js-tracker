@@ -42,9 +42,9 @@ const ActionMap: {
       'hidden': Attr,
       // @NOTE: innerText on MDN is in Node.prototype,
       // but chrome put it in HTMLElement.prototype 
-      'innerText': Node,
+      'innerText': Attr | Node,
       'lang': Attr,
-      'outerText': Node,
+      'outerText': Attr | Node,
       'spellcheck': Attr,
       'tabIndex': Attr,
       'title': Attr,
@@ -166,8 +166,8 @@ const ActionMap: {
       'onwebkitfullscreenchange': Event,
       'onwebkitfullscreenerror': Event,
 
-      'innerHTML': Node,
-      'outerHTML': Node,
+      'innerHTML': Attr | Node,
+      'outerHTML': Attr | Node,
 
       'className': Style,
 
@@ -208,7 +208,7 @@ const ActionMap: {
 
       'nodeValue': Attr,
 
-      'textContent': Node,
+      'textContent': Attr | Node,
 
       /* methods */
 
@@ -285,7 +285,9 @@ const _: IActionMap = {
       default:
         if (this.has(target, action)) {
           return function (type: ActionType | ActionTagMap): ActionType {
-            return actionTag ? (type[actionTag] || type['default']) : type
+            return actionTag
+              ? (type[actionTag] || type['default']) // ActionTagMap
+              : type // ActionType
           }(ActionMap[target][action])
         }
         return ActionType.None

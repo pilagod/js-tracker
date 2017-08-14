@@ -3,7 +3,7 @@
 
 import * as React from 'react'
 
-import ActionType from '../tracker/ActionType'
+import ActionType, { ActionTypeNames } from '../tracker/ActionType'
 
 interface ISidebarListProps {
   trackid: TrackID;
@@ -25,14 +25,10 @@ export default class SidebarList extends React.Component<ISidebarListProps, ISid
   }
 
   componentWillReceiveProps(nextProps: ISidebarListProps) {
-    let lastDiffIndex
-
-    if (this.props.trackid === nextProps.trackid) {
-      lastDiffIndex =
-        nextProps.records.length - this.props.records.length
-    } else {
-      lastDiffIndex = -1
-    }
+    const lastDiffIndex =
+      this.props.trackid === nextProps.trackid
+        ? nextProps.records.length - this.props.records.length
+        : -1
     this.setState(() => {
       return { lastDiffIndex }
     })
@@ -45,24 +41,13 @@ export default class SidebarList extends React.Component<ISidebarListProps, ISid
 
   render() {
     const records = this.props.records.map((record, index) => {
-      const { scriptUrl, lineNumber, columnNumber } = record.source.loc
-      const link = `${scriptUrl}:${lineNumber}:${columnNumber}`
-      const tag = ActionType[record.type]
-
       return (
-        <div key={index} className={`record ${index < this.state.lastDiffIndex ? 'record-diff' : ''}`}>
-          <div className="record-title">
-            <div className="record-tag">{tag}</div>
-            <a
-              className="record-link"
-              onClick={this.linkTo.bind(this, scriptUrl, lineNumber)}
-            >
-              {link}
-            </a>
-          </div>
-          <div className="record-info">
-            <span>{record.source.code}</span>
-          </div>
+        <div
+          key={index}
+          className={`record ${index < this.state.lastDiffIndex ? 'record-diff' : ''}`}
+        >
+          {createRecordTitle(record, this.linkTo.bind(this))}
+          {createRecordInfo(record)}
         </div>
       )
     })
@@ -72,4 +57,51 @@ export default class SidebarList extends React.Component<ISidebarListProps, ISid
       </div>
     )
   }
+}
+
+function createRecordTitle(record: ActionRecord, linkOnClicked: (e: any) => void): JSX.Element {
+  return (
+    <div className="record-title">
+      {createRecordTags(record.type)}
+      {createRecordLink(record.source.loc, linkOnClicked)}
+    </div>
+  )
+}
+
+function createRecordTags(actionType: ActionType): JSX.Element[] {
+  return ActionTypeNames.reduce((tags, type, index) => {
+    if (actionType & ActionType[type]) {
+      tags.push((
+        <div
+          key={index}
+          className="record-tag"
+        >
+          {type}
+        </div>)
+      )
+    }
+    return tags
+  }, [])
+}
+
+function createRecordLink(
+  { scriptUrl, lineNumber, columnNumber },
+  linkOnClicked: (e: any) => void
+): JSX.Element {
+  return (
+    <a
+      className="record-link"
+      onClick={linkOnClicked.bind(null, scriptUrl, lineNumber)}
+    >
+      {`${scriptUrl}:${lineNumber}:${columnNumber}`}
+    </a>
+  )
+}
+
+function createRecordInfo(record: ActionRecord): JSX.Element {
+  return (
+    <div className="record-info">
+      <span>{record.source.code}</span>
+    </div>
+  )
 }
