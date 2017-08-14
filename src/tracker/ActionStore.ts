@@ -104,26 +104,26 @@ export default class ActionStore implements IActionStore {
 class Store implements IStore {
 
   constructor() {
-    this._ = {}
+    this.store = {}
   }
 
   /* public */
 
   public add(trackid: TrackID, record: ActionRecord): void {
-    if (!this._[trackid]) {
-      this._[trackid] = []
+    if (!this.store[trackid]) {
+      this.store[trackid] = []
     }
-    this._[trackid].unshift(record)
+    this.store[trackid].unshift(record)
   }
 
   public get(trackid: TrackID): ActionRecord[] {
-    return this._[trackid] || []
+    return this.store[trackid] || []
   }
 
   public merge(from: TrackID, to: TrackID): ActionRecord[] {
     const merged: ActionRecord[] = this.get(from)
 
-    delete this._[from]
+    delete this.store[from]
 
     if (merged.length > 0) {
       merged.map((record) => { this.add(to, record) })
@@ -133,7 +133,7 @@ class Store implements IStore {
 
   /* private */
 
-  private _: {
+  private store: {
     [trackid in TrackID]: ActionRecord[]
   }
 }
@@ -141,29 +141,29 @@ class Store implements IStore {
 class LocMap implements ILocMap {
 
   constructor() {
-    this._ = {}
+    this.locMap = {}
   }
 
   /* public */
 
   public add(trackid: TrackID, loc: string): void {
-    if (!this._[loc]) {
-      this._[loc] = {}
+    if (!this.locMap[loc]) {
+      this.locMap[loc] = {}
     }
-    this._[loc][trackid] = true
+    this.locMap[loc][trackid] = true
   }
 
   public has(trackid: TrackID, loc: string): boolean {
-    return !!(this._[loc] && this._[loc][trackid])
+    return !!(this.locMap[loc] && this.locMap[loc][trackid])
   }
 
   public remove(trackid: TrackID, loc: string): void {
-    this._[loc] && delete this._[loc][trackid]
+    this.locMap[loc] && delete this.locMap[loc][trackid]
   }
 
   /* private */
 
-  private _: {
+  private locMap: {
     [loc: string]: {
       [trackid in TrackID]: boolean;
     };
@@ -173,28 +173,31 @@ class LocMap implements ILocMap {
 class ScriptCache implements IScriptCache {
 
   constructor() {
-    this._ = {}
+    this.cache = {}
   }
 
   /* public */
 
   public add(scriptUrl: string, scriptText: string): void {
-    this._[scriptUrl] = scriptText.split('\n').map((line) => {
+    this.cache[scriptUrl] = scriptText.split('\n').map((line) => {
       return line.trim()
     })
   }
 
   public get(scriptUrl: string, lineNumber: number, columnNumber: number): string {
-    return this._[scriptUrl][lineNumber - 1]
+    // @TODO: take column into account
+    // @TODO: trim just one line with maximum 50 letters
+    return this.cache[scriptUrl][lineNumber - 1]
   }
 
   public has(scriptUrl: string): boolean {
-    return !!this._[scriptUrl]
+    return !!this.cache[scriptUrl]
   }
 
   /* private */
 
-  private _: {
+  private cache: {
     [scriptUrl: string]: string[]
   }
+
 }
