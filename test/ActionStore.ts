@@ -1,14 +1,21 @@
 import { expect } from 'chai'
+import * as sinon from 'sinon'
 import ActionStore from '../src/tracker/ActionStore'
 import ActionType from '../src/tracker/ActionType'
 
 import actions from './test-script-actions'
 
 describe('ActionStore', () => {
+  const devtoolShouldUpdateSpy = sinon.spy()
+
   let actionStore: IActionStore
 
   beforeEach(() => {
-    actionStore = new ActionStore()
+    actionStore = new ActionStore(devtoolShouldUpdateSpy)
+  })
+
+  afterEach(() => {
+    devtoolShouldUpdateSpy.reset()
   })
 
   describe('get', () => {
@@ -109,6 +116,40 @@ describe('ActionStore', () => {
       await actionStore.registerFromActionInfo(actions[0].info)
 
       expect(actionStore.get('1')).to.deep.equal([actions[0].record])
+    })
+  })
+
+  describe('devtool should be updated upon updating ActionStore', () => {
+    it('should call devtoolShouldUpdate with updated trackid and records when ActionStore is updated by register', async () => {
+      await actionStore.register('1', actions[0].record)
+
+      expect(
+        devtoolShouldUpdateSpy
+          .calledWith('1', [actions[0].record])
+      ).to.be.true
+
+      await actionStore.register('1', actions[1].record)
+
+      expect(
+        devtoolShouldUpdateSpy
+          .calledWith('1', [actions[1].record, actions[0].record])
+      ).to.be.true
+    })
+
+    it('should call devtoolShouldUpdate with updated trackid and records when ActionStore is updated by registerFromActionInfo', async () => {
+      await actionStore.registerFromActionInfo(actions[0].info)
+
+      expect(
+        devtoolShouldUpdateSpy
+          .calledWith('1', [actions[0].record])
+      ).to.be.true
+
+      await actionStore.registerFromActionInfo(actions[1].info)
+
+      expect(
+        devtoolShouldUpdateSpy
+          .calledWith('1', [actions[1].record, actions[0].record])
+      ).to.be.true
     })
   })
 })

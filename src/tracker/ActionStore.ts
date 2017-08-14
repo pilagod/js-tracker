@@ -4,10 +4,16 @@ import ActionMap from './ActionMap'
 
 export default class ActionStore implements IActionStore {
 
-  constructor() {
+  constructor(
+    devtoolShouldUpdate: (
+      trackid: TrackID,
+      records: ActionRecord[]
+    ) => void
+  ) {
     this._store = new Store()
     this._locMap = new LocMap()
     this._scriptCache = new ScriptCache()
+    this._devtoolShouldUpdate = devtoolShouldUpdate
   }
 
   /* public */
@@ -19,6 +25,7 @@ export default class ActionStore implements IActionStore {
   public async register(trackid: TrackID, record: ActionRecord): Promise<void> {
     if (!this._locMap.has(trackid, record.key)) {
       this._register(trackid, record)
+      this._devtoolShouldUpdate(trackid, this.get(trackid))
     }
   }
 
@@ -39,6 +46,10 @@ export default class ActionStore implements IActionStore {
   private _store: IStore
   private _locMap: ILocMap
   private _scriptCache: IScriptCache
+  private _devtoolShouldUpdate: (
+    trackid: TrackID,
+    records: ActionRecord[]
+  ) => void
 
   private _register(trackid: TrackID, record: ActionRecord): void {
     this._store.add(trackid, record)

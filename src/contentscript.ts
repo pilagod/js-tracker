@@ -1,4 +1,5 @@
 /// <reference path='../node_modules/@types/chrome/index.d.ts' />
+/// <reference path='./tracker/ActionStore.d.ts'/>
 /// <reference path='./background.d.ts'/>
 /// <reference path='./contentscript.d.ts'/>
 
@@ -9,7 +10,7 @@ import * as fs from 'fs'
 import ActionStore from './tracker/ActionStore'
 import { Track_ID_Does_Not_Exist } from './tracker/TrackIDManager'
 
-const store = new ActionStore()
+const store = new ActionStore(devtoolShouldUpdate)
 
 listenOnActionTriggered()
 listenOnDevtoolSelectionChanged()
@@ -29,20 +30,29 @@ function listenOnActionTriggered() {
 function listenOnDevtoolSelectionChanged() {
   window.onDevtoolSelectionChanged = (element: Element) => {
     const trackid = getTrackIDFromElement(element)
-    const message: Message = {
-      trackid: trackid,
-      records: store.get(trackid)
-    }
-    chrome.runtime.sendMessage(message, (response) => {
-      console.group('contentscript')
-      console.log('--- forward record to background ---')
-      console.log('target:', element)
-      console.log('sent:', message)
-      console.log('received:', response)
-      console.log('------------------------------------')
-      console.groupEnd()
-    })
+
+    console.group('contentscript -- onDevtoolSelectionChanged --')
+    console.log('selected:', element)
+    console.groupEnd()
+
+    devtoolShouldUpdate(trackid, store.get(trackid))
   }
+}
+
+function devtoolShouldUpdate(
+  trackid: TrackID,
+  records: ActionRecord[]
+): void {
+  const message: Message = { trackid, records }
+
+  chrome.runtime.sendMessage(message, (response) => {
+    console.group('contentscript -- devtoolShouldUpdate --')
+    console.log('--- forward record to background ---')
+    console.log('sent:', message)
+    console.log('received:', response)
+    console.log('------------------------------------')
+    console.groupEnd()
+  })
 }
 
 function getTrackIDFromElement(element: Element) {
