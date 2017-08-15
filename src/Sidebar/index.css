@@ -1,3 +1,162 @@
-.sidebar-filter > button.selected {
-    background-color: red
+* {
+    box-sizing: border-box;
+    font-family: Helvetica;
+    font-size: 12px;
 }
+
+button {
+    border: none;
+    outline: none;
+    padding: 0;
+}
+
+/* tags */
+
+.tag {
+    color: white;
+    border-radius: 6px;
+    box-shadow: 1px 1px 3px 0 rgba(0, 0, 0, 0.4);
+
+    transition: all 0.15s ease-in-out;
+}
+
+.tag.selected {
+    border-style: solid;
+    border-width: 2px;
+}
+
+/* tag-filter */
+
+/* animate box-shadow [http://tobiasahlin.com/blog/how-to-animate-box-shadow/] */
+
+.tag-filter {
+    position: relative;
+    cursor: pointer;
+}
+
+.tag-filter:not(.selected).tag-attr:hover {
+    background-color: #ffd81d;
+}
+
+.tag-filter:not(.selected).tag-behav:hover {
+    background-color: #ff6979;
+}
+
+.tag-filter:not(.selected).tag-event:hover {
+    background-color: #65cea9;
+}
+
+.tag-filter:not(.selected).tag-node:hover {
+    background-color: #a373e9;
+}
+
+.tag-filter:not(.selected).tag-style:hover {
+    background-color: #2eb8d7;
+}
+
+.tag-filter::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: -1;
+    width: 100%;
+    height: 100%;
+    border-radius: 6px;
+    box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;   
+}
+
+.tag-filter:not(.selected):hover::after {
+    opacity: 1;
+}
+
+
+/* tag-attr */
+
+.tag-attr {
+    background-color: #ffd300;
+}
+
+.tag-attr.selected {
+    color: #f8a900;
+    border-color: #f9a900;
+}
+
+/* tag-behav */
+
+.tag-behav {
+    background-color: #f66070;
+}
+
+.tag-behav.selected {
+    color: #de3043;
+    border-color: #df3042;
+}
+
+/* tag-event */
+
+.tag-event {
+    background-color: #5ac09c;
+}
+
+.tag-event.selected {
+    color: #159065;
+    border-color: #149065;
+}
+
+/* tag-node */
+
+.tag-node {
+    background-color: #9966e3;
+}
+
+.tag-node.selected {
+    color: #7c3add;
+    border-color: #7c39de;
+}
+
+/* tag-style */
+
+.tag-style {
+    background-color: #1bb0d1;
+}
+
+.tag-style.selected {
+    color: #06809b;
+    border-color: #05809b;
+}
+
+/* sidebar-root */
+
+.sidebar-root {
+    width: 300px;
+    margin: 0 auto;
+}
+
+/* sidebar-fitler */
+
+.sidebar-filter {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1.5px inset #F4F4F4;
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+}
+
+.sidebar-filter > .tag {
+    flex: 0 1 55px;
+    height: 25px;
+    font-size: 1.1rem;
+}
+
+/* sidebar-list */
+
+
+/* sidebar-list
+    record-title
+        record-tag
+        record-link
+    record-info 
+*/

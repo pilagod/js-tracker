@@ -15,7 +15,6 @@ interface ISidebarFilterProps {
 export default class SidebarFilter extends React.Component<ISidebarFilterProps> {
   private onFilterClicked: (e: any) => void
 
-  // background: #F4F4F4
   constructor(props) {
     super(props)
 
@@ -42,7 +41,7 @@ export default class SidebarFilter extends React.Component<ISidebarFilterProps> 
           key={index}
           name={type}
           value={filter}
-          className={`filter ${selected}`}
+          className={`tag tag-filter tag-${type.toLowerCase()} ${selected}`}
           onClick={this.onFilterClicked}
         >
           {type}

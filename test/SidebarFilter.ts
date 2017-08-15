@@ -6,7 +6,7 @@ import * as ReactTestUtils from 'react-dom/test-utils'
 import ActionType from '../src/tracker/ActionType'
 import SidebarFilter from '../src/Sidebar/SidebarFilter'
 
-describe('SidebarFilter', () => {
+describe.only('SidebarFilter', () => {
   it('should render each action type as a button, with name, value and text set properly', () => {
     const sidebarFilter = ReactTestUtils.renderIntoDocument(
       React.createElement(SidebarFilter, {
@@ -20,10 +20,11 @@ describe('SidebarFilter', () => {
     )
     const totalTypes = (Object.keys(ActionType).length / 2) - 1 // exclude None
     const totalTypesInButtons = buttons.reduce((set, button) => {
-      expect(ActionType).to.have.property(button.name)
       expect(button.value).to.equal(ActionType[button.name].toString())
       expect(button.textContent).to.equal(button.name)
-      expect(button.classList.contains('filter')).to.be.true
+      expect(button.classList.contains('tag')).to.be.true
+      expect(button.classList.contains('tag-filter')).to.be.true
+      expect(button.classList.contains(`tag-${button.name.toLowerCase()}`)).to.be.true
 
       return set.add(button.name)
     }, new Set()).size
@@ -63,12 +64,12 @@ describe('SidebarFilter', () => {
     expect(buttons).to.have.length(3)
     expect(
       buttons.reduce((filter, button) => {
-        return filter - ActionType[button.name]
+        return filter - parseInt(button.value, 10)
       }, compositeFilter)
     ).to.equal(0)
   })
 
-  it('should call prop updateFilter with action \'add\' and proper filter when button is clicked, given that button is not selected', () => {
+  it('should call prop updateFilter with action \'add\' and corresponding filter when button is clicked, given that button is not selected', () => {
     const updateFilterSpy = sinon.spy()
     const sidebarFilter = ReactTestUtils.renderIntoDocument(
       React.createElement(SidebarFilter, {
@@ -90,7 +91,7 @@ describe('SidebarFilter', () => {
     ).to.be.true
   })
 
-  it('should call prop updateFilter with action \'remove\' and proper filter when button is clicked, given that button is selected ', () => {
+  it('should call prop updateFilter with action \'remove\' and corresponding filter when button is clicked, given that button is selected ', () => {
     const updateFilterSpy = sinon.spy()
     const sidebarFilter = ReactTestUtils.renderIntoDocument(
       React.createElement(SidebarFilter, {
