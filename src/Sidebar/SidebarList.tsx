@@ -68,13 +68,13 @@ function createRecordTitle(record: ActionRecord, linkOnClicked: (e: any) => void
   )
 }
 
-function createRecordTags(actionType: ActionType): JSX.Element[] {
-  return ActionTypeNames.reduce((tags, type, index) => {
+function createRecordTags(actionType: ActionType): JSX.Element {
+  const tags = ActionTypeNames.reduce((tags, type, index) => {
     if (actionType & ActionType[type]) {
       tags.push((
         <div
           key={index}
-          className="record-tag"
+          className={`tag tag-${type.toLowerCase()}`}
         >
           {type}
         </div>)
@@ -82,6 +82,11 @@ function createRecordTags(actionType: ActionType): JSX.Element[] {
     }
     return tags
   }, [])
+  return (
+    <div className="record-tag">
+      {tags}
+    </div>
+  )
 }
 
 function createRecordLink(

@@ -11,14 +11,14 @@ import { Track_ID_Does_Not_Exist } from '../src/tracker/TrackIDManager'
 
 import actions from './test-script-actions'
 
-describe('SidebarList', () => {
+describe.only('SidebarList', () => {
   const _trackid = Track_ID_Does_Not_Exist
   const _records: ActionRecord[] = [
     actions[0].record,
     actions[1].record,
     actions[2].record
   ]
-  it('should render all records passed to it', () => {
+  it('should render all records, with single type, passed to it properly', () => {
     const sidebarList = ReactTestUtils.renderIntoDocument(
       React.createElement(SidebarList, {
         trackid: _trackid,
@@ -33,39 +33,32 @@ describe('SidebarList', () => {
     expect(records).to.have.length(_records.length)
 
     records.map((record, index) => {
-      testRenderedRecordMatchesRecordData(record, _records[index])
+      const title = record.getElementsByClassName('record-title')
+      const info = record.getElementsByClassName('record-info')
+
+      expect(title).to.have.length(1)
+      expect(info).to.have.length(1)
+
+      // record-title
+
+      const recordTag = title[0].getElementsByClassName('record-tag')
+      const recordLink = title[0].getElementsByClassName('record-link')
+
+      expect(recordTag).to.have.length(1)
+      expect(recordLink).to.have.length(1)
+
+      const tags = recordTag[0].getElementsByClassName('tag')
+      const type = ActionType[_records[index].type]
+
+      expect(tags).to.have.length(1)
+      expect(tags[0].classList.contains(`tag-${type.toLowerCase()}`)).to.be.true
+      expect(tags[0].textContent).to.equal(type)
+
+      // record-info
+
+      expect(info[0].textContent).to.equal(_records[index].source.code)
     })
   })
-
-  function testRenderedRecordMatchesRecordData(record: Element, data: ActionRecord) {
-    const title = record.getElementsByClassName('record-title')
-    const info = record.getElementsByClassName('record-info')
-
-    expect(title).to.have.length(1)
-    expect(info).to.have.length(1)
-
-    testRenderedRecordTitle(title[0], data)
-    testRenderedRecordInfo(info[0], data)
-  }
-
-  function testRenderedRecordTitle(title: Element, data: ActionRecord) {
-    testRenderedElementContent(
-      title.getElementsByClassName('record-tag')[0],
-      ActionType[data.type]
-    )
-    testRenderedElementContent(
-      title.getElementsByClassName('record-link')[0],
-      data.key
-    )
-  }
-
-  function testRenderedElementContent(element: Element, content: string) {
-    expect(element.textContent).to.equal(content)
-  }
-
-  function testRenderedRecordInfo(info: Element, data: ActionRecord) {
-    testRenderedElementContent(info, data.source.code)
-  }
 
   it('should render record with composite type properly', () => {
     const sidebarList = ReactTestUtils.renderIntoDocument(
@@ -82,13 +75,16 @@ describe('SidebarList', () => {
 
     const tags =
       records[0]
-        .getElementsByClassName('record-title')[0]
-        .getElementsByClassName('record-tag')
+        .getElementsByClassName('record-tag')[0]
+        .getElementsByClassName('tag')
 
     expect(tags).to.have.length(2)
 
-    testRenderedElementContent(tags[0], 'Attr')
-    testRenderedElementContent(tags[1], 'Node')
+    expect(tags[0].classList.contains('tag-attr')).to.be.true
+    expect(tags[0].textContent).to.equal('Attr')
+
+    expect(tags[1].classList.contains('tag-node')).to.be.true
+    expect(tags[1].textContent).to.equal('Node')
   })
 
   it('should call prop openSource with proper url and line number when record link is clicked', () => {

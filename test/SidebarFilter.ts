@@ -6,7 +6,7 @@ import * as ReactTestUtils from 'react-dom/test-utils'
 import ActionType from '../src/tracker/ActionType'
 import SidebarFilter from '../src/Sidebar/SidebarFilter'
 
-describe.only('SidebarFilter', () => {
+describe('SidebarFilter', () => {
   it('should render each action type as a button, with name, value and text set properly', () => {
     const sidebarFilter = ReactTestUtils.renderIntoDocument(
       React.createElement(SidebarFilter, {
