@@ -27,6 +27,8 @@ export default class SidebarRoot extends React.Component<ISidebarRootProps, ISid
     }
   }
 
+  // @TODO: componentWillReceiveProps update onFilterUpdated
+
   updateFilter(
     action: 'add' | 'remove',
     filter: ActionType

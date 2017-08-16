@@ -46,7 +46,8 @@ export default class SidebarList extends React.Component<ISidebarListProps, ISid
           key={index}
           className={`record ${index < this.state.lastDiffIndex ? 'record-diff' : ''}`}
         >
-          {createRecordTitle(record, this.linkTo.bind(this))}
+          {createRecordTags(record.type)}
+          {createRecordLink(record.source.loc, this.linkTo.bind(this))}
           {createRecordInfo(record)}
         </div>
       )
@@ -57,15 +58,6 @@ export default class SidebarList extends React.Component<ISidebarListProps, ISid
       </div>
     )
   }
-}
-
-function createRecordTitle(record: ActionRecord, linkOnClicked: (e: any) => void): JSX.Element {
-  return (
-    <div className="record-title">
-      {createRecordTags(record.type)}
-      {createRecordLink(record.source.loc, linkOnClicked)}
-    </div>
-  )
 }
 
 function createRecordTags(actionType: ActionType): JSX.Element {

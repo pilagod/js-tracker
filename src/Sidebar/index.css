@@ -14,9 +14,6 @@ button {
 
 .tag {
     color: white;
-    border-radius: 6px;
-    box-shadow: 1px 1px 3px 0 rgba(0, 0, 0, 0.4);
-
     transition: all 0.15s ease-in-out;
 }
 
@@ -62,10 +59,8 @@ button {
     z-index: -1;
     width: 100%;
     height: 100%;
-    border-radius: 6px;
-    box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.4);
     opacity: 0;
-    transition: opacity 0.3s ease-in-out;   
+    transition: opacity 0.15s ease-in-out;   
 }
 
 .tag-filter:not(.selected):hover::after {
@@ -138,25 +133,86 @@ button {
 /* sidebar-fitler */
 
 .sidebar-filter {
+    position: fixed;
+    top: 0;
+    width: 300px; /* this should equal to the width of sidebar-root */
     display: flex;
-    justify-content: space-between;
+    justify-content: space-around;
+    background-color: white;
     border-bottom: 1.5px inset #F4F4F4;
-    margin-bottom: 8px;
-    padding-bottom: 8px;
+    padding: 8px 0;
 }
 
 .sidebar-filter > .tag {
-    flex: 0 1 55px;
-    height: 25px;
-    font-size: 1.1rem;
+    flex: 0 1 50px;
+    height: 20px;
+    font-size: 1rem;
+    box-shadow: 1px 1px 3px 0 rgba(0, 0, 0, 0.4);
+}
+
+.sidebar-filter > .tag-filter::after {
+    box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.4);
+}
+
+.sidebar-filter > .tag,
+.sidebar-filter > .tag-filter::after {
+    border-radius: 5px;
 }
 
 /* sidebar-list */
 
+.sidebar-list {
+    padding-top: 30px; /* approximate height of sidebar-filter */
+}
 
-/* sidebar-list
-    record-title
-        record-tag
-        record-link
-    record-info 
-*/
+/* record */
+
+.record {
+    border-radius: 5px;
+    padding: 5px;
+}
+
+.record.record-diff {
+    animation-name: record-diff;
+    animation-duration: 1.5s;
+    animation-timing-function: linear;
+}
+
+@keyframes record-diff {
+    from {
+        color: white;
+        background-color: #8640BA
+    }
+    to {
+        color: black;
+        background-color: inherit;
+    }
+}
+
+.record > * {
+    margin-top: 2.5px;
+}
+
+/* record-tag */
+
+.record-tag {
+    display: flex;
+    justify-content: flex-start;
+}
+
+.record-tag > .tag {
+    flex: 0 1 30px;
+    font-size: 0.75rem;
+    text-align: center;
+    border-radius: 3px;
+    margin-right: 2px;
+    padding: 2px 0;
+}
+
+/* record-link */
+
+.record-link {
+    display: block;
+    cursor: pointer;
+    text-decoration: underline;
+}

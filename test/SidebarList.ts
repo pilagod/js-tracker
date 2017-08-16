@@ -33,30 +33,32 @@ describe.only('SidebarList', () => {
     expect(records).to.have.length(_records.length)
 
     records.map((record, index) => {
-      const title = record.getElementsByClassName('record-title')
+      const _record = _records[index]
+
+      const tag = record.getElementsByClassName('record-tag')
+      const link = record.getElementsByClassName('record-link')
       const info = record.getElementsByClassName('record-info')
 
-      expect(title).to.have.length(1)
+      expect(tag).to.have.length(1)
+      expect(link).to.have.length(1)
       expect(info).to.have.length(1)
 
-      // record-title
+      // record-tag
 
-      const recordTag = title[0].getElementsByClassName('record-tag')
-      const recordLink = title[0].getElementsByClassName('record-link')
-
-      expect(recordTag).to.have.length(1)
-      expect(recordLink).to.have.length(1)
-
-      const tags = recordTag[0].getElementsByClassName('tag')
-      const type = ActionType[_records[index].type]
+      const tags = tag[0].getElementsByClassName('tag')
+      const type = ActionType[_record.type]
 
       expect(tags).to.have.length(1)
       expect(tags[0].classList.contains(`tag-${type.toLowerCase()}`)).to.be.true
       expect(tags[0].textContent).to.equal(type)
 
+      // record-link
+
+      expect(link[0].textContent).to.equal(_record.key)
+
       // record-info
 
-      expect(info[0].textContent).to.equal(_records[index].source.code)
+      expect(info[0].textContent).to.equal(_record.source.code)
     })
   })
 
