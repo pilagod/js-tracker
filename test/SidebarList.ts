@@ -23,6 +23,7 @@ describe.only('SidebarList', () => {
       React.createElement(SidebarList, {
         trackid: _trackid,
         records: _records,
+        isFilterUpdated: false,
         openSource: () => { }
       })
     )
@@ -66,7 +67,9 @@ describe.only('SidebarList', () => {
     const sidebarList = ReactTestUtils.renderIntoDocument(
       React.createElement(SidebarList, {
         trackid: _trackid,
-        records: [actions[3].record]
+        records: [actions[3].record],
+        isFilterUpdated: false,
+        openSource: () => { }
       })
     )
     const records = ReactTestUtils.scryRenderedDOMComponentsWithClass(
@@ -95,6 +98,7 @@ describe.only('SidebarList', () => {
       React.createElement(SidebarList, {
         trackid: _trackid,
         records: _records,
+        isFilterUpdated: false,
         openSource: openSourceSpy
       })
     )
@@ -116,25 +120,25 @@ describe.only('SidebarList', () => {
     })
   })
 
-  it('should add class record-diff to new records given records is updated but not the trackid', () => {
-    class SidebarListWrapper extends React.Component {
-      constructor(props) {
-        super(props)
-        this.state = Object.assign({}, this.props)
-      }
-      render() {
-        return React.createElement(SidebarList, this.state)
-      }
+  class SidebarListWrapper extends React.Component {
+    constructor(props) {
+      super(props)
+      this.state = Object.assign({}, this.props)
     }
+    render() {
+      return React.createElement(SidebarList, this.state)
+    }
+  }
+
+  it('should add class record-diff to new records given records is updated but not the trackid', () => {
     const sidebarListWrapper = ReactTestUtils.renderIntoDocument(
       React.createElement(SidebarListWrapper, {
         trackid: '1',
         records: _records.slice(_records.length - 1),
+        isFilterUpdated: false,
         openSource: () => { }
       })
     )
-
-    // should add record-diff class to new records
     sidebarListWrapper.setState({
       trackid: '1',
       records: _records
@@ -144,11 +148,48 @@ describe.only('SidebarList', () => {
       'record-diff'
     )
     expect(diffs).to.have.length(2)
+  })
 
-    // should not add record-diff class when trackid is changed
+  it('should not add class record-diff to any record given trackid updated', () => {
+    const sidebarListWrapper = ReactTestUtils.renderIntoDocument(
+      React.createElement(SidebarListWrapper, {
+        trackid: '1',
+        records: _records.slice(_records.length - 1),
+        isFilterUpdated: false,
+        openSource: () => { }
+      })
+    )
     sidebarListWrapper.setState({
       trackid: '2',
       records: _records
+    })
+    const noDiffs = ReactTestUtils.scryRenderedDOMComponentsWithClass(
+      sidebarListWrapper,
+      'record-diff'
+    )
+    expect(noDiffs).to.have.length(0)
+  })
+
+  it('should not add class record-diff to any given prop isFilterUpdated is true', () => {
+    const sidebarListWrapper = ReactTestUtils.renderIntoDocument(
+      React.createElement(SidebarListWrapper, {
+        trackid: '1',
+        records: _records,
+        isFilterUpdated: false,
+        openSource: () => { }
+      })
+    )
+    // set new filter
+    sidebarListWrapper.setState({
+      trackid: '1',
+      records: [],
+      isFilterUpdated: true
+    })
+    // unset filter
+    sidebarListWrapper.setState({
+      trackid: '1',
+      records: _records,
+      isFilterUpdated: true
     })
     const noDiffs = ReactTestUtils.scryRenderedDOMComponentsWithClass(
       sidebarListWrapper,

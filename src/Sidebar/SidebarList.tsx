@@ -8,6 +8,7 @@ import ActionType, { ActionTypeNames } from '../tracker/ActionType'
 interface ISidebarListProps {
   trackid: TrackID;
   records: ActionRecord[];
+  isFilterUpdated: boolean;
   openSource: (url: string, line: number) => void;
 }
 
@@ -25,13 +26,15 @@ export default class SidebarList extends React.Component<ISidebarListProps, ISid
   }
 
   componentWillReceiveProps(nextProps: ISidebarListProps) {
-    const lastDiffIndex =
-      this.props.trackid === nextProps.trackid
-        ? nextProps.records.length - this.props.records.length
-        : -1
-    this.setState(() => {
-      return { lastDiffIndex }
-    })
+    if (!this.props.isFilterUpdated) {
+      const lastDiffIndex =
+        this.props.trackid === nextProps.trackid
+          ? nextProps.records.length - this.props.records.length
+          : -1
+      this.setState(() => {
+        return { lastDiffIndex }
+      })
+    }
   }
 
   linkTo(url: string, line: number, e: Event) {
