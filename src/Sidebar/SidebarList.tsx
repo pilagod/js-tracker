@@ -26,15 +26,13 @@ export default class SidebarList extends React.Component<ISidebarListProps, ISid
   }
 
   componentWillReceiveProps(nextProps: ISidebarListProps) {
-    if (!this.props.isFilterUpdated) {
-      const lastDiffIndex =
-        this.props.trackid === nextProps.trackid
-          ? nextProps.records.length - this.props.records.length
-          : -1
-      this.setState(() => {
-        return { lastDiffIndex }
-      })
-    }
+    const lastDiffIndex =
+      this.shouldLabelDiffs(nextProps)
+        ? nextProps.records.length - this.props.records.length
+        : -1
+    this.setState(() => {
+      return { lastDiffIndex }
+    })
   }
 
   linkTo(url: string, line: number, e: Event) {
@@ -60,6 +58,15 @@ export default class SidebarList extends React.Component<ISidebarListProps, ISid
         {records}
       </div>
     )
+  }
+
+  /* private */
+
+  private shouldLabelDiffs(nextProps: ISidebarListProps) {
+    // @NOTE: only label diffs when 
+    //  (1) records is not updated by filter
+    //  (2) identical trackid is required before and after updating
+    return !nextProps.isFilterUpdated && this.props.trackid === nextProps.trackid
   }
 }
 

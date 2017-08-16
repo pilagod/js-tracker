@@ -38,7 +38,7 @@ describe('contentscript', () => {
   describe('on devtool selection changed', () => {
     const chrome = window.chrome
     const sandbox = sinon.sandbox.create()
-    const outputToBackground = sandbox.spy()
+    const outputToBackground = sinon.spy()
 
     before(() => {
       (<any>window).chrome = {
@@ -54,6 +54,7 @@ describe('contentscript', () => {
 
     afterEach(() => {
       sandbox.restore()
+      outputToBackground.reset()
     })
 
     it('should set onDevtoolSelectionChanged on window', () => {
@@ -87,6 +88,25 @@ describe('contentscript', () => {
     // @NOTE: this case will happen when devtool first opened
     it('should send message with { trackid: Track_ID_Does_Not_Exist, records: [] } given undefined element', () => {
       window.onDevtoolSelectionChanged(undefined)
+
+      expect(
+        outputToBackground.calledWith(
+          <Message>{
+            trackid: Track_ID_Does_Not_Exist,
+            records: []
+          }
+        )
+      ).to.be.true
+    })
+
+    it('should send message with { trackid: Track_ID_Does_Not_Exist, records: [] } given element has no trackid', () => {
+      const div = document.createElement('div')
+
+      sandbox.stub(div, 'getAttribute')
+        .withArgs('trackid')
+        .returns(null)
+
+      window.onDevtoolSelectionChanged(div)
 
       expect(
         outputToBackground.calledWith(

@@ -56,9 +56,11 @@ function devtoolShouldUpdate(
 }
 
 function getTrackIDFromElement(element: Element) {
-  return element instanceof Element
-    ? element.getAttribute('trackid')
-    : Track_ID_Does_Not_Exist
+  const trackid =
+    element instanceof Element
+      ? element.getAttribute('trackid')
+      : null
+  return trackid || Track_ID_Does_Not_Exist
 }
 
 function injectTrackerScript() {

@@ -16,6 +16,7 @@ export interface ISidebarRootProps {
 
 interface ISidebarRootState {
   filter: number;
+  isFilterUpdated: boolean;
 }
 
 export default class SidebarRoot extends React.Component<ISidebarRootProps, ISidebarRootState> {
@@ -23,11 +24,18 @@ export default class SidebarRoot extends React.Component<ISidebarRootProps, ISid
     super(props)
 
     this.state = {
-      filter: ActionType.None
+      filter: ActionType.None,
+      isFilterUpdated: false
     }
   }
 
-  // @TODO: componentWillReceiveProps update onFilterUpdated
+  componentWillReceiveProps() {
+    this.setState(() => {
+      return {
+        isFilterUpdated: false
+      }
+    })
+  }
 
   updateFilter(
     action: 'add' | 'remove',
@@ -35,7 +43,8 @@ export default class SidebarRoot extends React.Component<ISidebarRootProps, ISid
   ) {
     this.setState((preState) => {
       return {
-        filter: preState.filter + filter * (action === 'add' ? 1 : -1)
+        filter: preState.filter + filter * (action === 'add' ? 1 : -1),
+        isFilterUpdated: true
       }
     })
   }
@@ -54,6 +63,7 @@ export default class SidebarRoot extends React.Component<ISidebarRootProps, ISid
         <SidebarList
           trackid={this.props.trackid}
           records={filteredRecords}
+          isFilterUpdated={this.state.isFilterUpdated}
           openSource={this.props.openSource}
         />
       </div>
