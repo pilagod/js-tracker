@@ -193,7 +193,7 @@ button {
     margin-top: 2.5px;
 }
 
-/* record-tag */
+/* record tag */
 
 .record > .tags {
     display: flex;
@@ -209,7 +209,13 @@ button {
     padding: 2px 0;
 }
 
-/* record-link */
+/* record info */
+
+.record > .info {
+    overflow-wrap: break-word;
+}
+
+/* record link */
 
 .record > .link > a {
     cursor: pointer;
