@@ -96,16 +96,18 @@ export default class ActionStore implements IActionStore {
 
   private async _fetchSourceCode(scriptUrl: string, lineNumber: number, columnNumber: number): Promise<string> {
     if (!this._scriptCache.has(scriptUrl)) {
-      await this._fetchScriptSourceToCache(scriptUrl)
+      this._scriptCache.add(scriptUrl, this._fetchScript(scriptUrl))
     }
-    return this._scriptCache.get(scriptUrl, lineNumber, columnNumber)
+    return await this._scriptCache.get(scriptUrl, lineNumber, columnNumber)
   }
 
-  private async _fetchScriptSourceToCache(scriptUrl: string): Promise<void> {
+  private async _fetchScript(scriptUrl: string): Promise<string[]> {
     const response = await fetch(scriptUrl)
     const scriptText = await response.text()
 
-    this._scriptCache.add(scriptUrl, scriptText)
+    return scriptText.split('\n').map((line) => {
+      return line.trim()
+    })
   }
 }
 
@@ -186,16 +188,14 @@ class ScriptCache implements IScriptCache {
 
   /* public */
 
-  public add(scriptUrl: string, scriptText: string): void {
-    this.cache[scriptUrl] = scriptText.split('\n').map((line) => {
-      return line.trim()
-    })
+  public add(scriptUrl: string, scriptPromise: Promise<string[]>): void {
+    this.cache[scriptUrl] = scriptPromise
   }
 
-  public get(scriptUrl: string, lineNumber: number, columnNumber: number): string {
+  public async get(scriptUrl: string, lineNumber: number, columnNumber: number): Promise<string> {
     // @TODO: take column into account
     // @TODO: trim just one line with maximum 50 letters
-    return this.cache[scriptUrl][lineNumber - 1]
+    return (await this.cache[scriptUrl])[lineNumber - 1]
   }
 
   public has(scriptUrl: string): boolean {
@@ -205,6 +205,6 @@ class ScriptCache implements IScriptCache {
   /* private */
 
   private cache: {
-    [scriptUrl: string]: string[]
+    [scriptUrl: string]: Promise<string[]>
   }
 }

@@ -77,14 +77,14 @@ interface ILocMap {
 interface IScriptCache {
   add(
     scriptUrl: string,
-    scriptText: string
+    scriptPromise: Promise<string[]>
   ): void;
 
   get(
     scriptUrl: string,
     lineNumber: number,
     columnNumber: number
-  ): string;
+  ): Promise<string>;
 
   has(
     scriptUrl: string
