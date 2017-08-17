@@ -4,6 +4,7 @@ import { expect } from 'chai'
 import * as sinon from 'sinon'
 
 import ActionStore from '../src/tracker/ActionStore'
+import MessageType from '../src/MessageType'
 import { Track_ID_Does_Not_Exist } from '../src/tracker/TrackIDManager'
 
 import actions from './test-script-actions'
@@ -36,6 +37,7 @@ describe('contentscript', () => {
   })
 
   describe('on devtool selection changed', () => {
+    const type = MessageType.DevtoolSelectionChanged
     const chrome = window.chrome
     const sandbox = sinon.sandbox.create()
     const outputToBackground = sinon.spy()
@@ -79,6 +81,7 @@ describe('contentscript', () => {
       expect(
         outputToBackground.calledWith(
           <Message>{
+            type,
             trackid,
             records: [actions[0].record]
           }
@@ -92,6 +95,7 @@ describe('contentscript', () => {
       expect(
         outputToBackground.calledWith(
           <Message>{
+            type,
             trackid: Track_ID_Does_Not_Exist,
             records: []
           }
@@ -111,6 +115,7 @@ describe('contentscript', () => {
       expect(
         outputToBackground.calledWith(
           <Message>{
+            type,
             trackid: Track_ID_Does_Not_Exist,
             records: []
           }

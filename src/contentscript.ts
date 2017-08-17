@@ -8,6 +8,7 @@
 
 import * as fs from 'fs'
 import ActionStore from './tracker/ActionStore'
+import MessageType from './MessageType'
 import { Track_ID_Does_Not_Exist } from './tracker/TrackIDManager'
 
 const store = new ActionStore(devtoolShouldUpdate)
@@ -31,26 +32,33 @@ function listenOnDevtoolSelectionChanged() {
   window.onDevtoolSelectionChanged = (element: Element) => {
     const trackid = getTrackIDFromElement(element)
 
-    console.group('contentscript -- onDevtoolSelectionChanged --')
+    console.group('contentscript')
+    console.group('--- On Devtool Selection Changed ---')
     console.log('selected:', element)
+    console.group('------------------------------------')
     console.groupEnd()
 
-    devtoolShouldUpdate(trackid, store.get(trackid))
+    devtoolShouldUpdate(
+      MessageType.DevtoolSelectionChanged,
+      trackid,
+      store.get(trackid)
+    )
   }
 }
 
 function devtoolShouldUpdate(
+  type: MessageType,
   trackid: TrackID,
   records: ActionRecord[]
 ): void {
-  const message: Message = { trackid, records }
+  const message: Message = { type, trackid, records }
 
   chrome.runtime.sendMessage(message, (response) => {
-    console.group('contentscript -- devtoolShouldUpdate --')
-    console.log('--- forward record to background ---')
+    console.group('contentscript')
+    console.log('--- Devtool Should Update ---')
     console.log('sent:', message)
     console.log('received:', response)
-    console.log('------------------------------------')
+    console.log('-----------------------------')
     console.groupEnd()
   })
 }

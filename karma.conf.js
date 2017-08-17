@@ -22,6 +22,8 @@ module.exports = function (config) {
       { pattern: 'test/*.ts' },
 
       { pattern: 'src/contentscript.ts' },
+      { pattern: 'src/MessageType.ts' },
+
       { pattern: 'test/test-script.js', served: true, included: false }
     ],
 
@@ -35,7 +37,8 @@ module.exports = function (config) {
       'src/Sidebar/*.tsx': ['karma-typescript', 'coverage'],
       'test/*.ts': ['karma-typescript'],
 
-      'src/contentscript.ts': ['karma-typescript', 'coverage']
+      'src/contentscript.ts': ['karma-typescript', 'coverage'],
+      'src/MessageType.ts': ['karma-typescript', 'coverage']
     },
 
     karmaTypescriptConfig: {

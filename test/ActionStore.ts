@@ -1,7 +1,11 @@
+/// <reference path='../src/MessageType.d.ts'/>
+
 import { expect } from 'chai'
 import * as sinon from 'sinon'
+
 import ActionStore from '../src/tracker/ActionStore'
 import ActionType from '../src/tracker/ActionType'
+import MessageType from '../src/MessageType'
 
 import actions from './test-script-actions'
 
@@ -120,19 +124,21 @@ describe('ActionStore', () => {
   })
 
   describe('devtool should be updated upon updating ActionStore', () => {
-    it('should call devtoolShouldUpdate with updated trackid and records when ActionStore is updated by register', async () => {
+    const type = MessageType.ActionStoreUpdated
+
+    it('should call devtoolShouldUpdate with message type ActionStoreUpdated, updated trackid and records when ActionStore is updated', async () => {
       await actionStore.register('1', actions[0].record)
 
       expect(
         devtoolShouldUpdateSpy
-          .calledWith('1', [actions[0].record])
+          .calledWith(type, '1', [actions[0].record])
       ).to.be.true
 
       await actionStore.register('1', actions[1].record)
 
       expect(
         devtoolShouldUpdateSpy
-          .calledWith('1', [actions[1].record, actions[0].record])
+          .calledWith(type, '1', [actions[1].record, actions[0].record])
       ).to.be.true
     })
 
@@ -141,14 +147,14 @@ describe('ActionStore', () => {
 
       expect(
         devtoolShouldUpdateSpy
-          .calledWith('1', [actions[0].record])
+          .calledWith(type, '1', [actions[0].record])
       ).to.be.true
 
       await actionStore.registerFromActionInfo(actions[1].info)
 
       expect(
         devtoolShouldUpdateSpy
-          .calledWith('1', [actions[1].record, actions[0].record])
+          .calledWith(type, '1', [actions[1].record, actions[0].record])
       ).to.be.true
     })
   })

@@ -1,6 +1,7 @@
 /// <reference path='../node_modules/@types/chrome/index.d.ts'/>
 /// <reference path='./background.d.ts'/>
 
+import MessageType from './MessageType'
 import Sidebar from './Sidebar'
 
 packFilesToDist()
@@ -13,9 +14,10 @@ function packFilesToDist() {
 
 let background
 let sidebarWindow
-
-let state: Message
-
+let state: {
+  trackid: TrackID,
+  records: ActionRecord[]
+}
 setupConnectionToBackground()
 setupJSTrackerSidebar()
 updateSidebarOnMessage()
@@ -39,27 +41,6 @@ function setupJSTrackerSidebar() {
   })
 }
 
-function updateSidebarOnMessage() {
-  background.onMessage.addListener((message: Message) => {
-    console.group('devtool page')
-    console.log('--- message got from background ---')
-    console.log('message:', message)
-    console.log('state before update:', Object.assign({}, state))
-
-    updateStateBy(message)
-
-    console.log('state after update:', Object.assign({}, state))
-    console.log('-----------------------------------')
-    console.groupEnd()
-
-    renderSidebar()
-  })
-}
-
-function updateStateBy(message: Message) {
-  state = Object.assign({}, state, message)
-}
-
 function renderSidebar() {
   if (sidebarWindow) {
     // @TODO: pull request to @types/chrome, document should be on chrome.windows.Window
@@ -70,6 +51,56 @@ function renderSidebar() {
       openSource: openSource
     }))
   }
+}
+
+function updateSidebarOnMessage() {
+  background.onMessage.addListener((message: Message) => {
+    console.group('devtool page')
+    console.log('--- message received from background ---')
+    console.log('message:', message)
+    console.log('----------------------------------------')
+    console.groupEnd()
+
+    console.group('devtool page')
+    switch (message.type) {
+      case MessageType.ActionStoreUpdated:
+        handleActionStoreUpdated(message)
+        break
+      case MessageType.DevtoolSelectionChanged:
+        handleDevtoolSelectionChanged(message)
+        break
+      default:
+    }
+    console.groupEnd()
+  })
+}
+
+function handleActionStoreUpdated(message: Message) {
+  console.log('--- ActionStoreUpdated ---')
+  if (message.trackid === state.trackid) {
+    updateSidebarBy(message)
+  }
+  console.log('--------------------------')
+}
+
+function handleDevtoolSelectionChanged(message: Message) {
+  console.log('--- DevtoolSelectionChanged ---')
+  updateSidebarBy(message)
+  console.log('-------------------------------')
+}
+
+function updateSidebarBy(message: Message) {
+  console.log('state before update:', Object.assign({}, state))
+  updateStateBy(message)
+  console.log('state after update:', Object.assign({}, state))
+  renderSidebar()
+}
+
+function updateStateBy(message: Message) {
+  state = Object.assign({}, state, {
+    trackid: message.trackid,
+    records: message.records
+  })
 }
 
 function openSource(url: string, line: number): void {

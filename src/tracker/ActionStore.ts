@@ -1,11 +1,14 @@
 /// <reference path='./ActionStore.d.ts'/>
+/// <reference path='../MessageType.d.ts'/>
 
 import ActionMap from './ActionMap'
+import MessageType from '../MessageType'
 
 export default class ActionStore implements IActionStore {
 
   constructor(
     devtoolShouldUpdate: (
+      type: MessageType,
       trackid: TrackID,
       records: ActionRecord[]
     ) => void
@@ -25,7 +28,11 @@ export default class ActionStore implements IActionStore {
   public async register(trackid: TrackID, record: ActionRecord): Promise<void> {
     if (!this._locMap.has(trackid, record.key)) {
       this._register(trackid, record)
-      this._devtoolShouldUpdate(trackid, this.get(trackid))
+      this._devtoolShouldUpdate(
+        MessageType.ActionStoreUpdated,
+        trackid,
+        this.get(trackid)
+      )
     }
   }
 
@@ -47,6 +54,7 @@ export default class ActionStore implements IActionStore {
   private _locMap: ILocMap
   private _scriptCache: IScriptCache
   private _devtoolShouldUpdate: (
+    type: MessageType,
     trackid: TrackID,
     records: ActionRecord[]
   ) => void
