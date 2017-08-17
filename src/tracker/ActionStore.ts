@@ -199,7 +199,7 @@ class ScriptCache implements IScriptCache {
   }
 
   public has(scriptUrl: string): boolean {
-    return !!this.cache[scriptUrl]
+    return this.cache.hasOwnProperty(scriptUrl)
   }
 
   /* private */
