@@ -48,9 +48,9 @@ describe('SidebarList', () => {
     records.map((record, index) => {
       const _record = _records[index]
 
-      const tag = record.getElementsByClassName('record-tag')
-      const link = record.getElementsByClassName('record-link')
-      const info = record.getElementsByClassName('record-info')
+      const tag = record.getElementsByClassName('tags')
+      const link = record.getElementsByClassName('link')
+      const info = record.getElementsByClassName('info')
 
       expect(tag).to.have.length(1)
       expect(link).to.have.length(1)
@@ -90,7 +90,7 @@ describe('SidebarList', () => {
 
     const tags =
       records[0]
-        .getElementsByClassName('record-tag')[0]
+        .getElementsByClassName('tags')[0]
         .getElementsByClassName('tag')
 
     expect(tags).to.have.length(2)
@@ -110,7 +110,7 @@ describe('SidebarList', () => {
     })
     const links = ReactTestUtils.scryRenderedDOMComponentsWithClass(
       sidebarListWrapper,
-      'record-link'
+      'link'
     )
     links.map((link, index) => {
       const alink = link.getElementsByTagName('a')[0]

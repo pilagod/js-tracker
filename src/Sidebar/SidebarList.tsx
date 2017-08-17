@@ -97,7 +97,7 @@ function createRecordTags(actionType: ActionType): JSX.Element {
     return tags
   }, [])
   return (
-    <div className="record-tag">
+    <div className="tags">
       {tags}
     </div>
   )
@@ -108,7 +108,7 @@ function createRecordLink(
   linkOnClicked: (e: any) => void
 ): JSX.Element {
   return (
-    <div className="record-link">
+    <div className="link">
       <a onClick={linkOnClicked.bind(null, scriptUrl, lineNumber)}>
         {`${scriptUrl}:${lineNumber}:${columnNumber}`}
       </a>
@@ -119,7 +119,7 @@ function createRecordLink(
 
 function createRecordInfo(record: ActionRecord): JSX.Element {
   return (
-    <div className="record-info">
+    <div className="info">
       <span>{record.source.code}</span>
     </div>
   )
