@@ -11,9 +11,6 @@ export default class OwnerInstance implements Owner {
     constructor() {
       super(null)
     }
-    getTrackID() {
-      return Track_ID_Does_Not_Exist
-    }
     isShadow() {
       return false
     }
