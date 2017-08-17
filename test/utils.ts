@@ -1,7 +1,7 @@
 import * as React from 'react'
 
 export default {
-  wrapperFactory(component: any) {
+  wrapperFactory(component: React.ComponentClass) {
     return class extends React.Component {
       constructor(props) {
         super(props)

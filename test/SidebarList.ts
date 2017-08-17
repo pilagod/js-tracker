@@ -13,23 +13,30 @@ import utils from './utils'
 import actions from './test-script-actions'
 
 describe('SidebarList', () => {
-  const _trackid = Track_ID_Does_Not_Exist
+  const SidebarListWrapper = utils.wrapperFactory(SidebarList)
   const _records: ActionRecord[] = [
     actions[0].record,
     actions[1].record,
     actions[2].record
   ]
-  it('should render all records, with single type, passed to it properly', () => {
-    const sidebarList = ReactTestUtils.renderIntoDocument(
-      React.createElement(SidebarList, {
-        trackid: _trackid,
+  let sidebarListWrapper
+
+  beforeEach(() => {
+    // @NOTE: set state of sidebarListWrapper in each test case 
+    // might trigger component lifecycle function 
+    sidebarListWrapper = ReactTestUtils.renderIntoDocument(
+      React.createElement(SidebarListWrapper, {
+        trackid: '1',
         records: _records,
         isFilterUpdated: false,
         openSource: () => { }
       })
     )
+  })
+
+  it('should render all records, with single type, passed to it properly', () => {
     const records = ReactTestUtils.scryRenderedDOMComponentsWithClass(
-      sidebarList,
+      sidebarListWrapper,
       'record'
     )
     expect(records).to.have.length(_records.length)
@@ -65,16 +72,11 @@ describe('SidebarList', () => {
   })
 
   it('should render record with composite type properly', () => {
-    const sidebarList = ReactTestUtils.renderIntoDocument(
-      React.createElement(SidebarList, {
-        trackid: _trackid,
-        records: [actions[3].record],
-        isFilterUpdated: false,
-        openSource: () => { }
-      })
-    )
+    sidebarListWrapper.setState({
+      records: [actions[3].record]
+    })
     const records = ReactTestUtils.scryRenderedDOMComponentsWithClass(
-      sidebarList,
+      sidebarListWrapper,
       'record'
     )
     expect(records).to.have.length(1)
@@ -93,18 +95,14 @@ describe('SidebarList', () => {
     expect(tags[1].textContent).to.equal('Node')
   })
 
-  it('should call prop openSource with proper url and line number when record link is clicked', () => {
+  it('should call prop openSource with proper url and line number when record links are clicked', () => {
     const openSourceSpy = sinon.spy()
-    const sidebarList = ReactTestUtils.renderIntoDocument(
-      React.createElement(SidebarList, {
-        trackid: _trackid,
-        records: _records,
-        isFilterUpdated: false,
-        openSource: openSourceSpy
-      })
-    )
+
+    sidebarListWrapper.setState({
+      openSource: openSourceSpy
+    })
     const links = ReactTestUtils.scryRenderedDOMComponentsWithClass(
-      sidebarList,
+      sidebarListWrapper,
       'record-link'
     )
     links.map((link, index) => {
@@ -121,19 +119,11 @@ describe('SidebarList', () => {
     })
   })
 
-  const SidebarListWrapper = utils.wrapperFactory(SidebarList)
-
   it('should add class record-diff to new records given records is updated but not the trackid', () => {
-    const sidebarListWrapper = ReactTestUtils.renderIntoDocument(
-      React.createElement(SidebarListWrapper, {
-        trackid: '1',
-        records: _records.slice(_records.length - 1),
-        isFilterUpdated: false,
-        openSource: () => { }
-      })
-    )
     sidebarListWrapper.setState({
-      trackid: '1',
+      records: _records.slice(_records.length - 1),
+    })
+    sidebarListWrapper.setState({
       records: _records
     })
     const diffs = ReactTestUtils.scryRenderedDOMComponentsWithClass(
@@ -144,14 +134,9 @@ describe('SidebarList', () => {
   })
 
   it('should not add class record-diff to any record given trackid updated', () => {
-    const sidebarListWrapper = ReactTestUtils.renderIntoDocument(
-      React.createElement(SidebarListWrapper, {
-        trackid: '1',
-        records: _records.slice(_records.length - 1),
-        isFilterUpdated: false,
-        openSource: () => { }
-      })
-    )
+    sidebarListWrapper.setState({
+      records: _records.slice(_records.length - 1),
+    })
     sidebarListWrapper.setState({
       trackid: '2',
       records: _records
@@ -164,23 +149,13 @@ describe('SidebarList', () => {
   })
 
   it('should not add class record-diff to any given prop isFilterUpdated is true', () => {
-    const sidebarListWrapper = ReactTestUtils.renderIntoDocument(
-      React.createElement(SidebarListWrapper, {
-        trackid: '1',
-        records: _records,
-        isFilterUpdated: false,
-        openSource: () => { }
-      })
-    )
     // set new filter
     sidebarListWrapper.setState({
-      trackid: '1',
       records: [],
       isFilterUpdated: true
     })
     // unset filter
     sidebarListWrapper.setState({
-      trackid: '1',
       records: _records,
       isFilterUpdated: true
     })
@@ -192,14 +167,10 @@ describe('SidebarList', () => {
   })
 
   it('should not add class record-diff to any given records updated first then set & unset filter', () => {
-    const sidebarListWrapper = ReactTestUtils.renderIntoDocument(
-      React.createElement(SidebarListWrapper, {
-        trackid: '1',
-        records: _records.slice(0, 2),
-        isFilterUpdated: false,
-        openSource: () => { }
-      })
-    )
+    sidebarListWrapper.setState({
+      records: _records.slice(0, 2),
+    })
+
     // add a new record first
     sidebarListWrapper.setState({
       records: _records

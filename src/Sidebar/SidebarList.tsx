@@ -13,7 +13,7 @@ interface ISidebarListProps {
 }
 
 interface ISidebarListState {
-  lastDiffIndex: number
+  diff: number
 }
 
 export default class SidebarList extends React.Component<ISidebarListProps, ISidebarListState> {
@@ -21,17 +21,15 @@ export default class SidebarList extends React.Component<ISidebarListProps, ISid
     super(props)
 
     this.state = {
-      lastDiffIndex: -1
+      diff: -1 // an index indicating new added records
     }
   }
 
   componentWillReceiveProps(nextProps: ISidebarListProps) {
-    const lastDiffIndex =
-      this.shouldLabelDiffs(nextProps)
-        ? nextProps.records.length - this.props.records.length
-        : -1
     this.setState(() => {
-      return { lastDiffIndex }
+      return {
+        diff: this.diff(this.props, nextProps)
+      }
     })
   }
 
@@ -45,7 +43,7 @@ export default class SidebarList extends React.Component<ISidebarListProps, ISid
       return (
         <div
           key={index}
-          className={`record ${index < this.state.lastDiffIndex ? 'record-diff' : ''}`}
+          className={`record ${this.labelDiff(index)}`}
         >
           {createRecordTags(record.type)}
           {createRecordLink(record.source.loc, this.linkTo.bind(this))}
@@ -62,11 +60,25 @@ export default class SidebarList extends React.Component<ISidebarListProps, ISid
 
   /* private */
 
-  private shouldLabelDiffs(nextProps: ISidebarListProps) {
-    // @NOTE: only label diffs when 
+  private diff(preProps: ISidebarListProps, nextProps: ISidebarListProps) {
+    return this.shouldCalculateDiff(preProps, nextProps)
+      ? this.calculateDiff(preProps, nextProps)
+      : -1
+  }
+
+  private shouldCalculateDiff(preProps: ISidebarListProps, nextProps: ISidebarListProps) {
+    // @NOTE: only calculate diff when 
     //  (1) records is not updated by filter
-    //  (2) identical trackid is required before and after updating
-    return !nextProps.isFilterUpdated && this.props.trackid === nextProps.trackid
+    //  (2) identical trackid is required before and after records updated
+    return !nextProps.isFilterUpdated && preProps.trackid === nextProps.trackid
+  }
+
+  private calculateDiff(preProps: ISidebarListProps, nextProps: ISidebarListProps) {
+    return nextProps.records.length - preProps.records.length
+  }
+
+  private labelDiff(index: number) {
+    return index < this.state.diff ? 'record-diff' : ''
   }
 }
 
