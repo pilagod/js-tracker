@@ -58,19 +58,15 @@ describe('SidebarRoot', () => {
   it('should update its state\'s filter and isFilterUpdated by update filter function sent to SidebarFilter', () => {
     const updateFilter = sidebarFilter.props.updateFilter
 
-    updateFilter('add', ActionType.Attr)
+    updateFilter('set', ActionType.Attr)
     expect(sidebarFilter.props.filter).to.equal(ActionType.Attr)
     expect(sidebarList.props.isFilterUpdated).to.be.true
 
-    updateFilter('add', ActionType.Style)
-    expect(sidebarFilter.props.filter).to.equal(ActionType.Attr | ActionType.Style)
-    expect(sidebarList.props.isFilterUpdated).to.be.true
-
-    updateFilter('remove', ActionType.Attr)
+    updateFilter('set', ActionType.Style)
     expect(sidebarFilter.props.filter).to.equal(ActionType.Style)
     expect(sidebarList.props.isFilterUpdated).to.be.true
 
-    updateFilter('remove', ActionType.Style)
+    updateFilter('unset', ActionType.Style)
     expect(sidebarFilter.props.filter).to.equal(ActionType.None)
     expect(sidebarList.props.isFilterUpdated).to.be.true
   })
@@ -78,19 +74,15 @@ describe('SidebarRoot', () => {
   it('should filter records by its state\'s filter and send result as records prop to SidebarList', () => {
     const updateFilter = sidebarFilter.props.updateFilter
 
-    updateFilter('add', ActionType.Attr)
+    updateFilter('set', ActionType.Attr)
     expect(sidebarList.props.records).to.deep.equal(_records.slice(0, 1))
     expect(sidebarList.props.isFilterUpdated).to.be.true
 
-    updateFilter('add', ActionType.Style)
-    expect(sidebarList.props.records).to.deep.equal(_records)
-    expect(sidebarList.props.isFilterUpdated).to.be.true
-
-    updateFilter('remove', ActionType.Attr)
+    updateFilter('set', ActionType.Style)
     expect(sidebarList.props.records).to.deep.equal(_records.slice(1, 3))
     expect(sidebarList.props.isFilterUpdated).to.be.true
 
-    updateFilter('remove', ActionType.Style)
+    updateFilter('unset', ActionType.Style)
     expect(sidebarList.props.records).to.deep.equal(_records)
     expect(sidebarList.props.isFilterUpdated).to.be.true
   })
@@ -98,18 +90,21 @@ describe('SidebarRoot', () => {
   it('should set its isFilterUpdated to false given prop records updated', () => {
     const updateFilter = sidebarFilter.props.updateFilter
 
-    updateFilter('add', ActionType.Attr)
+    // set filter
+    updateFilter('set', ActionType.Attr)
     expect(sidebarList.props.isFilterUpdated).to.be.true
 
+    // update records only
     sidebarRootWrapper.setState({
-      trackid: _trackid,
       records: [].concat(_records, actions[3].record)
     })
     expect(sidebarList.props.isFilterUpdated).to.be.false
 
-    updateFilter('add', ActionType.Style)
+    // set filter
+    updateFilter('set', ActionType.Style)
     expect(sidebarList.props.isFilterUpdated).to.be.true
 
+    // update trackid and records
     sidebarRootWrapper.setState({
       trackid: '2',
       records: []

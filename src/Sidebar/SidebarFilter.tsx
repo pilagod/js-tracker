@@ -7,7 +7,7 @@ import ActionType, { ActionTypeNames } from '../tracker/ActionType'
 interface ISidebarFilterProps {
   filter: number;
   updateFilter: (
-    action: 'add' | 'remove',
+    action: 'set' | 'unset',
     filter: ActionType
   ) => void;
 }
@@ -25,7 +25,7 @@ export default class SidebarFilter extends React.Component<ISidebarFilterProps> 
     e.preventDefault()
 
     const button = e.target as HTMLButtonElement
-    const action = button.classList.contains('selected') ? 'remove' : 'add'
+    const action = button.classList.contains('selected') ? 'unset' : 'set'
     const filter = parseInt(button.value, 10)
 
     this.props.updateFilter(action, filter)

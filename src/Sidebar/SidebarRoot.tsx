@@ -38,12 +38,12 @@ export default class SidebarRoot extends React.Component<ISidebarRootProps, ISid
   }
 
   updateFilter(
-    action: 'add' | 'remove',
+    action: 'set' | 'unset',
     filter: ActionType
   ) {
     this.setState((preState) => {
       return {
-        filter: preState.filter + filter * (action === 'add' ? 1 : -1),
+        filter: action === 'set' ? filter : ActionType.None,
         isFilterUpdated: true
       }
     })
