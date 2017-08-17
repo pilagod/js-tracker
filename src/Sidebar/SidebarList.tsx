@@ -108,12 +108,12 @@ function createRecordLink(
   linkOnClicked: (e: any) => void
 ): JSX.Element {
   return (
-    <a
-      className="record-link"
-      onClick={linkOnClicked.bind(null, scriptUrl, lineNumber)}
-    >
-      {`${scriptUrl}:${lineNumber}:${columnNumber}`}
-    </a>
+    <div className="record-link">
+      <a onClick={linkOnClicked.bind(null, scriptUrl, lineNumber)}>
+        {`${scriptUrl}:${lineNumber}:${columnNumber}`}
+      </a>
+    </div>
+
   )
 }
 

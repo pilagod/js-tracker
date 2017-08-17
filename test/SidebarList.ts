@@ -67,7 +67,10 @@ describe('SidebarList', () => {
 
       // record-link
 
-      expect(link[0].textContent).to.equal(_record.key)
+      const alink = link[0].getElementsByTagName('a')
+
+      expect(alink).to.have.length(1)
+      expect(alink[0].textContent).to.equal(_record.key)
 
       // record-info
 
@@ -110,15 +113,16 @@ describe('SidebarList', () => {
       'record-link'
     )
     links.map((link, index) => {
-      const record = _records[index]
+      const alink = link.getElementsByTagName('a')[0]
+      const {
+        scriptUrl,
+        lineNumber
+      } = _records[index].source.loc
 
-      ReactTestUtils.Simulate.click(link)
+      ReactTestUtils.Simulate.click(alink)
 
       expect(
-        openSourceSpy.calledWith(
-          record.source.loc.scriptUrl,
-          record.source.loc.lineNumber
-        )
+        openSourceSpy.calledWith(scriptUrl, lineNumber)
       ).to.be.true
     })
   })

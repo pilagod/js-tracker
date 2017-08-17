@@ -211,8 +211,7 @@ button {
 
 /* record-link */
 
-.record-link {
-    display: block;
+.record-link > a {
     cursor: pointer;
     text-decoration: underline;
 }
