@@ -207,5 +207,4 @@ class ScriptCache implements IScriptCache {
   private cache: {
     [scriptUrl: string]: string[]
   }
-
 }

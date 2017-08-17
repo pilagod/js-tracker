@@ -33,9 +33,9 @@ function listenOnDevtoolSelectionChanged() {
     const trackid = getTrackIDFromElement(element)
 
     console.group('contentscript')
-    console.group('--- On Devtool Selection Changed ---')
+    console.log('--- On Devtool Selection Changed ---')
     console.log('selected:', element)
-    console.group('------------------------------------')
+    console.log('------------------------------------')
     console.groupEnd()
 
     devtoolShouldUpdate(

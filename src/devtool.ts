@@ -1,7 +1,10 @@
 /// <reference path='../node_modules/@types/chrome/index.d.ts'/>
 /// <reference path='./background.d.ts'/>
+/// <reference path='./devtool.d.ts'/>
 
 import MessageType from './MessageType'
+import { Track_ID_Does_Not_Exist } from './tracker/TrackIDManager'
+
 import Sidebar from './Sidebar'
 
 packFilesToDist()
@@ -11,12 +14,11 @@ function packFilesToDist() {
   require('file-loader?name=sidebar.html!./Sidebar/index.html')
   require('file-loader?name=sidebar.css!./Sidebar/index.css')
 }
-
 let background
 let sidebarWindow
-let state: {
-  trackid: TrackID,
-  records: ActionRecord[]
+let state: State = {
+  trackid: Track_ID_Does_Not_Exist,
+  records: []
 }
 setupConnectionToBackground()
 setupJSTrackerSidebar()
@@ -55,13 +57,13 @@ function renderSidebar() {
 
 function updateSidebarOnMessage() {
   background.onMessage.addListener((message: Message) => {
-    console.group('devtool page')
+    // console.group('devtool page')
     console.log('--- message received from background ---')
     console.log('message:', message)
     console.log('----------------------------------------')
-    console.groupEnd()
+    // console.groupEnd()
 
-    console.group('devtool page')
+    // console.group('devtool page')
     switch (message.type) {
       case MessageType.ActionStoreUpdated:
         handleActionStoreUpdated(message)
@@ -71,7 +73,7 @@ function updateSidebarOnMessage() {
         break
       default:
     }
-    console.groupEnd()
+    // console.groupEnd()
   })
 }
 
