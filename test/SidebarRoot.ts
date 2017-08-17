@@ -13,6 +13,8 @@ import utils from './utils'
 import actions from './test-script-actions'
 
 describe('SidebarRoot', () => {
+  const SidebarRootWrapper = utils.wrapperFactory(SidebarRoot)
+
   const _trackid = '1'
   const _records: ActionRecord[] = [
     actions[0].record,
@@ -20,7 +22,6 @@ describe('SidebarRoot', () => {
     actions[2].record
   ]
   const _openSource = () => { }
-  const SidebarRootWrapper = utils.wrapperFactory(SidebarRoot)
 
   let sidebarRootWrapper, sidebarFilter, sidebarList
 

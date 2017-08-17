@@ -50,10 +50,8 @@ export default class SidebarRoot extends React.Component<ISidebarRootProps, ISid
   }
 
   render() {
-    const filteredRecords = this.props.records.filter((record) => {
-      return this.state.filter === ActionType.None
-        || this.state.filter & record.type
-    })
+    const records = this.filterRecords(this.props.records)
+
     return (
       <div className="sidebar-root">
         <SidebarFilter
@@ -62,11 +60,20 @@ export default class SidebarRoot extends React.Component<ISidebarRootProps, ISid
         />
         <SidebarList
           trackid={this.props.trackid}
-          records={filteredRecords}
+          records={records}
           isFilterUpdated={this.state.isFilterUpdated}
           openSource={this.props.openSource}
         />
       </div>
     )
+  }
+
+  /* private */
+
+  private filterRecords(records) {
+    return records.filter((record) => {
+      return this.state.filter === ActionType.None
+        || this.state.filter & record.type
+    })
   }
 }

@@ -14,11 +14,15 @@ import actions from './test-script-actions'
 
 describe('SidebarList', () => {
   const SidebarListWrapper = utils.wrapperFactory(SidebarList)
+
+  const _trackid = '1'
   const _records: ActionRecord[] = [
     actions[0].record,
     actions[1].record,
     actions[2].record
   ]
+  const _openSource = () => { }
+
   let sidebarListWrapper
 
   beforeEach(() => {
@@ -26,10 +30,10 @@ describe('SidebarList', () => {
     // might trigger component lifecycle function 
     sidebarListWrapper = ReactTestUtils.renderIntoDocument(
       React.createElement(SidebarListWrapper, {
-        trackid: '1',
+        trackid: _trackid,
         records: _records,
         isFilterUpdated: false,
-        openSource: () => { }
+        openSource: _openSource
       })
     )
   })
