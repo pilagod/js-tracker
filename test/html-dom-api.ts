@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 import * as sinon from 'sinon'
 import * as StackTrace from 'stacktrace-js'
-import OwnerManager from '../src/tracker/OwnerManager'
+import OwnerManager from '../src/tracker/private/OwnerManager'
 import {
   attachListenerTo,
   detachListenerFrom

@@ -8,7 +8,7 @@
 
 import * as fs from 'fs'
 import ActionStore from './tracker/ActionStore'
-import MessageType from './MessageType'
+import MessageType from './tracker/MessageType'
 import TrackIDFactory from './tracker/TrackIDFactory'
 // @NOTE: use utils for test purpose, karma will put tracker
 // and contentscript into same window, which causes tracker to

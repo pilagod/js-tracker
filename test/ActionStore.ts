@@ -1,11 +1,9 @@
-/// <reference path='../src/MessageType.d.ts'/>
-
 import { expect } from 'chai'
 import * as sinon from 'sinon'
 
 import ActionStore from '../src/tracker/ActionStore'
 import ActionType from '../src/tracker/ActionType'
-import MessageType from '../src/MessageType'
+import MessageType from '../src/tracker/MessageType'
 
 import actions from './test-script-actions'
 

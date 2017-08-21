@@ -1,4 +1,4 @@
-/// <reference path='./ActionStore.d.ts'/>
+/// <reference path='../ActionStore.d.ts'/>
 
 interface Owner {
   getTrackID(): TrackID;

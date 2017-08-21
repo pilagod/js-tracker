@@ -1,5 +1,6 @@
 import { expect } from 'chai'
-import ActionMap from '../src/tracker/ActionMap'
+
+import ActionMap from '../src/tracker/private/ActionMap'
 import ActionType from '../src/tracker/ActionType'
 
 describe('ActionMap', () => {

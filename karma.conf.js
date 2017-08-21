@@ -17,13 +17,11 @@ module.exports = function (config) {
     // list of files / patterns to load in the browser
     // all modules including in tests should be included here
     files: [
-      { pattern: 'src/tracker/*.ts' },
+      { pattern: 'src/tracker/**/*.ts' },
       { pattern: 'src/Sidebar/*.tsx' },
-      { pattern: 'test/*.ts' },
-
       { pattern: 'src/contentscript.ts' },
-      { pattern: 'src/MessageType.ts' },
 
+      { pattern: 'test/*.ts' },
       { pattern: 'test/test-script.js', served: true, included: false }
     ],
 
@@ -33,12 +31,11 @@ module.exports = function (config) {
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
-      'src/tracker/*[!(.d)].ts': ['karma-typescript', 'coverage'],
+      'src/tracker/**/*[!(.d)].ts': ['karma-typescript', 'coverage'],
       'src/Sidebar/*.tsx': ['karma-typescript', 'coverage'],
-      'test/*.ts': ['karma-typescript'],
-
       'src/contentscript.ts': ['karma-typescript', 'coverage'],
-      'src/MessageType.ts': ['karma-typescript', 'coverage']
+
+      'test/*.ts': ['karma-typescript']
     },
 
     karmaTypescriptConfig: {

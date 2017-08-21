@@ -6,6 +6,7 @@ import * as React from 'react'
 import * as ReactTestUtils from 'react-dom/test-utils'
 
 import ActionType from '../src/tracker/ActionType'
+
 import SidebarList from '../src/Sidebar/SidebarList'
 
 import utils from './utils'

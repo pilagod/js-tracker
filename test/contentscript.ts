@@ -4,7 +4,7 @@ import { expect } from 'chai'
 import * as sinon from 'sinon'
 
 import ActionStore from '../src/tracker/ActionStore'
-import MessageType from '../src/MessageType'
+import MessageType from '../src/tracker/MessageType'
 import TrackIDFactory from '../src/tracker/TrackIDFactory'
 import { sendActionInfoToContentscript } from '../src/tracker/NativeUtils'
 

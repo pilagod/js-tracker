@@ -1,11 +1,11 @@
 /// <reference path='./index.d.ts'/>
 
 import * as StackTrace from 'stacktrace-js'
-import ActionMap from './ActionMap'
-import ActionTagMap from './ActionTagMap'
-import Anomalies from './Anomalies'
-import OwnerManager from './OwnerManager'
-import ShadowElement from './ShadowElement'
+import ActionMap from './private/ActionMap'
+import ActionTagMap from './private/ActionTagMap'
+import Anomalies from './private/Anomalies'
+import OwnerManager from './private/OwnerManager'
+import ShadowElement from './private/ShadowElement'
 import {
   attachAttr,
   sendActionInfoToContentscript,

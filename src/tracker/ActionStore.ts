@@ -1,22 +1,15 @@
 /// <reference path='./ActionStore.d.ts'/>
-/// <reference path='../MessageType.d.ts'/>
+/// <reference path='./MessageType.d.ts'/>
 
-import ActionMap from './ActionMap'
-import MessageType from '../MessageType'
+import ActionMap from './private/ActionMap'
+import MessageType from './MessageType'
 
 export default class ActionStore implements IActionStore {
 
-  constructor(
-    // devtoolShouldUpdate: (
-    //   type: MessageType,
-    //   trackid: TrackID,
-    //   records: ActionRecord[]
-    // ) => void
-  ) {
+  constructor() {
     this._store = new Store()
     this._locMap = new LocMap()
     this._scriptCache = new ScriptCache()
-    // this._devtoolShouldUpdate = devtoolShouldUpdate
   }
 
   /* public */
@@ -29,11 +22,6 @@ export default class ActionStore implements IActionStore {
     if (!this._locMap.has(trackid, record.key)) {
       this._register(trackid, record)
       return true
-      // this._devtoolShouldUpdate(
-      //   MessageType.ActionStoreUpdated,
-      //   trackid,
-      //   this.get(trackid)
-      // )
     }
     return false
   }
@@ -55,11 +43,6 @@ export default class ActionStore implements IActionStore {
   private _store: IStore
   private _locMap: ILocMap
   private _scriptCache: IScriptCache
-  // private _devtoolShouldUpdate: (
-  //   type: MessageType,
-  //   trackid: TrackID,
-  //   records: ActionRecord[]
-  // ) => void
 
   private _register(trackid: TrackID, record: ActionRecord): void {
     this._store.add(trackid, record)
