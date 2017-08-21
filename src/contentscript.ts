@@ -14,7 +14,7 @@ import TrackIDFactory from './tracker/TrackIDFactory'
 // and contentscript into same window, which causes tracker to
 // track HTML DOM API in contentscript. In real environment,
 // tracker and contentscript are in different window
-import { attachListenerTo } from './tracker/utils'
+import { attachListenerTo } from './tracker/NativeUtils'
 
 let selected: Element
 let selectedID: TrackID

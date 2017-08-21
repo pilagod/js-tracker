@@ -1,7 +1,7 @@
 /// <reference path='./Owner.d.ts'/>
 
 import ShadowElement from './ShadowElement'
-import { setTrackID } from './utils'
+import { setTrackID } from './NativeUtils'
 
 export default class OwnerInstance implements Owner {
   /* static */

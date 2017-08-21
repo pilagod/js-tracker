@@ -5,7 +5,7 @@ import OwnerManager from '../src/tracker/OwnerManager'
 import {
   attachListenerTo,
   detachListenerFrom
-} from '../src/tracker/utils'
+} from '../src/tracker/NativeUtils'
 
 describe('HTML DOM API tracker', () => {
   let msgs: ActionInfo[]

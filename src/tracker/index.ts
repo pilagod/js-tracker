@@ -10,7 +10,7 @@ import {
   attachAttr,
   sendActionInfoToContentscript,
   setAttrValue
-} from './utils'
+} from './NativeUtils'
 
 setupShadowElement()
 setupWindow()
