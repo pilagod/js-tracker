@@ -1,6 +1,6 @@
 /// <reference path='./ActionStore.d.ts'/>
 
-import TrackIDManager from './TrackIDManager'
+import TrackIDFactory from './TrackIDFactory'
 
 /**
  * A series of actions bypass tracker's record process
@@ -40,6 +40,6 @@ export const setAttrValue = (function (setValue) {
 
 export const setTrackID = (function (setAttribute) {
   return function (target: Element) {
-    return setAttribute.call(target, 'trackid', TrackIDManager.generateID())
+    return setAttribute.call(target, 'trackid', TrackIDFactory.generateID())
   }
 })(Element.prototype.setAttribute)

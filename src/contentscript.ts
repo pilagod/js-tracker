@@ -9,7 +9,7 @@
 import * as fs from 'fs'
 import ActionStore from './tracker/ActionStore'
 import MessageType from './MessageType'
-import { Track_ID_Does_Not_Exist } from './tracker/TrackIDManager'
+import TrackIDFactory from './tracker/TrackIDFactory'
 // @NOTE: use utils for test purpose, karma will put tracker
 // and contentscript into same window, which causes tracker to
 // track HTML DOM API in contentscript. In real environment,
@@ -96,9 +96,8 @@ function devtoolShouldUpdate(
 function getTrackIDFrom(element: Element) {
   const trackid =
     element instanceof Element
-      ? element.getAttribute('trackid')
-      : null
-  return trackid || Track_ID_Does_Not_Exist
+      ? element.getAttribute('trackid') : null
+  return trackid || TrackIDFactory.generateNullID()
 }
 
 function injectTrackerScript() {

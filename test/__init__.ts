@@ -1,10 +1,10 @@
 import { expect } from 'chai'
 import * as sinon from 'sinon'
 
-import TrackIDManager from '../src/tracker/TrackIDManager'
+import TrackIDFactory from '../src/tracker/TrackIDFactory'
 
 beforeEach(function () {
-  (<any>TrackIDManager).resetID()
+  (<any>TrackIDFactory).resetID()
 })
 
 describe('__init__', function () {

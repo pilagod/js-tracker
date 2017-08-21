@@ -3,7 +3,7 @@
 /// <reference path='./devtool.d.ts'/>
 
 import MessageType from './MessageType'
-import { Track_ID_Does_Not_Exist } from './tracker/TrackIDManager'
+import TrackIDFactory from './tracker/TrackIDFactory'
 
 import Sidebar from './Sidebar'
 
@@ -17,7 +17,7 @@ function packFilesToDist() {
 let background
 let sidebarWindow
 let state: State = {
-  trackid: Track_ID_Does_Not_Exist,
+  trackid: TrackIDFactory.generateNullID(),
   records: []
 }
 setupConnectionToBackground()

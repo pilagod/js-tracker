@@ -1,7 +1,6 @@
 /// <reference path='./Owner.d.ts'/>
 
 import ShadowElement from './ShadowElement'
-import { Track_ID_Does_Not_Exist } from './TrackIDManager'
 import { setTrackID } from './utils'
 
 export default class OwnerInstance implements Owner {

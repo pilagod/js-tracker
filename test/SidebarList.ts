@@ -7,7 +7,6 @@ import * as ReactTestUtils from 'react-dom/test-utils'
 
 import ActionType from '../src/tracker/ActionType'
 import SidebarList from '../src/Sidebar/SidebarList'
-import { Track_ID_Does_Not_Exist } from '../src/tracker/TrackIDManager'
 
 import utils from './utils'
 import actions from './test-script-actions'

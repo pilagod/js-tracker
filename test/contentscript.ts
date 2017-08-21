@@ -5,7 +5,7 @@ import * as sinon from 'sinon'
 
 import ActionStore from '../src/tracker/ActionStore'
 import MessageType from '../src/MessageType'
-import { Track_ID_Does_Not_Exist } from '../src/tracker/TrackIDManager'
+import TrackIDFactory from '../src/tracker/TrackIDFactory'
 import { sendActionInfoToContentscript } from '../src/tracker/utils'
 
 import actions from './test-script-actions'
@@ -168,21 +168,21 @@ describe('contentscript', () => {
       ).to.be.true
     })
     // @NOTE: this case will happen when devtool first opened
-    it('should send message with { trackid: Track_ID_Does_Not_Exist, records: [] } given undefined element', () => {
+    it('should send message with { trackid: ${NullTrackID}, records: [] } given undefined element', () => {
       window.onDevtoolSelectionChanged(undefined)
 
       expect(
         outputToBackground.calledWith(
           <Message>{
             type,
-            trackid: Track_ID_Does_Not_Exist,
+            trackid: TrackIDFactory.generateNullID(),
             records: []
           }
         )
       ).to.be.true
     })
 
-    it('should send message with { trackid: Track_ID_Does_Not_Exist, records: [] } given element has no trackid', () => {
+    it('should send message with { trackid: ${NullTrackID}, records: [] } given element has no trackid', () => {
       const div = document.createElement('div')
 
       sandbox.stub(div, 'getAttribute')
@@ -195,7 +195,7 @@ describe('contentscript', () => {
         outputToBackground.calledWith(
           <Message>{
             type,
-            trackid: Track_ID_Does_Not_Exist,
+            trackid: TrackIDFactory.generateNullID(),
             records: []
           }
         )
