@@ -6,7 +6,11 @@ import ActionTagMap from './ActionTagMap'
 import Anomalies from './Anomalies'
 import OwnerManager from './OwnerManager'
 import ShadowElement from './ShadowElement'
-import { attachAttr, setAttrValue } from './utils'
+import {
+  attachAttr,
+  sendActionInfoToContentscript,
+  setAttrValue
+} from './utils'
 
 setupShadowElement()
 setupWindow()
@@ -122,7 +126,7 @@ function record(
   if (!owner.hasTrackID()) {
     owner.setTrackID()
   }
-  window.postMessage(
+  sendActionInfoToContentscript(
     <ActionInfo>{
       trackid: owner.getTrackID(),
       target: data.target,
@@ -130,7 +134,8 @@ function record(
       actionTag: data.actionTag,
       merge: data.merge,
       stacktrace: StackTrace.getSync()
-    }, '*')
+    }
+  )
 }
 
 /**

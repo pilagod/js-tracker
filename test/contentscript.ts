@@ -6,21 +6,47 @@ import * as sinon from 'sinon'
 import ActionStore from '../src/tracker/ActionStore'
 import MessageType from '../src/MessageType'
 import { Track_ID_Does_Not_Exist } from '../src/tracker/TrackIDManager'
+import { sendActionInfoToContentscript } from '../src/tracker/utils'
 
 import actions from './test-script-actions'
 
 describe('contentscript', () => {
+  const chrome = window.chrome
+  const sandbox = sinon.sandbox.create()
+  const inputFromTracker = sendActionInfoToContentscript
+  const outputToBackground = sinon.spy()
+
+  before(() => {
+    (<any>window).chrome = {
+      runtime: {
+        sendMessage: outputToBackground
+      }
+    }
+  })
+
+  after(() => {
+    (<any>window).chrome = chrome
+  })
+
+  afterEach(() => {
+    sandbox.restore()
+    outputToBackground.reset()
+  })
+
   describe('on message from tracker', () => {
-    const inputFromTracker = (postMessage => info => postMessage(info, '*'))(window.postMessage);
     const registerFromActionInfo = ActionStore.prototype.registerFromActionInfo
-    const registerFromActionInfoSpy = sinon.spy()
+    const registerFromActionInfoStub = sinon.stub()
 
     before(() => {
-      ActionStore.prototype.registerFromActionInfo = registerFromActionInfoSpy
+      ActionStore.prototype.registerFromActionInfo = registerFromActionInfoStub
     })
 
     after(() => {
       ActionStore.prototype.registerFromActionInfo = registerFromActionInfo
+    })
+
+    afterEach(() => {
+      registerFromActionInfoStub.reset()
     })
 
     it('should call ActionStore.registerFromActionInfo with info collected from tracker', (done) => {
@@ -28,9 +54,82 @@ describe('contentscript', () => {
 
       setTimeout(() => {
         expect(
-          registerFromActionInfoSpy
+          registerFromActionInfoStub
             .calledWith(actions[0].info)
         ).to.be.true
+        done()
+      }, 10)
+    })
+
+    it('should send ActionStoreUpdated message with info.trackid and new records to background given registering successfully', (done) => {
+      registerFromActionInfoStub.returns(true)
+
+      sandbox.stub(ActionStore.prototype, 'get')
+        .withArgs('1')
+        .returns([actions[0].record])
+
+      inputFromTracker(actions[0].info)
+
+      setTimeout(() => {
+        expect(
+          outputToBackground
+            .calledAfter(registerFromActionInfoStub)
+        ).to.be.true
+        expect(
+          outputToBackground.calledWith(
+            <Message>{
+              type: MessageType.ActionStoreUpdated,
+              trackid: '1',
+              records: [actions[0].record]
+            })
+        ).to.be.true
+        done()
+      }, 10)
+    })
+
+    it('should send DevtoolForceUpdate message with info.trackid and new records to background given selected element has no trackid before', (done) => {
+      const div = document.createElement('div')
+
+      window.onDevtoolSelectionChanged(div)
+
+      registerFromActionInfoStub.returns(true)
+
+      sandbox.stub(div, 'getAttribute')
+        .withArgs('trackid')
+        .returns('1')
+
+      sandbox.stub(ActionStore.prototype, 'get')
+        .withArgs('1')
+        .returns([actions[0].record])
+
+      inputFromTracker(actions[0].info)
+
+      setTimeout(() => {
+        expect(
+          outputToBackground
+            .calledAfter(registerFromActionInfoStub)
+        ).to.be.true
+        expect(
+          outputToBackground.calledWith(
+            <Message>{
+              type: MessageType.DevtoolForceUpdate,
+              trackid: '1',
+              records: [actions[0].record]
+            })
+        ).to.be.true
+        done()
+      }, 10)
+    })
+
+    it('should not send any message to background given registering unsuccessfully', (done) => {
+      registerFromActionInfoStub.returns(false)
+
+      inputFromTracker(actions[0].info)
+
+      setTimeout(() => {
+        expect(
+          outputToBackground.called
+        ).to.be.false
         done()
       }, 10)
     })
@@ -38,26 +137,6 @@ describe('contentscript', () => {
 
   describe('on devtool selection changed', () => {
     const type = MessageType.DevtoolSelectionChanged
-    const chrome = window.chrome
-    const sandbox = sinon.sandbox.create()
-    const outputToBackground = sinon.spy()
-
-    before(() => {
-      (<any>window).chrome = {
-        runtime: {
-          sendMessage: outputToBackground
-        }
-      }
-    })
-
-    after(() => {
-      (<any>window).chrome = chrome
-    })
-
-    afterEach(() => {
-      sandbox.restore()
-      outputToBackground.reset()
-    })
 
     it('should set onDevtoolSelectionChanged on window', () => {
       expect(window.onDevtoolSelectionChanged).to.be.a('function')

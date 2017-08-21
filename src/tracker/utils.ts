@@ -1,3 +1,5 @@
+/// <reference path='./ActionStore.d.ts'/>
+
 import TrackIDManager from './TrackIDManager'
 
 /**
@@ -9,6 +11,26 @@ export const attachAttr = (function (setAttributeNode) {
     setAttributeNode.call(container, attr)
   }
 })(Element.prototype.setAttributeNode)
+
+export const attachListenerTo = (function (addEventListener) {
+  return function (target: EventTarget, event: string, listener: (e: Event) => void) {
+    addEventListener.call(target, event, listener)
+  }
+})(EventTarget.prototype.addEventListener)
+
+export const detachListenerFrom = (function (removeEventListener) {
+  return function (target: EventTarget, event: string, listener: (e: Event) => void) {
+    removeEventListener.call(target, event, listener)
+  }
+})(EventTarget.prototype.removeEventListener)
+
+export const sendActionInfoToContentscript = (function (context, dispatchEvent) {
+  return function (info: ActionInfo) {
+    dispatchEvent.call(context, new CustomEvent('js-tracker', {
+      detail: { info }
+    }))
+  }
+})(window, EventTarget.prototype.dispatchEvent)
 
 export const setAttrValue = (function (setValue) {
   return function (attr: Attr, value: string) {

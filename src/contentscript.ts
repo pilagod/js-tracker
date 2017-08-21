@@ -10,8 +10,16 @@ import * as fs from 'fs'
 import ActionStore from './tracker/ActionStore'
 import MessageType from './MessageType'
 import { Track_ID_Does_Not_Exist } from './tracker/TrackIDManager'
+// @NOTE: use utils for test purpose, karma will put tracker
+// and contentscript into same window, which causes tracker to
+// track HTML DOM API in contentscript. In real environment,
+// tracker and contentscript are in different window
+import { attachListenerTo } from './tracker/utils'
 
-const store = new ActionStore(devtoolShouldUpdate)
+let selected: Element
+let selectedID: TrackID
+
+const store = new ActionStore()
 
 listenOnActionTriggered()
 listenOnDevtoolSelectionChanged()
@@ -23,14 +31,36 @@ try {
 }
 
 function listenOnActionTriggered() {
-  window.addEventListener('message', async (event) => {
-    await store.registerFromActionInfo(event.data as ActionInfo)
+  attachListenerTo(window, 'js-tracker', async (event: CustomEvent) => {
+    const info: ActionInfo = event.detail.info
+
+    const shouldUpdateDevtool =
+      await store.registerFromActionInfo(info)
+
+    if (shouldUpdateDevtool) {
+      const type =
+        isSelectedFirstUpdated(selectedID, info.trackid)
+          ? MessageType.DevtoolForceUpdate
+          : MessageType.ActionStoreUpdated
+
+      devtoolShouldUpdate(
+        type,
+        info.trackid,
+        store.get(info.trackid)
+      )
+    }
   })
+}
+
+function isSelectedFirstUpdated(oldID: TrackID, newID: TrackID) {
+  const curID = getTrackIDFrom(selected)
+
+  return curID === newID && curID !== selectedID
 }
 
 function listenOnDevtoolSelectionChanged() {
   window.onDevtoolSelectionChanged = (element: Element) => {
-    const trackid = getTrackIDFromElement(element)
+    const trackid = selectedID = getTrackIDFrom(selected = element)
 
     console.group('contentscript')
     console.log('--- On Devtool Selection Changed ---')
@@ -63,7 +93,7 @@ function devtoolShouldUpdate(
   })
 }
 
-function getTrackIDFromElement(element: Element) {
+function getTrackIDFrom(element: Element) {
   const trackid =
     element instanceof Element
       ? element.getAttribute('trackid')

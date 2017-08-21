@@ -34,11 +34,11 @@ interface IActionStore {
   register(
     trackid: TrackID,
     record: ActionRecord
-  ): void;
+  ): Promise<boolean>;
 
   registerFromActionInfo(
     info: ActionInfo
-  ): void;
+  ): Promise<boolean>;
 }
 
 interface IStore {

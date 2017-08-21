@@ -7,16 +7,16 @@ import MessageType from '../MessageType'
 export default class ActionStore implements IActionStore {
 
   constructor(
-    devtoolShouldUpdate: (
-      type: MessageType,
-      trackid: TrackID,
-      records: ActionRecord[]
-    ) => void
+    // devtoolShouldUpdate: (
+    //   type: MessageType,
+    //   trackid: TrackID,
+    //   records: ActionRecord[]
+    // ) => void
   ) {
     this._store = new Store()
     this._locMap = new LocMap()
     this._scriptCache = new ScriptCache()
-    this._devtoolShouldUpdate = devtoolShouldUpdate
+    // this._devtoolShouldUpdate = devtoolShouldUpdate
   }
 
   /* public */
@@ -25,25 +25,27 @@ export default class ActionStore implements IActionStore {
     return this._store.get(trackid)
   }
 
-  public async register(trackid: TrackID, record: ActionRecord): Promise<void> {
+  public async register(trackid: TrackID, record: ActionRecord): Promise<boolean> {
     if (!this._locMap.has(trackid, record.key)) {
       this._register(trackid, record)
-      this._devtoolShouldUpdate(
-        MessageType.ActionStoreUpdated,
-        trackid,
-        this.get(trackid)
-      )
+      return true
+      // this._devtoolShouldUpdate(
+      //   MessageType.ActionStoreUpdated,
+      //   trackid,
+      //   this.get(trackid)
+      // )
     }
+    return false
   }
 
-  public async registerFromActionInfo(info: ActionInfo): Promise<void> {
+  public async registerFromActionInfo(info: ActionInfo): Promise<boolean> {
     if (info.merge) {
       this._merge(info.merge, info.trackid)
     }
     const record: ActionRecord =
       await this._parseActionInfoIntoActionRecord(info)
 
-    await this.register(info.trackid, record)
+    return await this.register(info.trackid, record)
   }
 
   /* private */
@@ -53,11 +55,11 @@ export default class ActionStore implements IActionStore {
   private _store: IStore
   private _locMap: ILocMap
   private _scriptCache: IScriptCache
-  private _devtoolShouldUpdate: (
-    type: MessageType,
-    trackid: TrackID,
-    records: ActionRecord[]
-  ) => void
+  // private _devtoolShouldUpdate: (
+  //   type: MessageType,
+  //   trackid: TrackID,
+  //   records: ActionRecord[]
+  // ) => void
 
   private _register(trackid: TrackID, record: ActionRecord): void {
     this._store.add(trackid, record)

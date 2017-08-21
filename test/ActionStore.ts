@@ -10,16 +10,17 @@ import MessageType from '../src/MessageType'
 import actions from './test-script-actions'
 
 describe('ActionStore', () => {
-  const devtoolShouldUpdateSpy = sinon.spy()
+  // const devtoolShouldUpdateSpy = sinon.spy()
 
   let actionStore: IActionStore
 
   beforeEach(() => {
-    actionStore = new ActionStore(devtoolShouldUpdateSpy)
+    // actionStore = new ActionStore(devtoolShouldUpdateSpy)
+    actionStore = new ActionStore()
   })
 
   afterEach(() => {
-    devtoolShouldUpdateSpy.reset()
+    // devtoolShouldUpdateSpy.reset()
   })
 
   describe('get', () => {
@@ -60,6 +61,22 @@ describe('ActionStore', () => {
 
       expect(actionStore.get('1')).to.deep.equal([actions[0].record])
       expect(actionStore.get('2')).to.deep.equal([actions[0].record])
+    })
+
+    it('should return true given record added successfully', async () => {
+      const shouldSuccess =
+        await actionStore.register('1', actions[0].record)
+
+      expect(shouldSuccess).to.be.true
+    })
+
+    it('should return false given record added has already been in ActionStore', async () => {
+      await actionStore.register('1', actions[0].record)
+
+      const shouldFail =
+        await actionStore.register('1', actions[0].record)
+
+      expect(shouldFail).to.be.false
     })
   })
 
@@ -121,41 +138,57 @@ describe('ActionStore', () => {
 
       expect(actionStore.get('1')).to.deep.equal([actions[0].record])
     })
-  })
 
-  describe('devtool should be updated upon updating ActionStore', () => {
-    const type = MessageType.ActionStoreUpdated
+    it('should return true given info added successfully', async () => {
+      const shouldSuccess =
+        await actionStore.registerFromActionInfo(actions[0].info)
 
-    it('should call devtoolShouldUpdate with message type ActionStoreUpdated, updated trackid and records when ActionStore is updated', async () => {
-      await actionStore.register('1', actions[0].record)
-
-      expect(
-        devtoolShouldUpdateSpy
-          .calledWith(type, '1', [actions[0].record])
-      ).to.be.true
-
-      await actionStore.register('1', actions[1].record)
-
-      expect(
-        devtoolShouldUpdateSpy
-          .calledWith(type, '1', [actions[1].record, actions[0].record])
-      ).to.be.true
+      expect(shouldSuccess).to.be.true
     })
 
-    it('should call devtoolShouldUpdate with updated trackid and records when ActionStore is updated by registerFromActionInfo', async () => {
+    it('should return false given record added has already been in ActionStore', async () => {
       await actionStore.registerFromActionInfo(actions[0].info)
 
-      expect(
-        devtoolShouldUpdateSpy
-          .calledWith(type, '1', [actions[0].record])
-      ).to.be.true
+      const shouldFail =
+        await actionStore.registerFromActionInfo(actions[0].info)
 
-      await actionStore.registerFromActionInfo(actions[1].info)
-
-      expect(
-        devtoolShouldUpdateSpy
-          .calledWith(type, '1', [actions[1].record, actions[0].record])
-      ).to.be.true
+      expect(shouldFail).to.be.false
     })
   })
+
+  // describe('devtool should be updated upon updating ActionStore', () => {
+  //   const type = MessageType.ActionStoreUpdated
+
+  //   it('should call devtoolShouldUpdate with message type ActionStoreUpdated, updated trackid and records when ActionStore is updated', async () => {
+  //     await actionStore.register('1', actions[0].record)
+
+  //     expect(
+  //       devtoolShouldUpdateSpy
+  //         .calledWith(type, '1', [actions[0].record])
+  //     ).to.be.true
+
+  //     await actionStore.register('1', actions[1].record)
+
+  //     expect(
+  //       devtoolShouldUpdateSpy
+  //         .calledWith(type, '1', [actions[1].record, actions[0].record])
+  //     ).to.be.true
+  //   })
+
+  //   it('should call devtoolShouldUpdate with updated trackid and records when ActionStore is updated by registerFromActionInfo', async () => {
+  //     await actionStore.registerFromActionInfo(actions[0].info)
+
+  //     expect(
+  //       devtoolShouldUpdateSpy
+  //         .calledWith(type, '1', [actions[0].record])
+  //     ).to.be.true
+
+  //     await actionStore.registerFromActionInfo(actions[1].info)
+
+  //     expect(
+  //       devtoolShouldUpdateSpy
+  //         .calledWith(type, '1', [actions[1].record, actions[0].record])
+  //     ).to.be.true
+  //   })
+  // })
 })

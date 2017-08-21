@@ -2,18 +2,30 @@ import { expect } from 'chai'
 import * as sinon from 'sinon'
 import * as StackTrace from 'stacktrace-js'
 import OwnerManager from '../src/tracker/OwnerManager'
+import {
+  attachListenerTo,
+  detachListenerFrom
+} from '../src/tracker/utils'
 
 describe('HTML DOM API tracker', () => {
   let msgs: ActionInfo[]
 
+  const trackerListener = (event: CustomEvent) => {
+    msgs.push(event.detail.info)
+  }
+
   before(() => {
-    (<sinon.SinonStub>window.postMessage).callsFake((msg) => {
-      msgs.push(msg)
+    // @NOTE: dispatch js-tracker info here will modify 
+    // ActionStore in contentscript of contentscript tests,
+    // but now contentscript test stub all ActionStore methods,
+    // so it is not a problem currently.
+    attachListenerTo(window, 'js-tracker', (event: CustomEvent) => {
+      msgs.push(event.detail.info)
     })
   })
 
   after(() => {
-    (<sinon.SinonStub>window.postMessage).reset()
+    detachListenerFrom(window, 'js-tracker', trackerListener)
   })
 
   beforeEach(() => {
@@ -36,10 +48,6 @@ describe('HTML DOM API tracker', () => {
         .getOwner(expected.caller)
         .getTrackID()
     ).to.equal(expected.trackid)
-
-    // expect(owner.dataset)
-    // .to.have.property('_trackid')
-    // .to.equal(expected.trackid)
 
     expect(got)
       .to.have.property('trackid')
