@@ -9,15 +9,15 @@ class TrackIDFactory implements ITrackIDFactory {
 
   /* public */
 
-  public generateID() {
-    return (++this.trackid).toString()
-  }
-
   public generateNullID() {
     return 'Track_ID_Does_Not_Exist'
   }
 
   /* private */
+
+  private generateID() {
+    return (++this.trackid).toString()
+  }
 
   private resetID() {
     this.trackid = 0

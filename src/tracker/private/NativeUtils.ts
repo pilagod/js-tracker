@@ -40,6 +40,6 @@ export const setAttrValue = (function (setValue) {
 
 export const setTrackID = (function (setAttribute) {
   return function (target: Element) {
-    return setAttribute.call(target, 'trackid', TrackIDFactory.generateID())
+    return setAttribute.call(target, 'trackid', (<any>TrackIDFactory).generateID())
   }
 })(Element.prototype.setAttribute)
