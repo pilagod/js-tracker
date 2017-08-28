@@ -1,3 +1,6 @@
+// Karma configuration
+// Generated on Fri Sep 02 2016 13:05:56 GMT+0800 (CST)
+
 module.exports = {
   // base path that will be used to resolve all patterns (eg. files, exclude)
   basePath: '../',

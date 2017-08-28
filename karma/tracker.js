@@ -1,7 +1,6 @@
-var config = require('./config')
 var configFactory = require('./configFactory')
 
-module.exports = configFactory(Object.assign({}, config, {
+module.exports = configFactory({
   files: [
     /* targets */
     { pattern: 'src/tracker/*[!(.d)].ts' },
@@ -26,4 +25,4 @@ module.exports = configFactory(Object.assign({}, config, {
     /* tests */
     'test/tracker/*.ts': ['karma-typescript']
   }
-}))
+})
