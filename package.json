@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "karma start",
+    "test-tracker": "karma start ./karma/tracker.js",
     "build": "node webpack/compiler.js",
     "watch": "webpack --watch",
     "dev": "webpack-dev-server --port 3000",
