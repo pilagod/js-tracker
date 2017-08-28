@@ -3,7 +3,7 @@
 
 import * as React from 'react'
 
-import ActionType, { ActionTypeNames } from '../tracker/ActionType'
+import ActionType, { ActionTypeNames } from '../tracker/types/ActionType'
 
 interface ISidebarListProps {
   trackid: TrackID;

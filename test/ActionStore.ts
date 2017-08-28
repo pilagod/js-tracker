@@ -2,8 +2,8 @@ import { expect } from 'chai'
 import * as sinon from 'sinon'
 
 import ActionStore from '../src/tracker/ActionStore'
-import ActionType from '../src/tracker/ActionType'
-import MessageType from '../src/tracker/MessageType'
+import ActionType from '../src/tracker/types/ActionType'
+import MessageType from '../src/tracker/types/MessageType'
 
 import actions from './test-script-actions'
 

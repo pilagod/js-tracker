@@ -1,8 +1,8 @@
-/// <reference path='../tracker/ActionType.d.ts'/>
+/// <reference path='../tracker/types/ActionType.d.ts'/>
 
 import * as React from 'react'
 
-import ActionType, { ActionTypeNames } from '../tracker/ActionType'
+import ActionType, { ActionTypeNames } from '../tracker/types/ActionType'
 
 interface ISidebarFilterProps {
   filter: number;

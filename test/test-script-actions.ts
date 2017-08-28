@@ -1,7 +1,7 @@
 /// <reference path='../src/tracker/ActionStore.d.ts'/>
 
 import StackFrame from 'stackframe'
-import ActionType from '../src/tracker/ActionType'
+import ActionType from '../src/tracker/types/ActionType'
 
 const PORT = 9876
 const HOST = `http://localhost:${PORT}`

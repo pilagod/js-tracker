@@ -7,9 +7,10 @@
 // the only connection of these two are native HTML DOM API
 
 import * as fs from 'fs'
+
 import ActionStore from './tracker/ActionStore'
-import MessageType from './tracker/MessageType'
 import TrackIDFactory from './tracker/TrackIDFactory'
+import MessageType from './tracker/types/MessageType'
 // @NOTE: use utils for test purpose, karma will put tracker
 // and contentscript into same window, which causes tracker to
 // track HTML DOM API in contentscript. In real environment,

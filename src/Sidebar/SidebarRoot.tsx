@@ -3,7 +3,7 @@
 
 import * as React from 'react'
 
-import ActionType from '../tracker/ActionType'
+import ActionType from '../tracker/types/ActionType'
 
 import SidebarFilter from './SidebarFilter'
 import SidebarList from './SidebarList'

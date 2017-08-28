@@ -1,8 +1,8 @@
 /// <reference path='./ActionStore.d.ts'/>
-/// <reference path='./MessageType.d.ts'/>
+/// <reference path='./types/MessageType.d.ts'/>
 
 import ActionMap from './private/ActionMap'
-import MessageType from './MessageType'
+import MessageType from './types/MessageType'
 
 export default class ActionStore implements IActionStore {
 

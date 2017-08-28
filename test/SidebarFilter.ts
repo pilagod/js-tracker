@@ -3,7 +3,7 @@ import * as sinon from 'sinon'
 import * as React from 'react'
 import * as ReactTestUtils from 'react-dom/test-utils'
 
-import ActionType from '../src/tracker/ActionType'
+import ActionType from '../src/tracker/types/ActionType'
 
 import SidebarFilter from '../src/Sidebar/SidebarFilter'
 
