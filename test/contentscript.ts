@@ -1,12 +1,12 @@
-/// <reference path='../src/background.d.ts'/>
+/// <reference path='../src/extension/background.d.ts'/>
 
 import { expect } from 'chai'
 import * as sinon from 'sinon'
 
 import ActionStore from '../src/tracker/public/ActionStore'
-import MessageType from '../src/MessageType'
 import TrackIDFactory from '../src/tracker/public/TrackIDFactory'
 import { sendActionInfoToContentscript } from '../src/tracker/NativeUtils'
+import MessageType from '../src/extension/MessageType'
 
 import actions from './test-script-actions'
 

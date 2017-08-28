@@ -18,9 +18,9 @@ module.exports = function (config) {
     // all modules including in tests should be included here
     files: [
       { pattern: 'src/tracker/**/*.ts' },
-      { pattern: 'src/Sidebar/*.tsx' },
-      { pattern: 'src/contentscript.ts' },
-      { pattern: 'src/MessageType.ts' },
+      { pattern: 'src/extension/Sidebar/*.tsx' },
+      { pattern: 'src/extension/contentscript.ts' },
+      { pattern: 'src/extension/MessageType.ts' },
 
       { pattern: 'test/*.ts' },
       { pattern: 'test/test-script.js', served: true, included: false }
@@ -33,9 +33,9 @@ module.exports = function (config) {
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
       'src/tracker/**/*[!(.d)].ts': ['karma-typescript', 'coverage'],
-      'src/Sidebar/*.tsx': ['karma-typescript', 'coverage'],
-      'src/contentscript.ts': ['karma-typescript', 'coverage'],
-      'src/MessageType.ts': ['karma-typescript', 'coverage'],
+      'src/extension/Sidebar/*.tsx': ['karma-typescript', 'coverage'],
+      'src/extension/contentscript.ts': ['karma-typescript', 'coverage'],
+      'src/extension/MessageType.ts': ['karma-typescript', 'coverage'],
 
       'test/*.ts': ['karma-typescript']
     },

@@ -1,9 +1,9 @@
-/// <reference path='../tracker/public/ActionStore.d.ts'/>
-/// <reference path='../tracker/public/TrackIDFactory.d.ts'/>
+/// <reference path='../../tracker/public/ActionStore.d.ts'/>
+/// <reference path='../../tracker/public/TrackIDFactory.d.ts'/>
 
 import * as React from 'react'
 
-import ActionType from '../tracker/public/ActionType'
+import ActionType from '../../tracker/public/ActionType'
 
 import SidebarFilter from './SidebarFilter'
 import SidebarList from './SidebarList'

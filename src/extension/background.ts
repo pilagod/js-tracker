@@ -1,4 +1,4 @@
-/// <reference path='../node_modules/@types/chrome/index.d.ts' />
+/// <reference path='../../node_modules/@types/chrome/index.d.ts' />
 /// <reference path='./background.d.ts'/>
 
 class ConnectionCache {

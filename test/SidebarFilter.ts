@@ -5,7 +5,7 @@ import * as ReactTestUtils from 'react-dom/test-utils'
 
 import ActionType from '../src/tracker/public/ActionType'
 
-import SidebarFilter from '../src/Sidebar/SidebarFilter'
+import SidebarFilter from '../src/extension/Sidebar/SidebarFilter'
 
 import utils from './utils'
 

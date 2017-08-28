@@ -1,4 +1,4 @@
-/// <reference path='../tracker/public/ActionStore.d.ts'/>
+/// <reference path='../../tracker/public/ActionStore.d.ts'/>
 
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'

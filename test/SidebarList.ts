@@ -7,7 +7,7 @@ import * as ReactTestUtils from 'react-dom/test-utils'
 
 import ActionType from '../src/tracker/public/ActionType'
 
-import SidebarList from '../src/Sidebar/SidebarList'
+import SidebarList from '../src/extension/Sidebar/SidebarList'
 
 import utils from './utils'
 import actions from './test-script-actions'
