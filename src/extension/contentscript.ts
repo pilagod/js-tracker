@@ -15,7 +15,7 @@ import MessageType from './MessageType'
 // and contentscript into same window, which causes tracker to
 // track HTML DOM API in contentscript. In real environment,
 // tracker and contentscript are in different window
-import { attachListenerTo } from '../tracker/NativeUtils'
+import { attachListenerTo } from '../tracker/private/NativeUtils'
 
 let selected: Element
 let selectedID: TrackID

@@ -5,7 +5,7 @@ import * as sinon from 'sinon'
 
 import ActionStore from '../src/tracker/public/ActionStore'
 import TrackIDFactory from '../src/tracker/public/TrackIDFactory'
-import { sendActionInfoToContentscript } from '../src/tracker/NativeUtils'
+import { sendActionInfoToContentscript } from '../src/tracker/private/NativeUtils'
 import MessageType from '../src/extension/MessageType'
 
 import actions from './test-script-actions'
