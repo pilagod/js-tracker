@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 
+import ActionType from '../src/tracker/public/ActionType'
 import ActionMap from '../src/tracker/private/ActionMap'
-import ActionType from '../src/tracker/types/ActionType'
 
 describe('ActionMap', () => {
   describe('filterActionType', () => {

@@ -1,6 +1,6 @@
 /// <reference path='./ActionMap.d.ts'/>
 
-import ActionType from '../types/ActionType'
+import ActionType from '../public/ActionType'
 
 const {
   Attr,

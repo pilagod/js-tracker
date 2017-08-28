@@ -1,10 +1,10 @@
-/// <reference path='../src/tracker/ActionStore.d.ts'/> 
+/// <reference path='../src/tracker/public/ActionStore.d.ts'/> 
 
 import { expect } from 'chai'
 import * as React from 'react'
 import * as ReactTestUtils from 'react-dom/test-utils'
 
-import ActionType from '../src/tracker/types/ActionType'
+import ActionType from '../src/tracker/public/ActionType'
 
 import SidebarRoot from '../src/Sidebar/SidebarRoot'
 import SidebarFilter from '../src/Sidebar/SidebarFilter'

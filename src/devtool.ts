@@ -2,8 +2,8 @@
 /// <reference path='./background.d.ts'/>
 /// <reference path='./devtool.d.ts'/>
 
-import TrackIDFactory from './tracker/TrackIDFactory'
-import MessageType from './tracker/types/MessageType'
+import TrackIDFactory from './tracker/public/TrackIDFactory'
+import MessageType from './MessageType'
 
 import Sidebar from './Sidebar'
 

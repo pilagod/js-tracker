@@ -1,5 +1,5 @@
 /// <reference path='../node_modules/@types/chrome/index.d.ts' />
-/// <reference path='./tracker/ActionStore.d.ts'/>
+/// <reference path='./tracker/public/ActionStore.d.ts'/>
 /// <reference path='./background.d.ts'/>
 /// <reference path='./contentscript.d.ts'/>
 
@@ -8,9 +8,9 @@
 
 import * as fs from 'fs'
 
-import ActionStore from './tracker/ActionStore'
-import TrackIDFactory from './tracker/TrackIDFactory'
-import MessageType from './tracker/types/MessageType'
+import ActionStore from './tracker/public/ActionStore'
+import TrackIDFactory from './tracker/public/TrackIDFactory'
+import MessageType from './MessageType'
 // @NOTE: use utils for test purpose, karma will put tracker
 // and contentscript into same window, which causes tracker to
 // track HTML DOM API in contentscript. In real environment,

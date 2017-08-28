@@ -1,4 +1,4 @@
-/// <reference path='../types/ActionType.d.ts' />
+/// <reference path='../public/ActionType.d.ts' />
 
 type Target =
   'HTMLElement'

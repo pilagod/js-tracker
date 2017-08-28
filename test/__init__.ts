@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 import * as sinon from 'sinon'
 
-import TrackIDFactory from '../src/tracker/TrackIDFactory'
+import TrackIDFactory from '../src/tracker/public/TrackIDFactory'
 
 beforeEach(function () {
   (<any>TrackIDFactory).resetID()
