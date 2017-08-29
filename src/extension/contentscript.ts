@@ -11,11 +11,6 @@ import * as fs from 'fs'
 import ActionStore from '../tracker/public/ActionStore'
 import TrackIDFactory from '../tracker/public/TrackIDFactory'
 import MessageType from './MessageType'
-// @NOTE: use utils for test purpose, karma will put tracker
-// and contentscript into same window, which causes tracker to
-// track HTML DOM API in contentscript. In real environment,
-// tracker and contentscript are in different window
-import { attachListenerTo } from '../tracker/private/NativeUtils'
 
 let selected: Element
 let selectedID: TrackID
@@ -32,7 +27,7 @@ try {
 }
 
 function listenOnActionTriggered() {
-  attachListenerTo(window, 'js-tracker', async (event: CustomEvent) => {
+  window.addEventListener('js-tracker', async (event: CustomEvent) => {
     const info: ActionInfo = event.detail.info
 
     const shouldUpdateDevtool =

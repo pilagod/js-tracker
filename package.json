@@ -5,8 +5,10 @@
   "main": "index.js",
   "scripts": {
     "test": "karma start",
+    "test-all": "karma start ./karma/tracker.js --single-run & karma start ./karma/trackerModules.js --single-run & karma start ./karma/extension.js --single-run",
     "test-tracker": "karma start ./karma/tracker.js",
     "test-tracker-modules": "karma start ./karma/trackerModules.js",
+    "test-extension": "karma start ./karma/extension.js",
     "build": "node webpack/compiler.js",
     "watch": "webpack --watch",
     "dev": "webpack-dev-server --port 3000",
