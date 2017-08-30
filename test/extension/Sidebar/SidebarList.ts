@@ -9,7 +9,7 @@ import ActionType from '../../../src/tracker/public/ActionType'
 import SidebarList from '../../../src/extension/Sidebar/SidebarList'
 
 import wrapperFactory from './wrapperFactory'
-import actions from '../../test-script-actions'
+import actions from '../../actions'
 
 describe('SidebarList', () => {
   const SidebarListWrapper = wrapperFactory(SidebarList)

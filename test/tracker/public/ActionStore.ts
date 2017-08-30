@@ -4,7 +4,7 @@ import * as sinon from 'sinon'
 import ActionStore from '../../../src/tracker/public/ActionStore'
 import ActionType from '../../../src/tracker/public/ActionType'
 
-import actions from '../../test-script-actions'
+import actions from '../../actions'
 
 describe('ActionStore', () => {
   let actionStore: IActionStore

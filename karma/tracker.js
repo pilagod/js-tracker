@@ -1,7 +1,9 @@
 var configFactory = require('./configFactory')
+var PORT = 9877
 
 module.exports = configFactory(function (defaultConfig) {
   var customConfig = Object.assign({}, defaultConfig, {
+    port: PORT,
     // list of files / patterns to load in the browser
     // all modules including in tests should be included here
     files: [

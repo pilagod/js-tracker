@@ -7,7 +7,7 @@ import ActionStore from '../../src/tracker/public/ActionStore'
 import TrackIDFactory from '../../src/tracker/public/TrackIDFactory'
 import MessageType from '../../src/extension/MessageType'
 
-import actions from '../test-script-actions'
+import actions from '../actions'
 
 describe('contentscript', () => {
   const chrome = window.chrome

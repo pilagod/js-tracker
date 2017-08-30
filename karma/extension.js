@@ -1,7 +1,13 @@
 var configFactory = require('./configFactory')
+var PORT = 9879
 
 module.exports = configFactory(function (defaultConfig) {
   var customConfig = Object.assign({}, defaultConfig, {
+    port: PORT,
+
+    proxies: {
+      '/script.js': `http://localhost:${PORT}/base/test/script.js`
+    },
     // list of files / patterns to load in the browser
     // all modules including in tests should be included here
     files: [
@@ -23,10 +29,10 @@ module.exports = configFactory(function (defaultConfig) {
       { pattern: 'src/extension/MessageType.ts' },
 
       // test
-      { pattern: 'test/test-script-actions.ts' },
+      { pattern: 'test/actions.ts' },
 
       /* static */
-      { pattern: 'test/test-script.js', served: true, included: false },
+      { pattern: 'test/script.js', served: true, included: false },
 
       /* tests */
       { pattern: 'test/extension/**/*.ts' }
@@ -52,7 +58,7 @@ module.exports = configFactory(function (defaultConfig) {
       'src/extension/MessageType.ts': ['karma-typescript'],
 
       // test
-      'test/test-script-actions.ts': ['karma-typescript'],
+      'test/actions.ts': ['karma-typescript'],
 
       /* tests */
       'test/extension/**/*.ts': ['karma-typescript']
