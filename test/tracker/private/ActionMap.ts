@@ -57,33 +57,33 @@ describe('ActionMap', () => {
     })
   })
 
-  describe('filterActionType', () => {
+  describe('getActionType', () => {
     describe('without action tag', () => {
       it('should return correct action type', () => {
         expect(
-          ActionMap.filterActionType('Element', 'id')
+          ActionMap.getActionType('Element', 'id')
         ).to.equal(ActionType.Attr)
       })
 
       it('should return action type None given invalid action', () => {
         expect(
-          ActionMap.filterActionType('Element', 'innerText')
+          ActionMap.getActionType('Element', 'innerText')
         ).to.equal(ActionType.None)
       })
 
       it('should return action type None given invalid target', () => {
         expect(
-          ActionMap.filterActionType(<any>'InvalidTarget', 'InvalidAction')
+          ActionMap.getActionType(<any>'InvalidTarget', 'InvalidAction')
         ).to.equal(ActionType.None)
       })
 
       describe('CSSStyleDeclaration', () => {
         it('should always return action type Style', () => {
           expect(
-            ActionMap.filterActionType('CSSStyleDeclaration', 'color')
+            ActionMap.getActionType('CSSStyleDeclaration', 'color')
           ).to.equal(ActionType.Style)
           expect(
-            ActionMap.filterActionType('CSSStyleDeclaration', 'border')
+            ActionMap.getActionType('CSSStyleDeclaration', 'border')
           ).to.equal(ActionType.Style)
         })
       })
@@ -91,10 +91,10 @@ describe('ActionMap', () => {
       describe('DOMStringMap', () => {
         it('should always return action type Attr', () => {
           expect(
-            ActionMap.filterActionType('DOMStringMap', 'id')
+            ActionMap.getActionType('DOMStringMap', 'id')
           ).to.equal(ActionType.Attr)
           expect(
-            ActionMap.filterActionType('DOMStringMap', 'style')
+            ActionMap.getActionType('DOMStringMap', 'style')
           ).to.equal(ActionType.Attr)
         })
       })
@@ -104,19 +104,19 @@ describe('ActionMap', () => {
       describe('Attr', () => {
         it('should return action type Attr on default', () => {
           expect(
-            ActionMap.filterActionType('Element', 'setAttribute', 'id')
+            ActionMap.getActionType('Element', 'setAttribute', 'id')
           ).to.equal(ActionType.Attr)
         })
 
         it('should return action type Style given action tag \'class\'', () => {
           expect(
-            ActionMap.filterActionType('Element', 'setAttributeNode', 'class')
+            ActionMap.getActionType('Element', 'setAttributeNode', 'class')
           ).to.equal(ActionType.Style)
         })
 
         it('should return action type Style given action tag \'style\'', () => {
           expect(
-            ActionMap.filterActionType('Attr', 'value', 'style')
+            ActionMap.getActionType('Attr', 'value', 'style')
           ).to.equal(ActionType.Style)
         })
       })
@@ -124,7 +124,7 @@ describe('ActionMap', () => {
       describe('DOMTokenList', () => {
         it('should return action type Style given action tag \'classList\'', () => {
           expect(
-            ActionMap.filterActionType('DOMTokenList', 'add', 'classList')
+            ActionMap.getActionType('DOMTokenList', 'add', 'classList')
           ).to.equal(ActionType.Style)
         })
       })

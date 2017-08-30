@@ -65,7 +65,7 @@ export default class ActionStore implements IActionStore {
 
     return <ActionRecord>{
       key: `${scriptUrl}:${lineNumber}:${columnNumber}`,
-      type: ActionMap.filterActionType(info.target, info.action, info.actionTag),
+      type: ActionMap.getActionType(info.target, info.action, info.actionTag),
       source: <Source>{
         loc: { scriptUrl, lineNumber, columnNumber },
         code: await this._fetchSourceCode(scriptUrl, lineNumber, columnNumber)

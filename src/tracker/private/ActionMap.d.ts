@@ -19,7 +19,7 @@ type ActionTagMap = {
 }
 
 interface IActionMap {
-  filterActionType(
+  getActionType(
     target: Target,
     action: Action,
     actionTag?: string
