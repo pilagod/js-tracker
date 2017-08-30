@@ -1,9 +1,5 @@
 /// <reference path='../../node_modules/@types/chrome/index.d.ts'/>
 /// <reference path='./background.d.ts'/>
-/// <reference path='./devtool.d.ts'/>
-
-import TrackIDFactory from '../tracker/public/TrackIDFactory'
-import MessageType from './MessageType'
 
 import Sidebar from './Sidebar'
 
@@ -16,10 +12,8 @@ function packFilesToDist() {
 }
 let background
 let sidebarWindow
-let state: State = {
-  trackid: TrackIDFactory.generateNullID(),
-  records: []
-}
+let records: ActionRecord[] = []
+
 setupConnectionToBackground()
 setupJSTrackerSidebar()
 updateSidebarOnMessage()
@@ -38,77 +32,40 @@ function setupJSTrackerSidebar() {
     sidebar.setPage('dist/sidebar.html');
     sidebar.onShown.addListener((window) => {
       !sidebarWindow && (sidebarWindow = window)
-      renderSidebar()
+      renderSidebar(records)
     })
   })
 }
 
-function renderSidebar() {
+function renderSidebar(records: ActionRecord[], shouldTagDiffs: boolean = false) {
   if (sidebarWindow) {
     // @TODO: pull request to @types/chrome, document should be on chrome.windows.Window
     const document: Document = (<any>sidebarWindow).document
     const container: Element = document.getElementsByTagName('main')[0]
 
-    Sidebar.render(container, Object.assign({}, state, {
-      openSource: openSource
-    }))
+    Sidebar.render(container, { records, shouldTagDiffs, openSource })
   }
-}
-
-function updateSidebarOnMessage() {
-  background.onMessage.addListener((message: Message) => {
-    // console.group('devtool page')
-    console.log('--- message received from background ---')
-    console.log('message:', message)
-    console.log('----------------------------------------')
-    // console.groupEnd()
-
-    // console.group('devtool page')
-    switch (message.type) {
-      case MessageType.ActionStoreUpdated:
-        handleActionStoreUpdated(message)
-        break
-      case MessageType.DevtoolSelectionChanged:
-        handleDevtoolSelectionChanged(message)
-        break
-      default:
-    }
-    // console.groupEnd()
-  })
-}
-
-function handleActionStoreUpdated(message: Message) {
-  console.log('--- ActionStoreUpdated ---')
-  if (message.trackid === state.trackid) {
-    updateSidebarBy(message)
-  }
-  console.log('--------------------------')
-}
-
-function handleDevtoolSelectionChanged(message: Message) {
-  console.log('--- DevtoolSelectionChanged ---')
-  updateSidebarBy(message)
-  console.log('-------------------------------')
-}
-
-function updateSidebarBy(message: Message) {
-  console.log('state before update:', Object.assign({}, state))
-  updateStateBy(message)
-  console.log('state after update:', Object.assign({}, state))
-  renderSidebar()
-}
-
-function updateStateBy(message: Message) {
-  state = Object.assign({}, state, {
-    trackid: message.trackid,
-    records: message.records
-  })
 }
 
 function openSource(url: string, line: number): void {
   // @TODO: pull request to @types/chrome, callback should be optional
   // @NOTE: line add a '-1' offset, it seems that openResource counting lines from 0
   chrome.devtools.panels.openResource(url, line - 1, () => { })
+}
+
+function updateSidebarOnMessage() {
+  background.onMessage.addListener((message: Message) => {
+    console.group('devtool page')
+    console.log('--- message received from background ---')
+    console.log('message:', message)
+    console.log('----------------------------------------')
+    console.groupEnd()
+
+    renderSidebar(
+      records = message.records,
+      message.shouldTagDiffs
+    )
+  })
 }
 
 function listenOnSelectionChanged() {
@@ -124,7 +81,7 @@ function emitSelectionToContentScript() {
     <any>{
       useContentScriptContext: true
     }
-  );
+  )
 }
 
 

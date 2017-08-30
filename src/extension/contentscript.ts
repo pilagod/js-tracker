@@ -10,10 +10,8 @@ import * as fs from 'fs'
 
 import ActionStore from '../tracker/public/ActionStore'
 import TrackIDFactory from '../tracker/public/TrackIDFactory'
-import MessageType from './MessageType'
 
-let selected: Element
-let selectedID: TrackID
+let selection: Element
 
 const store = new ActionStore()
 
@@ -29,55 +27,20 @@ try {
 function listenOnActionTriggered() {
   window.addEventListener('js-tracker', async (event: CustomEvent) => {
     const info: ActionInfo = event.detail.info
+    const success = await store.registerFromActionInfo(info)
 
-    const shouldUpdateDevtool =
-      await store.registerFromActionInfo(info)
-
-    if (shouldUpdateDevtool) {
-      const type =
-        isSelectedFirstUpdated(selectedID, info.trackid)
-          ? MessageType.DevtoolForceUpdate
-          : MessageType.ActionStoreUpdated
-
-      devtoolShouldUpdate(
-        type,
-        info.trackid,
-        store.get(info.trackid)
-      )
+    if (success && isSelectionUpdated(info.trackid)) {
+      devtoolShouldUpdate(store.get(info.trackid), true)
     }
   })
 }
 
-function isSelectedFirstUpdated(oldID: TrackID, newID: TrackID) {
-  const curID = getTrackIDFrom(selected)
-
-  return curID === newID && curID !== selectedID
+function isSelectionUpdated(updatedID: TrackID) {
+  return getTrackIDFrom(selection) === updatedID
 }
 
-function listenOnDevtoolSelectionChanged() {
-  window.onDevtoolSelectionChanged = (element: Element) => {
-    const trackid = selectedID = getTrackIDFrom(selected = element)
-
-    console.group('contentscript')
-    console.log('--- On Devtool Selection Changed ---')
-    console.log('selected:', element)
-    console.log('------------------------------------')
-    console.groupEnd()
-
-    devtoolShouldUpdate(
-      MessageType.DevtoolSelectionChanged,
-      trackid,
-      store.get(trackid)
-    )
-  }
-}
-
-function devtoolShouldUpdate(
-  type: MessageType,
-  trackid: TrackID,
-  records: ActionRecord[]
-): void {
-  const message: Message = { type, trackid, records }
+function devtoolShouldUpdate(records: ActionRecord[], shouldTagDiffs: boolean = false): void {
+  const message: Message = { records, shouldTagDiffs }
 
   chrome.runtime.sendMessage(message, (response) => {
     console.group('contentscript')
@@ -87,6 +50,18 @@ function devtoolShouldUpdate(
     console.log('-----------------------------')
     console.groupEnd()
   })
+}
+
+function listenOnDevtoolSelectionChanged() {
+  window.onDevtoolSelectionChanged = (element: Element) => {
+    console.group('contentscript')
+    console.log('--- On Devtool Selection Changed ---')
+    console.log('selected:', element)
+    console.log('------------------------------------')
+    console.groupEnd()
+
+    devtoolShouldUpdate(store.get(getTrackIDFrom(selection = element)))
+  }
 }
 
 function getTrackIDFrom(element: Element) {

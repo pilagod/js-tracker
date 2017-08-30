@@ -14,14 +14,11 @@ import actions from '../../actions'
 describe('SidebarList', () => {
   const SidebarListWrapper = wrapperFactory(SidebarList)
 
-  const _trackid = '1'
   const _records: ActionRecord[] = [
     actions[0].record,
     actions[1].record,
     actions[2].record
   ]
-  const _openSource = () => { }
-
   let sidebarListWrapper
 
   beforeEach(() => {
@@ -29,10 +26,9 @@ describe('SidebarList', () => {
     // might trigger component lifecycle function 
     sidebarListWrapper = ReactTestUtils.renderIntoDocument(
       React.createElement(SidebarListWrapper, {
-        trackid: _trackid,
         records: _records,
-        isFilterUpdated: false,
-        openSource: _openSource
+        shouldTagDiffs: false,
+        openSource: () => { }
       })
     )
   })
@@ -126,88 +122,27 @@ describe('SidebarList', () => {
     })
   })
 
-  it('should add class record-diff to new records given records is updated but not the trackid', () => {
+  it('should add class record-diff to new records given shouldTagDiffs is true', () => {
     sidebarListWrapper.setState({
-      records: _records.slice(_records.length - 1),
-    })
-    sidebarListWrapper.setState({
-      records: _records
-    })
-    const diffs = ReactTestUtils.scryRenderedDOMComponentsWithClass(
-      sidebarListWrapper,
-      'record-diff'
-    )
-    expect(diffs).to.have.length(2)
-  })
-
-  it('should not add class record-diff to any record given trackid updated', () => {
-    sidebarListWrapper.setState({
-      records: _records.slice(_records.length - 1),
-    })
-    sidebarListWrapper.setState({
-      trackid: '2',
-      records: _records
-    })
-    const noDiffs = ReactTestUtils.scryRenderedDOMComponentsWithClass(
-      sidebarListWrapper,
-      'record-diff'
-    )
-    expect(noDiffs).to.have.length(0)
-  })
-
-  it('should not add class record-diff to any given prop isFilterUpdated is true', () => {
-    // set new filter
-    sidebarListWrapper.setState({
-      records: [],
-      isFilterUpdated: true
-    })
-    // unset filter
-    sidebarListWrapper.setState({
-      records: _records,
-      isFilterUpdated: true
-    })
-    const noDiffs = ReactTestUtils.scryRenderedDOMComponentsWithClass(
-      sidebarListWrapper,
-      'record-diff'
-    )
-    expect(noDiffs).to.have.length(0)
-  })
-
-  it('should not add class record-diff to any given records updated first then set & unset filter', () => {
-    sidebarListWrapper.setState({
-      records: _records.slice(0, 2),
-    })
-
-    // add a new record first
-    sidebarListWrapper.setState({
-      records: _records
+      records: [].concat(_records, actions[3].record),
+      shouldTagDiffs: true
     })
     const diffs = ReactTestUtils.scryRenderedDOMComponentsWithClass(
       sidebarListWrapper,
       'record-diff'
     )
     expect(diffs).to.have.length(1)
+  })
 
-    // change filter
+  it('should not add class record-diff to any record given shouldTagDiffs is false', () => {
     sidebarListWrapper.setState({
-      records: _records.slice(0, 1),
-      isFilterUpdated: true
+      records: [].concat(_records, actions[3].record),
+      shouldTagDiffs: false
     })
-    let noDiffs = ReactTestUtils.scryRenderedDOMComponentsWithClass(
+    const diffs = ReactTestUtils.scryRenderedDOMComponentsWithClass(
       sidebarListWrapper,
       'record-diff'
     )
-    expect(noDiffs).to.have.length(0)
-
-    // change filter back
-    sidebarListWrapper.setState({
-      records: _records,
-      isFilterUpdated: true
-    })
-    noDiffs = ReactTestUtils.scryRenderedDOMComponentsWithClass(
-      sidebarListWrapper,
-      'record-diff'
-    )
-    expect(noDiffs).to.have.length(0)
+    expect(diffs).to.have.length(0)
   })
 })

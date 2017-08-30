@@ -9,14 +9,14 @@ import SidebarFilter from './SidebarFilter'
 import SidebarList from './SidebarList'
 
 export interface ISidebarRootProps {
-  trackid: TrackID;
   records: ActionRecord[];
+  shouldTagDiffs: boolean;
   openSource: (url: string, line: number) => void
 }
 
 interface ISidebarRootState {
   filter: number;
-  isFilterUpdated: boolean;
+  shouldTagDiffs: boolean;
 }
 
 export default class SidebarRoot extends React.Component<ISidebarRootProps, ISidebarRootState> {
@@ -25,14 +25,14 @@ export default class SidebarRoot extends React.Component<ISidebarRootProps, ISid
 
     this.state = {
       filter: ActionType.None,
-      isFilterUpdated: false
+      shouldTagDiffs: this.props.shouldTagDiffs
     }
   }
 
-  componentWillReceiveProps() {
+  componentWillReceiveProps(nextProps: ISidebarRootProps) {
     this.setState(() => {
       return {
-        isFilterUpdated: false
+        shouldTagDiffs: nextProps.shouldTagDiffs
       }
     })
   }
@@ -44,7 +44,7 @@ export default class SidebarRoot extends React.Component<ISidebarRootProps, ISid
     this.setState((preState) => {
       return {
         filter: action === 'set' ? filter : ActionType.None,
-        isFilterUpdated: true
+        shouldTagDiffs: false
       }
     })
   }
@@ -59,9 +59,8 @@ export default class SidebarRoot extends React.Component<ISidebarRootProps, ISid
           updateFilter={this.updateFilter.bind(this)}
         />
         <SidebarList
-          trackid={this.props.trackid}
           records={records}
-          isFilterUpdated={this.state.isFilterUpdated}
+          shouldTagDiffs={this.state.shouldTagDiffs}
           openSource={this.props.openSource}
         />
       </div>

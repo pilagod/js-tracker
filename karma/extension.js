@@ -25,9 +25,6 @@ module.exports = configFactory(function (defaultConfig) {
       { pattern: 'src/tracker/public/*[!(.d)].ts' },
       { pattern: 'src/tracker/private/ActionMap.ts' },
 
-      // extension
-      { pattern: 'src/extension/MessageType.ts' },
-
       // test
       { pattern: 'test/actions.ts' },
 
@@ -53,9 +50,6 @@ module.exports = configFactory(function (defaultConfig) {
       // tracker
       'src/tracker/public/*[!(.d)].ts': ['karma-typescript'],
       'src/tracker/private/ActionMap.ts': ['karma-typescript'],
-
-      // extension
-      'src/extension/MessageType.ts': ['karma-typescript'],
 
       // test
       'test/actions.ts': ['karma-typescript'],

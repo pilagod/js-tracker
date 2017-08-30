@@ -1,5 +1,4 @@
 /// <reference path='../../tracker/public/ActionStore.d.ts'/>
-/// <reference path='../../tracker/public/TrackIDFactory.d.ts'/>
 
 import * as React from 'react'
 
@@ -8,9 +7,8 @@ import ActionType, {
 } from '../../tracker/public/ActionType'
 
 interface ISidebarListProps {
-  trackid: TrackID;
   records: ActionRecord[];
-  isFilterUpdated: boolean;
+  shouldTagDiffs: boolean;
   openSource: (url: string, line: number) => void;
 }
 
@@ -45,7 +43,7 @@ export default class SidebarList extends React.Component<ISidebarListProps, ISid
       return (
         <div
           key={index}
-          className={`record ${this.labelDiff(index)}`}
+          className={`record ${this.tagDiff(index)}`}
         >
           {createRecordTags(record.type)}
           {createRecordLink(record.source.loc, this.linkTo.bind(this))}
@@ -63,23 +61,16 @@ export default class SidebarList extends React.Component<ISidebarListProps, ISid
   /* private */
 
   private diff(preProps: ISidebarListProps, nextProps: ISidebarListProps) {
-    return this.shouldCalculateDiff(preProps, nextProps)
+    return nextProps.shouldTagDiffs
       ? this.calculateDiff(preProps, nextProps)
       : -1
-  }
-
-  private shouldCalculateDiff(preProps: ISidebarListProps, nextProps: ISidebarListProps) {
-    // @NOTE: only calculate diff when 
-    //  (1) records is not updated by filter
-    //  (2) identical trackid is required before and after records updated
-    return !nextProps.isFilterUpdated && preProps.trackid === nextProps.trackid
   }
 
   private calculateDiff(preProps: ISidebarListProps, nextProps: ISidebarListProps) {
     return nextProps.records.length - preProps.records.length
   }
 
-  private labelDiff(index: number) {
+  private tagDiff(index: number) {
     return index < this.state.diff ? 'record-diff' : ''
   }
 }
@@ -115,7 +106,6 @@ function createRecordLink(
         {`${scriptUrl}:${lineNumber}:${columnNumber}`}
       </a>
     </div>
-
   )
 }
 
