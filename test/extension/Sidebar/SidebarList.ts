@@ -145,4 +145,27 @@ describe('SidebarList', () => {
     )
     expect(diffs).to.have.length(0)
   })
+
+  it('should keep record-diff on records given animation is not finished', () => {
+    sidebarListWrapper.setState({
+      records: [],
+      shouldTagDiffs: false
+    })
+    sidebarListWrapper.setState({
+      records: [actions[0].record],
+      shouldTagDiffs: true
+    })
+    sidebarListWrapper.setState({
+      records: [
+        actions[1].record,
+        actions[0].record,
+      ],
+      shouldTagDiffs: true
+    })
+    const diffs = ReactTestUtils.scryRenderedDOMComponentsWithClass(
+      sidebarListWrapper,
+      'record-diff'
+    )
+    expect(diffs).to.have.length(2)
+  })
 })

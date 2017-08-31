@@ -14,7 +14,7 @@ interface ISidebarListProps {
 }
 
 interface ISidebarListState {
-  diff: number
+  isRecordInDiffPeriod: { [key: string]: boolean };
 }
 
 export default class SidebarList extends React.Component<ISidebarListProps, ISidebarListState> {
@@ -22,14 +22,35 @@ export default class SidebarList extends React.Component<ISidebarListProps, ISid
     super(props)
 
     this.state = {
-      diff: -1 // an index indicates new added records
+      isRecordInDiffPeriod: {}
     }
   }
 
   componentWillReceiveProps(nextProps: ISidebarListProps) {
-    this.setState(() => {
+    // an index indicates new added record
+    const diff = this.calculateDiff(this.props, nextProps)
+    const newRecordsInDiffPeriod = {}
+
+    nextProps.records.map((record, index) => {
+      if (index < diff) {
+        newRecordsInDiffPeriod[record.key] = true
+      }
+    })
+    this.setState((preState: ISidebarListState) => {
+      setTimeout(() => {
+        this.setState((preState: ISidebarListState) => {
+          const state = Object.assign({}, preState)
+
+          Object.keys(newRecordsInDiffPeriod).map((key) => {
+            delete state.isRecordInDiffPeriod[key]
+          })
+          return {
+            isRecordInDiffPeriod: state.isRecordInDiffPeriod
+          }
+        })
+      }, 2000)
       return {
-        diff: this.calculateDiff(this.props, nextProps)
+        isRecordInDiffPeriod: Object.assign({}, preState.isRecordInDiffPeriod, newRecordsInDiffPeriod)
       }
     })
   }
@@ -40,17 +61,16 @@ export default class SidebarList extends React.Component<ISidebarListProps, ISid
   }
 
   render() {
-    const count = this.props.records.length
     const records = this.props.records.map((record, index) => {
       // @NOTE: new records will be prepended to the head of list
-      // @NOTE: record's key here should be reversed, 
+      // @NOTE: key should reflect new added items,
       // react use key to identify new items in list, 
-      // and only re-render those items with different
-      // key from previous rendering
+      // and only re-render those items with new key 
+      // from previous rendering
       return (
         <div
-          key={count - index}
-          className={`record ${this.tagDiff(index)}`}
+          key={record.key}
+          className={`record ${this.shouldTagDiff(record.key) ? 'record-diff' : ''}`}
         >
           {createRecordTags(record.type)}
           {createRecordLink(record.source.loc, this.linkTo.bind(this))}
@@ -73,8 +93,8 @@ export default class SidebarList extends React.Component<ISidebarListProps, ISid
       : -1
   }
 
-  private tagDiff(index: number) {
-    return index < this.state.diff ? 'record-diff' : ''
+  private shouldTagDiff(key: string) {
+    return this.state.isRecordInDiffPeriod.hasOwnProperty(key)
   }
 }
 
