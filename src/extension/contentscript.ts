@@ -13,6 +13,10 @@ import TrackIDFactory from '../tracker/public/TrackIDFactory'
 
 let selection: Element
 
+const state = {
+  SELECTION_IS_CHANGED: true,
+  SELECTION_IS_NOT_CHANGED: false
+}
 const store = new ActionStore()
 
 listenOnActionTriggered()
@@ -30,7 +34,10 @@ function listenOnActionTriggered() {
     const success = await store.registerFromActionInfo(info)
 
     if (success && isSelectionUpdated(info.trackid)) {
-      devtoolShouldUpdate(store.get(info.trackid), true)
+      devtoolShouldUpdate(
+        store.get(info.trackid),
+        state.SELECTION_IS_CHANGED
+      )
     }
   })
 }
@@ -39,7 +46,7 @@ function isSelectionUpdated(updatedID: TrackID) {
   return getTrackIDFrom(selection) === updatedID
 }
 
-function devtoolShouldUpdate(records: ActionRecord[], selectionChanged: boolean = false): void {
+function devtoolShouldUpdate(records: ActionRecord[], selectionChanged: boolean): void {
   const message: Message = { records, selectionChanged }
 
   chrome.runtime.sendMessage(message, (response) => {
@@ -60,7 +67,12 @@ function listenOnDevtoolSelectionChanged() {
     console.log('------------------------------------')
     console.groupEnd()
 
-    devtoolShouldUpdate(store.get(getTrackIDFrom(selection = element)))
+    const trackid = getTrackIDFrom(selection = element)
+
+    devtoolShouldUpdate(
+      store.get(trackid),
+      state.SELECTION_IS_NOT_CHANGED
+    )
   }
 }
 
