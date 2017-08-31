@@ -10,13 +10,13 @@ import SidebarList from './SidebarList'
 
 export interface ISidebarRootProps {
   records: ActionRecord[];
-  shouldTagDiffs: boolean;
+  selectionChanged: boolean;
   openSource: (url: string, line: number) => void
 }
 
 interface ISidebarRootState {
   filter: number;
-  shouldTagDiffs: boolean;
+  selectionChanged: boolean;
 }
 
 export default class SidebarRoot extends React.Component<ISidebarRootProps, ISidebarRootState> {
@@ -25,14 +25,14 @@ export default class SidebarRoot extends React.Component<ISidebarRootProps, ISid
 
     this.state = {
       filter: ActionType.None,
-      shouldTagDiffs: this.props.shouldTagDiffs
+      selectionChanged: this.props.selectionChanged
     }
   }
 
   componentWillReceiveProps(nextProps: ISidebarRootProps) {
     this.setState(() => {
       return {
-        shouldTagDiffs: nextProps.shouldTagDiffs
+        selectionChanged: nextProps.selectionChanged
       }
     })
   }
@@ -44,7 +44,7 @@ export default class SidebarRoot extends React.Component<ISidebarRootProps, ISid
     this.setState((preState) => {
       return {
         filter: action === 'set' ? filter : ActionType.None,
-        shouldTagDiffs: false
+        selectionChanged: false
       }
     })
   }
@@ -60,7 +60,7 @@ export default class SidebarRoot extends React.Component<ISidebarRootProps, ISid
         />
         <SidebarList
           records={records}
-          shouldTagDiffs={this.state.shouldTagDiffs}
+          selectionChanged={this.state.selectionChanged}
           openSource={this.props.openSource}
         />
       </div>

@@ -9,7 +9,7 @@ import ActionType, {
 
 interface ISidebarListProps {
   records: ActionRecord[];
-  shouldTagDiffs: boolean;
+  selectionChanged: boolean;
   openSource: (url: string, line: number) => void;
 }
 
@@ -22,14 +22,14 @@ export default class SidebarList extends React.Component<ISidebarListProps, ISid
     super(props)
 
     this.state = {
-      diff: -1 // an index indicating new added records
+      diff: -1 // an index indicates new added records
     }
   }
 
   componentWillReceiveProps(nextProps: ISidebarListProps) {
     this.setState(() => {
       return {
-        diff: this.diff(this.props, nextProps)
+        diff: this.calculateDiff(this.props, nextProps)
       }
     })
   }
@@ -67,22 +67,14 @@ export default class SidebarList extends React.Component<ISidebarListProps, ISid
 
   /* private */
 
-  private diff(preProps: ISidebarListProps, nextProps: ISidebarListProps) {
-    return nextProps.shouldTagDiffs
-      ? this.calculateDiff(preProps, nextProps)
-      : -1
-  }
-
   private calculateDiff(preProps: ISidebarListProps, nextProps: ISidebarListProps) {
-    return nextProps.records.length - preProps.records.length
+    return nextProps.selectionChanged
+      ? nextProps.records.length - preProps.records.length
+      : -1
   }
 
   private tagDiff(index: number) {
     return index < this.state.diff ? 'record-diff' : ''
-  }
-
-  private shouldTagDiff(index: number) {
-    return index < this.state.diff
   }
 }
 

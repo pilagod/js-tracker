@@ -2,5 +2,5 @@
 
 type Message = {
   records: ActionRecord[];
-  shouldTagDiffs: boolean;
+  selectionChanged: boolean;
 }

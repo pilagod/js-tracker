@@ -27,7 +27,7 @@ describe('SidebarList', () => {
     sidebarListWrapper = ReactTestUtils.renderIntoDocument(
       React.createElement(SidebarListWrapper, {
         records: _records,
-        shouldTagDiffs: false,
+        selectionChanged: false,
         openSource: () => { }
       })
     )
@@ -122,10 +122,10 @@ describe('SidebarList', () => {
     })
   })
 
-  it('should add class record-diff to new records given shouldTagDiffs is true', () => {
+  it('should add class record-diff to new records given selectionChanged is true', () => {
     sidebarListWrapper.setState({
       records: [].concat(_records, actions[3].record),
-      shouldTagDiffs: true
+      selectionChanged: true
     })
     const diffs = ReactTestUtils.scryRenderedDOMComponentsWithClass(
       sidebarListWrapper,
@@ -134,10 +134,10 @@ describe('SidebarList', () => {
     expect(diffs).to.have.length(1)
   })
 
-  it('should not add class record-diff to any record given shouldTagDiffs is false', () => {
+  it('should not add class record-diff to any record given selectionChanged is false', () => {
     sidebarListWrapper.setState({
       records: [].concat(_records, actions[3].record),
-      shouldTagDiffs: false
+      selectionChanged: false
     })
     const diffs = ReactTestUtils.scryRenderedDOMComponentsWithClass(
       sidebarListWrapper,

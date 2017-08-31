@@ -39,8 +39,8 @@ function isSelectionUpdated(updatedID: TrackID) {
   return getTrackIDFrom(selection) === updatedID
 }
 
-function devtoolShouldUpdate(records: ActionRecord[], shouldTagDiffs: boolean = false): void {
-  const message: Message = { records, shouldTagDiffs }
+function devtoolShouldUpdate(records: ActionRecord[], selectionChanged: boolean = false): void {
+  const message: Message = { records, selectionChanged }
 
   chrome.runtime.sendMessage(message, (response) => {
     console.group('contentscript')
