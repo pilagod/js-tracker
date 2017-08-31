@@ -36,7 +36,7 @@ function listenOnActionTriggered() {
     if (success && isSelectionUpdated(info.trackid)) {
       devtoolShouldUpdate(
         store.get(info.trackid),
-        state.SELECTION_IS_CHANGED
+        state.SELECTION_IS_NOT_CHANGED
       )
     }
   })
@@ -71,7 +71,7 @@ function listenOnDevtoolSelectionChanged() {
 
     devtoolShouldUpdate(
       store.get(trackid),
-      state.SELECTION_IS_NOT_CHANGED
+      state.SELECTION_IS_CHANGED
     )
   }
 }

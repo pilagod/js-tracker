@@ -28,7 +28,7 @@ describe('SidebarRoot', () => {
     sidebarRootWrapper = ReactTestUtils.renderIntoDocument(
       React.createElement(SidebarRootWrapper, {
         records: _records,
-        selectionChanged: false,
+        shouldTagDiffs: false,
         openSource: _openSource
       })
     )
@@ -47,9 +47,9 @@ describe('SidebarRoot', () => {
     expect(sidebarFilter.props.updateFilter).to.be.a('function')
   })
 
-  it('should send records, selectionChanged (default: false) and openSource function as prop to SidebarList', () => {
+  it('should send records, shouldTagDiffs and openSource function as prop to SidebarList', () => {
     expect(sidebarList.props.records).to.deep.equal(_records)
-    expect(sidebarList.props.selectionChanged).to.be.false
+    expect(sidebarList.props.shouldTagDiffs).to.be.false
     expect(sidebarList.props.openSource).to.equal(_openSource)
   })
 
@@ -66,22 +66,22 @@ describe('SidebarRoot', () => {
     expect(sidebarFilter.props.filter).to.equal(ActionType.None)
   })
 
-  it('should send filtered records and false selectionChanged to SidebarList when updateFilter function is called', () => {
+  it('should send filtered records and false shouldTagDiffs to SidebarList when updateFilter function is called', () => {
     const updateFilter = sidebarFilter.props.updateFilter
     // filter updating should not tag diffs in SidebarList
     sidebarRootWrapper.setState({
-      selectionChanged: true
+      shouldTagDiffs: true
     })
     updateFilter('set', ActionType.Attr)
     expect(sidebarList.props.records).to.deep.equal(_records.slice(0, 1))
-    expect(sidebarList.props.selectionChanged).to.be.false
+    expect(sidebarList.props.shouldTagDiffs).to.be.false
 
     updateFilter('set', ActionType.Style)
     expect(sidebarList.props.records).to.deep.equal(_records.slice(1, 3))
-    expect(sidebarList.props.selectionChanged).to.be.false
+    expect(sidebarList.props.shouldTagDiffs).to.be.false
 
     updateFilter('unset', ActionType.Style)
     expect(sidebarList.props.records).to.deep.equal(_records)
-    expect(sidebarList.props.selectionChanged).to.be.false
+    expect(sidebarList.props.shouldTagDiffs).to.be.false
   })
 })

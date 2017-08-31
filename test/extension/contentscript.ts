@@ -104,7 +104,7 @@ describe('contentscript', () => {
       }, 10)
     })
 
-    it('should send message with new records and true selectionChanged to background given registering is successful and updated target is current selection', (done) => {
+    it('should send message with new records and false selectionChanged to background given registering is successful and updated target is current selection', (done) => {
       const div = document.createElement('div')
 
       div.setAttribute('trackid', '1')
@@ -128,7 +128,7 @@ describe('contentscript', () => {
           outputToBackground.calledWith(
             <Message>{
               records: [actions[0].record],
-              selectionChanged: true
+              selectionChanged: false
             }
           )
         ).to.be.true
@@ -142,7 +142,7 @@ describe('contentscript', () => {
       expect(window.onDevtoolSelectionChanged).to.be.a('function')
     })
 
-    it('should send message with empty records and false selectionChanged to background given element has no trackid', () => {
+    it('should send message with empty records and true selectionChanged to background given element has no trackid', () => {
       const div = document.createElement('div')
 
       window.onDevtoolSelectionChanged(div)
@@ -151,13 +151,13 @@ describe('contentscript', () => {
         outputToBackground.calledWith(
           <Message>{
             records: [],
-            selectionChanged: false
+            selectionChanged: true
           }
         )
       ).to.be.true
     })
 
-    it('should send message with existed records and false selectionChanged to background given element has tradckid', () => {
+    it('should send message with existed records and true selectionChanged to background given element has tradckid', () => {
       const div = document.createElement('div')
 
       div.setAttribute('trackid', '1')
@@ -172,7 +172,7 @@ describe('contentscript', () => {
         outputToBackground.calledWith(
           <Message>{
             records: [actions[0].record],
-            selectionChanged: false
+            selectionChanged: true
           }
         )
       ).to.be.true

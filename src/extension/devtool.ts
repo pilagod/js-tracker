@@ -37,13 +37,13 @@ function setupJSTrackerSidebar() {
   })
 }
 
-function renderSidebar(records: ActionRecord[], selectionChanged: boolean = false) {
+function renderSidebar(records: ActionRecord[], shouldTagDiffs: boolean = false) {
   if (sidebarWindow) {
     // @TODO: pull request to @types/chrome, document should be on chrome.windows.Window
     const document: Document = (<any>sidebarWindow).document
     const container: Element = document.getElementsByTagName('main')[0]
 
-    Sidebar.render(container, { records, selectionChanged, openSource })
+    Sidebar.render(container, { records, shouldTagDiffs, openSource })
   }
 }
 
@@ -63,9 +63,13 @@ function updateSidebarOnMessage() {
 
     renderSidebar(
       records = message.records,
-      message.selectionChanged
+      shouldTagDiffs(message.selectionChanged)
     )
   })
+}
+
+function shouldTagDiffs(selectionChanged: boolean) {
+  return !selectionChanged
 }
 
 function listenOnSelectionChanged() {

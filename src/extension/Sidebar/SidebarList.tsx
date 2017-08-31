@@ -9,7 +9,7 @@ import ActionType, {
 
 interface ISidebarListProps {
   records: ActionRecord[];
-  selectionChanged: boolean;
+  shouldTagDiffs: boolean;
   openSource: (url: string, line: number) => void;
 }
 
@@ -68,7 +68,7 @@ export default class SidebarList extends React.Component<ISidebarListProps, ISid
   /* private */
 
   private calculateDiff(preProps: ISidebarListProps, nextProps: ISidebarListProps) {
-    return nextProps.selectionChanged
+    return nextProps.shouldTagDiffs
       ? nextProps.records.length - preProps.records.length
       : -1
   }
