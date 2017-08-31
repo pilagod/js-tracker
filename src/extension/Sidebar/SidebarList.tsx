@@ -1,6 +1,7 @@
 /// <reference path='../../tracker/public/ActionStore.d.ts'/>
 
 import * as React from 'react'
+import * as ReactDOM from 'react-dom'
 
 import ActionType, {
   ActionTypeNames
@@ -39,10 +40,16 @@ export default class SidebarList extends React.Component<ISidebarListProps, ISid
   }
 
   render() {
+    const count = this.props.records.length
     const records = this.props.records.map((record, index) => {
+      // @NOTE: new records will be prepended to the head of list
+      // @NOTE: record's key here should be reversed, 
+      // react use key to identify new items in list, 
+      // and only re-render those items with different
+      // key from previous rendering
       return (
         <div
-          key={index}
+          key={count - index}
           className={`record ${this.tagDiff(index)}`}
         >
           {createRecordTags(record.type)}
@@ -72,6 +79,10 @@ export default class SidebarList extends React.Component<ISidebarListProps, ISid
 
   private tagDiff(index: number) {
     return index < this.state.diff ? 'record-diff' : ''
+  }
+
+  private shouldTagDiff(index: number) {
+    return index < this.state.diff
   }
 }
 
