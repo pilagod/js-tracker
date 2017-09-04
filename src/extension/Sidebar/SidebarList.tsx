@@ -18,6 +18,9 @@ interface ISidebarListState {
 }
 
 export default class SidebarList extends React.Component<ISidebarListProps, ISidebarListState> {
+  // @NOTE: depends on ./index.css .record.record-diff animation-duration 
+  static DIFF_STATE_DURATION = 1500
+
   constructor(props) {
     super(props)
 
@@ -33,7 +36,7 @@ export default class SidebarList extends React.Component<ISidebarListProps, ISid
 
     setTimeout(() => {
       this.clearDiffStateOn(records)
-    }, this.DIFF_STATE_DURATION)
+    }, SidebarList.DIFF_STATE_DURATION)
   }
 
   render() {
@@ -55,8 +58,6 @@ export default class SidebarList extends React.Component<ISidebarListProps, ISid
   }
 
   /* private */
-
-  private DIFF_STATE_DURATION = 2000
 
   private filterDiffRecords(preProps: ISidebarListProps, nextProps: ISidebarListProps): ActionRecord[] {
     if (nextProps.shouldTagDiffs) {

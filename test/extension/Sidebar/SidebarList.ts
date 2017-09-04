@@ -12,6 +12,7 @@ import wrapperFactory from './wrapperFactory'
 import actions from '../../actions'
 
 describe('SidebarList', () => {
+  const DIFF_STATE_DURATION = SidebarList.DIFF_STATE_DURATION
   const SidebarListWrapper = wrapperFactory(SidebarList)
 
   const _records: ActionRecord[] = [
@@ -146,7 +147,7 @@ describe('SidebarList', () => {
     expect(diffs).to.have.length(0)
   })
 
-  it('should keep record-diff on records given animation is not finished', () => {
+  it('should keep record-diff on records when diff state hasn\'t finished', () => {
     sidebarListWrapper.setState({
       records: [],
       shouldTagDiffs: false
@@ -167,6 +168,24 @@ describe('SidebarList', () => {
       'record-diff'
     )
     expect(diffs).to.have.length(2)
+  })
+
+  it('should remove record-diff on records when diff state has finished', (done) => {
+    sidebarListWrapper.setState({
+      records: [
+        actions[1].record,
+        actions[0].record,
+      ],
+      shouldTagDiffs: true
+    })
+    setTimeout(() => {
+      const diffs = ReactTestUtils.scryRenderedDOMComponentsWithClass(
+        sidebarListWrapper,
+        'record-diff'
+      )
+      expect(diffs).to.have.length(0)
+      done()
+    }, DIFF_STATE_DURATION)
   })
 
   it('should render \'Have no matched records yet :)\' notification given no records', () => {
