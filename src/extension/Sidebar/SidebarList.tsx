@@ -27,36 +27,29 @@ export default class SidebarList extends React.Component<ISidebarListProps, ISid
   }
 
   componentWillReceiveProps(nextProps: ISidebarListProps) {
-    const diffs = this.filterDiffRecords(this.props, nextProps)
+    const records = this.filterDiffRecords(this.props, nextProps)
 
-    this.setDiffStateTo(diffs)
+    this.setDiffStateOn(records)
 
     setTimeout(() => {
-      this.clearDiffStateOf(diffs)
+      this.clearDiffStateOn(records)
     }, this.DIFF_STATE_DURATION)
   }
 
   render() {
-    const records = this.props.records.map((record, index) => {
-      // @NOTE: new records will be prepended to the head of list
-      // @NOTE: key should reflect new added items,
-      // react use key to identify new items in list, 
-      // and only re-render those items with new key 
-      // from previous rendering
-      return (
-        <div
-          key={record.key}
-          className={`record ${this.shouldTagDiff(record.key) ? 'record-diff' : ''}`}
-        >
-          {createRecordTags(record.type)}
-          {createRecordLink(record.source.loc, this.linkTo.bind(this))}
-          {createRecordInfo(record)}
-        </div>
-      )
-    })
     return (
       <div className="sidebar-list">
-        {records}
+        {
+          this.props.records.length > 0
+            ? this.props.records.map((record) => {
+              return renderRecord(
+                record,
+                this.isInDiffState(record),
+                this.props.openSource
+              )
+            })
+            : renderEmptyRecord()
+        }
       </div>
     )
   }
@@ -65,16 +58,7 @@ export default class SidebarList extends React.Component<ISidebarListProps, ISid
 
   private DIFF_STATE_DURATION = 2000
 
-  private linkTo(url: string, line: number, e: Event) {
-    e.preventDefault()
-    this.props.openSource(url, line)
-  }
-
-  private shouldTagDiff(key: string) {
-    return this.state.recordsInDiffState.hasOwnProperty(key)
-  }
-
-  private filterDiffRecords(preProps: ISidebarListProps, nextProps: ISidebarListProps) {
+  private filterDiffRecords(preProps: ISidebarListProps, nextProps: ISidebarListProps): ActionRecord[] {
     if (nextProps.shouldTagDiffs) {
       // @NOTE: new records will always be added to the head of record list
       const lastDiffIndex
@@ -85,7 +69,7 @@ export default class SidebarList extends React.Component<ISidebarListProps, ISid
     return []
   }
 
-  private setDiffStateTo(records: ActionRecord[]) {
+  private setDiffStateOn(records: ActionRecord[]) {
     this.setState((preState: ISidebarListState) => {
       return {
         recordsInDiffState: Object.assign({},
@@ -98,7 +82,7 @@ export default class SidebarList extends React.Component<ISidebarListProps, ISid
     })
   }
 
-  private clearDiffStateOf(records: ActionRecord[]) {
+  private clearDiffStateOn(records: ActionRecord[]) {
     this.setState((preState: ISidebarListState) => {
       const nextState = Object.assign({}, preState)
 
@@ -108,9 +92,43 @@ export default class SidebarList extends React.Component<ISidebarListProps, ISid
       return nextState
     })
   }
+
+  private isInDiffState(record: ActionRecord): boolean {
+    return this.state.recordsInDiffState.hasOwnProperty(record.key)
+  }
 }
 
-function createRecordTags(actionType: ActionType): JSX.Element {
+function renderEmptyRecord(): JSX.Element {
+  return (
+    <div className='record record-empty'>
+      <span>Have no matched records yet :)</span>
+    </div>
+  )
+}
+
+function renderRecord(
+  record: ActionRecord,
+  isInDiffState: boolean,
+  openSource: (url: string, line: number) => void
+) {
+  // @NOTE: new records will be prepended to the head of list
+  // @NOTE: key should reflect new added items,
+  // react use key to identify new items in list, 
+  // and only re-render those items with new key 
+  // from previous rendering
+  return (
+    <div
+      key={record.key}
+      className={`record ${isInDiffState ? 'record-diff' : ''}`}
+    >
+      {renderRecordTags(record.type)}
+      {renderRecordLink(record.source.loc, openSource)}
+      {renderRecordInfo(record)}
+    </div>
+  )
+}
+
+function renderRecordTags(actionType: ActionType): JSX.Element {
   const tags = ActionTypeNames.reduce((tags, type, index) => {
     if (actionType & ActionType[type]) {
       tags.push((
@@ -131,20 +149,25 @@ function createRecordTags(actionType: ActionType): JSX.Element {
   )
 }
 
-function createRecordLink(
+function renderRecordLink(
   { scriptUrl, lineNumber, columnNumber },
-  linkOnClicked: (e: any) => void
+  openSource: (url: string, line: number) => void
 ): JSX.Element {
   return (
     <div className="link">
-      <a onClick={linkOnClicked.bind(null, scriptUrl, lineNumber)}>
+      <a onClick={
+        (e: any) => {
+          e.preventDefault()
+          openSource(scriptUrl, lineNumber)
+        }
+      }>
         {`${scriptUrl}:${lineNumber}:${columnNumber}`}
       </a>
     </div>
   )
 }
 
-function createRecordInfo(record: ActionRecord): JSX.Element {
+function renderRecordInfo(record: ActionRecord): JSX.Element {
   return (
     <div className="info">
       <span>{record.source.code}</span>

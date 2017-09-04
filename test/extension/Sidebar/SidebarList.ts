@@ -168,4 +168,16 @@ describe('SidebarList', () => {
     )
     expect(diffs).to.have.length(2)
   })
+
+  it('should render \'Have no matched records yet :)\' notification given no records', () => {
+    sidebarListWrapper.setState({
+      records: []
+    })
+    const record = ReactTestUtils.findRenderedDOMComponentWithClass(
+      sidebarListWrapper,
+      'record'
+    )
+    expect(record.classList.contains('record-empty')).to.be.true
+    expect(record.textContent).to.equal('Have no matched records yet :)')
+  })
 })

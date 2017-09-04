@@ -135,7 +135,7 @@ button {
 .sidebar-filter {
     position: fixed;
     top: 0;
-    width: 300px; /* this should equal to the width of sidebar-root */
+    width: 300px; /* should equal to the width of sidebar-root */
     display: flex;
     justify-content: space-around;
     background-color: white;
@@ -170,6 +170,11 @@ button {
 .record {
     border-radius: 5px;
     padding: 5px;
+}
+
+.record.record-empty {
+    color: #8F8F8F;
+    text-align: center;
 }
 
 .record.record-diff {
