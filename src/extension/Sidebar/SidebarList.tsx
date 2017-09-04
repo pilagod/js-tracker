@@ -14,7 +14,7 @@ interface ISidebarListProps {
 }
 
 interface ISidebarListState {
-  isRecordInDiffPeriod: { [key: string]: boolean };
+  recordsInDiffState: { [key: string]: boolean; };
 }
 
 export default class SidebarList extends React.Component<ISidebarListProps, ISidebarListState> {
@@ -22,42 +22,18 @@ export default class SidebarList extends React.Component<ISidebarListProps, ISid
     super(props)
 
     this.state = {
-      isRecordInDiffPeriod: {}
+      recordsInDiffState: {}
     }
   }
 
   componentWillReceiveProps(nextProps: ISidebarListProps) {
-    // an index indicates new added record
-    const diff = this.calculateDiff(this.props, nextProps)
-    const newRecordsInDiffPeriod = {}
+    const diffs = this.filterDiffRecords(this.props, nextProps)
 
-    nextProps.records.map((record, index) => {
-      if (index < diff) {
-        newRecordsInDiffPeriod[record.key] = true
-      }
-    })
-    this.setState((preState: ISidebarListState) => {
-      setTimeout(() => {
-        this.setState((preState: ISidebarListState) => {
-          const state = Object.assign({}, preState)
+    this.setDiffStateTo(diffs)
 
-          Object.keys(newRecordsInDiffPeriod).map((key) => {
-            delete state.isRecordInDiffPeriod[key]
-          })
-          return {
-            isRecordInDiffPeriod: state.isRecordInDiffPeriod
-          }
-        })
-      }, 2000)
-      return {
-        isRecordInDiffPeriod: Object.assign({}, preState.isRecordInDiffPeriod, newRecordsInDiffPeriod)
-      }
-    })
-  }
-
-  linkTo(url: string, line: number, e: Event) {
-    e.preventDefault()
-    this.props.openSource(url, line)
+    setTimeout(() => {
+      this.clearDiffStateOf(diffs)
+    }, this.DIFF_STATE_DURATION)
   }
 
   render() {
@@ -87,14 +63,50 @@ export default class SidebarList extends React.Component<ISidebarListProps, ISid
 
   /* private */
 
-  private calculateDiff(preProps: ISidebarListProps, nextProps: ISidebarListProps) {
-    return nextProps.shouldTagDiffs
-      ? nextProps.records.length - preProps.records.length
-      : -1
+  private DIFF_STATE_DURATION = 2000
+
+  private linkTo(url: string, line: number, e: Event) {
+    e.preventDefault()
+    this.props.openSource(url, line)
   }
 
   private shouldTagDiff(key: string) {
-    return this.state.isRecordInDiffPeriod.hasOwnProperty(key)
+    return this.state.recordsInDiffState.hasOwnProperty(key)
+  }
+
+  private filterDiffRecords(preProps: ISidebarListProps, nextProps: ISidebarListProps) {
+    if (nextProps.shouldTagDiffs) {
+      // @NOTE: new records will always be added to the head of record list
+      const lastDiffIndex
+        = nextProps.records.length - preProps.records.length
+
+      return nextProps.records.filter((_, index) => index < lastDiffIndex)
+    }
+    return []
+  }
+
+  private setDiffStateTo(records: ActionRecord[]) {
+    this.setState((preState: ISidebarListState) => {
+      return {
+        recordsInDiffState: Object.assign({},
+          preState.recordsInDiffState,
+          records.reduce((_, record) => {
+            return Object.assign(_, { [record.key]: true })
+          }, {})
+        )
+      }
+    })
+  }
+
+  private clearDiffStateOf(records: ActionRecord[]) {
+    this.setState((preState: ISidebarListState) => {
+      const nextState = Object.assign({}, preState)
+
+      records.map((record) => {
+        delete nextState.recordsInDiffState[record.key]
+      })
+      return nextState
+    })
   }
 }
 
