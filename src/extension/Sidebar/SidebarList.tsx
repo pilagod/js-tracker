@@ -45,13 +45,13 @@ export default class SidebarList extends React.Component<ISidebarListProps, ISid
         {
           this.props.records.length > 0
             ? this.props.records.map((record) => {
-              return renderRecord(
+              return Record(
                 record,
                 this.isInDiffState(record),
                 this.props.openSource
               )
             })
-            : renderEmptyRecord()
+            : EmptyRecord()
         }
       </div>
     )
@@ -99,7 +99,7 @@ export default class SidebarList extends React.Component<ISidebarListProps, ISid
   }
 }
 
-function renderEmptyRecord(): JSX.Element {
+function EmptyRecord(): JSX.Element {
   return (
     <div className='record record-empty'>
       <span>Have no matched records yet :)</span>
@@ -107,7 +107,7 @@ function renderEmptyRecord(): JSX.Element {
   )
 }
 
-function renderRecord(
+function Record(
   record: ActionRecord,
   isInDiffState: boolean,
   openSource: (url: string, line: number) => void
@@ -122,14 +122,14 @@ function renderRecord(
       key={record.key}
       className={`record ${isInDiffState ? 'record-diff' : ''}`}
     >
-      {renderRecordTags(record.type)}
-      {renderRecordLink(record.source.loc, openSource)}
-      {renderRecordInfo(record)}
+      {RecordTags(record.type)}
+      {RecordLink(record.source.loc, openSource)}
+      {RecordInfo(record)}
     </div>
   )
 }
 
-function renderRecordTags(actionType: ActionType): JSX.Element {
+function RecordTags(actionType: ActionType): JSX.Element {
   const tags = ActionTypeNames.reduce((tags, type, index) => {
     if (actionType & ActionType[type]) {
       tags.push((
@@ -150,7 +150,7 @@ function renderRecordTags(actionType: ActionType): JSX.Element {
   )
 }
 
-function renderRecordLink(
+function RecordLink(
   { scriptUrl, lineNumber, columnNumber },
   openSource: (url: string, line: number) => void
 ): JSX.Element {
@@ -168,7 +168,7 @@ function renderRecordLink(
   )
 }
 
-function renderRecordInfo(record: ActionRecord): JSX.Element {
+function RecordInfo(record: ActionRecord): JSX.Element {
   return (
     <div className="info">
       <span>{record.source.code}</span>
