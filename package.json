@@ -36,6 +36,8 @@
   "devDependencies": {
     "@types/chai": "^3.5.1",
     "@types/chrome": "0.0.47",
+    "@types/escodegen": "0.0.6",
+    "@types/esprima": "^4.0.0",
     "@types/mocha": "^2.2.41",
     "@types/node": "^8.0.14",
     "@types/react": "^15.0.39",
@@ -51,6 +53,8 @@
     "chai": "^3.5.0",
     "diff-dom": "^2.1.0",
     "es6-promise": "^3.3.1",
+    "escodegen": "^1.9.0",
+    "esprima": "^4.0.0",
     "file-loader": "^0.11.2",
     "isomorphic-fetch": "^2.2.1",
     "istanbul": "^0.4.5",

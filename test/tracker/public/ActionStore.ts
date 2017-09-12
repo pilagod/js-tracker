@@ -74,16 +74,17 @@ describe('ActionStore', () => {
 
     // @NOTE: all info have trackid '1' by default
 
-    it('should transform action info into record and add it to ActionStore', async () => {
-      await actionStore.registerFromActionInfo(actions[0].info)
-
-      expect(actionStore.get('1')).to.deep.equal([actions[0].record])
-    })
-
-    it('should transform action info into record and add it to ActionStore (actionTag scenario)', async () => {
-      await actionStore.registerFromActionInfo(actions[2].info)
-
-      expect(actionStore.get('1')).to.deep.equal([actions[2].record])
+    it('should parse info correctly and add result to corresponding group', async () => {
+      return await Promise.all(actions.map(async (action, index) => {
+        await actionStore.registerFromActionInfo(
+          Object.assign({}, action.info, {
+            trackid: index
+          })
+        )
+        // console.log(action.record.source.code)
+        // console.log(actionStore.get(`${index}`)[0].source.code)
+        expect(actionStore.get(`${index}`)).to.deep.equal([action.record])
+      }))
     })
 
     it('should apply FILO on action records transformed from info in trackid group in ActionStore', async () => {

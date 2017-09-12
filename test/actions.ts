@@ -106,5 +106,24 @@ export default [
       scriptUrl, 5, 1,
       `div.innerText = 'js-tracker'`
     )
+  },
+  // action[4]
+  {
+    info: <ActionInfo>{
+      trackid: '1',
+      target: 'EventTarget',
+      action: 'addEventListener',
+      stacktrace: [_, _, new StackFrame({
+        functionName: 'EventTarget.addEventListener',
+        fileName: scriptUrl,
+        lineNumber: 6,
+        columnNumber: 5
+      })]
+    },
+    record: createActionRecord(
+      ActionType.Event,
+      scriptUrl, 6, 5,
+      `div.addEventListener('click', function () {console.log('clicked')})`
+    )
   }
 ]

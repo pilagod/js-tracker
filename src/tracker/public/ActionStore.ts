@@ -1,14 +1,12 @@
 /// <reference path='./ActionStore.d.ts'/>
 
+import * as ESTree from '../../../node_modules/@types/estree'
+import * as esprima from 'esprima'
+import * as escodegen from 'escodegen'
+
 import ActionMap from '../private/ActionMap'
 
 export default class ActionStore implements IActionStore {
-
-  constructor() {
-    this._store = new Store()
-    this._locMap = new LocMap()
-    this._scriptCache = new ScriptCache()
-  }
 
   /* public */
 
@@ -38,9 +36,9 @@ export default class ActionStore implements IActionStore {
 
   private _HTML_DOM_API_FRAME_INDEX = 2
 
-  private _store: IStore
-  private _locMap: ILocMap
-  private _scriptCache: IScriptCache
+  private _store = new Store()
+  private _locMap = new LocMap()
+  private _scriptCache = new ScriptCache()
 
   private _register(trackid: TrackID, record: ActionRecord): void {
     this._store.add(trackid, record)
@@ -84,17 +82,22 @@ export default class ActionStore implements IActionStore {
     return await this._scriptCache.get(scriptUrl, lineNumber, columnNumber)
   }
 
-  private async _fetchScript(scriptUrl: string): Promise<string[]> {
+  private async _fetchScript(scriptUrl: string): Promise<ESTree.Node[]> {
     const response = await fetch(scriptUrl)
-    const scriptText = await response.text()
+    const script = await response.text()
+    const candidates = []
 
-    return scriptText.split('\n').map((line) => {
-      return line.trim()
+    esprima.parseScript(script, { loc: true }, (node) => {
+      if (node.type === 'CallExpression' || node.type === 'AssignmentExpression') {
+        candidates.push(node)
+      }
     })
+    // @TODO: compress blockstatement
+    return candidates
   }
 }
 
-class Store implements IStore {
+class Store {
 
   constructor() {
     this.store = {}
@@ -131,7 +134,7 @@ class Store implements IStore {
   }
 }
 
-class LocMap implements ILocMap {
+class LocMap {
 
   constructor() {
     this.locMap = {}
@@ -163,7 +166,7 @@ class LocMap implements ILocMap {
   }
 }
 
-class ScriptCache implements IScriptCache {
+class ScriptCache {
 
   constructor() {
     this.cache = {}
@@ -171,14 +174,23 @@ class ScriptCache implements IScriptCache {
 
   /* public */
 
-  public add(scriptUrl: string, scriptPromise: Promise<string[]>): void {
-    this.cache[scriptUrl] = scriptPromise
+  public add(scriptUrl: string, script: Promise<ESTree.Node[]>): void {
+    this.cache[scriptUrl] = script
   }
 
   public async get(scriptUrl: string, lineNumber: number, columnNumber: number): Promise<string> {
-    // @TODO: take column into account
-    // @TODO: trim just one line with maximum 50 letters
-    return (await this.cache[scriptUrl])[lineNumber - 1]
+    const candidates = await this.cache[scriptUrl]
+
+    return escodegen.generate(
+      this.elect(candidates, lineNumber, columnNumber),
+      {
+        format: {
+          indent: { style: '' },
+          newline: '',
+          semicolons: false
+        }
+      }
+    )
   }
 
   public has(scriptUrl: string): boolean {
@@ -188,6 +200,51 @@ class ScriptCache implements IScriptCache {
   /* private */
 
   private cache: {
-    [scriptUrl: string]: Promise<string[]>
+    [scriptUrl: string]: Promise<ESTree.Node[]>
+  }
+
+  private elect(
+    candidates: ESTree.Node[],
+    lineNumber: number,
+    columnNumber: number
+  ): ESTree.Node {
+    const action = {
+      loc: {
+        start: { line: lineNumber, column: columnNumber },
+        end: { line: lineNumber, column: columnNumber }
+      }
+    }
+    const elected = candidates
+      .filter((candidate: ESTree.Node) => {
+        return this.contains(candidate.loc, action.loc)
+      })
+      .reduce((elected: ESTree.Node, candidate: ESTree.Node, candidateIndex: number) => {
+        if (this.contains(candidate.loc, action.loc)
+          && this.contains(elected.loc, candidate.loc)
+        ) {
+          return candidate
+        }
+        return elected
+      })
+    // @TODO: should remove elected candidate
+    return elected
+  }
+
+  private contains(loc1: ESTree.SourceLocation, loc2: ESTree.SourceLocation): boolean {
+    return (
+      (
+        loc1.start.line < loc2.start.line ||
+        (
+          loc1.start.line === loc2.start.line &&
+          loc1.start.column <= loc2.start.column
+        )
+      ) && (
+        loc1.end.line > loc2.end.line ||
+        (
+          loc1.end.line === loc2.end.line &&
+          loc1.end.column >= loc2.end.column
+        )
+      )
+    )
   }
 }
