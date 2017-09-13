@@ -11,12 +11,13 @@ export default class ActionStore implements IActionStore {
   /* public */
 
   public get(trackid: TrackID): ActionRecord[] {
-    return this._store.get(trackid)
+    return this.store.get(trackid)
   }
 
   public async register(trackid: TrackID, record: ActionRecord): Promise<boolean> {
-    if (!this._locMap.has(trackid, record.key)) {
-      this._register(trackid, record)
+    if (!this.locMap.has(trackid, record.key)) {
+      this.store.add(trackid, record)
+      this.locMap.add(trackid, record.key)
       return true
     }
     return false
@@ -24,67 +25,63 @@ export default class ActionStore implements IActionStore {
 
   public async registerFromActionInfo(info: ActionInfo): Promise<boolean> {
     if (info.merge) {
-      this._merge(info.merge, info.trackid)
+      this.merge(info.merge, info.trackid)
     }
     const record: ActionRecord =
-      await this._parseActionInfoIntoActionRecord(info)
+      await this.parseActionInfoIntoActionRecord(info)
 
     return await this.register(info.trackid, record)
   }
 
   /* private */
 
-  private _HTML_DOM_API_FRAME_INDEX = 2
+  private HTML_DOM_API_FRAME_INDEX = 2
 
-  private _store = new Store()
-  private _locMap = new LocMap()
-  private _scriptCache = new ScriptCache()
+  private store = new Store()
+  private locMap = new LocMap()
+  private scriptCache = new ScriptCache()
 
-  private _register(trackid: TrackID, record: ActionRecord): void {
-    this._store.add(trackid, record)
-    this._locMap.add(trackid, record.key)
-  }
-
-  private _merge(from: TrackID, to: TrackID) {
-    const merged = this._store.merge(from, to)
+  private merge(from: TrackID, to: TrackID) {
+    const merged = this.store.merge(from, to)
 
     merged.map((record) => {
-      this._locMap.add(to, record.key)
-      this._locMap.remove(from, record.key)
+      this.locMap.add(to, record.key)
+      this.locMap.remove(from, record.key)
     })
   }
 
-  private async _parseActionInfoIntoActionRecord(info: ActionInfo): Promise<ActionRecord> {
+  private async parseActionInfoIntoActionRecord(info: ActionInfo): Promise<ActionRecord> {
     const {
       fileName: scriptUrl,
       lineNumber,
       columnNumber
-    } = this._filterStackTrace(info.stacktrace)
+    } = this.filterStackTrace(info.stacktrace)
 
     return <ActionRecord>{
       key: `${scriptUrl}:${lineNumber}:${columnNumber}`,
       type: ActionMap.getActionType(info.target, info.action, info.actionTag),
       source: <Source>{
         loc: { scriptUrl, lineNumber, columnNumber },
-        code: await this._fetchSourceCode(scriptUrl, lineNumber, columnNumber)
+        code: await this.fetchSourceCode(scriptUrl, lineNumber, columnNumber)
       }
     }
   }
 
-  private _filterStackTrace(stacktrace: StackTrace.StackFrame[]): StackTrace.StackFrame {
-    return stacktrace[this._HTML_DOM_API_FRAME_INDEX]
+  private filterStackTrace(stacktrace: StackTrace.StackFrame[]): StackTrace.StackFrame {
+    return stacktrace[this.HTML_DOM_API_FRAME_INDEX]
   }
 
-  private async _fetchSourceCode(scriptUrl: string, lineNumber: number, columnNumber: number): Promise<string> {
-    if (!this._scriptCache.has(scriptUrl)) {
-      this._scriptCache.add(scriptUrl, this._fetchScript(scriptUrl))
+  private async fetchSourceCode(scriptUrl: string, lineNumber: number, columnNumber: number): Promise<string> {
+    if (!this.scriptCache.has(scriptUrl)) {
+      this.scriptCache.add(scriptUrl, this.fetchScript(scriptUrl))
     }
-    return await this._scriptCache.get(scriptUrl, lineNumber, columnNumber)
+    return await this.scriptCache.get(scriptUrl, lineNumber, columnNumber)
   }
 
-  private async _fetchScript(scriptUrl: string): Promise<ESTree.Node[]> {
+  private async fetchScript(scriptUrl: string): Promise<ESTree.Node[]> {
     const response = await fetch(scriptUrl)
     const script = await response.text()
+    // @TODO: handle html file
     const candidates = []
 
     esprima.parseScript(script, { loc: true }, (node) => {
