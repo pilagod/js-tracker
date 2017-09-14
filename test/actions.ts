@@ -2,30 +2,11 @@
 
 import StackFrame from 'stackframe'
 import ActionType from '../src/tracker/public/ActionType'
+import {
+  dummyStackFrame as _,
+  createActionRecord
+} from './utils'
 
-function createActionRecord(
-  type: ActionType,
-  scriptUrl: string,
-  lineNumber: number,
-  columnNumber: number,
-  code: string,
-): ActionRecord {
-  return {
-    key: `${scriptUrl}:${lineNumber}:${columnNumber}`,
-    type: type,
-    source: {
-      loc: { scriptUrl, lineNumber, columnNumber },
-      code: code
-    }
-  }
-}
-// dummy stack frame
-const _: StackTrace.StackFrame = new StackFrame({
-  functionName: 'dummy',
-  fileName: 'dummy.js',
-  lineNumber: 0,
-  columnNumber: 0
-})
 // all actions refer to ./script.js
 const scriptUrl = '/script.js'
 

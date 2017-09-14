@@ -80,8 +80,7 @@ export default class ActionStore implements IActionStore {
 
   private async fetchScript(scriptUrl: string): Promise<ESTree.Node[]> {
     const response = await fetch(scriptUrl)
-    const script = await response.text()
-    // @TODO: handle html file
+    const script = this.process(await response.text())
     const candidates = []
 
     esprima.parseScript(script, { loc: true }, (node) => {
@@ -91,6 +90,24 @@ export default class ActionStore implements IActionStore {
     })
     // @TODO: compress blockstatement
     return candidates
+  }
+
+  private process(source: string): string {
+    if (this.isHTML(source)) {
+      // this is a html file, comment all html tags
+      // keep only script text in script tag
+      // @TODO: comment in style error
+      source = ('/*' + source + '*/')
+        // replace only <script> and <script ... type="text/javascript" ...>
+        .replace(/(<script(?:[^>]((?!type=)|(?=type="text\/javascript)))*>)/g, '$1*/')
+        .replace(/(<\/script>)/g, '/*$1')
+      console.log(source)
+    }
+    return source
+  }
+
+  private isHTML(source: string): boolean {
+    return source.indexOf('</html>') !== -1
   }
 }
 

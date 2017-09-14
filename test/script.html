@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+
+    </style>
+</head>
+
+<body>
+    <script>
+        var div = document.createElement('div')
+    </script>
+
+    <script some other property>
+        div.innerText = 'js-tracker'
+    </script>
+
+    <script type="text/javascript">
+        div.addEventListener('click', function () {
+            console.log('clicked')
+        })
+    </script>
+
+    <script type="text/custom">
+        should not include this
+    </script>
+</body>
+
+</html>

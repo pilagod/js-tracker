@@ -25,13 +25,11 @@ module.exports = configFactory(function (defaultConfig) {
       { pattern: 'src/tracker/public/*[!(.d)].ts' },
       { pattern: 'src/tracker/private/ActionMap.ts' },
 
-      // test
-      { pattern: 'test/actions.ts' },
-
       /* static */
       { pattern: 'test/script.js', served: true, included: false },
 
       /* tests */
+      { pattern: 'test/*.ts' },
       { pattern: 'test/extension/**/*.ts' }
     ],
     // preprocess matching files before serving them to the browser
@@ -51,10 +49,8 @@ module.exports = configFactory(function (defaultConfig) {
       'src/tracker/public/*[!(.d)].ts': ['karma-typescript'],
       'src/tracker/private/ActionMap.ts': ['karma-typescript'],
 
-      // test
-      'test/actions.ts': ['karma-typescript'],
-
       /* tests */
+      'test/*.ts': ['karma-typescript'],
       'test/extension/**/*.ts': ['karma-typescript']
     }
   })

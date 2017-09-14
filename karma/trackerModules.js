@@ -1,12 +1,12 @@
 var configFactory = require('./configFactory')
-var PORT = 9878
 
 module.exports = configFactory(function (defaultConfig) {
   var customConfig = Object.assign({}, defaultConfig, {
-    port: PORT,
+    port: 9878,
 
     proxies: {
-      '/script.js': `http://localhost:${PORT}/base/test/script.js`
+      '/script.js': `/base/test/script.js`,
+      '/script.html': `/base/test/script.html`
     },
     // list of files / patterns to load in the browser
     // all modules including in tests should be included here
@@ -23,12 +23,12 @@ module.exports = configFactory(function (defaultConfig) {
       { pattern: 'src/tracker/public/*[!(.d)].ts' },
       { pattern: 'src/tracker/private/*[!(.d)].ts' },
 
-      { pattern: 'test/actions.ts' },
-
       /* static */
       { pattern: 'test/script.js', served: true, included: false },
+      { pattern: 'test/script.html', served: true, included: false },
 
       /* tests */
+      { pattern: 'test/*.ts' },
       { pattern: 'test/tracker/public/*.ts' },
       { pattern: 'test/tracker/private/*.ts' }
     ],
@@ -47,9 +47,8 @@ module.exports = configFactory(function (defaultConfig) {
       'src/tracker/public/*[!(.d)].ts': ['karma-typescript'],
       'src/tracker/private/*[!(.d)].ts': ['karma-typescript'],
 
-      'test/actions.ts': ['karma-typescript'],
-
       /* tests */
+      'test/*.ts': ['karma-typescript'],
       'test/tracker/public/*.ts': ['karma-typescript'],
       'test/tracker/private/*.ts': ['karma-typescript']
     }
