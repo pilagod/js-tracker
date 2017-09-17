@@ -5,7 +5,7 @@ import ActionStore from '../../../src/tracker/public/ActionStore'
 import ActionType from '../../../src/tracker/public/ActionType'
 
 import actions from '../../actions'
-import actionsOfHTML from '../../actionsOfHTML'
+import actionsInHTML from '../../actionsInHTML'
 
 describe('ActionStore', () => {
   let actionStore: IActionStore
@@ -75,8 +75,8 @@ describe('ActionStore', () => {
 
     // @NOTE: all info have trackid '1' by default
 
-    describe('correctness of parsing info', () => {
-      it('should parse info correctly given javascript source', async () => {
+    describe('correctness of parsing record info', () => {
+      async function testParsingGiven(actions: Array<{ info: ActionInfo, record: ActionRecord }>) {
         return await Promise.all(actions.map(async (action, index) => {
           await actionStore.registerFromActionInfo(
             Object.assign({}, action.info, {
@@ -87,19 +87,14 @@ describe('ActionStore', () => {
           // console.log(actionStore.get(`${index}`)[0].source.code)
           expect(actionStore.get(`${index}`)).to.deep.equal([action.record])
         }))
+      }
+
+      it('should parse info correctly given javascript source', async () => {
+        return testParsingGiven(actions)
       })
 
       it('should parse info correctly given html source', async () => {
-        return await Promise.all(actionsOfHTML.map(async (action, index) => {
-          await actionStore.registerFromActionInfo(
-            Object.assign({}, action.info, {
-              trackid: index
-            })
-          )
-          // console.log(action.record.source.code)
-          // console.log(actionStore.get(`${index}`)[0].source.code)
-          expect(actionStore.get(`${index}`)).to.deep.equal([action.record])
-        }))
+        return testParsingGiven(actionsInHTML)
       })
     })
 
