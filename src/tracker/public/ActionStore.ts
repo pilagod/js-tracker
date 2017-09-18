@@ -8,6 +8,12 @@ import ActionMap from '../private/ActionMap'
 
 export default class ActionStore implements IActionStore {
 
+  private HTML_DOM_API_FRAME_INDEX = 2
+
+  private store = new Store()
+  private locMap = new LocMap()
+  private scriptCache = new ScriptCache()
+
   /* public */
 
   public get(trackid: TrackID): ActionRecord[] {
@@ -34,12 +40,6 @@ export default class ActionStore implements IActionStore {
   }
 
   /* private */
-
-  private HTML_DOM_API_FRAME_INDEX = 2
-
-  private store = new Store()
-  private locMap = new LocMap()
-  private scriptCache = new ScriptCache()
 
   private merge(from: TrackID, to: TrackID) {
     const merged = this.store.merge(from, to)
@@ -79,7 +79,7 @@ export default class ActionStore implements IActionStore {
   }
 
   private async fetchScript(scriptUrl: string): Promise<ESTree.Node[]> {
-    const script = this.trimSource(await (await fetch(scriptUrl)).text())
+    const script = this.process(await (await fetch(scriptUrl)).text())
     const candidates = []
 
     esprima.parseScript(script, { loc: true }, (node) => {
@@ -90,27 +90,62 @@ export default class ActionStore implements IActionStore {
     return candidates
   }
 
-  private trimSource(source: string): string {
-    return this.isHTML(source) ? this.trimNonScriptPart(source) : source
+  private process(source: string): string {
+    return this.isHTML(source) ? this.commentOutNonScriptPart(source) : source
   }
 
   private isHTML(source: string): boolean {
     return /<html[\s\S]*?>/.test(source)
   }
 
-  private trimNonScriptPart(source: string): string {
-    // @TODO: remote comments in style
-    return ('/*' + source + '*/')
+  private commentOutNonScriptPart(source: string): string {
+    // @NOTE: commenting out html tags but not removing is
+    // because removing html part will cause code location
+    // (line and column) to change, and this will bring 
+    // inconsistency of code location to call stack and 
+    // source code we fetched here.
+    return ('/*' + this.removeCommentsInStyleTags(source) + '*/')
       // match only <script ...> and <script ... type="text/javascript" ...>
       .replace(/(<script(?:[\s\S](?:(?!type=)|(?=type="text\/javascript)))*?>)([\s\S]*?)(<\/script>)/gi, '$1*/$2/*$3')
+  }
+
+  private removeCommentsInStyleTags(source: string) {
+    // @NOTE: comments in style block will break off 
+    // those comment blocks added to other html part
+    return this.indexStyleRanges(source).reduce((result, [start, end]) => {
+      for (let i = start; i < end; i++) {
+        if (source[i] === '/' && (source[i + 1] === '*' || source[i - 1] === '*')) {
+          result = result.slice(0, i) + '*' + result.slice(i + 1)
+        }
+      }
+      return result
+    }, source)
+  }
+
+  private indexStyleRanges(source: string): Array<[number, number]> {
+    const result = []
+    const endOffset = '</style>'.length
+
+    let [start, end] = [
+      source.indexOf('<style', 0),
+      source.indexOf('</style>', 0) + endOffset
+    ]
+    while (start !== -1) {
+      result.push([start, end]);
+      [start, end] = [
+        source.indexOf('<style', end),
+        source.indexOf('</style>', end) + endOffset
+      ]
+    }
+    return result
   }
 }
 
 class Store {
 
-  constructor() {
-    this.store = {}
-  }
+  private store: {
+    [trackid in TrackID]: ActionRecord[]
+  } = {}
 
   /* public */
 
@@ -135,19 +170,15 @@ class Store {
     }
     return merged
   }
-
-  /* private */
-
-  private store: {
-    [trackid in TrackID]: ActionRecord[]
-  }
 }
 
 class LocMap {
 
-  constructor() {
-    this.locMap = {}
-  }
+  private locMap: {
+    [loc: string]: {
+      [trackid in TrackID]: boolean;
+    };
+  } = {}
 
   /* public */
 
@@ -165,21 +196,13 @@ class LocMap {
   public remove(trackid: TrackID, loc: string): void {
     this.locMap[loc] && delete this.locMap[loc][trackid]
   }
-
-  /* private */
-
-  private locMap: {
-    [loc: string]: {
-      [trackid in TrackID]: boolean;
-    };
-  }
 }
 
 class ScriptCache {
 
-  constructor() {
-    this.cache = {}
-  }
+  private cache: {
+    [scriptUrl: string]: Promise<ESTree.Node[]>
+  } = {}
 
   /* public */
 
@@ -207,10 +230,6 @@ class ScriptCache {
   }
 
   /* private */
-
-  private cache: {
-    [scriptUrl: string]: Promise<ESTree.Node[]>
-  }
 
   private elect(
     candidates: ESTree.Node[],

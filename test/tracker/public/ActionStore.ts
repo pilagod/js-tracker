@@ -72,9 +72,6 @@ describe('ActionStore', () => {
   })
 
   describe('registerFromActionInfo', () => {
-
-    // @NOTE: all info have trackid '1' by default
-
     describe('correctness of parsing record info', () => {
       async function testParsingGiven(actions: Array<{ info: ActionInfo, record: ActionRecord }>) {
         return await Promise.all(actions.map(async (action, index) => {

@@ -20,13 +20,13 @@ export default [
       stacktrace: [_, _, new StackFrame({
         functionName: 'HTMLElement.innerText',
         fileName: scriptUrl,
-        lineNumber: 16,
+        lineNumber: 20,
         columnNumber: 13
       })]
     },
     record: createActionRecord(
       ActionType.Attr | ActionType.Node,
-      scriptUrl, 16, 13,
+      scriptUrl, 20, 13,
       `div.innerText = 'js-tracker'`
     )
   },
@@ -39,13 +39,13 @@ export default [
       stacktrace: [_, _, new StackFrame({
         functionName: 'EventTarget.addEventListener',
         fileName: scriptUrl,
-        lineNumber: 20,
+        lineNumber: 24,
         columnNumber: 13
       })]
     },
     record: createActionRecord(
       ActionType.Event,
-      scriptUrl, 20, 13,
+      scriptUrl, 24, 13,
       `div.addEventListener('click', function () {console.log('clicked')})`
     )
   }
