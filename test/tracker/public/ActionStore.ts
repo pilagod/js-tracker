@@ -23,53 +23,53 @@ describe('ActionStore', () => {
     })
   })
 
-  describe('register', () => {
-    it('should add action record to ActionStore grouped by trackid', async () => {
-      await actionStore.register('1', actions[0].record)
-      await actionStore.register('2', actions[1].record)
+  // describe('register', () => {
+  //   it('should add action record to ActionStore grouped by trackid', async () => {
+  //     await actionStore.register('1', actions[0].record)
+  //     await actionStore.register('2', actions[1].record)
 
-      expect(actionStore.get('1')).to.deep.equal([actions[0].record])
-      expect(actionStore.get('2')).to.deep.equal([actions[1].record])
-    })
+  //     expect(actionStore.get('1')).to.deep.equal([actions[0].record])
+  //     expect(actionStore.get('2')).to.deep.equal([actions[1].record])
+  //   })
 
-    it('should apply FILO on action records in trackid group in ActionStore', async () => {
-      await actionStore.register('1', actions[0].record)
-      await actionStore.register('1', actions[1].record)
+  //   it('should apply FILO on action records in trackid group in ActionStore', async () => {
+  //     await actionStore.register('1', actions[0].record)
+  //     await actionStore.register('1', actions[1].record)
 
-      expect(actionStore.get('1')).to.deep.equal([actions[1].record, actions[0].record])
-    })
+  //     expect(actionStore.get('1')).to.deep.equal([actions[1].record, actions[0].record])
+  //   })
 
-    it('should not allow ActionStore to add duplicate (same source.loc) records to same trackid group', async () => {
-      await actionStore.register('1', actions[0].record)
-      await actionStore.register('1', actions[0].record)
+  //   it('should not allow ActionStore to add duplicate (same source.loc) records to same trackid group', async () => {
+  //     await actionStore.register('1', actions[0].record)
+  //     await actionStore.register('1', actions[0].record)
 
-      expect(actionStore.get('1')).to.deep.equal([actions[0].record])
-    })
+  //     expect(actionStore.get('1')).to.deep.equal([actions[0].record])
+  //   })
 
-    it('should allow ActionStore to add duplicate (same source.loc) records to different trackid group', async () => {
-      await actionStore.register('1', actions[0].record)
-      await actionStore.register('2', actions[0].record)
+  //   it('should allow ActionStore to add duplicate (same source.loc) records to different trackid group', async () => {
+  //     await actionStore.register('1', actions[0].record)
+  //     await actionStore.register('2', actions[0].record)
 
-      expect(actionStore.get('1')).to.deep.equal([actions[0].record])
-      expect(actionStore.get('2')).to.deep.equal([actions[0].record])
-    })
+  //     expect(actionStore.get('1')).to.deep.equal([actions[0].record])
+  //     expect(actionStore.get('2')).to.deep.equal([actions[0].record])
+  //   })
 
-    it('should return true given record added successfully', async () => {
-      const shouldSuccess =
-        await actionStore.register('1', actions[0].record)
+  //   it('should return true given record added successfully', async () => {
+  //     const shouldSuccess =
+  //       await actionStore.register('1', actions[0].record)
 
-      expect(shouldSuccess).to.be.true
-    })
+  //     expect(shouldSuccess).to.be.true
+  //   })
 
-    it('should return false given record added has already been in ActionStore', async () => {
-      await actionStore.register('1', actions[0].record)
+  //   it('should return false given record added has already been in ActionStore', async () => {
+  //     await actionStore.register('1', actions[0].record)
 
-      const shouldFail =
-        await actionStore.register('1', actions[0].record)
+  //     const shouldFail =
+  //       await actionStore.register('1', actions[0].record)
 
-      expect(shouldFail).to.be.false
-    })
-  })
+  //     expect(shouldFail).to.be.false
+  //   })
+  // })
 
   describe('registerFromActionInfo', () => {
     describe('correctness of parsing record info', () => {

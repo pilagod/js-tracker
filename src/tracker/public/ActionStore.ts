@@ -20,15 +20,6 @@ export default class ActionStore implements IActionStore {
     return this.store.get(trackid)
   }
 
-  public async register(trackid: TrackID, record: ActionRecord): Promise<boolean> {
-    if (!this.locMap.has(trackid, record.key)) {
-      this.store.add(trackid, record)
-      this.locMap.add(trackid, record.key)
-      return true
-    }
-    return false
-  }
-
   public async registerFromActionInfo(info: ActionInfo): Promise<boolean> {
     if (info.merge) {
       this.merge(info.merge, info.trackid)
@@ -36,10 +27,19 @@ export default class ActionStore implements IActionStore {
     const record: ActionRecord =
       await this.parseActionInfoIntoActionRecord(info)
 
-    return await this.register(info.trackid, record)
+    return this.locMap.has(info.trackid, record.key)
+      ? false
+      : this.register(info.trackid, record)
   }
 
   /* private */
+
+  private register(trackid: TrackID, record: ActionRecord): boolean {
+    this.store.add(trackid, record)
+    this.locMap.add(trackid, record.key)
+
+    return true
+  }
 
   private merge(from: TrackID, to: TrackID) {
     const merged = this.store.merge(from, to)

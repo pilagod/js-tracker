@@ -31,11 +31,6 @@ interface IActionStore {
     trackid: TrackID
   ): ActionRecord[];
 
-  register(
-    trackid: TrackID,
-    record: ActionRecord
-  ): Promise<boolean>;
-
   registerFromActionInfo(
     info: ActionInfo
   ): Promise<boolean>;
