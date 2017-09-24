@@ -126,8 +126,6 @@ function record(
   if (!owner.hasTrackID()) {
     owner.setTrackID()
   }
-  const stackframe = filterStackTrace(StackTrace.getSync())
-
   sendActionInfoToContentscript(
     <ActionInfo>{
       trackid: owner.getTrackID(),
@@ -135,13 +133,19 @@ function record(
       action: data.action,
       actionTag: ActionTagMap.fetchActionTag(data),
       merge: data.merge,
-      loc: {
-        scriptUrl: stackframe.fileName,
-        lineNumber: stackframe.lineNumber,
-        columnNumber: stackframe.columnNumber
-      },
+      loc: createSourceLocationFromStackFrame(
+        filterStackTrace(StackTrace.getSync())
+      ),
     }
   )
+}
+
+function createSourceLocationFromStackFrame(stackframe: StackTrace.StackFrame): SourceLocation {
+  return {
+    scriptUrl: stackframe.fileName,
+    lineNumber: stackframe.lineNumber,
+    columnNumber: stackframe.columnNumber
+  }
 }
 
 const HTML_DOM_API_FRAME_INDEX = 2
