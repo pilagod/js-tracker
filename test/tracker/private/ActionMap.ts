@@ -2,6 +2,7 @@ import { expect } from 'chai'
 
 import ActionType from '../../../src/tracker/public/ActionType'
 import ActionMap from '../../../src/tracker/private/ActionMap'
+import { SymbolWhich } from '../../../src/tracker/private/Symbols'
 
 describe('ActionMap', () => {
   describe('coverage', () => {
@@ -194,7 +195,7 @@ describe('ActionMap', () => {
         it('should return action type Style given caller is \'classList\'', () => {
           const div = document.createElement('div')
 
-          div.classList._which = 'classList'
+          div.classList[SymbolWhich] = 'classList'
 
           expect(
             ActionMap.getActionType({

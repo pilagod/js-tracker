@@ -1,5 +1,7 @@
 /// <reference path='./ActionTagMap.d.ts'/>
 
+import { SymbolWhich } from './Symbols'
+
 const ActionTagMap: object = {
   'Element': {
     // general
@@ -41,11 +43,11 @@ const _: IActionTagMap = {
 
       switch (tags[0]) {
         case '#arg':
-          return tags.slice(1).reduce((pre: object, cur: string) => pre[cur], args)
+          return tags.slice(1).reduce((pre: object, cur: any) => pre[cur.toString()], args)
         case '#name':
           return (<Attr>caller).name
         case '#which':
-          return (<DOMTokenList>caller)._which
+          return (<DOMTokenList>caller)[SymbolWhich]
       }
     }
   },

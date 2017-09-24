@@ -1,7 +1,6 @@
 /**
  * ActionTargets
  */
-
 interface ActionTarget {
   // @NOTE: symbol index is not supported yet
   // [owner: symbol]: Owner;
@@ -14,7 +13,6 @@ interface CSSStyleDeclaration extends ActionTarget { }
 interface DOMStringMap extends ActionTarget { }
 interface DOMTokenList extends ActionTarget {
   value: string; // @TODO: pull request to typescript repo
-  _which: string;
 }
 interface NamedNodeMap extends ActionTarget { }
 

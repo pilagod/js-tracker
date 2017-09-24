@@ -6,6 +6,7 @@ import ActionTagMap from './private/ActionTagMap'
 import Anomalies from './private/Anomalies'
 import OwnerManager from './private/OwnerManager'
 import ShadowElement from './private/ShadowElement'
+import { SymbolProxy, SymbolWhich } from './private/Symbols'
 import {
   attachAttr,
   sendActionInfoToContentscript,
@@ -127,7 +128,7 @@ function record(
       loc: createSourceLocationFromStackFrame(
         filterStackTrace(StackTrace.getSync())
       ),
-      merge: data.merge,
+      merge: data.merge
     }
   )
 }
@@ -234,12 +235,11 @@ function proxyDecoratorTemplate<T extends ActionTarget>(proxyHandler: ProxyHandl
   return function (_: any, __: any, getter: () => T): () => T {
     return function (this: HTMLElement): T {
       const target = <T>getter.call(this)
-      const proxy = new Proxy<T>(target, proxyHandler)
 
       if (!OwnerManager.hasOwner(target)) {
         OwnerManager.setOwner(target, this)
       }
-      return proxy
+      return target[SymbolProxy] || (target[SymbolProxy] = new Proxy<T>(target, proxyHandler))
     }
   }
 }
@@ -318,8 +318,8 @@ function DOMTokenListDecorator(
     if (!OwnerManager.hasOwner(target)) {
       OwnerManager.setOwner(target, this)
     }
-    if (!target._which) {
-      target._which = which /* classList, relList */
+    if (!target[SymbolWhich]) {
+      target[SymbolWhich] = which /* classList, relList */
     }
     return target
   }

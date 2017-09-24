@@ -3,8 +3,8 @@
 // @NOTE: this module should only be used in tracker, not contentscript
 
 import Owner from './Owner'
+import { SymbolOwner } from './Symbols'
 
-const SymbolOwner = Symbol('owner')
 const OwnerManager: IOwnerManager = {
   getOwner(target) {
     return <Owner>Reflect.get(target, SymbolOwner) || Owner.NullOwner
