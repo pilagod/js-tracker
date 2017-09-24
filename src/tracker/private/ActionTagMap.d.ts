@@ -12,9 +12,11 @@ interface IActionTagMap {
   ): boolean;
 
   fetchActionTag(
-    caller: ActionTarget,
-    target: Target,
-    action: Action,
-    args: any[]
+    data: {
+      caller: ActionTarget,
+      target: Target,
+      action: Action,
+      args?: any[]
+    }
   ): ActionTag;
 }

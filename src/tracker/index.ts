@@ -105,7 +105,7 @@ function record(
     caller: ActionTarget,
     target: Target,
     action: Action,
-    actionTag?: string,
+    args?: any[],
     merge?: string
   }
 ): void {
@@ -133,7 +133,7 @@ function record(
       trackid: owner.getTrackID(),
       target: data.target,
       action: data.action,
-      actionTag: data.actionTag,
+      actionTag: ActionTagMap.fetchActionTag(data),
       merge: data.merge,
       loc: {
         scriptUrl: stackframe.fileName,
@@ -173,12 +173,8 @@ function trackGeneralCases(): void {
     return function (...args) {
       const result = actionFunc.call(this, ...args)
 
-      record({
-        caller: this,
-        target,
-        action,
-        actionTag: ActionTagMap.fetchActionTag(this, target, action, args)
-      })
+      record({ caller: this, target, action, args })
+
       return result
     }
   }
@@ -205,11 +201,9 @@ function trackHTMLElementAnomalies(): void {
     return proxyDecoratorTemplate(<ProxyHandler<DOMStringMap>>{
       set: (target, action, value: string) => {
         target[action] = value
-        record({
-          caller: target,
-          target: 'DOMStringMap',
-          action
-        })
+
+        record({ caller: target, target: 'DOMStringMap', action })
+
         return true
       }
     })
@@ -235,11 +229,9 @@ function trackHTMLElementAnomalies(): void {
       },
       set: function (target, action, value) {
         target[action] = value
-        record({
-          caller: target,
-          target: 'CSSStyleDeclaration',
-          action
-        })
+
+        record({ caller: target, target: 'CSSStyleDeclaration', action })
+
         return true
       }
     })
@@ -352,10 +344,7 @@ function setAttrNodeDecorator(
     const result = actionFunc.call(this, parseAttr(attr))
 
     record({
-      caller: this,
-      target,
-      action,
-      actionTag: attr.name,
+      caller: this, target, action, args: [attr],
       merge: OwnerManager.hasShadowOwner(attr)
         ? OwnerManager.getTrackIDFromOwnerOf(attr)
         : undefined
@@ -413,12 +402,8 @@ function valueDecorator(
     }
     const result = setter.call(this, value)
 
-    record({
-      caller: this,
-      target,
-      action,
-      actionTag: this.name
-    })
+    record({ caller: this, target, action })
+
     return result
   }
 }
