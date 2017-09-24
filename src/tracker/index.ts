@@ -25,11 +25,8 @@ trackNamedNodeMapAnomalies()
  * register custom elements
  */
 
-function setupShadowElement() {
-  customElements.define(
-    ShadowElement.TagName,
-    ShadowElement
-  )
+function setupShadowElement(): void {
+  customElements.define(ShadowElement.TagName, ShadowElement)
 }
 
 function setupWindow(): void {
@@ -40,7 +37,7 @@ function setupDocument(): void {
   setupNonElementTarget(document, 'document')
 }
 
-function setupNonElementTarget(target: ActionTarget, name: string) {
+function setupNonElementTarget(target: ActionTarget, name: string): void {
   const infoElementName = `${name}-info`
 
   customElements.define(
@@ -69,7 +66,7 @@ function trackTemplate(
     ) => (this: ActionTarget, ...args: any[]) => any,
     getter?: boolean
   }
-) {
+): void {
   const { target, action, decorator } = template
   const shouldTrackGetter = template.getter
   const descriptor =
@@ -123,12 +120,9 @@ function record(
   }
   const owner = OwnerManager.getOwner(data.caller)
 
-  if (!owner.hasTrackID()) {
-    owner.setTrackID()
-  }
   sendActionInfoToContentscript(
     <ActionInfo>{
-      trackid: owner.getTrackID(),
+      trackid: (!owner.hasTrackID() && owner.setTrackID()) || owner.getTrackID(),
       target: data.target,
       action: data.action,
       actionTag: ActionTagMap.fetchActionTag(data),
@@ -205,9 +199,7 @@ function trackHTMLElementAnomalies(): void {
     return proxyDecoratorTemplate(<ProxyHandler<DOMStringMap>>{
       set: (target, action, value: string) => {
         target[action] = value
-
         record({ caller: target, target: 'DOMStringMap', action })
-
         return true
       }
     })
@@ -233,9 +225,7 @@ function trackHTMLElementAnomalies(): void {
       },
       set: function (target, action, value) {
         target[action] = value
-
         record({ caller: target, target: 'CSSStyleDeclaration', action })
-
         return true
       }
     })
@@ -260,20 +250,20 @@ function proxyDecoratorTemplate<T extends ActionTarget>(proxyHandler: ProxyHandl
  * trackElementAnomalies
  */
 
-function trackElementAnomalies() {
+function trackElementAnomalies(): void {
   setupOwner()
   trackAttributes()
   trackClassList()
   trackSetAttributeNode()
 
-  function setupOwner() {
+  function setupOwner(): void {
     OwnerManager.setOwnerByGetter(
       Element.prototype,
       (context: Element) => context
     )
   }
 
-  function trackAttributes() {
+  function trackAttributes(): void {
     trackTemplate({
       target: 'Element',
       action: 'attributes',
@@ -282,7 +272,7 @@ function trackElementAnomalies() {
     })
   }
 
-  function trackClassList() {
+  function trackClassList(): void {
     trackTemplate({
       target: 'Element',
       action: 'classList',
@@ -291,7 +281,7 @@ function trackElementAnomalies() {
     })
   }
 
-  function trackSetAttributeNode() {
+  function trackSetAttributeNode(): void {
     for (let anomaly of [
       'setAttributeNode',
       'setAttributeNodeNS'
@@ -323,8 +313,8 @@ function DOMTokenListDecorator(
   _: any,
   which: string,
   getter: () => DOMTokenList
-): () => DOMTokenList {
-  return function (this: Element): DOMTokenList {
+): (this: Element) => DOMTokenList {
+  return function () {
     const target = <DOMTokenList>getter.call(this)
 
     if (!OwnerManager.hasOwner(target)) {
@@ -342,7 +332,7 @@ function setAttrNodeDecorator(
   action: Action,
   actionFunc: (attr: Attr) => void
 ): (attr: Attr) => void {
-  return function (attr: Attr) {
+  return function (attr) {
     // @NOTE: error might raise here, native operation 
     // should call before recording
     const result = actionFunc.call(this, parseAttr(attr))
@@ -350,7 +340,7 @@ function setAttrNodeDecorator(
     record({
       caller: this, target, action, args: [attr],
       merge: OwnerManager.hasShadowOwner(attr)
-        ? OwnerManager.getTrackIDFromOwnerOf(attr)
+        ? OwnerManager.getOwner(attr).getTrackID()
         : undefined
     })
     return result
@@ -379,7 +369,7 @@ function trackAttrAnomalies(): void {
   setupAttr()
   trackValue()
 
-  function setupAttr() {
+  function setupAttr(): void {
     OwnerManager.setOwnerByGetter(
       Attr.prototype,
       (context: Attr) => context.ownerElement
@@ -414,10 +404,7 @@ function valueDecorator(
 
 function attachAttrToShadowElement(attr: Attr) {
   // @TODO: check namespaceURI
-  attachAttr(
-    document.createElement(ShadowElement.TagName),
-    attr
-  )
+  attachAttr(document.createElement(ShadowElement.TagName), attr)
 }
 
 /**

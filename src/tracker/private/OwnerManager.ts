@@ -10,10 +10,6 @@ const OwnerManager: IOwnerManager = {
     return <Owner>Reflect.get(target, SymbolOwner) || Owner.NullOwner
   },
 
-  getTrackIDFromOwnerOf(target) {
-    return this.getOwner(target).getTrackID()
-  },
-
   hasOwner(target) {
     // @NOTE: Attr has owner but might be null (created by createAttribute)
     return this.getOwner(target) !== Owner.NullOwner
