@@ -37,7 +37,7 @@ describe('HTML DOM API tracker', () => {
     trackid: string,
     target: string,
     action: Action,
-    stackframe: StackTrace.StackFrame,
+    loc: SourceLocation,
     actionTag?: string,
     merge?: string,
   }
@@ -61,7 +61,7 @@ describe('HTML DOM API tracker', () => {
       .to.have.property('action')
       .to.equal(expected.action)
 
-    matchStackFrame(got.stacktrace[2], expected.stackframe)
+    matchLocation(got.loc, expected.loc)
 
     if (expected.merge) {
       expect(got.merge).to.equal(expected.merge)
@@ -72,22 +72,20 @@ describe('HTML DOM API tracker', () => {
     }
   }
 
-  function matchStackFrame(
-    got: StackTrace.StackFrame,
-    expected: StackTrace.StackFrame
-  ) {
-    expect(got.fileName).to.equal(expected.fileName)
+  function matchLocation(got: SourceLocation, expected: SourceLocation) {
+    expect(got.scriptUrl).to.equal(expected.scriptUrl)
     expect(got.lineNumber).to.equal(expected.lineNumber)
+    // expect(got.columnNumber).to.equal(expected.columnNumber)
   }
 
-  // @NOTE: getStackFrameWithLineOffset should call immediately 
-  // after tracked actions on default
-  function getStackFrameWithLineOffset(lineOffset: number = -1) {
-    const stackframe = StackTrace.getSync()[1]
+  function getPrevLineSourceLocation(): SourceLocation {
+    const loc = StackTrace.getSync()[1]
 
-    return Object.assign({}, stackframe, {
-      lineNumber: stackframe.lineNumber + lineOffset
-    })
+    return {
+      scriptUrl: loc.fileName,
+      lineNumber: loc.lineNumber - 1,
+      columnNumber: loc.columnNumber
+    }
   }
 
   describe('Window', () => {
@@ -135,7 +133,7 @@ describe('HTML DOM API tracker', () => {
       fragment.appendChild(child)
 
       div.appendChild(fragment)
-      const stackframe = getStackFrameWithLineOffset()
+      const loc = getPrevLineSourceLocation()
 
       expect(msgs).to.have.length(1)
 
@@ -144,7 +142,7 @@ describe('HTML DOM API tracker', () => {
         trackid: '1',
         target: 'Node',
         action: 'appendChild',
-        stackframe
+        loc
       })
     })
   })
@@ -154,7 +152,7 @@ describe('HTML DOM API tracker', () => {
       const div = document.createElement('div')
 
       div.accessKey = 'accessKey'
-      const stackframe = getStackFrameWithLineOffset()
+      const loc = getPrevLineSourceLocation()
 
       expect(msgs).to.have.length(1)
 
@@ -163,7 +161,7 @@ describe('HTML DOM API tracker', () => {
         trackid: '1',
         target: 'HTMLElement',
         action: 'accessKey',
-        stackframe
+        loc
       })
     })
 
@@ -171,7 +169,7 @@ describe('HTML DOM API tracker', () => {
       const div = document.createElement('div')
 
       div.click()
-      const stackframe = getStackFrameWithLineOffset()
+      const loc = getPrevLineSourceLocation()
 
       expect(msgs).to.have.length(1)
 
@@ -180,7 +178,7 @@ describe('HTML DOM API tracker', () => {
         trackid: '1',
         target: 'HTMLElement',
         action: 'click',
-        stackframe
+        loc
       })
     })
   })
@@ -190,7 +188,7 @@ describe('HTML DOM API tracker', () => {
       const div = document.createElement('div')
 
       div.id = 'id'
-      const stackframe = getStackFrameWithLineOffset()
+      const loc = getPrevLineSourceLocation()
 
       expect(msgs).to.have.length(1)
 
@@ -199,7 +197,7 @@ describe('HTML DOM API tracker', () => {
         trackid: '1',
         target: 'Element',
         action: 'id',
-        stackframe
+        loc
       })
     })
 
@@ -208,7 +206,7 @@ describe('HTML DOM API tracker', () => {
       const div2 = document.createElement('div')
 
       div.insertAdjacentElement('afterbegin', div2)
-      const stackframe = getStackFrameWithLineOffset()
+      const loc = getPrevLineSourceLocation()
 
       expect(msgs).to.have.length(1)
 
@@ -217,7 +215,7 @@ describe('HTML DOM API tracker', () => {
         trackid: '1',
         target: 'Element',
         action: 'insertAdjacentElement',
-        stackframe
+        loc
       })
     })
 
@@ -228,7 +226,7 @@ describe('HTML DOM API tracker', () => {
         const div = document.createElement('div')
 
         div.setAttribute('id', 'id')
-        const stackframe = getStackFrameWithLineOffset()
+        const loc = getPrevLineSourceLocation()
 
         expect(msgs).to.have.length(1)
 
@@ -238,7 +236,7 @@ describe('HTML DOM API tracker', () => {
           target: 'Element',
           action: 'setAttribute',
           actionTag: 'id',
-          stackframe
+          loc
         })
       })
 
@@ -248,7 +246,7 @@ describe('HTML DOM API tracker', () => {
         div.setAttribute('id', 'id') // msgs[0]
 
         div.removeAttribute('id') // msgs[1]
-        const stackframe = getStackFrameWithLineOffset()
+        const loc = getPrevLineSourceLocation()
 
         expect(msgs).to.have.length(2)
 
@@ -258,7 +256,7 @@ describe('HTML DOM API tracker', () => {
           target: 'Element',
           action: 'removeAttribute',
           actionTag: 'id',
-          stackframe
+          loc
         })
       })
 
@@ -269,7 +267,7 @@ describe('HTML DOM API tracker', () => {
 
         const id = div.getAttributeNode('id')
         div.removeAttributeNode(id)
-        const stackframe = getStackFrameWithLineOffset()
+        const loc = getPrevLineSourceLocation()
 
         expect(msgs).to.have.length(2)
 
@@ -279,7 +277,7 @@ describe('HTML DOM API tracker', () => {
           target: 'Element',
           action: 'removeAttributeNode',
           actionTag: 'id',
-          stackframe
+          loc
         })
       })
     })
@@ -294,7 +292,7 @@ describe('HTML DOM API tracker', () => {
         const idAttr = document.createAttribute('id')
 
         div.setAttributeNode(idAttr)
-        const stackframe = getStackFrameWithLineOffset()
+        const loc = getPrevLineSourceLocation()
 
         expect(msgs).to.have.length(1)
 
@@ -304,7 +302,7 @@ describe('HTML DOM API tracker', () => {
           target: 'Element',
           action: 'setAttributeNode',
           actionTag: 'id',
-          stackframe
+          loc
         })
       })
 
@@ -315,7 +313,7 @@ describe('HTML DOM API tracker', () => {
         idAttr.value = 'id' // msgs[0] -> generate trackid 1
 
         div.setAttributeNode(idAttr) // msgs[1] -> generate trackid 2
-        const stackframe = getStackFrameWithLineOffset()
+        const loc = getPrevLineSourceLocation()
 
         expect(msgs).to.have.length(2)
 
@@ -326,7 +324,7 @@ describe('HTML DOM API tracker', () => {
           action: 'setAttributeNode',
           actionTag: 'id',
           merge: '1',
-          stackframe
+          loc
         })
       })
 
@@ -350,7 +348,7 @@ describe('HTML DOM API tracker', () => {
       const div = document.createElement('div')
 
       div.textContent = 'content'
-      const stackframe = getStackFrameWithLineOffset()
+      const loc = getPrevLineSourceLocation()
 
       expect(msgs).to.have.length(1)
 
@@ -359,7 +357,7 @@ describe('HTML DOM API tracker', () => {
         trackid: '1',
         target: 'Node',
         action: 'textContent',
-        stackframe
+        loc
       })
     })
 
@@ -368,7 +366,7 @@ describe('HTML DOM API tracker', () => {
       const div2 = document.createElement('div')
 
       div.appendChild(div2)
-      const stackframe = getStackFrameWithLineOffset()
+      const loc = getPrevLineSourceLocation()
 
       expect(msgs).to.have.length(1)
 
@@ -377,7 +375,7 @@ describe('HTML DOM API tracker', () => {
         trackid: '1',
         target: 'Node',
         action: 'appendChild',
-        stackframe
+        loc
       })
     })
   })
@@ -387,7 +385,7 @@ describe('HTML DOM API tracker', () => {
       const div = document.createElement('div')
 
       div.addEventListener('click', () => { })
-      const stackframe = getStackFrameWithLineOffset()
+      const loc = getPrevLineSourceLocation()
 
       expect(msgs).to.have.length(1)
 
@@ -396,7 +394,7 @@ describe('HTML DOM API tracker', () => {
         trackid: '1',
         target: 'EventTarget',
         action: 'addEventListener',
-        stackframe
+        loc
       })
     })
   })
@@ -406,7 +404,7 @@ describe('HTML DOM API tracker', () => {
       const idAttr = document.createAttribute('id')
 
       idAttr.value = 'id'
-      const stackframe = getStackFrameWithLineOffset()
+      const loc = getPrevLineSourceLocation()
 
       expect(msgs).to.have.length(1)
 
@@ -416,7 +414,7 @@ describe('HTML DOM API tracker', () => {
         target: 'Attr',
         action: 'value',
         actionTag: 'id',
-        stackframe
+        loc
       })
     })
   })
@@ -432,7 +430,7 @@ describe('HTML DOM API tracker', () => {
       ).to.equal(div)
 
       div.style.color = 'red'
-      const stackframe = getStackFrameWithLineOffset()
+      const loc = getPrevLineSourceLocation()
 
       expect(msgs).to.have.length(1)
 
@@ -441,7 +439,7 @@ describe('HTML DOM API tracker', () => {
         trackid: '1',
         target: 'CSSStyleDeclaration',
         action: 'color',
-        stackframe
+        loc
       })
     })
   })
@@ -457,7 +455,7 @@ describe('HTML DOM API tracker', () => {
       ).to.equal(div)
 
       div.dataset.data = 'data'
-      const stackframe = getStackFrameWithLineOffset()
+      const loc = getPrevLineSourceLocation()
 
       expect(msgs).to.have.length(1)
 
@@ -466,7 +464,7 @@ describe('HTML DOM API tracker', () => {
         trackid: '1',
         target: 'DOMStringMap',
         action: 'data',
-        stackframe
+        loc
       })
     })
   })
@@ -476,7 +474,7 @@ describe('HTML DOM API tracker', () => {
       const div = document.createElement('div')
 
       div.classList.value = 'class'
-      const stackframe = getStackFrameWithLineOffset()
+      const loc = getPrevLineSourceLocation()
 
       expect(msgs).to.have.length(1)
 
@@ -486,7 +484,7 @@ describe('HTML DOM API tracker', () => {
         target: 'DOMTokenList',
         action: 'value',
         actionTag: 'classList',
-        stackframe
+        loc
       })
     })
 
@@ -494,7 +492,7 @@ describe('HTML DOM API tracker', () => {
       const div = document.createElement('div')
 
       div.classList.add('class')
-      const stackframe = getStackFrameWithLineOffset()
+      const loc = getPrevLineSourceLocation()
 
       expect(msgs).to.have.length(1)
 
@@ -504,7 +502,7 @@ describe('HTML DOM API tracker', () => {
         target: 'DOMTokenList',
         action: 'add',
         actionTag: 'classList',
-        stackframe
+        loc
       })
     })
   })
@@ -516,7 +514,7 @@ describe('HTML DOM API tracker', () => {
       div.id = 'id' // msgs[0]
 
       div.attributes.removeNamedItem('id') // msgs[1]
-      const stackframe = getStackFrameWithLineOffset()
+      const loc = getPrevLineSourceLocation()
 
       expect(msgs).to.have.length(2)
 
@@ -526,7 +524,7 @@ describe('HTML DOM API tracker', () => {
         target: 'NamedNodeMap',
         action: 'removeNamedItem',
         actionTag: 'id',
-        stackframe
+        loc
       })
     })
 
@@ -539,7 +537,7 @@ describe('HTML DOM API tracker', () => {
       id.value = 'id' // msgs[0] -> generate trackid 1
 
       div.attributes.setNamedItem(id) // msgs[1] -> generate trackid 2
-      const stackframe = getStackFrameWithLineOffset()
+      const loc = getPrevLineSourceLocation()
 
       expect(msgs).to.have.length(2)
 
@@ -549,7 +547,7 @@ describe('HTML DOM API tracker', () => {
         target: 'NamedNodeMap',
         action: 'setNamedItem',
         actionTag: 'id',
-        stackframe
+        loc,
       })
     })
   })

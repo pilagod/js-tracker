@@ -7,9 +7,6 @@ import * as escodegen from 'escodegen'
 import ActionMap from '../private/ActionMap'
 
 export default class ActionStore implements IActionStore {
-
-  private HTML_DOM_API_FRAME_INDEX = 2
-
   private store = new Store()
   private locMap = new LocMap()
   private scriptCache = new ScriptCache()
@@ -51,24 +48,14 @@ export default class ActionStore implements IActionStore {
   }
 
   private async parseActionInfoIntoActionRecord(info: ActionInfo): Promise<ActionRecord> {
-    const {
-      fileName: scriptUrl,
-      lineNumber,
-      columnNumber
-    } = this.filterStackTrace(info.stacktrace)
-
     return <ActionRecord>{
-      key: `${scriptUrl}:${lineNumber}:${columnNumber}`,
+      key: `${info.loc.scriptUrl}:${info.loc.lineNumber}:${info.loc.columnNumber}`,
       type: ActionMap.getActionType(info.target, info.action, info.actionTag),
       source: <Source>{
-        loc: { scriptUrl, lineNumber, columnNumber },
-        code: await this.fetchSourceCode(scriptUrl, lineNumber, columnNumber)
+        loc: info.loc,
+        code: await this.fetchSourceCode(info.loc.scriptUrl, info.loc.lineNumber, info.loc.columnNumber)
       }
     }
-  }
-
-  private filterStackTrace(stacktrace: StackTrace.StackFrame[]): StackTrace.StackFrame {
-    return stacktrace[this.HTML_DOM_API_FRAME_INDEX]
   }
 
   private async fetchSourceCode(scriptUrl: string, lineNumber: number, columnNumber: number): Promise<string> {

@@ -1,9 +1,7 @@
 /// <reference path='../src/tracker/public/ActionStore.d.ts'/>
 
-import StackFrame from 'stackframe'
 import ActionType from '../src/tracker/public/ActionType'
 import {
-  dummyStackFrame as _,
   createActionRecord
 } from './utils'
 
@@ -17,12 +15,11 @@ export default [
       trackid: '1',
       target: 'HTMLElement',
       action: 'innerText',
-      stacktrace: [_, _, new StackFrame({
-        functionName: 'HTMLElement.innerText',
-        fileName: scriptUrl,
+      loc: {
+        scriptUrl,
         lineNumber: 20,
         columnNumber: 13
-      })]
+      },
     },
     record: createActionRecord(
       ActionType.Attr | ActionType.Node,
@@ -36,12 +33,11 @@ export default [
       trackid: '1',
       target: 'EventTarget',
       action: 'addEventListener',
-      stacktrace: [_, _, new StackFrame({
-        functionName: 'EventTarget.addEventListener',
-        fileName: scriptUrl,
+      loc: {
+        scriptUrl,
         lineNumber: 24,
         columnNumber: 13
-      })]
+      },
     },
     record: createActionRecord(
       ActionType.Event,

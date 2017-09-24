@@ -6,9 +6,15 @@ type ActionInfo = {
   trackid: TrackID,
   target: Target,
   action: Action,
+  loc: SourceLocation,
   actionTag?: string,
   merge?: TrackID,
-  stacktrace: StackTrace.StackFrame[]
+}
+
+type SourceLocation = {
+  scriptUrl: string;
+  lineNumber: number;
+  columnNumber: number;
 }
 
 type ActionRecord = {
@@ -18,11 +24,7 @@ type ActionRecord = {
 }
 
 type Source = {
-  loc: {
-    scriptUrl: string;
-    lineNumber: number;
-    columnNumber: number;
-  }
+  loc: SourceLocation;
   code: string;
 }
 

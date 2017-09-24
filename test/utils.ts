@@ -1,13 +1,3 @@
-import StackFrame from 'stackframe'
-
-// dummy stack frame
-export const dummyStackFrame = new StackFrame({
-  functionName: 'dummy',
-  fileName: 'dummy.js',
-  lineNumber: 0,
-  columnNumber: 0
-})
-
 export function createActionRecord(
   type: ActionType,
   scriptUrl: string,
