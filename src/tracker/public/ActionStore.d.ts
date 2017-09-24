@@ -4,10 +4,8 @@
 
 type ActionInfo = {
   trackid: TrackID,
-  target: Target,
-  action: Action,
+  type: ActionType,
   loc: SourceLocation,
-  actionTag?: string,
   merge?: TrackID,
 }
 

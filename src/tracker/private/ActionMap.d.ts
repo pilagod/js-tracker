@@ -20,9 +20,12 @@ type ActionTagMap = {
 
 interface IActionMap {
   getActionType(
-    target: Target,
-    action: Action,
-    actionTag?: string
+    data: {
+      caller: ActionTarget,
+      target: Target,
+      action: Action,
+      args?: any[]
+    }
   ): ActionType;
 
   has(

@@ -1,6 +1,7 @@
 import { expect } from 'chai'
 import * as sinon from 'sinon'
 import * as StackTrace from 'stacktrace-js'
+import ActionType from '../../src/tracker/public/ActionType'
 import OwnerManager from '../../src/tracker/private/OwnerManager'
 import {
   attachListenerTo,
@@ -35,10 +36,8 @@ describe('HTML DOM API tracker', () => {
   type ExpectInfo = {
     caller: ActionTarget,
     trackid: string,
-    target: string,
-    action: Action,
+    type: ActionType,
     loc: SourceLocation,
-    actionTag?: string,
     merge?: string,
   }
 
@@ -54,21 +53,13 @@ describe('HTML DOM API tracker', () => {
       .to.equal(expected.trackid)
 
     expect(got)
-      .to.have.property('target')
-      .to.equal(expected.target)
-
-    expect(got)
-      .to.have.property('action')
-      .to.equal(expected.action)
+      .to.have.property('type')
+      .to.equal(expected.type)
 
     matchLocation(got.loc, expected.loc)
 
     if (expected.merge) {
       expect(got.merge).to.equal(expected.merge)
-    }
-
-    if (expected.actionTag) {
-      expect(got.actionTag).to.equal(expected.actionTag)
     }
   }
 
@@ -140,8 +131,7 @@ describe('HTML DOM API tracker', () => {
       matchActionInfo(msgs[0], {
         caller: div,
         trackid: '1',
-        target: 'Node',
-        action: 'appendChild',
+        type: ActionType.Node,
         loc
       })
     })
@@ -159,8 +149,7 @@ describe('HTML DOM API tracker', () => {
       matchActionInfo(msgs[0], {
         caller: div,
         trackid: '1',
-        target: 'HTMLElement',
-        action: 'accessKey',
+        type: ActionType.Attr,
         loc
       })
     })
@@ -176,8 +165,7 @@ describe('HTML DOM API tracker', () => {
       matchActionInfo(msgs[0], {
         caller: div,
         trackid: '1',
-        target: 'HTMLElement',
-        action: 'click',
+        type: ActionType.Behav,
         loc
       })
     })
@@ -195,8 +183,7 @@ describe('HTML DOM API tracker', () => {
       matchActionInfo(msgs[0], {
         caller: div,
         trackid: '1',
-        target: 'Element',
-        action: 'id',
+        type: ActionType.Attr,
         loc
       })
     })
@@ -213,16 +200,15 @@ describe('HTML DOM API tracker', () => {
       matchActionInfo(msgs[0], {
         caller: div,
         trackid: '1',
-        target: 'Element',
-        action: 'insertAdjacentElement',
+        type: ActionType.Node,
         loc
       })
     })
 
-    /* action tag */
+    /* composite actions */
 
     describe('set/removeAttribute', () => {
-      it('should track setAttribute with action tag', () => {
+      it('should track setAttribute', () => {
         const div = document.createElement('div')
 
         div.setAttribute('id', 'id')
@@ -233,18 +219,15 @@ describe('HTML DOM API tracker', () => {
         matchActionInfo(msgs[0], {
           caller: div,
           trackid: '1',
-          target: 'Element',
-          action: 'setAttribute',
-          actionTag: 'id',
+          type: ActionType.Attr,
           loc
         })
       })
 
-      it('should track removeAttribute with action tag', () => {
+      it('should track removeAttribute', () => {
         const div = document.createElement('div')
 
         div.setAttribute('id', 'id') // msgs[0]
-
         div.removeAttribute('id') // msgs[1]
         const loc = getPrevLineSourceLocation()
 
@@ -253,20 +236,16 @@ describe('HTML DOM API tracker', () => {
         matchActionInfo(msgs[1], {
           caller: div,
           trackid: '1',
-          target: 'Element',
-          action: 'removeAttribute',
-          actionTag: 'id',
+          type: ActionType.Attr,
           loc
         })
       })
 
-      it('should track removeAttributeNode with action tag', () => {
+      it('should track removeAttributeNode', () => {
         const div = document.createElement('div')
 
         div.setAttribute('id', 'id')
-
-        const id = div.getAttributeNode('id')
-        div.removeAttributeNode(id)
+        div.removeAttributeNode(div.getAttributeNode('id'))
         const loc = getPrevLineSourceLocation()
 
         expect(msgs).to.have.length(2)
@@ -274,9 +253,7 @@ describe('HTML DOM API tracker', () => {
         matchActionInfo(msgs[1], {
           caller: div,
           trackid: '1',
-          target: 'Element',
-          action: 'removeAttributeNode',
-          actionTag: 'id',
+          type: ActionType.Attr,
           loc
         })
       })
@@ -299,9 +276,7 @@ describe('HTML DOM API tracker', () => {
         matchActionInfo(msgs[0], {
           caller: div,
           trackid: '1',
-          target: 'Element',
-          action: 'setAttributeNode',
-          actionTag: 'id',
+          type: ActionType.Attr,
           loc
         })
       })
@@ -320,9 +295,7 @@ describe('HTML DOM API tracker', () => {
         matchActionInfo(msgs[1], {
           caller: div,
           trackid: '2',
-          target: 'Element',
-          action: 'setAttributeNode',
-          actionTag: 'id',
+          type: ActionType.Attr,
           merge: '1',
           loc
         })
@@ -355,8 +328,7 @@ describe('HTML DOM API tracker', () => {
       matchActionInfo(msgs[0], {
         caller: div,
         trackid: '1',
-        target: 'Node',
-        action: 'textContent',
+        type: ActionType.Attr | ActionType.Node,
         loc
       })
     })
@@ -373,8 +345,7 @@ describe('HTML DOM API tracker', () => {
       matchActionInfo(msgs[0], {
         caller: div,
         trackid: '1',
-        target: 'Node',
-        action: 'appendChild',
+        type: ActionType.Node,
         loc
       })
     })
@@ -392,8 +363,7 @@ describe('HTML DOM API tracker', () => {
       matchActionInfo(msgs[0], {
         caller: div,
         trackid: '1',
-        target: 'EventTarget',
-        action: 'addEventListener',
+        type: ActionType.Event,
         loc
       })
     })
@@ -411,9 +381,7 @@ describe('HTML DOM API tracker', () => {
       matchActionInfo(msgs[0], {
         caller: idAttr,
         trackid: '1',
-        target: 'Attr',
-        action: 'value',
-        actionTag: 'id',
+        type: ActionType.Attr,
         loc
       })
     })
@@ -437,8 +405,7 @@ describe('HTML DOM API tracker', () => {
       matchActionInfo(msgs[0], {
         caller: div.style,
         trackid: '1',
-        target: 'CSSStyleDeclaration',
-        action: 'color',
+        type: ActionType.Style,
         loc
       })
     })
@@ -462,8 +429,7 @@ describe('HTML DOM API tracker', () => {
       matchActionInfo(msgs[0], {
         caller: div.dataset,
         trackid: '1',
-        target: 'DOMStringMap',
-        action: 'data',
+        type: ActionType.Attr,
         loc
       })
     })
@@ -481,9 +447,7 @@ describe('HTML DOM API tracker', () => {
       matchActionInfo(msgs[0], {
         caller: div.classList,
         trackid: '1',
-        target: 'DOMTokenList',
-        action: 'value',
-        actionTag: 'classList',
+        type: ActionType.Style,
         loc
       })
     })
@@ -499,16 +463,14 @@ describe('HTML DOM API tracker', () => {
       matchActionInfo(msgs[0], {
         caller: div.classList,
         trackid: '1',
-        target: 'DOMTokenList',
-        action: 'add',
-        actionTag: 'classList',
+        type: ActionType.Style,
         loc
       })
     })
   })
 
   describe('NamedNodeMap', () => {
-    it('should track removeNamedItem with action tag', () => {
+    it('should track removeNamedItem', () => {
       const div = document.createElement('div')
 
       div.id = 'id' // msgs[0]
@@ -521,9 +483,7 @@ describe('HTML DOM API tracker', () => {
       matchActionInfo(msgs[1], {
         caller: div.attributes,
         trackid: '1',
-        target: 'NamedNodeMap',
-        action: 'removeNamedItem',
-        actionTag: 'id',
+        type: ActionType.Attr,
         loc
       })
     })
@@ -544,9 +504,7 @@ describe('HTML DOM API tracker', () => {
       matchActionInfo(msgs[1], {
         caller: div.attributes,
         trackid: '2',
-        target: 'NamedNodeMap',
-        action: 'setNamedItem',
-        actionTag: 'id',
+        type: ActionType.Attr,
         loc,
       })
     })

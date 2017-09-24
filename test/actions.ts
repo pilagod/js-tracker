@@ -9,12 +9,11 @@ import {
 const scriptUrl = '/script.js'
 
 export default [
-  // action[0]
+  // action[0] `div.id = 'id'`
   {
     info: <ActionInfo>{
       trackid: '1',
-      target: 'Element',
-      action: 'id',
+      type: ActionType.Attr,
       loc: {
         scriptUrl,
         lineNumber: 2,
@@ -27,12 +26,11 @@ export default [
       `div.id = 'id'`
     )
   },
-  // action[1]
+  // action[1] `div.style.color = 'red'`
   {
     info: <ActionInfo>{
       trackid: '1',
-      target: 'CSSStyleDeclaration',
-      action: 'color',
+      type: ActionType.Style,
       loc: {
         scriptUrl,
         lineNumber: 3,
@@ -45,13 +43,11 @@ export default [
       `div.style.color = 'red'`
     ),
   },
-  // action[2]
+  // action[2] `div.removeAttribute('style')`
   {
     info: <ActionInfo>{
       trackid: '1',
-      target: 'Element',
-      action: 'removeAttribute',
-      actionTag: 'style',
+      type: ActionType.Style,
       loc: {
         scriptUrl,
         lineNumber: 4,
@@ -64,12 +60,11 @@ export default [
       `div.removeAttribute('style')`
     )
   },
-  // action[3]
+  // action[3] `div.innerText = 'js-tracker'`
   {
     info: <ActionInfo>{
       trackid: '1',
-      target: 'HTMLElement',
-      action: 'innerText',
+      type: ActionType.Attr | ActionType.Node,
       loc: {
         scriptUrl,
         lineNumber: 5,
@@ -82,12 +77,11 @@ export default [
       `div.innerText = 'js-tracker'`
     )
   },
-  // action[4]
+  // action[4] `div.addEventListener('click', function () {console.log('clicked')})`
   {
     info: <ActionInfo>{
       trackid: '1',
-      target: 'EventTarget',
-      action: 'addEventListener',
+      type: ActionType.Event,
       loc: {
         scriptUrl,
         lineNumber: 6,

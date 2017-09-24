@@ -123,13 +123,11 @@ function record(
   sendActionInfoToContentscript(
     <ActionInfo>{
       trackid: (!owner.hasTrackID() && owner.setTrackID()) || owner.getTrackID(),
-      target: data.target,
-      action: data.action,
-      actionTag: ActionTagMap.fetchActionTag(data),
-      merge: data.merge,
+      type: ActionMap.getActionType(data),
       loc: createSourceLocationFromStackFrame(
         filterStackTrace(StackTrace.getSync())
       ),
+      merge: data.merge,
     }
   )
 }

@@ -4,8 +4,6 @@ import * as ESTree from '../../../node_modules/@types/estree'
 import * as esprima from 'esprima'
 import * as escodegen from 'escodegen'
 
-import ActionMap from '../private/ActionMap'
-
 export default class ActionStore implements IActionStore {
   private store = new Store()
   private locMap = new LocMap()
@@ -50,7 +48,7 @@ export default class ActionStore implements IActionStore {
   private async parseActionInfoIntoActionRecord(info: ActionInfo): Promise<ActionRecord> {
     return <ActionRecord>{
       key: `${info.loc.scriptUrl}:${info.loc.lineNumber}:${info.loc.columnNumber}`,
-      type: ActionMap.getActionType(info.target, info.action, info.actionTag),
+      type: info.type,
       source: <Source>{
         loc: info.loc,
         code: await this.fetchSourceCode(info.loc.scriptUrl, info.loc.lineNumber, info.loc.columnNumber)

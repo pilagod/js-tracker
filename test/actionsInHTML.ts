@@ -9,12 +9,11 @@ import {
 const scriptUrl = '/script.html'
 
 export default [
-  // action[0]
+  // action[0] `div.innerText = 'js-tracker'`
   {
     info: <ActionInfo>{
       trackid: '1',
-      target: 'HTMLElement',
-      action: 'innerText',
+      type: ActionType.Attr | ActionType.Node,
       loc: {
         scriptUrl,
         lineNumber: 20,
@@ -27,12 +26,11 @@ export default [
       `div.innerText = 'js-tracker'`
     )
   },
-  // action[1]
+  // action[1] `div.addEventListener('click', function () {console.log('clicked')})`
   {
     info: <ActionInfo>{
       trackid: '1',
-      target: 'EventTarget',
-      action: 'addEventListener',
+      type: ActionType.Event,
       loc: {
         scriptUrl,
         lineNumber: 24,

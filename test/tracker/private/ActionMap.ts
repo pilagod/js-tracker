@@ -58,32 +58,45 @@ describe('ActionMap', () => {
   })
 
   describe('getActionType', () => {
-    describe('without action tag', () => {
+    describe('normal actions', () => {
       it('should return correct action type', () => {
         expect(
-          ActionMap.getActionType('Element', 'id')
+          ActionMap.getActionType({
+            caller: null,
+            target: 'Element',
+            action: 'id'
+          })
         ).to.equal(ActionType.Attr)
       })
 
       it('should return action type None given invalid action', () => {
         expect(
-          ActionMap.getActionType('Element', 'innerText')
+          ActionMap.getActionType({
+            caller: null,
+            target: 'Element',
+            action: 'innerText'
+          })
         ).to.equal(ActionType.None)
       })
 
       it('should return action type None given invalid target', () => {
         expect(
-          ActionMap.getActionType(<any>'InvalidTarget', 'InvalidAction')
+          ActionMap.getActionType({
+            caller: null,
+            target: <any>'InvalidTarget',
+            action: 'InvalidAction'
+          })
         ).to.equal(ActionType.None)
       })
 
       describe('CSSStyleDeclaration', () => {
-        it('should always return action type Style', () => {
+        it('should return action type Style', () => {
           expect(
-            ActionMap.getActionType('CSSStyleDeclaration', 'color')
-          ).to.equal(ActionType.Style)
-          expect(
-            ActionMap.getActionType('CSSStyleDeclaration', 'border')
+            ActionMap.getActionType({
+              caller: null,
+              target: 'CSSStyleDeclaration',
+              action: 'color'
+            })
           ).to.equal(ActionType.Style)
         })
       })
@@ -91,40 +104,104 @@ describe('ActionMap', () => {
       describe('DOMStringMap', () => {
         it('should always return action type Attr', () => {
           expect(
-            ActionMap.getActionType('DOMStringMap', 'id')
+            ActionMap.getActionType({
+              caller: null,
+              target: 'DOMStringMap',
+              action: 'id'
+            })
           ).to.equal(ActionType.Attr)
           expect(
-            ActionMap.getActionType('DOMStringMap', 'style')
+            ActionMap.getActionType({
+              caller: null,
+              target: 'DOMStringMap',
+              action: 'style'
+            })
           ).to.equal(ActionType.Attr)
         })
       })
     })
 
-    describe('with action tag', () => {
-      describe('Attr', () => {
-        it('should return action type Attr on default', () => {
+    describe('composite actions', () => {
+      describe('Element', () => {
+        it('should return action type Attr given id attribute is set', () => {
           expect(
-            ActionMap.getActionType('Element', 'setAttribute', 'id')
+            ActionMap.getActionType({
+              caller: null,
+              target: 'Element',
+              action: 'setAttribute',
+              args: ['id']
+            })
           ).to.equal(ActionType.Attr)
         })
 
-        it('should return action type Style given action tag \'class\'', () => {
+        it('should return action type Style given style attribute is set', () => {
           expect(
-            ActionMap.getActionType('Element', 'setAttributeNode', 'class')
+            ActionMap.getActionType({
+              caller: null,
+              target: 'Element',
+              action: 'setAttribute',
+              args: ['style']
+            })
           ).to.equal(ActionType.Style)
         })
 
-        it('should return action type Style given action tag \'style\'', () => {
+        it('should return action type Attr given attr\'s name is \'id\'', () => {
           expect(
-            ActionMap.getActionType('Attr', 'value', 'style')
+            ActionMap.getActionType({
+              caller: null,
+              target: 'Element',
+              action: 'setAttributeNode',
+              args: [document.createAttribute('id')]
+            })
+          ).to.equal(ActionType.Attr)
+        })
+
+        it('should return action type Style given attr\'s name is \'class\'', () => {
+          expect(
+            ActionMap.getActionType({
+              caller: null,
+              target: 'Element',
+              action: 'setAttributeNode',
+              args: [document.createAttribute('class')]
+            })
+          ).to.equal(ActionType.Style)
+        })
+      })
+
+      describe('Attr', () => {
+        it('should return action type Attr given attr\'s name is \'id\'', () => {
+          expect(
+            ActionMap.getActionType({
+              caller: document.createAttribute('id'),
+              target: 'Attr',
+              action: 'value'
+            })
+          ).to.equal(ActionType.Attr)
+        })
+
+        it('should return action type Style given attr\'s name is \'style\'', () => {
+          expect(
+            ActionMap.getActionType({
+              caller: document.createAttribute('style'),
+              target: 'Attr',
+              action: 'value'
+            })
           ).to.equal(ActionType.Style)
         })
       })
 
       describe('DOMTokenList', () => {
-        it('should return action type Style given action tag \'classList\'', () => {
+        it('should return action type Style given caller is \'classList\'', () => {
+          const div = document.createElement('div')
+
+          div.classList._which = 'classList'
+
           expect(
-            ActionMap.getActionType('DOMTokenList', 'add', 'classList')
+            ActionMap.getActionType({
+              caller: div.classList,
+              target: 'DOMTokenList',
+              action: 'add'
+            })
           ).to.equal(ActionType.Style)
         })
       })
