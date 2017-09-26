@@ -58,71 +58,9 @@ export default class ActionStore implements IActionStore {
 
   private async fetchSourceCode(scriptUrl: string, lineNumber: number, columnNumber: number): Promise<string> {
     if (!this.scriptCache.has(scriptUrl)) {
-      this.scriptCache.add(scriptUrl, this.fetchScript(scriptUrl))
+      this.scriptCache.add(scriptUrl)
     }
     return await this.scriptCache.get(scriptUrl, lineNumber, columnNumber)
-  }
-
-  private async fetchScript(scriptUrl: string): Promise<ESTree.Node[]> {
-    const script = this.process(await (await fetch(scriptUrl)).text())
-    const candidates = []
-
-    esprima.parseScript(script, { loc: true }, (node) => {
-      if (node.type === 'CallExpression' || node.type === 'AssignmentExpression') {
-        candidates.push(node)
-      }
-    })
-    return candidates
-  }
-
-  private process(source: string): string {
-    return this.isHTML(source) ? this.commentOutNonScriptPart(source) : source
-  }
-
-  private isHTML(source: string): boolean {
-    return /<html[\s\S]*?>/.test(source)
-  }
-
-  private commentOutNonScriptPart(source: string): string {
-    // @NOTE: commenting out html tags but not removing is
-    // because removing html part will cause code location
-    // (line and column) to change, and this will bring 
-    // inconsistency of code location to call stack and 
-    // source code we fetched here.
-    return ('/*' + this.removeCommentsInStyleTags(source) + '*/')
-      // match only <script ...> and <script ... type="text/javascript" ...>
-      .replace(/(<script(?:[\s\S](?:(?!type=)|(?=type="text\/javascript)))*?>)([\s\S]*?)(<\/script>)/gi, '$1*/$2/*$3')
-  }
-
-  private removeCommentsInStyleTags(source: string) {
-    // @NOTE: comments in style block will break off 
-    // those comment blocks added to other html part
-    return this.indexStyleRanges(source).reduce((result, [start, end]) => {
-      for (let i = start; i < end; i++) {
-        if (source[i] === '/' && (source[i + 1] === '*' || source[i - 1] === '*')) {
-          result = result.slice(0, i) + '*' + result.slice(i + 1)
-        }
-      }
-      return result
-    }, source)
-  }
-
-  private indexStyleRanges(source: string): Array<[number, number]> {
-    const result = []
-    const endOffset = '</style>'.length
-
-    let [start, end] = [
-      source.indexOf('<style', 0),
-      source.indexOf('</style>', 0) + endOffset
-    ]
-    while (start !== -1) {
-      result.push([start, end]);
-      [start, end] = [
-        source.indexOf('<style', end),
-        source.indexOf('</style>', end) + endOffset
-      ]
-    }
-    return result
   }
 }
 
@@ -191,8 +129,8 @@ class ScriptCache {
 
   /* public */
 
-  public add(scriptUrl: string, script: Promise<ESTree.Node[]>): void {
-    this.cache[scriptUrl] = script
+  public add(scriptUrl: string): void {
+    this.cache[scriptUrl] = this.fetchScript(scriptUrl)
   }
 
   public async get(scriptUrl: string, lineNumber: number, columnNumber: number): Promise<string> {
@@ -215,6 +153,68 @@ class ScriptCache {
   }
 
   /* private */
+
+  private async fetchScript(scriptUrl: string): Promise<ESTree.Node[]> {
+    const script = this.process(await (await fetch(scriptUrl)).text())
+    const candidates = []
+
+    esprima.parseScript(script, { loc: true }, (node) => {
+      if (node.type === 'CallExpression' || node.type === 'AssignmentExpression') {
+        candidates.push(node)
+      }
+    })
+    return candidates
+  }
+
+  private process(source: string): string {
+    return this.isHTML(source) ? this.commentOutNonScriptPart(source) : source
+  }
+
+  private isHTML(source: string): boolean {
+    return /<html[\s\S]*?>/.test(source)
+  }
+
+  private commentOutNonScriptPart(source: string): string {
+    // @NOTE: commenting out html tags but not removing is
+    // because removing html part will cause code location
+    // (line and column) to change, and this will bring 
+    // inconsistency of code location to call stack and 
+    // source code we fetched here.
+    return ('/*' + this.removeCommentsInStyleTags(source) + '*/')
+      // match only <script ...> and <script ... type="text/javascript" ...>
+      .replace(/(<script(?:[\s\S](?:(?!type=)|(?=type="text\/javascript)))*?>)([\s\S]*?)(<\/script>)/gi, '$1*/$2/*$3')
+  }
+
+  private removeCommentsInStyleTags(source: string) {
+    // @NOTE: comments in style block will break off 
+    // those comment blocks added to other html part
+    return this.indexStyleRanges(source).reduce((result, [start, end]) => {
+      for (let i = start; i < end; i++) {
+        if (source[i] === '/' && (source[i + 1] === '*' || source[i - 1] === '*')) {
+          result = result.slice(0, i) + '*' + result.slice(i + 1)
+        }
+      }
+      return result
+    }, source)
+  }
+
+  private indexStyleRanges(source: string): Array<[number, number]> {
+    const result = []
+    const endOffset = '</style>'.length
+
+    let [start, end] = [
+      source.indexOf('<style', 0),
+      source.indexOf('</style>', 0) + endOffset
+    ]
+    while (start !== -1) {
+      result.push([start, end]);
+      [start, end] = [
+        source.indexOf('<style', end),
+        source.indexOf('</style>', end) + endOffset
+      ]
+    }
+    return result
+  }
 
   private elect(
     candidates: ESTree.Node[],
