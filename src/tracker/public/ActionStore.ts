@@ -7,6 +7,7 @@ import * as escodegen from 'escodegen'
 export default class ActionStore implements IActionStore {
   private store = new Store()
   private locMap = new LocMap()
+  private recordPool = new RecordPool()
   private scriptCache = new ScriptCache()
 
   /* public */
@@ -51,12 +52,12 @@ export default class ActionStore implements IActionStore {
       type: info.type,
       source: <Source>{
         loc: info.loc,
-        code: await this.fetchSourceCode(info.loc.scriptUrl, info.loc.lineNumber, info.loc.columnNumber)
+        code: await this.fetchCode(info.loc.scriptUrl, info.loc.lineNumber, info.loc.columnNumber)
       }
     }
   }
 
-  private async fetchSourceCode(scriptUrl: string, lineNumber: number, columnNumber: number): Promise<string> {
+  private async fetchCode(scriptUrl: string, lineNumber: number, columnNumber: number): Promise<string> {
     if (!this.scriptCache.has(scriptUrl)) {
       this.scriptCache.add(scriptUrl)
     }
@@ -95,6 +96,10 @@ class Store {
   }
 }
 
+class RecordPool {
+
+}
+
 class LocMap {
 
   private locMap: {
@@ -130,7 +135,10 @@ class ScriptCache {
   /* public */
 
   public add(scriptUrl: string): void {
-    this.cache[scriptUrl] = this.fetchScript(scriptUrl)
+    this.cache[scriptUrl] =
+      this.parseScriptIntoCandidateESTNodes(
+        this.fetchScript(scriptUrl)
+      )
   }
 
   public async get(scriptUrl: string, lineNumber: number, columnNumber: number): Promise<string> {
@@ -154,41 +162,31 @@ class ScriptCache {
 
   /* private */
 
-  private async fetchScript(scriptUrl: string): Promise<ESTree.Node[]> {
-    const script = this.process(await (await fetch(scriptUrl)).text())
-    const candidates = []
+  private async fetchScript(scriptUrl: string): Promise<string> {
+    const source = await (await fetch(scriptUrl)).text()
 
-    esprima.parseScript(script, { loc: true }, (node) => {
-      if (node.type === 'CallExpression' || node.type === 'AssignmentExpression') {
-        candidates.push(node)
-      }
-    })
-    return candidates
-  }
-
-  private process(source: string): string {
-    return this.isHTML(source) ? this.commentOutNonScriptPart(source) : source
+    return this.isHTML(source) ? this.commentHTMLTags(source) : source
   }
 
   private isHTML(source: string): boolean {
     return /<html[\s\S]*?>/.test(source)
   }
 
-  private commentOutNonScriptPart(source: string): string {
-    // @NOTE: commenting out html tags but not removing is
+  private commentHTMLTags(source: string): string {
+    // @NOTE: commenting out html tags instead of removing is
     // because removing html part will cause code location
     // (line and column) to change, and this will bring 
-    // inconsistency of code location to call stack and 
+    // inconsistency of code location between stack trace and 
     // source code we fetched here.
-    return ('/*' + this.removeCommentsInStyleTags(source) + '*/')
+    return ('/*' + this.removeCommentsInStyleBlocks(source) + '*/')
       // match only <script ...> and <script ... type="text/javascript" ...>
       .replace(/(<script(?:[\s\S](?:(?!type=)|(?=type="text\/javascript)))*?>)([\s\S]*?)(<\/script>)/gi, '$1*/$2/*$3')
   }
 
-  private removeCommentsInStyleTags(source: string) {
+  private removeCommentsInStyleBlocks(source: string) {
     // @NOTE: comments in style block will break off 
     // those comment blocks added to other html part
-    return this.indexStyleRanges(source).reduce((result, [start, end]) => {
+    return this.indexStyleBlocks(source).reduce((result, [start, end]) => {
       for (let i = start; i < end; i++) {
         if (source[i] === '/' && (source[i + 1] === '*' || source[i - 1] === '*')) {
           result = result.slice(0, i) + '*' + result.slice(i + 1)
@@ -198,7 +196,7 @@ class ScriptCache {
     }, source)
   }
 
-  private indexStyleRanges(source: string): Array<[number, number]> {
+  private indexStyleBlocks(source: string): Array<[number, number]> {
     const result = []
     const endOffset = '</style>'.length
 
@@ -214,6 +212,17 @@ class ScriptCache {
       ]
     }
     return result
+  }
+
+  private async parseScriptIntoCandidateESTNodes(script: Promise<string>): Promise<ESTree.Node[]> {
+    const candidates = []
+
+    esprima.parseScript(await script, { loc: true }, (node) => {
+      if (node.type === 'CallExpression' || node.type === 'AssignmentExpression') {
+        candidates.push(node)
+      }
+    })
+    return candidates
   }
 
   private elect(
@@ -232,9 +241,7 @@ class ScriptCache {
         return this.contains(candidate.loc, action.loc)
       })
       .reduce((elected: ESTree.Node, candidate: ESTree.Node, candidateIndex: number) => {
-        if (this.contains(candidate.loc, action.loc)
-          && this.contains(elected.loc, candidate.loc)
-        ) {
+        if (this.contains(elected.loc, candidate.loc)) {
           return candidate
         }
         return elected
