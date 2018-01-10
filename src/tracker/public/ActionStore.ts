@@ -26,8 +26,8 @@ export default class ActionStore implements IActionStore {
   /* private */
 
   private async updateRecordPool(info: ActionInfo) {
-    if (!this.recordPool.has(info.loc)) {
-      this.recordPool.add(info.loc, info.type, await this.fetchCode(info.loc))
+    if (!this.recordPool.has(info)) {
+      this.recordPool.add(info, await this.fetchCode(info.loc))
     }
   }
 
@@ -39,11 +39,11 @@ export default class ActionStore implements IActionStore {
   }
 
   private updateStore(info: ActionInfo): boolean {
-    if (!this.store.contains(info.trackid, this.recordPool.get(info.loc))) {
+    if (!this.store.contains(info.trackid, this.recordPool.get(info))) {
       if (info.merge) {
         this.store.merge(info.merge, info.trackid)
       }
-      this.store.add(info.trackid, this.recordPool.get(info.loc))
+      this.store.add(info.trackid, this.recordPool.get(info))
       return true
     }
     return false
@@ -94,17 +94,17 @@ class RecordPool {
 
   /* public */
 
-  public add(loc: SourceLocation, type: ActionType, code: string): ActionRecord {
+  public add({ type, loc }: ActionInfo, code: string): ActionRecord {
     const key = this.hashSourceLocation(loc)
 
     return this.pool[key] = { key, type, source: { loc, code } }
   }
 
-  public get(loc: SourceLocation): ActionRecord {
+  public get({ loc }: ActionInfo): ActionRecord {
     return this.pool[this.hashSourceLocation(loc)]
   }
 
-  public has(loc: SourceLocation): boolean {
+  public has({ loc }: ActionInfo): boolean {
     return this.pool.hasOwnProperty(this.hashSourceLocation(loc))
   }
 
@@ -225,17 +225,16 @@ class ScriptCache {
         end: { line: lineNumber, column: columnNumber }
       }
     }
-    const elected = candidates
-      .filter((candidate: ESTree.Node) => {
-        return this.contains(candidate.loc, action.loc)
-      })
-      .reduce((elected: ESTree.Node, candidate: ESTree.Node, candidateIndex: number) => {
-        if (this.contains(elected.loc, candidate.loc)) {
-          return candidate
-        }
-        return elected
-      })
-    // @TODO: should remove elected candidate
+    const elected =
+      candidates
+        .filter((candidate: ESTree.Node) => {
+          return this.contains(candidate.loc, action.loc)
+        })
+        .reduce((elected: ESTree.Node, candidate: ESTree.Node) => {
+          return this.contains(elected.loc, candidate.loc) ? candidate : elected
+        })
+    // remove elected candidate
+    candidates.splice(candidates.indexOf(elected), 1)
     // @TODO: compress blockstatement
     return elected
   }
