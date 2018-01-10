@@ -4,9 +4,10 @@ import * as ESTree from '../../../node_modules/@types/estree'
 import * as esprima from 'esprima'
 import * as escodegen from 'escodegen'
 
+import { hash } from './utils'
+
 export default class ActionStore implements IActionStore {
   private store = new Store()
-  private locMap = new LocMap()
   private recordPool = new RecordPool()
   private scriptCache = new ScriptCache()
 
@@ -17,51 +18,35 @@ export default class ActionStore implements IActionStore {
   }
 
   public async registerFromActionInfo(info: ActionInfo): Promise<boolean> {
-    if (info.merge) {
-      this.merge(info.merge, info.trackid)
-    }
-    const record: ActionRecord =
-      await this.parseActionInfoIntoActionRecord(info)
-
-    return this.locMap.has(info.trackid, record.key)
-      ? false
-      : this.register(info.trackid, record)
+    await this.updateRecordPool(info)
+    // @TODO: check recordPool.refs contains info.trackid
+    return this.updateStore(info)
   }
 
   /* private */
 
-  private register(trackid: TrackID, record: ActionRecord): boolean {
-    this.store.add(trackid, record)
-    this.locMap.add(trackid, record.key)
-
-    return true
-  }
-
-  private merge(from: TrackID, to: TrackID) {
-    const merged = this.store.merge(from, to)
-
-    merged.map((record) => {
-      this.locMap.add(to, record.key)
-      this.locMap.remove(from, record.key)
-    })
-  }
-
-  private async parseActionInfoIntoActionRecord(info: ActionInfo): Promise<ActionRecord> {
-    return <ActionRecord>{
-      key: `${info.loc.scriptUrl}:${info.loc.lineNumber}:${info.loc.columnNumber}`,
-      type: info.type,
-      source: <Source>{
-        loc: info.loc,
-        code: await this.fetchCode(info.loc.scriptUrl, info.loc.lineNumber, info.loc.columnNumber)
-      }
+  private async updateRecordPool(info: ActionInfo) {
+    if (!this.recordPool.has(info.loc)) {
+      this.recordPool.add(info.loc, info.type, await this.fetchCode(info.loc))
     }
   }
 
-  private async fetchCode(scriptUrl: string, lineNumber: number, columnNumber: number): Promise<string> {
+  private async fetchCode({ scriptUrl, lineNumber, columnNumber }: SourceLocation): Promise<string> {
     if (!this.scriptCache.has(scriptUrl)) {
       this.scriptCache.add(scriptUrl)
     }
     return await this.scriptCache.get(scriptUrl, lineNumber, columnNumber)
+  }
+
+  private updateStore(info: ActionInfo): boolean {
+    if (!this.store.contains(info.trackid, this.recordPool.get(info.loc))) {
+      if (info.merge) {
+        this.store.merge(info.merge, info.trackid)
+      }
+      this.store.add(info.trackid, this.recordPool.get(info.loc))
+      return true
+    }
+    return false
   }
 }
 
@@ -78,6 +63,11 @@ class Store {
       this.store[trackid] = []
     }
     this.store[trackid].unshift(record)
+  }
+
+  public contains(trackid: TrackID, record: ActionRecord): boolean {
+    return this.store.hasOwnProperty(trackid)
+      && this.store[trackid].filter((_record) => _record.key === record.key).length > 0
   }
 
   public get(trackid: TrackID): ActionRecord[] {
@@ -98,31 +88,30 @@ class Store {
 
 class RecordPool {
 
-}
-
-class LocMap {
-
-  private locMap: {
-    [loc: string]: {
-      [trackid in TrackID]: boolean;
-    };
-  } = {}
+  private pool: {
+    [hashOfSourceLocation: string]: ActionRecord
+  } = {};
 
   /* public */
 
-  public add(trackid: TrackID, loc: string): void {
-    if (!this.locMap[loc]) {
-      this.locMap[loc] = {}
-    }
-    this.locMap[loc][trackid] = true
+  public add(loc: SourceLocation, type: ActionType, code: string): ActionRecord {
+    const key = this.hashSourceLocation(loc)
+
+    return this.pool[key] = { key, type, source: { loc, code } }
   }
 
-  public has(trackid: TrackID, loc: string): boolean {
-    return !!(this.locMap[loc] && this.locMap[loc][trackid])
+  public get(loc: SourceLocation): ActionRecord {
+    return this.pool[this.hashSourceLocation(loc)]
   }
 
-  public remove(trackid: TrackID, loc: string): void {
-    this.locMap[loc] && delete this.locMap[loc][trackid]
+  public has(loc: SourceLocation): boolean {
+    return this.pool.hasOwnProperty(this.hashSourceLocation(loc))
+  }
+
+  /* private */
+
+  private hashSourceLocation({ scriptUrl, lineNumber, columnNumber }: SourceLocation): string {
+    return hash(`${scriptUrl}:${lineNumber}:${columnNumber}`)
   }
 }
 
@@ -186,7 +175,7 @@ class ScriptCache {
   private removeCommentsInStyleBlocks(source: string) {
     // @NOTE: comments in style block will break off 
     // those comment blocks added to other html part
-    return this.indexStyleBlocks(source).reduce((result, [start, end]) => {
+    return this.indexStyleRanges(source).reduce((result, [start, end]) => {
       for (let i = start; i < end; i++) {
         if (source[i] === '/' && (source[i + 1] === '*' || source[i - 1] === '*')) {
           result = result.slice(0, i) + '*' + result.slice(i + 1)
@@ -196,7 +185,7 @@ class ScriptCache {
     }, source)
   }
 
-  private indexStyleBlocks(source: string): Array<[number, number]> {
+  private indexStyleRanges(source: string): Array<[number, number]> {
     const result = []
     const endOffset = '</style>'.length
 

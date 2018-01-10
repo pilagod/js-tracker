@@ -66,6 +66,7 @@
     "karma-coverage": "^1.1.1",
     "karma-mocha": "^1.1.1",
     "karma-mocha-reporter": "^2.1.0",
+    "karma-source-map-support": "^1.2.0",
     "karma-typescript": "^3.0.4",
     "karma-typescript-es6-transform": "^1.0.0",
     "mocha": "^3.0.2",

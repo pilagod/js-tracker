@@ -45,6 +45,7 @@ const ActionMap: {
       // but chrome put it in HTMLElement.prototype 
       'innerText': Attr | Node,
       'lang': Attr,
+      'nonce': Attr,
       'outerText': Attr | Node,
       'spellcheck': Attr,
       'tabIndex': Attr,
@@ -135,6 +136,7 @@ const ActionMap: {
       'ontransitionend': Event,
       'onvolumechange': Event,
       'onwaiting': Event,
+      'onwheel': Event,
 
       /* methods */
 
@@ -163,7 +165,6 @@ const ActionMap: {
       'onpaste': Event,
       'onsearch': Event,
       'onselectstart': Event,
-      'onwheel': Event,
       'onwebkitfullscreenchange': Event,
       'onwebkitfullscreenerror': Event,
 

@@ -9,7 +9,8 @@ module.exports = {
   // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
   frameworks: [
     'karma-typescript', // https://www.npmjs.com/package/karma-typescript
-    'mocha'
+    'mocha',
+    'source-map-support'
   ],
 
   // list of files / patterns to load in the browser

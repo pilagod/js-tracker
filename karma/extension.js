@@ -6,7 +6,7 @@ module.exports = configFactory(function (defaultConfig) {
     port: PORT,
 
     proxies: {
-      '/script.js': `http://localhost:${PORT}/base/test/script.js`
+      '/script.js': `/base/test/script.js`
     },
     // list of files / patterns to load in the browser
     // all modules including in tests should be included here

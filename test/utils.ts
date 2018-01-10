@@ -1,3 +1,5 @@
+import { hash } from '../src/tracker/public/utils'
+
 export function createActionRecord(
   type: ActionType,
   scriptUrl: string,
@@ -6,7 +8,7 @@ export function createActionRecord(
   code: string,
 ): ActionRecord {
   return {
-    key: `${scriptUrl}:${lineNumber}:${columnNumber}`,
+    key: hash(`${scriptUrl}:${lineNumber}:${columnNumber}`),
     type: type,
     source: {
       loc: { scriptUrl, lineNumber, columnNumber },

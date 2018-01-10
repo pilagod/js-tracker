@@ -4,7 +4,6 @@ import { expect } from 'chai'
 import * as sinon from 'sinon'
 
 import ActionStore from '../../src/tracker/public/ActionStore'
-import TrackIDFactory from '../../src/tracker/public/TrackIDFactory'
 
 import actions from '../actions'
 
@@ -12,9 +11,11 @@ describe('contentscript', () => {
   const chrome = window.chrome
   const sandbox = sinon.sandbox.create()
   const inputFromTracker = function (info: ActionInfo) {
-    window.dispatchEvent(new CustomEvent('js-tracker', {
-      detail: { info }
-    }))
+    window.dispatchEvent(
+      new CustomEvent('js-tracker', {
+        detail: { info }
+      })
+    )
   }
   const outputToBackground = sinon.spy()
 
@@ -46,6 +47,7 @@ describe('contentscript', () => {
       window.onDevtoolSelectionChanged(element)
       outputToBackground.reset()
     }
+
     before(() => {
       ActionStore.prototype.registerFromActionInfo = registerFromActionInfoStub
     })

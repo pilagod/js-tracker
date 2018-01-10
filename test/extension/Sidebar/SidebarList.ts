@@ -34,7 +34,7 @@ describe('SidebarList', () => {
     )
   })
 
-  it('should render all records, with single type, passed to it properly', () => {
+  it('should render all records passed to it properly', () => {
     const records = ReactTestUtils.scryRenderedDOMComponentsWithClass(
       sidebarListWrapper,
       'record'
@@ -64,9 +64,10 @@ describe('SidebarList', () => {
       // record-link
 
       const alink = link[0].getElementsByTagName('a')
+      const { scriptUrl, lineNumber, columnNumber } = _record.source.loc
 
       expect(alink).to.have.length(1)
-      expect(alink[0].textContent).to.equal(_record.key)
+      expect(alink[0].textContent).to.equal(`${scriptUrl}:${lineNumber}:${columnNumber}`)
 
       // record-info
 
