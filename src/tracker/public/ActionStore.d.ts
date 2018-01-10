@@ -18,10 +18,6 @@ type SourceLocation = {
 type ActionRecord = {
   key: string;
   type: ActionType;
-  source: Source;
-}
-
-type Source = {
   loc: SourceLocation;
   code: string;
 }

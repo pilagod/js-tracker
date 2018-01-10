@@ -7,9 +7,9 @@ import * as escodegen from 'escodegen'
 import { hash } from './utils'
 
 export default class ActionStore implements IActionStore {
+
   private store = new Store()
   private recordPool = new RecordPool()
-  private scriptCache = new ScriptCache()
 
   /* public */
 
@@ -18,35 +18,16 @@ export default class ActionStore implements IActionStore {
   }
 
   public async registerFromActionInfo(info: ActionInfo): Promise<boolean> {
-    await this.updateRecordPool(info)
-    // @TODO: check recordPool.refs contains info.trackid
-    return this.updateStore(info)
+    return this.updateStore(info, await this.recordPool.update(info))
   }
 
   /* private */
 
-  private async updateRecordPool(info: ActionInfo) {
-    if (!this.recordPool.has(info)) {
-      this.recordPool.add(info, await this.fetchCode(info.loc))
-    }
-  }
-
-  private async fetchCode({ scriptUrl, lineNumber, columnNumber }: SourceLocation): Promise<string> {
-    if (!this.scriptCache.has(scriptUrl)) {
-      this.scriptCache.add(scriptUrl)
-    }
-    return await this.scriptCache.get(scriptUrl, lineNumber, columnNumber)
-  }
-
-  private updateStore(info: ActionInfo): boolean {
-    if (!this.store.contains(info.trackid, this.recordPool.get(info))) {
-      if (info.merge) {
-        this.store.merge(info.merge, info.trackid)
-      }
-      this.store.add(info.trackid, this.recordPool.get(info))
-      return true
-    }
-    return false
+  private updateStore({ trackid, merge }: ActionInfo, record: ActionRecord): boolean {
+    return !this.store.contains(trackid, record) && !(() => {
+      merge && this.store.merge(merge, trackid)
+      this.store.add(trackid, record)
+    })()
   }
 }
 
@@ -65,13 +46,12 @@ class Store {
     this.store[trackid].unshift(record)
   }
 
-  public contains(trackid: TrackID, record: ActionRecord): boolean {
-    return this.store.hasOwnProperty(trackid)
-      && this.store[trackid].filter((_record) => _record.key === record.key).length > 0
-  }
-
   public get(trackid: TrackID): ActionRecord[] {
     return this.store[trackid] || []
+  }
+
+  public contains(trackid: TrackID, record: ActionRecord): boolean {
+    return this.store.hasOwnProperty(trackid) && this.store[trackid].indexOf(record) > -1
   }
 
   public merge(from: TrackID, to: TrackID): ActionRecord[] {
@@ -88,30 +68,29 @@ class Store {
 
 class RecordPool {
 
+  private scriptCache = new ScriptCache()
   private pool: {
     [hashOfSourceLocation: string]: ActionRecord
   } = {};
 
   /* public */
 
-  public add({ type, loc }: ActionInfo, code: string): ActionRecord {
-    const key = this.hashSourceLocation(loc)
+  public async update({ type, loc }: ActionInfo): Promise<ActionRecord> {
+    const key =
+      hash(`${loc.scriptUrl}:${loc.lineNumber}:${loc.columnNumber}`)
 
-    return this.pool[key] = { key, type, source: { loc, code } }
-  }
-
-  public get({ loc }: ActionInfo): ActionRecord {
-    return this.pool[this.hashSourceLocation(loc)]
-  }
-
-  public has({ loc }: ActionInfo): boolean {
-    return this.pool.hasOwnProperty(this.hashSourceLocation(loc))
+    return this.pool.hasOwnProperty(key)
+      ? this.pool[key]
+      : this.pool[key] = { key, type, loc, code: await this.fetchCode(loc) }
   }
 
   /* private */
 
-  private hashSourceLocation({ scriptUrl, lineNumber, columnNumber }: SourceLocation): string {
-    return hash(`${scriptUrl}:${lineNumber}:${columnNumber}`)
+  private async fetchCode({ scriptUrl, lineNumber, columnNumber }: SourceLocation): Promise<string> {
+    if (!this.scriptCache.has(scriptUrl)) {
+      this.scriptCache.add(scriptUrl)
+    }
+    return await this.scriptCache.get(scriptUrl, lineNumber, columnNumber)
   }
 }
 

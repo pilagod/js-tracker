@@ -64,14 +64,14 @@ describe('SidebarList', () => {
       // record-link
 
       const alink = link[0].getElementsByTagName('a')
-      const { scriptUrl, lineNumber, columnNumber } = _record.source.loc
+      const { scriptUrl, lineNumber, columnNumber } = _record.loc
 
       expect(alink).to.have.length(1)
       expect(alink[0].textContent).to.equal(`${scriptUrl}:${lineNumber}:${columnNumber}`)
 
       // record-info
 
-      expect(info[0].textContent).to.equal(_record.source.code)
+      expect(info[0].textContent).to.equal(_record.code)
     })
   })
 
@@ -114,7 +114,7 @@ describe('SidebarList', () => {
       const {
         scriptUrl,
         lineNumber
-      } = _records[index].source.loc
+      } = _records[index].loc
 
       ReactTestUtils.Simulate.click(alink)
 

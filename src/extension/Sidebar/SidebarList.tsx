@@ -123,7 +123,7 @@ function Record(
       className={`record ${isInDiffState ? 'record-diff' : ''}`}
     >
       {RecordTags(record.type)}
-      {RecordLink(record.source.loc, openSource)}
+      {RecordLink(record.loc, openSource)}
       {RecordInfo(record)}
     </div>
   )
@@ -171,7 +171,7 @@ function RecordLink(
 function RecordInfo(record: ActionRecord): JSX.Element {
   return (
     <div className="info">
-      <span>{record.source.code}</span>
+      <span>{record.code}</span>
     </div>
   )
 }

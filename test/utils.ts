@@ -10,9 +10,7 @@ export function createActionRecord(
   return {
     key: hash(`${scriptUrl}:${lineNumber}:${columnNumber}`),
     type: type,
-    source: {
-      loc: { scriptUrl, lineNumber, columnNumber },
-      code: code
-    }
+    loc: { scriptUrl, lineNumber, columnNumber },
+    code: code
   }
 }
