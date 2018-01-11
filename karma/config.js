@@ -58,6 +58,11 @@ module.exports = {
     terminal: true
   },
 
+  // https://stackoverflow.com/questions/38876237/karma-start-passing-parameters
+  client: {
+    env: 'test'
+  },
+
   // http://blog.500tech.com/setting-up-travis-ci-to-run-tests-on-latest-google-chrome-version/
   customLaunchers: {
     Chrome_travis_ci: {

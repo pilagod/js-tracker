@@ -3,22 +3,22 @@
 
 import Sidebar from './Sidebar'
 
+let background
+let sidebarWindow
+let records: ActionRecord[] = []
+
 packFilesToDist()
+setupConnectionToBackground()
+setupJSTrackerSidebar()
+updateSidebarOnMessage()
+listenOnSelectionChanged()
+emitSelectionToContentScript()
 
 function packFilesToDist() {
   require('file-loader?name=[name].[ext]!./devtool.html')
   require('file-loader?name=sidebar.html!./Sidebar/index.html')
   require('file-loader?name=sidebar.css!./Sidebar/index.css')
 }
-let background
-let sidebarWindow
-let records: ActionRecord[] = []
-
-setupConnectionToBackground()
-setupJSTrackerSidebar()
-updateSidebarOnMessage()
-listenOnSelectionChanged()
-emitSelectionToContentScript()
 
 function setupConnectionToBackground() {
   const tabID = chrome.devtools.inspectedWindow.tabId.toString()
