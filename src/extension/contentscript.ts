@@ -11,22 +11,17 @@ import * as fs from 'fs'
 import ActionStore from '../tracker/public/ActionStore'
 import TrackIDFactory from '../tracker/public/TrackIDFactory'
 
-let selection: Element
-
 const state = {
   SELECTION_IS_CHANGED: true,
   SELECTION_IS_NOT_CHANGED: false
 }
 const store = new ActionStore()
 
+let selection: Element
+
 listenOnActionTriggered()
 listenOnDevtoolSelectionChanged()
-try {
-  // in production environment
-  injectTrackerScript()
-} catch (e) {
-  // in testing environment
-}
+injectTrackerScript()
 
 function listenOnActionTriggered() {
   window.addEventListener('js-tracker', async (event: CustomEvent) => {
@@ -77,20 +72,22 @@ function listenOnDevtoolSelectionChanged() {
 }
 
 function getTrackIDFrom(element: Element) {
-  const trackid =
-    element instanceof Element
-      ? element.getAttribute('trackid') : null
-  return trackid || TrackIDFactory.generateNullID()
+  return element instanceof Element
+    ? element.getAttribute('trackid')
+    : TrackIDFactory.generateNullID()
 }
 
 function injectTrackerScript() {
   const script = document.createElement('script')
-
-  script.textContent = fs.readFileSync(__dirname + '/../../dist/tracker.js', 'utf-8')
-
+  try {
+    // production
+    script.textContent = fs.readFileSync(__dirname + '/../../dist/tracker.js', 'utf-8')
+  } catch (e) {
+    // test
+    script.textContent = '/* fs read file in test environment */'
+  }
   document.documentElement.appendChild(script)
   document.documentElement.removeChild(script)
-
   // issue: [https://stackoverflow.com/questions/15730869/my-injected-script-runs-after-the-target-pages-javascript-despite-using-run]
   // script.src = chrome.extension.getURL('dist/injectscript.js')
   // script.async = false

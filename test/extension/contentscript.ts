@@ -9,7 +9,6 @@ import actions from '../actions'
 
 describe('contentscript', () => {
   const chrome = window.chrome
-  const sandbox = sinon.sandbox.create()
   const inputFromTracker = function (info: ActionInfo) {
     window.dispatchEvent(
       new CustomEvent('js-tracker', {
@@ -17,7 +16,8 @@ describe('contentscript', () => {
       })
     )
   }
-  const outputToBackground = sinon.spy()
+  const sandbox = sinon.sandbox.create()
+  const outputToBackground = sinon.stub().callsArgWith(1, 'response from background')
 
   before(() => {
     (<any>window).chrome = {
@@ -32,11 +32,8 @@ describe('contentscript', () => {
   })
 
   beforeEach(() => {
-    outputToBackground.reset()
-  })
-
-  afterEach(() => {
     sandbox.restore()
+    outputToBackground.resetHistory()
   })
 
   describe('on message from tracker', () => {
@@ -45,7 +42,7 @@ describe('contentscript', () => {
 
     function select(element: Element) {
       window.onDevtoolSelectionChanged(element)
-      outputToBackground.reset()
+      outputToBackground.resetHistory()
     }
 
     before(() => {
@@ -58,9 +55,6 @@ describe('contentscript', () => {
 
     beforeEach(() => {
       select(null)
-    })
-
-    afterEach(() => {
       registerFromActionInfoStub.reset()
     })
 
