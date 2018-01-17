@@ -1,6 +1,6 @@
 /// <reference path='../public/ActionStore.d.ts'/>
 
-import TrackIDFactory from '../public/TrackIDFactory'
+import TrackIDFactory from './TrackIDFactory'
 
 /**
  * A series of actions bypass tracker's record process

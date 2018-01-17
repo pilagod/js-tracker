@@ -9,7 +9,6 @@
 import * as fs from 'fs'
 
 import ActionStore from '../tracker/public/ActionStore'
-import TrackIDFactory from '../tracker/public/TrackIDFactory'
 
 const state = {
   SELECTION_IS_CHANGED: true,
@@ -72,9 +71,7 @@ function listenOnDevtoolSelectionChanged() {
 }
 
 function getTrackIDFrom(element: Element) {
-  return element instanceof Element
-    ? element.getAttribute('trackid')
-    : TrackIDFactory.generateNullID()
+  return element instanceof Element ? element.getAttribute('trackid') : null
 }
 
 function injectTrackerScript() {

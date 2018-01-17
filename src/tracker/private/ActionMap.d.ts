@@ -1,3 +1,4 @@
+/// <reference path='../index.d.ts'/>
 /// <reference path='../public/ActionType.d.ts' />
 
 type Target =
