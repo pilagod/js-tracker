@@ -2,174 +2,260 @@
 
 import { expect } from 'chai'
 import * as sinon from 'sinon'
+import * as fs from 'fs'
 
 import ActionStore from '../../src/tracker/public/ActionStore'
+// import contentscript from '../../src/extension/contentscript'
 import actions from '../actions'
 
-describe('contentscript', () => {
-  const chrome = window.chrome
-  const inputFromTracker = (info: ActionInfo) => {
-    window.dispatchEvent(
-      new CustomEvent('js-tracker', {
-        detail: { info }
-      })
-    )
-  }
-  const sandbox = sinon.sandbox.create()
-  const outputToBackground = sinon.stub().callsArgWith(1, 'response from background')
+describe.skip('contentscript', () => {
+  // const response = { status: 'OK', description: 'done' }
+  // const updateSidebar = sinon.stub(chrome.runtime, 'sendMessage').callsArgWith(1, response)
 
-  before(() => {
-    (<any>window).chrome = {
-      runtime: {
-        sendMessage: outputToBackground
-      }
-    }
+  // before(() => {
+  // contentscript()
+  // })
+
+  // beforeEach(() => {
+  //   updateSidebar.resetHistory()
+  // })
+
+  // after(() => {
+  //   updateSidebar.restore()
+  // })
+
+  describe('listen on action', () => {
+    // const actionFromTracker = (info: ActionInfo) => {
+    //   window.dispatchEvent(new CustomEvent('js-tracker', {
+    //     detail: { info }
+    //   }))
+    // }
+    // const select = (element: Element) => {
+    //   window.onDevtoolSelectionChanged(element)
+    //   updateSidebar.resetHistory()
+    // }
+
+    // it('should not update sidebar given no selected element in devtool', () => {
+    //   actionFromTracker(actions[0].info)
+
+    //   expect(updateSidebar.called).to.be.false
+    // })
+
+    // it('should not update sidebar given selected element in devtool has no trackid', () => {
+    //   select(document.createElement('div'))
+
+    //   actionFromTracker(actions[0].info)
+
+    //   expect(updateSidebar.called).to.be.false
+    // })
+
+    // it('should update sidebar given selected element in devtool has trackid', () => {
+
+    // })
   })
 
-  after(() => {
-    (<any>window).chrome = chrome
+  describe('listen on devtool selection changed', () => {
   })
 
-  beforeEach(() => {
-    sandbox.restore()
-    outputToBackground.resetHistory()
-  })
+  describe('inject tracker script', () => {
+    // const sandbox = sinon.sandbox.create()
+    // const trackerjs = '/* this is tracker.js */'
+    // const readFileSync = (<any>fs).readFileSync = sandbox.stub().returns(trackerjs)
+    // const appendChild = sandbox.spy(document.documentElement, 'appendChild')
+    // const removeChild = sandbox.spy(document.documentElement, 'removeChild')
 
-  describe('on message from tracker', () => {
-    const registerFromActionInfo = ActionStore.prototype.registerFromActionInfo
-    const registerFromActionInfoStub = sinon.stub()
-    const select = (element: Element) => {
-      window.onDevtoolSelectionChanged(element)
-      outputToBackground.resetHistory()
-    }
+    // after(() => {
+    //   sandbox.restore()
+    // })
 
-    before(() => {
-      ActionStore.prototype.registerFromActionInfo = registerFromActionInfoStub
-    })
+    // it('should call readFileSync only once and with tracker.js in dist directory', () => {
+    //   expect(readFileSync.calledOnce).to.be.true
+    //   expect(readFileSync.getCall(0).args[0].includes('dist/tracker.js')).to.be.true
+    // })
 
-    after(() => {
-      ActionStore.prototype.registerFromActionInfo = registerFromActionInfo
-    })
+    // it('should inject script text of tracker.js to documentElement then remove it', () => {
+    //   expect(appendChild.calledOnce).to.be.true
 
-    beforeEach(() => {
-      select(null)
-      registerFromActionInfoStub.reset()
-    })
+    //   const appendedElement = appendChild.getCall(0).args[0]
 
-    it('should call ActionStore.registerFromActionInfo with info collected from tracker', (done) => {
-      inputFromTracker(actions[0].info)
+    //   expect(appendedElement).to.be.an.instanceof(Element)
+    //   expect(appendedElement.tagName.toLowerCase()).to.equal('script')
+    //   expect(appendedElement.textContent).to.equal(trackerjs)
 
-      setTimeout(() => {
-        expect(
-          registerFromActionInfoStub
-            .calledWith(actions[0].info)
-        ).to.be.true
-        done()
-      }, 10)
-    })
+    //   expect(removeChild.calledOnce).to.be.true
+    //   expect(removeChild.calledImmediatelyAfter(appendChild)).to.be.true
 
-    it('should not send message given registering is failed', (done) => {
-      registerFromActionInfoStub.returns(false)
+    //   const removedElement = appendChild.getCall(0).args[0]
 
-      inputFromTracker(actions[0].info)
-
-      setTimeout(() => {
-        expect(outputToBackground.called).to.be.false
-        done()
-      }, 10)
-    })
-
-    it('should not send message given updated target is not current selection', (done) => {
-      const div = document.createElement('div')
-      const div2 = document.createElement('div')
-
-      div.setAttribute('trackid', '1')
-      div2.setAttribute('trackid', '2')
-
-      select(div)
-
-      registerFromActionInfoStub.returns(true)
-
-      inputFromTracker(Object.assign({}, actions[0].info, { trackid: '2' }))
-
-      setTimeout(() => {
-        expect(outputToBackground.called).to.be.false
-        done()
-      }, 10)
-    })
-
-    it('should send message with new records and false selectionChanged to background given registering is successful and updated target is current selection', (done) => {
-      const div = document.createElement('div')
-
-      div.setAttribute('trackid', '1')
-
-      select(div)
-
-      registerFromActionInfoStub.returns(true)
-
-      sandbox.stub(ActionStore.prototype, 'get')
-        .withArgs('1')
-        .returns([actions[0].record])
-
-      inputFromTracker(actions[0].info)
-
-      setTimeout(() => {
-        expect(
-          outputToBackground
-            .calledAfter(registerFromActionInfoStub)
-        ).to.be.true
-        expect(
-          outputToBackground.calledWith(
-            <Message>{
-              records: [actions[0].record],
-              selectionChanged: false
-            }
-          )
-        ).to.be.true
-        done()
-      }, 10)
-    })
-  })
-
-  describe('on devtool selection changed', () => {
-    it('should set onDevtoolSelectionChanged on window', () => {
-      expect(window.onDevtoolSelectionChanged).to.be.a('function')
-    })
-
-    it('should send message with empty records and true selectionChanged to background given element has no trackid', () => {
-      const div = document.createElement('div')
-
-      window.onDevtoolSelectionChanged(div)
-
-      expect(
-        outputToBackground.calledWith(
-          <Message>{
-            records: [],
-            selectionChanged: true
-          }
-        )
-      ).to.be.true
-    })
-
-    it('should send message with existed records and true selectionChanged to background given element has tradckid', () => {
-      const div = document.createElement('div')
-
-      div.setAttribute('trackid', '1')
-
-      sandbox.stub(ActionStore.prototype, 'get')
-        .withArgs('1')
-        .returns([actions[0].record])
-
-      window.onDevtoolSelectionChanged(div)
-
-      expect(
-        outputToBackground.calledWith(
-          <Message>{
-            records: [actions[0].record],
-            selectionChanged: true
-          }
-        )
-      ).to.be.true
-    })
+    //   expect(removedElement).to.equal(appendedElement)
+    // })
   })
 })
+
+// describe.skip('contentscript', () => {
+//   const chrome = window.chrome
+//   const inputFromTracker = (info: ActionInfo) => {
+//     window.dispatchEvent(
+//       new CustomEvent('js-tracker', {
+//         detail: { info }
+//       })
+//     )
+//   }
+//   const sandbox = sinon.sandbox.create()
+//   const outputToBackground = sinon.stub().callsArgWith(1, 'response from background')
+
+//   before(() => {
+//     (<any>window).chrome = {
+//       runtime: {
+//         sendMessage: outputToBackground
+//       }
+//     }
+//   })
+
+//   after(() => {
+//     (<any>window).chrome = chrome
+//   })
+
+//   beforeEach(() => {
+//     sandbox.restore()
+//     outputToBackground.resetHistory()
+//   })
+
+//   describe('on message from tracker', () => {
+//     const registerFromActionInfo = ActionStore.prototype.registerFromActionInfo
+//     const registerFromActionInfoStub = sinon.stub()
+//     const select = (element: Element) => {
+//       window.onDevtoolSelectionChanged(element)
+//       outputToBackground.resetHistory()
+//     }
+
+//     before(() => {
+//       ActionStore.prototype.registerFromActionInfo = registerFromActionInfoStub
+//     })
+
+//     after(() => {
+//       ActionStore.prototype.registerFromActionInfo = registerFromActionInfo
+//     })
+
+//     beforeEach(() => {
+//       select(null)
+//       registerFromActionInfoStub.reset()
+//     })
+
+//     it('should call ActionStore.registerFromActionInfo with info collected from tracker', (done) => {
+//       inputFromTracker(actions[0].info)
+
+//       setTimeout(() => {
+//         expect(
+//           registerFromActionInfoStub
+//             .calledWith(actions[0].info)
+//         ).to.be.true
+//         done()
+//       }, 10)
+//     })
+
+//     it('should not send message given registering is failed', (done) => {
+//       registerFromActionInfoStub.returns(false)
+
+//       inputFromTracker(actions[0].info)
+
+//       setTimeout(() => {
+//         expect(outputToBackground.called).to.be.false
+//         done()
+//       }, 10)
+//     })
+
+//     it('should not send message given updated target is not current selection', (done) => {
+//       const div = document.createElement('div')
+//       const div2 = document.createElement('div')
+
+//       div.setAttribute('trackid', '1')
+//       div2.setAttribute('trackid', '2')
+
+//       select(div)
+
+//       registerFromActionInfoStub.returns(true)
+
+//       inputFromTracker(Object.assign({}, actions[0].info, { trackid: '2' }))
+
+//       setTimeout(() => {
+//         expect(outputToBackground.called).to.be.false
+//         done()
+//       }, 10)
+//     })
+
+//     it('should send message with new records and false selectionChanged to background given registering is successful and updated target is current selection', (done) => {
+//       const div = document.createElement('div')
+
+//       div.setAttribute('trackid', '1')
+
+//       select(div)
+
+//       registerFromActionInfoStub.returns(true)
+
+//       sandbox.stub(ActionStore.prototype, 'get')
+//         .withArgs('1')
+//         .returns([actions[0].record])
+
+//       inputFromTracker(actions[0].info)
+
+//       setTimeout(() => {
+//         expect(
+//           outputToBackground
+//             .calledAfter(registerFromActionInfoStub)
+//         ).to.be.true
+//         expect(
+//           outputToBackground.calledWith(
+//             <Message>{
+//               records: [actions[0].record],
+//               selectionChanged: false
+//             }
+//           )
+//         ).to.be.true
+//         done()
+//       }, 10)
+//     })
+//   })
+
+//   describe('on devtool selection changed', () => {
+//     it('should set onDevtoolSelectionChanged on window', () => {
+//       expect(window.onDevtoolSelectionChanged).to.be.a('function')
+//     })
+
+//     it('should send message with empty records and true selectionChanged to background given element has no trackid', () => {
+//       const div = document.createElement('div')
+
+//       window.onDevtoolSelectionChanged(div)
+
+//       expect(
+//         outputToBackground.calledWith(
+//           <Message>{
+//             records: [],
+//             selectionChanged: true
+//           }
+//         )
+//       ).to.be.true
+//     })
+
+//     it('should send message with existed records and true selectionChanged to background given element has tradckid', () => {
+//       const div = document.createElement('div')
+
+//       div.setAttribute('trackid', '1')
+
+//       sandbox.stub(ActionStore.prototype, 'get')
+//         .withArgs('1')
+//         .returns([actions[0].record])
+
+//       window.onDevtoolSelectionChanged(div)
+
+//       expect(
+//         outputToBackground.calledWith(
+//           <Message>{
+//             records: [actions[0].record],
+//             selectionChanged: true
+//           }
+//         )
+//       ).to.be.true
+//     })
+//   })
+// })

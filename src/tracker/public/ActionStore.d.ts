@@ -23,11 +23,6 @@ type ActionRecord = {
 }
 
 interface IActionStore {
-  get(
-    trackid: TrackID
-  ): ActionRecord[];
-
-  registerFromActionInfo(
-    info: ActionInfo
-  ): Promise<boolean>;
+  get(trackid: TrackID): ActionRecord[];
+  registerFromActionInfo(info: ActionInfo): Promise<boolean>;
 }
