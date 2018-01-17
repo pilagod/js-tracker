@@ -4,12 +4,11 @@ import { expect } from 'chai'
 import * as sinon from 'sinon'
 
 import ActionStore from '../../src/tracker/public/ActionStore'
-
 import actions from '../actions'
 
 describe('contentscript', () => {
   const chrome = window.chrome
-  const inputFromTracker = function (info: ActionInfo) {
+  const inputFromTracker = (info: ActionInfo) => {
     window.dispatchEvent(
       new CustomEvent('js-tracker', {
         detail: { info }
@@ -39,8 +38,7 @@ describe('contentscript', () => {
   describe('on message from tracker', () => {
     const registerFromActionInfo = ActionStore.prototype.registerFromActionInfo
     const registerFromActionInfoStub = sinon.stub()
-
-    function select(element: Element) {
+    const select = (element: Element) => {
       window.onDevtoolSelectionChanged(element)
       outputToBackground.resetHistory()
     }
