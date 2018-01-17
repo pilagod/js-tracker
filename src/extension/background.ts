@@ -2,10 +2,9 @@
 /// <reference path='./background.d.ts'/>
 
 class ConnectionCache {
-
-  constructor() {
-    this._connections = {}
-  }
+  private _connections: {
+    [tabID: string]: chrome.runtime.Port
+  } = {}
 
   /* public */
 
@@ -29,10 +28,6 @@ class ConnectionCache {
       }
     }
   }
-
-  /* private */
-
-  private _connections
 }
 const connectionCache = new ConnectionCache()
 
