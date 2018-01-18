@@ -2,7 +2,6 @@ import { expect } from 'chai'
 import * as sinon from 'sinon'
 
 import actions from '../actions'
-
 import initContentscriptHelpers from '../../src/extension/contentscriptHelpers'
 
 describe('contentscript helpers', () => {
@@ -36,7 +35,7 @@ describe('contentscript helpers', () => {
       ).to.be.true
     })
 
-    it('should not call updateSidebar given store.registerFromActionInfo succeeds', async () => {
+    it('should not call updateSidebar given store.registerFromActionInfo fails', async () => {
       store.registerFromActionInfo.returns(false)
 
       await actionHandler(actions[0].info)
