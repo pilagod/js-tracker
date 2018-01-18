@@ -4,41 +4,44 @@
 import * as fs from 'fs'
 
 import ActionStore from '../tracker/public/ActionStore'
+
 import initContentscriptHelpers from './contentscriptHelpers'
+import { isTestEnv } from './utils'
 
-let helpers
-
-function main() {
-  initHelpers()
-  listenOnAction()
-  listenOnDevtoolSelectionChanged()
-  injectTrackerScript()
+function main(
+  helpers: {
+    actionHandler: (info: ActionInfo) => void,
+    devtoolSelectionChangedHandler: (element: Element) => void,
+    injectScript: (container: Node, scriptText: string) => void
+  }
+) {
+  listenOnAction(helpers.actionHandler)
+  listenOnDevtoolSelectionChanged(helpers.devtoolSelectionChangedHandler)
+  injectTrackerScript(helpers.injectScript)
 }
 
-function initHelpers() {
-  helpers = initContentscriptHelpers(
-    new ActionStore(),
-    chrome.runtime.sendMessage
-  )
-}
-
-function listenOnAction() {
+function listenOnAction(actionHandler: (info: ActionInfo) => void) {
   window.addEventListener('js-tracker', (event: CustomEvent) => {
-    helpers.actionHandler(<ActionInfo>event.detail.info)
+    actionHandler(<ActionInfo>event.detail.info)
   })
 }
 
-function listenOnDevtoolSelectionChanged() {
-  window.onDevtoolSelectionChanged = helpers.devtoolSelectionChangedHandler
+function listenOnDevtoolSelectionChanged(devtoolSelectionChangedHandler: (element: Element) => void) {
+  window.onDevtoolSelectionChanged = devtoolSelectionChangedHandler
 }
 
-function injectTrackerScript() {
+function injectTrackerScript(injectScript: (container: Node, scriptText: string) => void) {
   // issue: [https://stackoverflow.com/questions/15730869/my-injected-script-runs-after-the-target-pages-javascript-despite-using-run]
   // script.src = chrome.extension.getURL('dist/injectscript.js')
   // script.async = false
-  helpers.injectScript(
+  injectScript(
     document.documentElement,
     fs.readFileSync(__dirname + '/../../dist/tracker.js', 'utf-8')
   )
 }
-main()
+
+if (!isTestEnv()) {
+  main(initContentscriptHelpers(new ActionStore(), chrome.runtime.sendMessage))
+}
+export default isTestEnv() ? main : null
+

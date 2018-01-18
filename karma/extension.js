@@ -17,7 +17,7 @@ module.exports = configFactory(function (defaultConfig) {
       { pattern: 'src/extension/utils.ts' },
 
       // contentscript
-      // { pattern: 'src/extension/contentscript.ts' },
+      { pattern: 'src/extension/contentscript.ts' },
       { pattern: 'src/extension/contentscriptHelpers.ts' },
 
       // devtool sidebar
@@ -41,7 +41,7 @@ module.exports = configFactory(function (defaultConfig) {
       'src/extension/utils.ts': ['karma-typescript'],
 
       // contentscript
-      // 'src/extension/contentscript.ts': ['karma-typescript', 'coverage'],
+      'src/extension/contentscript.ts': ['karma-typescript', 'coverage'],
       'src/extension/contentscriptHelpers.ts': ['karma-typescript', 'coverage'],
 
       // devtool sidebar
