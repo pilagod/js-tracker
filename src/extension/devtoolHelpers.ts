@@ -11,15 +11,15 @@ class SidebarController {
   public records: ActionRecord[] = []
   public sidebarWindow: chrome.windows.Window = null
 
-  private _panels: typeof chrome.devtools.panels
-  private _renderSidebar: (container: Element, props: ISidebarRootProps) => void
+  private panels: typeof chrome.devtools.panels
+  private renderSidebar: (container: Element, props: ISidebarRootProps) => void
 
   constructor(
     panels: typeof chrome.devtools.panels,
     renderSidebar: (container: Element, props: ISidebarRootProps) => void
   ) {
-    this._panels = panels
-    this._renderSidebar = renderSidebar
+    this.panels = panels
+    this.renderSidebar = renderSidebar
   }
 
   /* public */
@@ -27,13 +27,7 @@ class SidebarController {
   public init = (sidebar: chrome.devtools.panels.ExtensionSidebarPane) => {
     sidebar.setPage('dist/sidebar.html')
     sidebar.onShown.addListener(this.onShown)
-  }
-
-  public onShown = (sidebarWindow: chrome.windows.Window) => {
-    if (!this.sidebarWindow) {
-      this.sidebarWindow = sidebarWindow
-    }
-    this.render(SidebarController.SHOULD_NOT_TAG_DIFFS)
+    sidebar.onHidden.addListener(this.onHidden)
   }
 
   public render = (shouldTagDiffs: boolean) => {
@@ -43,16 +37,29 @@ class SidebarController {
     const document: Document = (<any>this.sidebarWindow).document
     const container: Element = document.getElementsByTagName('main')[0]
 
-    this._renderSidebar(container, {
+    this.renderSidebar(container, {
       records: this.records,
       shouldTagDiffs,
       openSource: this.openSource
     })
   }
 
-  public openSource = (url: string, line: number) => {
-    // @NOTE: line is counting from 0
-    this._panels.openResource(url, line - 1, () => { })
+  /* private */
+
+  private onShown = (sidebarWindow: chrome.windows.Window) => {
+    if (!this.sidebarWindow) {
+      this.sidebarWindow = sidebarWindow
+    }
+    this.render(SidebarController.SHOULD_NOT_TAG_DIFFS)
+  }
+
+  private onHidden = () => {
+    this.sidebarWindow = null
+  }
+
+  private openSource = (url: string, line: number) => {
+    // @NOTE: there is 1 offset of line number between stacktrace and openResource
+    this.panels.openResource(url, line - 1, () => { })
   }
 }
 
@@ -68,7 +75,6 @@ function makeBackgroundMessageHandler(sidebarController: SidebarController) {
     console.log('message:', message)
     console.log('----------------------------------------')
     console.groupEnd()
-
     sidebarController.records = message.records
     sidebarController.render(shouldTagDiffs(message.selectionChanged))
   }
