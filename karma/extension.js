@@ -13,6 +13,9 @@ module.exports = configFactory(function (defaultConfig) {
     files: [
       /* targets */
 
+      // utils
+      { pattern: 'src/extension/utils.ts' },
+
       // contentscript
       // { pattern: 'src/extension/contentscript.ts' },
       { pattern: 'src/extension/contentscriptHelpers.ts' },
@@ -25,9 +28,6 @@ module.exports = configFactory(function (defaultConfig) {
       // tracker
       { pattern: 'src/tracker/public/*[!(.d)].ts' },
 
-      /* static */
-      { pattern: 'test/script.js', served: true, included: false },
-
       /* tests */
       { pattern: 'test/*.ts' },
       { pattern: 'test/extension/**/*.ts' }
@@ -36,6 +36,9 @@ module.exports = configFactory(function (defaultConfig) {
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
       /* targets */
+
+      // utils
+      'src/extension/utils.ts': ['karma-typescript'],
 
       // contentscript
       // 'src/extension/contentscript.ts': ['karma-typescript', 'coverage'],

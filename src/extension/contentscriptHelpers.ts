@@ -1,6 +1,8 @@
 /// <reference path='../tracker/public/ActionStore.d.ts'/>
 /// <reference path='./background.d.ts'/>
 
+import { isTestEnv } from './utils'
+
 class State {
   static SELECTION_IS_CHANGED = true
   static SELECTION_IS_NOT_CHANGED = false
@@ -77,16 +79,19 @@ function injectScript(container: Node, scriptText: string) {
   container.removeChild(script)
 }
 
+declare const __karma__
+
 export default function (
   store: IActionStore,
   updateSidebar: (message: Message, callback?: (response: any) => void) => void
 ) {
   const state = new State()
-
-  return {
-    state,
+  const helpers = {
     actionHandler: makeActionHandler(state, store, updateSidebar),
     devtoolSelectionChangedHandler: makeDevtoolSelectionChangedHandler(state, store, updateSidebar),
     injectScript
   }
+  isTestEnv() && Object.assign(helpers, { state })
+
+  return helpers
 }

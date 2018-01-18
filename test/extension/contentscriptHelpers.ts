@@ -18,8 +18,10 @@ describe('contentscript helpers', () => {
   })
 
   describe('actionHandler', () => {
+    const helpers = initContentscriptHelpers(store, updateSidebar)
+    const state = (<any>helpers).state
     // @NOTE: actionHandler is an async function
-    const { state, actionHandler } = initContentscriptHelpers(store, updateSidebar)
+    const actionHandler = helpers.actionHandler
 
     beforeEach(() => {
       state.selection = null
@@ -82,7 +84,9 @@ describe('contentscript helpers', () => {
   })
 
   describe('devtoolSelectionChangedHandler', () => {
-    const { state, devtoolSelectionChangedHandler } = initContentscriptHelpers(store, updateSidebar)
+    const helpers = initContentscriptHelpers(store, updateSidebar)
+    const state = (<any>helpers).state
+    const devtoolSelectionChangedHandler = helpers.devtoolSelectionChangedHandler
 
     beforeEach(() => {
       state.selection = null
