@@ -15,18 +15,18 @@ function main(
     injectScript: (container: Node, scriptText: string) => void
   }
 ) {
-  listenOnAction(helpers.actionHandler)
-  listenOnDevtoolSelectionChanged(helpers.devtoolSelectionChangedHandler)
+  listenToAction(helpers.actionHandler)
+  listenToDevtoolSelectionChanged(helpers.devtoolSelectionChangedHandler)
   injectTrackerScript(helpers.injectScript)
 }
 
-function listenOnAction(actionHandler: (info: ActionInfo) => void) {
+function listenToAction(actionHandler: (info: ActionInfo) => void) {
   window.addEventListener('js-tracker', (event: CustomEvent) => {
     actionHandler(<ActionInfo>event.detail.info)
   })
 }
 
-function listenOnDevtoolSelectionChanged(devtoolSelectionChangedHandler: (element: Element) => void) {
+function listenToDevtoolSelectionChanged(devtoolSelectionChangedHandler: (element: Element) => void) {
   window.onDevtoolSelectionChanged = devtoolSelectionChangedHandler
 }
 
