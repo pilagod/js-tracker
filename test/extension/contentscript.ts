@@ -4,7 +4,6 @@ import { expect } from 'chai'
 import * as sinon from 'sinon'
 import * as fs from 'fs'
 
-import ActionStore from '../../src/tracker/public/ActionStore'
 import contentscript from '../../src/extension/contentscript'
 import actions from '../actions'
 
