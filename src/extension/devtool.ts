@@ -1,91 +1,58 @@
 /// <reference path='../../node_modules/@types/chrome/index.d.ts'/>
 /// <reference path='./background.d.ts'/>
+/// <reference path='./devtool.d.ts'/>
 
-import Sidebar from './Sidebar'
+import initDevtoolHelpers from './devtoolHelpers'
+import { isTestEnv } from './utils'
 
-let background
-let sidebarWindow
-let records: ActionRecord[] = []
-
-packFilesToDist()
-setupConnectionToBackground()
-setupJSTrackerSidebar()
-updateSidebarOnMessage()
-listenOnSelectionChanged()
-emitSelectionToContentScript()
-
-function packFilesToDist() {
-  require('file-loader?name=[name].[ext]!./devtool.html')
-  require('file-loader?name=sidebar.html!./Sidebar/index.html')
-  require('file-loader?name=sidebar.css!./Sidebar/index.css')
+function main(
+  __chrome__: typeof chrome,
+  helpers: DevtoolHelpers
+) {
+  setupConnectionToBackground(__chrome__, helpers.backgroundMessageHandler)
+  setupSidebar(__chrome__, helpers.sidebarInitHandler)
+  listenToDevtoolSelectionChanged(__chrome__, helpers.selectionChangedHandler)
 }
 
-function setupConnectionToBackground() {
-  const tabID = chrome.devtools.inspectedWindow.tabId.toString()
-
-  background = chrome.runtime.connect({ name: `JS-Tracer Devtool ${tabID}` })
+function setupConnectionToBackground(
+  __chrome__: typeof chrome,
+  backgroundMessageHandler: (message: Message) => void
+) {
+  const tabID = __chrome__.devtools.inspectedWindow.tabId.toString()
+  const background = __chrome__.runtime.connect({
+    name: 'js-tracker devtool of tab ' + tabID
+  })
   background.postMessage({ type: 'init', tabID })
+  background.onMessage.addListener(backgroundMessageHandler)
 }
 
-function setupJSTrackerSidebar() {
-  chrome.devtools.panels.elements.createSidebarPane('JS Tracker', (sidebar) => {
-    sidebar.setPage('dist/sidebar.html');
-    sidebar.onShown.addListener((window) => {
-      !sidebarWindow && (sidebarWindow = window)
-      renderSidebar(records)
-    })
-  })
-}
-
-function renderSidebar(records: ActionRecord[], shouldTagDiffs: boolean = false) {
-  if (sidebarWindow) {
-    // @TODO: pull request to @types/chrome, document should be on chrome.windows.Window
-    const document: Document = (<any>sidebarWindow).document
-    const container: Element = document.getElementsByTagName('main')[0]
-
-    Sidebar.render(container, { records, shouldTagDiffs, openSource })
-  }
-}
-
-function openSource(url: string, line: number): void {
-  // @TODO: pull request to @types/chrome, callback should be optional
-  // @NOTE: line add a '-1' offset, it seems that openResource counting lines from 0
-  chrome.devtools.panels.openResource(url, line - 1, () => { })
-}
-
-function updateSidebarOnMessage() {
-  background.onMessage.addListener((message: Message) => {
-    console.group('devtool page')
-    console.log('--- message received from background ---')
-    console.log('message:', message)
-    console.log('----------------------------------------')
-    console.groupEnd()
-
-    renderSidebar(
-      records = message.records,
-      shouldTagDiffs(message.selectionChanged)
-    )
-  })
-}
-
-function shouldTagDiffs(selectionChanged: boolean) {
-  return !selectionChanged
-}
-
-function listenOnSelectionChanged() {
-  chrome.devtools.panels.elements.onSelectionChanged.addListener(() => {
-    emitSelectionToContentScript()
-  })
-}
-
-function emitSelectionToContentScript() {
-  chrome.devtools.inspectedWindow.eval(
-    'onDevtoolSelectionChanged($0)',
-    // @TODO: pull request to @types/chrome
-    <any>{
-      useContentScriptContext: true
-    }
+function setupSidebar(
+  __chrome__: typeof chrome,
+  sidebarInitHandler: (sidebar: chrome.devtools.panels.ExtensionSidebarPane) => void
+) {
+  __chrome__.devtools.panels.elements.createSidebarPane(
+    'JS-Tracker',
+    sidebarInitHandler
   )
 }
 
+function listenToDevtoolSelectionChanged(
+  __chrome__: typeof chrome,
+  selectionChangedHandler: () => void
+) {
+  selectionChangedHandler() // init selection
+  __chrome__.devtools.panels.elements.onSelectionChanged.addListener(
+    selectionChangedHandler
+  )
+}
 
+if (!isTestEnv()) {
+  main(
+    chrome,
+    initDevtoolHelpers(
+      chrome.devtools,
+      require('./Sidebar').default.render
+    )
+  )
+}
+export default isTestEnv() ? main : null

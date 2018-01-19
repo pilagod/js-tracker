@@ -11,9 +11,6 @@ describe('devtool helpers', () => {
     panels: { openResource: sandbox.spy() },
     inspectedWindow: { eval: sandbox.spy() }
   }
-  const renderSidebar = sandbox.spy()
-  const helpers = initDevtoolHelpers(<any>devtools, renderSidebar)
-  const sidebarController = (<any>helpers).sidebarController
 
   beforeEach(() => {
     sandbox.reset()
@@ -31,7 +28,10 @@ describe('devtool helpers', () => {
   }
 
   describe('sidebarInitHandler', () => {
-    const { sidebarInitHandler } = helpers
+    const renderSidebar = sandbox.spy()
+    const helpers = initDevtoolHelpers(<any>devtools, renderSidebar)
+    const sidebarInitHandler = helpers.sidebarInitHandler
+    const sidebarController = (<any>helpers).sidebarController
     // @NOTE: sidebar apis: https://developer.chrome.com/extensions/devtools_panels#type-ExtensionSidebarPane
     const sidebar = {
       setPage: sandbox.spy(),
@@ -175,7 +175,10 @@ describe('devtool helpers', () => {
   })
 
   describe('backgroundMessageHandler', () => {
-    const { backgroundMessageHandler } = helpers
+    const renderSidebar = sandbox.spy()
+    const helpers = initDevtoolHelpers(<any>devtools, renderSidebar)
+    const backgroundMessageHandler = helpers.backgroundMessageHandler
+    const sidebarController = (<any>helpers).sidebarController
 
     afterEach(() => {
       sidebarController.records = []
@@ -226,7 +229,7 @@ describe('devtool helpers', () => {
   })
 
   describe('selectionChangedHandler', () => {
-    const { selectionChangedHandler } = helpers
+    const { selectionChangedHandler } = initDevtoolHelpers(<any>devtools, null)
 
     it('should call devtools.inspectedWindow.eval with proper arguments', () => {
       selectionChangedHandler()

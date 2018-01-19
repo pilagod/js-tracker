@@ -1,5 +1,6 @@
 /// <reference path='../tracker/public/ActionStore.d.ts'/>
 /// <reference path='./background.d.ts'/>
+/// <reference path='./devtool.d.ts'/>
 
 import { ISidebarRootProps } from '../extension/Sidebar/SidebarRoot'
 import { isTestEnv } from './utils'
@@ -90,16 +91,24 @@ function makeUpdateSelection(inspectedWindow: typeof chrome.devtools.inspectedWi
   )
 }
 
+function makePackFilesHandler(packFileToDist: (path: string, distname: string) => void) {
+  return (files: { path: string, distname: string }[]) => {
+    files.map((file) => {
+      packFileToDist(file.path, file.distname)
+    })
+  }
+}
+
 export default function (
   devtools: typeof chrome.devtools,
   renderSidebar: (container: Element, props: ISidebarRootProps) => void
 ) {
   const sidebarController = new SidebarController(devtools.panels, renderSidebar)
   const updateSelection = makeUpdateSelection(devtools.inspectedWindow)
-  const helpers = {
-    sidebarInitHandler: sidebarController.init,
+  const helpers: DevtoolHelpers = {
     backgroundMessageHandler: makeBackgroundMessageHandler(sidebarController),
     selectionChangedHandler: () => updateSelection(),
+    sidebarInitHandler: sidebarController.init,
   }
   if (isTestEnv()) {
     Object.assign(helpers, { sidebarController })
