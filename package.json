@@ -8,7 +8,7 @@
     "test-tracker": "karma start ./karma/tracker.js",
     "test-modules": "karma start ./karma/modules.js",
     "test-extension": "karma start ./karma/extension.js",
-    "build": "node webpack/compiler.js",
+    "build": "node webpack/compiler.js && find ./dist -name staticFilesPacker.* -exec rm -f {} \\;",
     "watch": "webpack --watch",
     "dev": "webpack-dev-server --port 3000",
     "deploy": "rm ~/Desktop/JS-Tracker.zip & zip -r ~/Desktop/JS-Tracker.zip manifest.json assets/ background.js devtools.* contentscript-dist.js"
