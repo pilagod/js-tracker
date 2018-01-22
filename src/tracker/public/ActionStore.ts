@@ -79,9 +79,17 @@ class RecordPool {
     const key =
       hash(`${loc.scriptUrl}:${loc.lineNumber}:${loc.columnNumber}`)
 
-    return this.pool.hasOwnProperty(key)
-      ? this.pool[key]
-      : this.pool[key] = { key, type, loc, code: await this.fetchCode(loc) }
+    if (!this.pool.hasOwnProperty(key)) {
+      // @NOTE: same call/assignment might execute multiple times in short period, 
+      // before any code fetched, these actions will send duplicate requests to
+      // fetch the same code segment. To fix this, we use record with default value 
+      // on its not yet fetched code property, in order to occupy the position in 
+      // record pool in advance, avoiding upcoming same actions to do duplicate requests. 
+      this.pool[key] = { key, type, loc, code: 'loading...' }
+      this.pool[key].code = await this.fetchCode(loc)
+    }
+    return this.pool[key]
+
   }
 
   /* private */

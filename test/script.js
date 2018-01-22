@@ -6,3 +6,6 @@ div.innerText = 'js-tracker'
 div.addEventListener('click', function () {
   console.log('clicked')
 })
+for (let i = 0; i < 3; i++) {
+  div.classList.add('class' + i)
+}
