@@ -4,8 +4,8 @@ import { expect } from 'chai'
 import * as sinon from 'sinon'
 import * as fs from 'fs'
 
+import { actionsOfJS as actions } from '../actions'
 import contentscript from '../../src/extension/contentscript'
-import actions from '../actions'
 
 describe('contentscript', () => {
   const helpers = {

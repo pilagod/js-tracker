@@ -10,7 +10,7 @@ import SidebarFilter from '../../../src/extension/Sidebar/SidebarFilter'
 import SidebarList from '../../../src/extension/Sidebar/SidebarList'
 
 import wrapperFactory from './wrapperFactory'
-import actions from '../../actions'
+import { actionsOfJS as actions } from '../../actions'
 
 describe('SidebarRoot', () => {
   const SidebarRootWrapper = wrapperFactory(SidebarRoot)

@@ -9,7 +9,7 @@ import ActionType from '../../../src/tracker/public/ActionType'
 import SidebarList from '../../../src/extension/Sidebar/SidebarList'
 
 import wrapperFactory from './wrapperFactory'
-import actions from '../../actions'
+import { actionsOfJS as actions } from '../../actions'
 
 describe('SidebarList', () => {
   const DIFF_STATE_DURATION = SidebarList.DIFF_STATE_DURATION

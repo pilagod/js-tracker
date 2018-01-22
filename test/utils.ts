@@ -1,16 +1,20 @@
 import { hash } from '../src/tracker/public/utils'
 
-export function createActionRecord(
+export function createAction(
+  trackid: TrackID,
   type: ActionType,
   scriptUrl: string,
   lineNumber: number,
   columnNumber: number,
   code: string,
-): ActionRecord {
+): { info: ActionInfo, record: ActionRecord } {
+  const loc = { scriptUrl, lineNumber, columnNumber }
+
   return {
-    key: hash(`${scriptUrl}:${lineNumber}:${columnNumber}`),
-    type: type,
-    loc: { scriptUrl, lineNumber, columnNumber },
-    code: code
+    info: { trackid, type, loc },
+    record: {
+      key: hash(`${scriptUrl}:${lineNumber}:${columnNumber}`),
+      type, loc, code
+    }
   }
 }

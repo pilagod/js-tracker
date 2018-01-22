@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 import * as sinon from 'sinon'
 
-import actions from '../actions'
+import { actionsOfJS as actions } from '../actions'
 import initDevtoolHelpers from '../../src/extension/devtoolHelpers'
 
 describe('devtool helpers', () => {
