@@ -183,8 +183,7 @@ const ActionMap: {
       'setAttributeNS': AttrActionTagMap,
 
       'scrollIntoView': Behav,
-
-      'setPointerCapture': Event,
+      'setPointerCapture': Behav | Event,
 
       'append': Node,
       'attachShadow': Node,
