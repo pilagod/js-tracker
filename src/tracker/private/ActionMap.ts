@@ -153,9 +153,8 @@ const ActionMap: {
       'id': Attr,
       'name': Attr,
       'slot': Attr,
-
-      'scrollTop': Behav,
-      'scrollLeft': Behav,
+      'scrollTop': Attr,
+      'scrollLeft': Attr,
 
       'onbeforecopy': Event,
       'onbeforecut': Event,
