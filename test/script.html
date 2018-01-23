@@ -7,7 +7,7 @@
     </style>
 
     <style type="text/css">
-        /* property on style start tag should be matched correctly */
+        /* comment in style block will make esprima broken */
     </style>
 </head>
 
@@ -16,17 +16,20 @@
         var div = document.createElement('div')
     </script>
 
-    <script some other property>
+    <script some='property'>
+        /* comment in target script should be parsed correctly */
         div.innerText = 'js-tracker'
     </script>
 
-    <script type="text/javascript">
+    <script some='property' type="text/javascript">
+        /* comment in target script should be parsed correctly */
         div.addEventListener('click', function () {
             console.log('clicked')
         })
     </script>
 
-    <script type="text/custom">
+    <script some='property' type="text/custom">
+        /* comment in non-target script block will make esprima broken  */
         should not include this
     </script>
 </body>

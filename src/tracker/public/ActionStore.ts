@@ -129,7 +129,7 @@ class ScriptCache {
           semicolons: false
         }
       }
-    ).replace(/{[\s\S]*}/, '{ ... }')
+    ).replace(/{}/, '{ ... }')
   }
 
   public has(scriptUrl: string): boolean {
@@ -141,51 +141,54 @@ class ScriptCache {
   private async fetchScript(scriptUrl: string): Promise<string> {
     const source = await (await fetch(scriptUrl)).text()
 
-    return this.isHTML(source) ? this.commentHTMLTags(source) : source
+    return this.isHTML(source) ? this.refineHTMLTags(source) : source
   }
 
   private isHTML(source: string): boolean {
     return /<html[\s\S]*?>/.test(source)
   }
 
-  private commentHTMLTags(source: string): string {
+  private refineHTMLTags(source: string): string {
     // @NOTE: commenting out html tags instead of removing is
     // because removing html part will cause code location
     // (line and column) to change, and this will bring 
     // inconsistency of code location between stack trace and 
     // source code we fetched here.
-    return ('/*' + this.removeCommentsInStyleBlocks(source) + '*/')
+    return ('/*' + this.refineComments(source) + '*/')
       // match only <script ...> and <script ... type="text/javascript" ...>
+      // refine <script> ... </script> to <script>*/ ... /*</script>
       .replace(/(<script(?:[\s\S](?:(?!type=)|(?=type="text\/javascript)))*?>)([\s\S]*?)(<\/script>)/gi, '$1*/$2/*$3')
   }
 
-  private removeCommentsInStyleBlocks(source: string) {
-    // @NOTE: comments in style block will break off 
-    // those comment blocks added to other html part
-    return this.indexStyleRanges(source).reduce((result, [start, end]) => {
-      for (let i = start; i < end; i++) {
-        if (source[i] === '/' && (source[i + 1] === '*' || source[i - 1] === '*')) {
-          result = result.slice(0, i) + '*' + result.slice(i + 1)
-        }
-      }
-      return result
+  private refineComments(source: string) {
+    const rangeOfBlockComments = this.indexRangeOfBlockComments(source)
+    const rangeOfValidScripts = this.indexRangeOfValidScripts(source)
+    const rangeOfBlockCommentsNotInScript = rangeOfBlockComments.filter(([commentStart, commentEnd]) => {
+      return !rangeOfValidScripts.reduce((result, [scriptStart, scriptEnd]) => {
+        return result || (commentStart >= scriptStart && commentEnd <= scriptEnd)
+      }, false)
+    })
+    return rangeOfBlockCommentsNotInScript.reduce((source, [commentStart, commentEnd]) => {
+      // refine /* ... */ to ** ... **
+      return source.slice(0, commentStart) + '*' + source.slice(commentStart + 1, commentEnd) + '*' + source.slice(commentEnd + 1)
     }, source)
   }
 
-  private indexStyleRanges(source: string): Array<[number, number]> {
-    const result = []
-    const endOffset = '</style>'.length
+  private indexRangeOfBlockComments(source: string): [number, number][] {
+    return this.indexRangeOf(source, /\/\*[\s\S]*?\*\//gi)
+  }
 
-    let [start, end] = [
-      source.indexOf('<style', 0),
-      source.indexOf('</style>', 0) + endOffset
-    ]
-    while (start !== -1) {
-      result.push([start, end]);
-      [start, end] = [
-        source.indexOf('<style', end),
-        source.indexOf('</style>', end) + endOffset
-      ]
+  private indexRangeOfValidScripts(source: string): [number, number][] {
+    return this.indexRangeOf(source, /<script([\s\S]((?!type=)|(?=type="text\/javascript)))*?>[\s\S]*?<\/script>/gi)
+  }
+
+  private indexRangeOf(source: string, regexp: RegExp): [number, number][] {
+    const result = []
+
+    let match
+
+    while (match = regexp.exec(source)) {
+      result.push([match.index, regexp.lastIndex - 1])
     }
     return result
   }
@@ -228,7 +231,7 @@ class ScriptCache {
         })
     // remove elected candidate
     candidates.splice(candidates.indexOf(elected), 1)
-    // @TODO: compress blockstatement
+
     return elected
   }
 
