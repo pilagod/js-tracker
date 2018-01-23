@@ -1,11 +1,11 @@
 /// <reference path='./index.d.ts'/>
 
-import * as StackTrace from 'stacktrace-js'
 import ActionMap from './private/ActionMap'
 import ActionTagMap from './private/ActionTagMap'
 import Anomalies from './private/Anomalies'
 import OwnerManager from './private/OwnerManager'
 import ShadowElement from './private/ShadowElement'
+import StackTracer from './private/StackTracer'
 import { SymbolProxy, SymbolWhich } from './private/Symbols'
 import {
   attachAttr,
@@ -125,26 +125,10 @@ function record(
     <ActionInfo>{
       trackid: (!owner.hasTrackID() && owner.setTrackID()) || owner.getTrackID(),
       type: ActionMap.getActionType(data),
-      loc: createSourceLocationFromStackFrame(
-        filterStackTrace(StackTrace.getSync())
-      ),
+      loc: StackTracer.getSourceLocation(),
       merge: data.merge
     }
   )
-}
-
-function createSourceLocationFromStackFrame(stackframe: StackTrace.StackFrame): SourceLocation {
-  return {
-    scriptUrl: stackframe.fileName,
-    lineNumber: stackframe.lineNumber,
-    columnNumber: stackframe.columnNumber
-  }
-}
-
-const HTML_DOM_API_FRAME_INDEX = 2
-
-function filterStackTrace(stacktrace: StackTrace.StackFrame[]): StackTrace.StackFrame {
-  return stacktrace[HTML_DOM_API_FRAME_INDEX]
 }
 
 /**
