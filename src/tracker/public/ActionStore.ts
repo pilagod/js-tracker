@@ -129,7 +129,7 @@ class ScriptCache {
           semicolons: false
         }
       }
-    )
+    ).replace(/{[\s\S]*}/, '{ ... }')
   }
 
   public has(scriptUrl: string): boolean {
@@ -194,8 +194,14 @@ class ScriptCache {
     const candidates = []
 
     esprima.parseScript(await script, { loc: true }, (node) => {
-      if (node.type === 'CallExpression' || node.type === 'AssignmentExpression') {
-        candidates.push(node)
+      switch (node.type) {
+        case 'AssignmentExpression':
+        case 'CallExpression':
+          candidates.push(node)
+          break
+        case 'BlockStatement':
+          node.body = [] // ignore unimportant details
+          break
       }
     })
     return candidates
