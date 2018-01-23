@@ -143,9 +143,8 @@ class ScriptCache {
 
     return this.isHTML(source) ? this.refineHTMLTags(source) : source
   }
-
   private isHTML(source: string): boolean {
-    return /<html[\s\S]*?>/.test(source)
+    return /^(<!DOCTYPE html>[\s]*)??<html[\s\S]*?>/.test(source)
   }
 
   private refineHTMLTags(source: string): string {
