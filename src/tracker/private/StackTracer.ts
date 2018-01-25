@@ -1,20 +1,32 @@
 /// <reference path='../public/ActionStore.d.ts'/>
 
 import * as StackTrace from 'stacktrace-js'
+import checkers from './checkers'
 
 class StackTracer {
-  // @NOTE: 
-  //  StackTracer (0) 
+  // @NOTE: StackTracer (0) 
   //  -> record (1) 
   //  -> DOM API function (2)
   //  -> code calling DOM API (3)
   static HTML_DOM_API_INDEX = 3
 
+  private checkers: Array<(stackframe: StackTrace.StackFrame) => boolean>
+
+  constructor(checkers) {
+    this.checkers = checkers
+  }
+
   /* public */
 
   public getSourceLocation(): SourceLocation {
-    const stackframe = this.getSourceStackFrame(StackTrace.getSync())
-
+    const stackframes = StackTrace.getSync()
+    const stackframe = this.getSourceStackFrame(stackframes)
+    // @TODO: callback function will break stack trace
+    // stackframes.map((stackframe) => {
+    //   console.log(stackframe)
+    //   console.log()
+    // })
+    // console.log(stackframe)
     return {
       scriptUrl: stackframe.fileName,
       lineNumber: stackframe.lineNumber,
@@ -24,30 +36,28 @@ class StackTracer {
 
   /* private */
 
-  private trackedAPIs: Array<(stackframe: StackTrace.StackFrame) => boolean> = [
-    function _(stackframe) {
-      return false
-    }
-  ]
-
   private getSourceStackFrame(stackframes: StackTrace.StackFrame[]): StackTrace.StackFrame {
-    const trimmedStackFrames = stackframes.slice(StackTracer.HTML_DOM_API_INDEX + 1)
+    // @NOTE: index of StackTracer.HTML_DOM_API_INDEX refers to which function invoking html dom api,
+    // and the location in that function actually invoking this html dom api
+    const trimmedStackFrames = stackframes.slice(StackTracer.HTML_DOM_API_INDEX)
 
-    return trimmedStackFrames.reduceRight((result, stackframe) => {
-      return result || this.takeThisAsSourceStackFrameOrNot(stackframe)
+    return trimmedStackFrames.reduceRight((result, stackframe, index, stackframes) => {
+      // @NOTE: Suppose we found tracked api called at stackframe i
+      // the location of the code invoking the tracked api is at stackframe i + 1 
+      return result || (this.isStackFrameAboutTrackedAPI(stackframe) ? stackframes[index + 1] : null)
     }, null) || stackframes[StackTracer.HTML_DOM_API_INDEX]
   }
 
-  private takeThisAsSourceStackFrameOrNot(stackframe: StackTrace.StackFrame): StackTrace.StackFrame | null {
+  private isStackFrameAboutTrackedAPI(stackframe: StackTrace.StackFrame): boolean {
     if (!stackframe.functionName) {
-      return null
+      return false
     }
-    for (const isTrackedAPI of this.trackedAPIs) {
-      if (isTrackedAPI(stackframe)) {
-        return stackframe
+    for (const check of this.checkers) {
+      if (check(stackframe)) {
+        return true
       }
     }
-    return null
+    return false
   }
 }
-export default new StackTracer()
+export default new StackTracer(checkers)

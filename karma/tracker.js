@@ -10,6 +10,7 @@ module.exports = configFactory(function (defaultConfig) {
       /* targets */
       { pattern: 'src/tracker/*[!(.d)].ts' },
       { pattern: 'src/tracker/private/*[!(.d)].ts' },
+      { pattern: 'src/tracker/private/checkers/*[!(.d)].ts' },
 
       /* dependencies */
       { pattern: 'src/tracker/public/*[!(.d)].ts' },
@@ -23,6 +24,7 @@ module.exports = configFactory(function (defaultConfig) {
       /* targets */
       'src/tracker/*[!(.d)].ts': ['karma-typescript', 'coverage'],
       'src/tracker/private/*[!(.d)].ts': ['karma-typescript', 'coverage'],
+      'src/tracker/private/checkers/*[!(.d)].ts': ['karma-typescript', 'coverage'],
 
       /* dependencies */
       'src/tracker/public/*[!(.d)].ts': ['karma-typescript'],
