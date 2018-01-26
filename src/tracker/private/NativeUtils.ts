@@ -1,3 +1,4 @@
+/// <reference path='../index.d.ts'/>
 /// <reference path='../public/ActionStore.d.ts'/>
 
 import TrackIDFactory from './TrackIDFactory'
@@ -28,6 +29,14 @@ export const sendActionInfoToContentscript = (function (context, dispatchEvent) 
   return function (info: ActionInfo) {
     dispatchEvent.call(context, new CustomEvent('js-tracker', {
       detail: { info }
+    }))
+  }
+})(window, EventTarget.prototype.dispatchEvent)
+
+export const sendMessageToContentScript = (function (context, dispatch) {
+  return function (message: RecordMessage) {
+    dispatch.call(context, new CustomEvent('js-tracker', {
+      detail: { message }
     }))
   }
 })(window, EventTarget.prototype.dispatchEvent)

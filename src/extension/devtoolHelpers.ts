@@ -3,7 +3,7 @@
 /// <reference path='./devtool.d.ts'/>
 
 import { ISidebarRootProps } from '../extension/Sidebar/SidebarRoot'
-import { isTestEnv } from './utils'
+import { isTestEnv } from '../utils'
 
 class SidebarController {
   static SHOULD_TAG_DIFFS = true

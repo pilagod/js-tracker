@@ -29,7 +29,7 @@ export default class OwnerInstance implements Owner {
     return this.element.getAttribute('trackid')
   }
 
-  public getOwnerElement() {
+  public getElement() {
     return this.element
   }
 

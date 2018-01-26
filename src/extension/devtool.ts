@@ -3,7 +3,7 @@
 /// <reference path='./devtool.d.ts'/>
 
 import initDevtoolHelpers from './devtoolHelpers'
-import { isTestEnv } from './utils'
+import { isTestEnv } from '../utils'
 
 function main(
   __chrome__: typeof chrome,

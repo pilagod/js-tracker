@@ -16,3 +16,33 @@ interface DOMTokenList extends ActionTarget {
 }
 interface NamedNodeMap extends ActionTarget { }
 
+type RecordInfo = {
+  caller: ActionTarget,
+  target: Target,
+  action: Action,
+  args?: any[],
+  merge?: string
+}
+
+interface RecordMessage {
+  state: string,
+  data: object
+}
+
+interface RecordWrapMessage extends RecordMessage {
+  data: RecordWrap
+}
+
+interface RecordDataMessage extends RecordMessage {
+  data: RecordData
+}
+
+type RecordWrap = {
+  loc: SourceLocation
+}
+
+type RecordData = {
+  trackid: string,
+  type: ActionType,
+  merge?: string
+}

@@ -14,7 +14,7 @@ module.exports = configFactory(function (defaultConfig) {
       /* targets */
 
       // utils
-      { pattern: 'src/extension/utils.ts' },
+      { pattern: 'src/utils.ts' },
 
       // contentscript
       { pattern: 'src/extension/contentscript.ts' },
@@ -41,9 +41,6 @@ module.exports = configFactory(function (defaultConfig) {
     preprocessors: {
       /* targets */
 
-      // utils
-      'src/extension/utils.ts': ['karma-typescript'],
-
       // contentscript
       'src/extension/contentscript.ts': ['karma-typescript', 'coverage'],
       'src/extension/contentscriptHelpers.ts': ['karma-typescript', 'coverage'],
@@ -56,8 +53,7 @@ module.exports = configFactory(function (defaultConfig) {
       'src/extension/Sidebar/*.tsx': ['karma-typescript', 'coverage'],
 
       /* dependencies */
-
-      // tracker
+      'src/utils.ts': ['karma-typescript'],
       'src/tracker/public/*[!(.d)].ts': ['karma-typescript'],
 
       /* tests */

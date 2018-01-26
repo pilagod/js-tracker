@@ -9,9 +9,12 @@ import StackTracer from './private/StackTracer'
 import { SymbolProxy, SymbolWhich } from './private/Symbols'
 import {
   attachAttr,
+  sendMessageToContentScript,
   sendActionInfoToContentscript,
   setAttrValue
 } from './private/NativeUtils'
+
+import * as utils from './utils'
 
 setupShadowElement()
 setupWindow()
@@ -98,37 +101,41 @@ function hasMethod(descriptor: PropertyDescriptor): boolean {
   return !!descriptor.value && (typeof descriptor.value === 'function')
 }
 
-function record(
-  data: {
-    caller: ActionTarget,
-    target: Target,
-    action: Action,
-    args?: any[],
-    merge?: string
-  }
-): void {
+function record(info: RecordInfo): void {
   // @NOTE: target should not be derived from the type of caller
   // e.g., {
   //  caller: HTMLDivElement, 
   //  target: Element, 
   //  action: id
   // }
-  if (!OwnerManager.hasOwner(data.caller)) {
+  if (!OwnerManager.hasOwner(info.caller)) {
     // @NOTE: although typescript predefine that caller should be ActionTarget,
     // caller is actually determined in runtime, and it's possible to get invalid 
     // callers, e.g., DocumentFragment, XHRHttpRequst
     return
   }
-  const owner = OwnerManager.getOwner(data.caller)
+  const owner = OwnerManager.getOwner(info.caller)
 
-  sendActionInfoToContentscript(
-    <ActionInfo>{
-      trackid: (!owner.hasTrackID() && owner.setTrackID()) || owner.getTrackID(),
-      type: ActionMap.getActionType(data),
-      loc: StackTracer.getSourceLocation(),
-      merge: data.merge
-    }
-  )
+  if (!owner.hasTrackID()) {
+    owner.setTrackID()
+  }
+  const data: RecordData = {
+    trackid: owner.getTrackID(),
+    type: ActionMap.getActionType(info),
+  }
+  if (info.merge) {
+    data.merge = info.merge
+  }
+  sendMessageToContentScript({ state: 'record', data })
+
+  // sendActionInfoToContentscript(
+  //   <ActionInfo>{
+  //     trackid: (!owner.hasTrackID() && owner.setTrackID()) || owner.getTrackID(),
+  //     type: ActionMap.getActionType(data),
+  //     loc: StackTracer.getSourceLocation(),
+  //     merge: data.merge
+  //   }
+  // )
 }
 
 /**
@@ -136,29 +143,59 @@ function record(
  */
 
 function trackGeneralCases(): void {
-  ActionMap.visit(function (target) {
+  ActionMap.visit((target) => {
     const proto = window[target].prototype
 
     Object.getOwnPropertyNames(proto).forEach((action) => {
       if (ActionMap.has(target, action) && !Anomalies.has(target, action)) {
-        trackTemplate({ target, action, decorator })
+        trackTemplate({ target, action, decorator: generalDecorator })
       }
     })
   })
+}
 
-  function decorator(
-    target: Target,
-    action: Action,
-    actionFunc: (...args: any[]) => any
-  ): (...args: any[]) => any {
-    return function (...args) {
+function generalDecorator(
+  target: Target,
+  action: Action,
+  actionFunc: (...args: any[]) => any
+): (...args: any[]) => any {
+  return function (...args) {
+    return recordWrapper(() => {
       const result = actionFunc.call(this, ...args)
+      const info: RecordInfo = { caller: this, target, action, args }
 
-      record({ caller: this, target, action, args })
+      record(info)
 
       return result
-    }
+    })
   }
+}
+
+function recordWrapper(action: (...args: any[]) => any) {
+  const loc = utils.getSourceLocationGivenDepth(3)
+
+  try {
+    recordStart(loc)
+    return action()
+  } catch (e) {
+    throw (e)
+  } finally {
+    recordEnd(loc)
+  }
+}
+
+function recordStart(loc: SourceLocation) {
+  sendMessageToContentScript({
+    state: 'record_start',
+    data: { loc }
+  })
+}
+
+function recordEnd(loc: SourceLocation) {
+  sendMessageToContentScript({
+    state: 'record_end',
+    data: { loc }
+  })
 }
 
 /**
@@ -181,9 +218,11 @@ function trackHTMLElementAnomalies(): void {
   function createDatasetDecorator() {
     return proxyDecoratorTemplate(<ProxyHandler<DOMStringMap>>{
       set: (target, action, value: string) => {
-        target[action] = value
-        record({ caller: target, target: 'DOMStringMap', action })
-        return true
+        return recordWrapper(() => {
+          target[action] = value
+          record({ caller: target, target: 'DOMStringMap', action })
+          return true
+        })
       }
     })
   }
@@ -207,9 +246,11 @@ function trackHTMLElementAnomalies(): void {
           : target[action]
       },
       set: function (target, action, value) {
-        target[action] = value
-        record({ caller: target, target: 'CSSStyleDeclaration', action })
-        return true
+        return recordWrapper(() => {
+          target[action] = value
+          record({ caller: target, target: 'CSSStyleDeclaration', action })
+          return true
+        })
       }
     })
   }
@@ -315,21 +356,22 @@ function setAttrNodeDecorator(
   actionFunc: (attr: Attr) => void
 ): (attr: Attr) => void {
   return function (attr) {
-    // @NOTE: error might raise here, native operation 
-    // should call before recording
-    const result = actionFunc.call(this, parseAttr(attr))
+    return recordWrapper(() => {
+      const pureAttr = getPureAttr(attr)
+      const result = actionFunc.call(this, pureAttr)
+      const info: RecordInfo = { caller: this, target, action, args: [pureAttr] }
 
-    record({
-      caller: this, target, action, args: [attr],
-      merge: OwnerManager.hasShadowOwner(attr)
-        ? OwnerManager.getOwner(attr).getTrackID()
-        : undefined
+      if (OwnerManager.hasShadowOwner(attr)) {
+        info.merge = OwnerManager.getOwner(attr).getTrackID()
+      }
+      record(info)
+
+      return result
     })
-    return result
   }
 }
 
-function parseAttr(attr: Attr): Attr {
+function getPureAttr(attr: Attr): Attr {
   if (OwnerManager.hasShadowOwner(attr)) {
     // @TODO: use name or localname in createAttributeNS ?
     const attrClone = attr.namespaceURI
@@ -373,14 +415,18 @@ function valueDecorator(
   setter: (value: string) => void
 ): (this: Attr, value: string) => void {
   return function (value) {
-    if (!OwnerManager.hasOwner(this)) {
-      attachAttrToShadowElement(this)
-    }
-    const result = setter.call(this, value)
+    return recordWrapper(() => {
+      if (!OwnerManager.hasOwner(this)) {
+        attachAttrToShadowElement(this)
+      }
+      const result = setter.call(this, value)
+      const info: RecordInfo = { caller: this, target, action }
 
-    record({ caller: this, target, action })
+      record(info)
 
-    return result
+      return result
+    })
+
   }
 }
 

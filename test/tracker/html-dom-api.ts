@@ -1,91 +1,70 @@
 import { expect } from 'chai'
-import * as sinon from 'sinon'
 
 import ActionType from '../../src/tracker/public/ActionType'
-import OwnerManager from '../../src/tracker/private/OwnerManager'
-import {
-  attachListenerTo,
-  detachListenerFrom
-} from '../../src/tracker/private/NativeUtils'
-
 import * as utils from './utils'
 
 describe('HTML DOM API tracker', () => {
-  const {
-    messages,
-    resetMessages,
-    trackerMessageHandler
-  } = utils.makeTrackerMessageHandler()
+  const receiver = new utils.TrackerMessageReceiver(window)
 
   before(() => {
-    attachListenerTo(window, 'js-tracker', trackerMessageHandler)
+    receiver.setup()
   })
 
   after(() => {
-    detachListenerFrom(window, 'js-tracker', trackerMessageHandler)
+    receiver.teardown()
   })
 
   beforeEach(() => {
-    // @NOTE: https://stackoverflow.com/questions/1232040/how-do-i-empty-an-array-in-javascript
-    // in order to keep reference of messages, we can only set length to 0
-    resetMessages()
+    receiver.reset()
   })
 
   describe('Window', () => {
     it('should have owner \'window-info\' element on page', () => {
-      const windowInfoElement =
-        document.getElementsByTagName('window-info')[0]
+      const windowInfoElement = document.getElementsByTagName('window-info')[0]
+      const ownerElement = utils.getOwnerOf(window).getElement()
 
       expect(windowInfoElement).to.be.not.undefined
-      expect(
-        OwnerManager
-          .getOwner(window)
-          .getOwnerElement()
-      ).to.equal(windowInfoElement)
+      expect(ownerElement).to.equal(windowInfoElement)
     })
   })
 
   describe('Document', () => {
     it('should have owner \'document-info\' element on page', () => {
-      const documentInfoElement =
-        document.getElementsByTagName('document-info')[0]
+      const documentInfoElement = document.getElementsByTagName('document-info')[0]
+      const ownerElement = utils.getOwnerOf(document).getElement()
 
       expect(documentInfoElement).to.be.not.undefined
-      expect(
-        OwnerManager
-          .getOwner(document)
-          .getOwnerElement()
-      ).to.equal(documentInfoElement)
+      expect(ownerElement).to.equal(documentInfoElement)
     })
   })
 
   describe('DocumentFragment', () => {
     it('should not track any action on fragment', () => {
+      const div = document.createElement('div')
       const fragment = document.createDocumentFragment()
 
-      fragment.appendChild(document.createElement('div'))
+      fragment.appendChild(div)
+      const loc = utils.getPrevLineSourceLocation()
 
-      expect(messages).to.have.length(0)
+      receiver.verifyOnlyWrapMessageStream(loc)
     })
 
     it('should track other element appending a fragment', () => {
       const div = document.createElement('div')
-      const child = document.createElement('div')
       const fragment = document.createDocumentFragment()
 
-      fragment.appendChild(child)
+      fragment.appendChild(document.createElement('div'))
+      // @NOTE: although there is no records about fragment, 
+      // it will still send record_start and record_end messages
+      receiver.reset()
 
       div.appendChild(fragment)
       const loc = utils.getPrevLineSourceLocation()
+      const record = utils.createRecord('1', ActionType.Node)
+      const ownerID = utils.getOwnerOf(div).getTrackID()
 
-      expect(messages).to.have.length(1)
-
-      utils.matchActionInfo(messages[0], {
-        caller: div,
-        trackid: '1',
-        type: ActionType.Node,
-        loc
-      })
+      expect(ownerID).to.equal(record.trackid)
+      receiver.verifyMessageStream(loc, record)
     })
   })
 
@@ -95,15 +74,11 @@ describe('HTML DOM API tracker', () => {
 
       div.accessKey = 'accessKey'
       const loc = utils.getPrevLineSourceLocation()
+      const record = utils.createRecord('1', ActionType.Attr)
+      const ownerID = utils.getOwnerOf(div).getTrackID()
 
-      expect(messages).to.have.length(1)
-
-      utils.matchActionInfo(messages[0], {
-        caller: div,
-        trackid: '1',
-        type: ActionType.Attr,
-        loc
-      })
+      expect(ownerID).to.equal(record.trackid)
+      receiver.verifyMessageStream(loc, record)
     })
 
     it('should track its method call', () => {
@@ -111,15 +86,11 @@ describe('HTML DOM API tracker', () => {
 
       div.click()
       const loc = utils.getPrevLineSourceLocation()
+      const record = utils.createRecord('1', ActionType.Behav)
+      const ownerID = utils.getOwnerOf(div).getTrackID()
 
-      expect(messages).to.have.length(1)
-
-      utils.matchActionInfo(messages[0], {
-        caller: div,
-        trackid: '1',
-        type: ActionType.Behav,
-        loc
-      })
+      expect(ownerID).to.equal(record.trackid)
+      receiver.verifyMessageStream(loc, record)
     })
   })
 
@@ -129,15 +100,11 @@ describe('HTML DOM API tracker', () => {
 
       div.id = 'id'
       const loc = utils.getPrevLineSourceLocation()
+      const record = utils.createRecord('1', ActionType.Attr)
+      const ownerID = utils.getOwnerOf(div).getTrackID()
 
-      expect(messages).to.have.length(1)
-
-      utils.matchActionInfo(messages[0], {
-        caller: div,
-        trackid: '1',
-        type: ActionType.Attr,
-        loc
-      })
+      expect(ownerID).to.equal(record.trackid)
+      receiver.verifyMessageStream(loc, record)
     })
 
     it('should track its method call', () => {
@@ -146,15 +113,11 @@ describe('HTML DOM API tracker', () => {
 
       div.insertAdjacentElement('afterbegin', div2)
       const loc = utils.getPrevLineSourceLocation()
+      const record = utils.createRecord('1', ActionType.Node)
+      const ownerID = utils.getOwnerOf(div).getTrackID()
 
-      expect(messages).to.have.length(1)
-
-      utils.matchActionInfo(messages[0], {
-        caller: div,
-        trackid: '1',
-        type: ActionType.Node,
-        loc
-      })
+      expect(ownerID).to.equal(record.trackid)
+      receiver.verifyMessageStream(loc, record)
     })
 
     /* composite actions */
@@ -165,49 +128,41 @@ describe('HTML DOM API tracker', () => {
 
         div.setAttribute('id', 'id')
         const loc = utils.getPrevLineSourceLocation()
+        const record = utils.createRecord('1', ActionType.Attr)
+        const ownerID = utils.getOwnerOf(div).getTrackID()
 
-        expect(messages).to.have.length(1)
-
-        utils.matchActionInfo(messages[0], {
-          caller: div,
-          trackid: '1',
-          type: ActionType.Attr,
-          loc
-        })
+        expect(ownerID).to.equal(record.trackid)
+        receiver.verifyMessageStream(loc, record)
       })
 
       it('should track removeAttribute', () => {
         const div = document.createElement('div')
 
-        div.setAttribute('id', 'id') // messages[0]
-        div.removeAttribute('id') // messages[1]
+        div.setAttribute('id', 'id')
+        receiver.reset()
+
+        div.removeAttribute('id')
         const loc = utils.getPrevLineSourceLocation()
+        const record = utils.createRecord('1', ActionType.Attr)
+        const ownerID = utils.getOwnerOf(div).getTrackID()
 
-        expect(messages).to.have.length(2)
-
-        utils.matchActionInfo(messages[1], {
-          caller: div,
-          trackid: '1',
-          type: ActionType.Attr,
-          loc
-        })
+        expect(ownerID).to.equal(record.trackid)
+        receiver.verifyMessageStream(loc, record)
       })
 
       it('should track removeAttributeNode', () => {
         const div = document.createElement('div')
 
         div.setAttribute('id', 'id')
+        receiver.reset()
+
         div.removeAttributeNode(div.getAttributeNode('id'))
         const loc = utils.getPrevLineSourceLocation()
+        const record = utils.createRecord('1', ActionType.Attr)
+        const ownerID = utils.getOwnerOf(div).getTrackID()
 
-        expect(messages).to.have.length(2)
-
-        utils.matchActionInfo(messages[1], {
-          caller: div,
-          trackid: '1',
-          type: ActionType.Attr,
-          loc
-        })
+        expect(ownerID).to.equal(record.trackid)
+        receiver.verifyMessageStream(loc, record)
       })
     })
 
@@ -222,35 +177,27 @@ describe('HTML DOM API tracker', () => {
 
         div.setAttributeNode(idAttr)
         const loc = utils.getPrevLineSourceLocation()
+        const record = utils.createRecord('1', ActionType.Attr)
+        const ownerID = utils.getOwnerOf(div).getTrackID()
 
-        expect(messages).to.have.length(1)
-
-        utils.matchActionInfo(messages[0], {
-          caller: div,
-          trackid: '1',
-          type: ActionType.Attr,
-          loc
-        })
+        expect(ownerID).to.equal(record.trackid)
+        receiver.verifyMessageStream(loc, record)
       })
 
       it('should track setAttributeNode{NS} (merge scenario)', () => {
         const div = document.createElement('div')
         const idAttr = document.createAttribute('id')
 
-        idAttr.value = 'id' // messages[0] -> generate trackid 1
+        idAttr.value = 'id' // trackid 1 attach to shadow element
+        receiver.reset()
 
-        div.setAttributeNode(idAttr) // messages[1] -> generate trackid 2
+        div.setAttributeNode(idAttr) // trackid 2 attach to div
         const loc = utils.getPrevLineSourceLocation()
+        const record = utils.createRecord('2', ActionType.Attr, '1')
+        const ownerID = utils.getOwnerOf(div).getTrackID()
 
-        expect(messages).to.have.length(2)
-
-        utils.matchActionInfo(messages[1], {
-          caller: div,
-          trackid: '2',
-          type: ActionType.Attr,
-          merge: '1',
-          loc
-        })
+        expect(ownerID).to.equal(record.trackid)
+        receiver.verifyMessageStream(loc, record)
       })
 
       it('should track setAttributeNode{NS} (error scenario)', () => {
@@ -258,12 +205,13 @@ describe('HTML DOM API tracker', () => {
         const div2 = document.createElement('div')
 
         div.id = 'id'
+        receiver.reset()
 
-        const error = () => {
-          div2.setAttributeNode(div.attributes[0])
-        }
+        const error = () => div2.setAttributeNode(div.attributes[0])
+        const loc = utils.getPrevLineSourceLocation()
+
         expect(error).to.throw()
-        expect(messages).to.have.length(1)
+        receiver.verifyOnlyWrapMessageStream(loc)
       })
     })
   })
@@ -274,15 +222,11 @@ describe('HTML DOM API tracker', () => {
 
       div.textContent = 'content'
       const loc = utils.getPrevLineSourceLocation()
+      const record = utils.createRecord('1', ActionType.Attr | ActionType.Node)
+      const ownerID = utils.getOwnerOf(div).getTrackID()
 
-      expect(messages).to.have.length(1)
-
-      utils.matchActionInfo(messages[0], {
-        caller: div,
-        trackid: '1',
-        type: ActionType.Attr | ActionType.Node,
-        loc
-      })
+      expect(ownerID).to.equal(record.trackid)
+      receiver.verifyMessageStream(loc, record)
     })
 
     it('should track its method call', () => {
@@ -291,15 +235,11 @@ describe('HTML DOM API tracker', () => {
 
       div.appendChild(div2)
       const loc = utils.getPrevLineSourceLocation()
+      const record = utils.createRecord('1', ActionType.Node)
+      const ownerID = utils.getOwnerOf(div).getTrackID()
 
-      expect(messages).to.have.length(1)
-
-      utils.matchActionInfo(messages[0], {
-        caller: div,
-        trackid: '1',
-        type: ActionType.Node,
-        loc
-      })
+      expect(ownerID).to.equal(record.trackid)
+      receiver.verifyMessageStream(loc, record)
     })
   })
 
@@ -309,15 +249,11 @@ describe('HTML DOM API tracker', () => {
 
       div.addEventListener('click', () => { })
       const loc = utils.getPrevLineSourceLocation()
+      const record = utils.createRecord('1', ActionType.Event)
+      const ownerID = utils.getOwnerOf(div).getTrackID()
 
-      expect(messages).to.have.length(1)
-
-      utils.matchActionInfo(messages[0], {
-        caller: div,
-        trackid: '1',
-        type: ActionType.Event,
-        loc
-      })
+      expect(ownerID).to.equal(record.trackid)
+      receiver.verifyMessageStream(loc, record)
     })
   })
 
@@ -327,81 +263,77 @@ describe('HTML DOM API tracker', () => {
 
       idAttr.value = 'id'
       const loc = utils.getPrevLineSourceLocation()
+      const record = utils.createRecord('1', ActionType.Attr)
+      const ownerID = utils.getOwnerOf(idAttr).getTrackID()
 
-      expect(messages).to.have.length(1)
-
-      utils.matchActionInfo(messages[0], {
-        caller: idAttr,
-        trackid: '1',
-        type: ActionType.Attr,
-        loc
-      })
+      expect(ownerID).to.equal(record.trackid)
+      receiver.verifyMessageStream(loc, record)
     })
   })
 
   describe('CSSStyleDeclaration', () => {
-    it('should track its property assignment', () => {
+    it('should set its owner properly', () => {
       const div = document.createElement('div')
 
       expect(
-        OwnerManager
-          .getOwner(div.style)
-          .getOwnerElement()
+        utils.getOwnerOf(div.style).getElement()
       ).to.equal(div)
+    })
+
+    it('should track its property assignment', () => {
+      const div = document.createElement('div')
 
       div.style.color = 'red'
       const loc = utils.getPrevLineSourceLocation()
+      const record = utils.createRecord('1', ActionType.Style)
+      const ownerID = utils.getOwnerOf(div.style).getTrackID()
 
-      expect(messages).to.have.length(1)
-
-      utils.matchActionInfo(messages[0], {
-        caller: div.style,
-        trackid: '1',
-        type: ActionType.Style,
-        loc
-      })
+      expect(ownerID).to.equal(record.trackid)
+      receiver.verifyMessageStream(loc, record)
     })
   })
 
   describe('DOMStringMap', () => {
-    it('should track its property assignment', () => {
+    it('should set its owner properly', () => {
       const div = document.createElement('div')
 
       expect(
-        OwnerManager
-          .getOwner(div.dataset)
-          .getOwnerElement()
+        utils.getOwnerOf(div.dataset).getElement()
       ).to.equal(div)
+    })
+
+    it('should track its property assignment', () => {
+      const div = document.createElement('div')
 
       div.dataset.data = 'data'
       const loc = utils.getPrevLineSourceLocation()
+      const record = utils.createRecord('1', ActionType.Attr)
+      const ownerID = utils.getOwnerOf(div.dataset).getTrackID()
 
-      expect(messages).to.have.length(1)
-
-      utils.matchActionInfo(messages[0], {
-        caller: div.dataset,
-        trackid: '1',
-        type: ActionType.Attr,
-        loc
-      })
+      expect(ownerID).to.equal(record.trackid)
+      receiver.verifyMessageStream(loc, record)
     })
   })
 
   describe('DOMTokenList', () => {
+    it('should set owner properly', () => {
+      const div = document.createElement('div')
+
+      expect(
+        utils.getOwnerOf(div.classList).getElement()
+      ).to.equal(div)
+    })
+
     it('should track its value property assignment', () => {
       const div = document.createElement('div')
 
       div.classList.value = 'class'
       const loc = utils.getPrevLineSourceLocation()
+      const record = utils.createRecord('1', ActionType.Style)
+      const ownerID = utils.getOwnerOf(div.classList).getTrackID()
 
-      expect(messages).to.have.length(1)
-
-      utils.matchActionInfo(messages[0], {
-        caller: div.classList,
-        trackid: '1',
-        type: ActionType.Style,
-        loc
-      })
+      expect(ownerID).to.equal(record.trackid)
+      receiver.verifyMessageStream(loc, record)
     })
 
     it('should track its methods', () => {
@@ -409,56 +341,85 @@ describe('HTML DOM API tracker', () => {
 
       div.classList.add('class')
       const loc = utils.getPrevLineSourceLocation()
+      const record = utils.createRecord('1', ActionType.Style)
+      const ownerID = utils.getOwnerOf(div.classList).getTrackID()
 
-      expect(messages).to.have.length(1)
-
-      utils.matchActionInfo(messages[0], {
-        caller: div.classList,
-        trackid: '1',
-        type: ActionType.Style,
-        loc
-      })
+      expect(ownerID).to.equal(record.trackid)
+      receiver.verifyMessageStream(loc, record)
     })
   })
 
   describe('NamedNodeMap', () => {
-    it('should track removeNamedItem', () => {
+    it('should set its owner properly', () => {
       const div = document.createElement('div')
 
-      div.id = 'id' // messages[0]
+      expect(
+        utils.getOwnerOf(div.attributes).getElement()
+      ).to.equal(div)
+    })
 
-      div.attributes.removeNamedItem('id') // messages[1]
+    it('should track removeNamedItem (attr scenario)', () => {
+      const div = document.createElement('div')
+
+      div.id = 'id'
+      receiver.reset()
+
+      div.attributes.removeNamedItem('id')
       const loc = utils.getPrevLineSourceLocation()
+      const record = utils.createRecord('1', ActionType.Attr)
+      const ownerID = utils.getOwnerOf(div.attributes).getTrackID()
 
-      expect(messages).to.have.length(2)
+      expect(ownerID).to.equal(record.trackid)
+      receiver.verifyMessageStream(loc, record)
+    })
 
-      utils.matchActionInfo(messages[1], {
-        caller: div.attributes,
-        trackid: '1',
-        type: ActionType.Attr,
-        loc
-      })
+    it('should track removeNamedItem (style scenario)', () => {
+      const div = document.createElement('div')
+
+      div.style.color = 'red'
+      receiver.reset()
+
+      div.attributes.removeNamedItem('style')
+      const loc = utils.getPrevLineSourceLocation()
+      const record = utils.createRecord('1', ActionType.Style)
+      const ownerID = utils.getOwnerOf(div.attributes).getTrackID()
+
+      expect(ownerID).to.equal(record.trackid)
+      receiver.verifyMessageStream(loc, record)
     })
 
     /* anomalies */
 
-    it('should track setNamedItem', () => {
+    it('should track setNamedItem (attr scenario)', () => {
       const div = document.createElement('div')
       const id = document.createAttribute('id')
 
-      id.value = 'id' // messages[0] -> generate trackid 1
+      id.value = 'id' // trackid 1 attach to shadow element
+      receiver.reset()
 
-      div.attributes.setNamedItem(id) // messages[1] -> generate trackid 2
+      div.attributes.setNamedItem(id) // trackid 2 attach to owner of attributes
       const loc = utils.getPrevLineSourceLocation()
+      const record = utils.createRecord('2', ActionType.Attr, '1')
+      const ownerID = utils.getOwnerOf(div.attributes).getTrackID()
 
-      expect(messages).to.have.length(2)
+      expect(ownerID).to.equal(record.trackid)
+      receiver.verifyMessageStream(loc, record)
+    })
 
-      utils.matchActionInfo(messages[1], {
-        caller: div.attributes,
-        trackid: '2',
-        type: ActionType.Attr,
-        loc,
-      })
+    it('should track setNamedItem (style scenario)', () => {
+      const div = document.createElement('div')
+      const style = document.createAttribute('style')
+
+      style.value = 'color: red' // trackid 1 attach to shadow element
+      receiver.reset()
+
+      div.attributes.setNamedItem(style) // trackid 2 attach to owner of attributes
+      const loc = utils.getPrevLineSourceLocation()
+      const record = utils.createRecord('2', ActionType.Style, '1')
+      const ownerID = utils.getOwnerOf(div.attributes).getTrackID()
+
+      expect(ownerID).to.equal(record.trackid)
+      receiver.verifyMessageStream(loc, record)
     })
   })
 })

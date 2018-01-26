@@ -2,7 +2,7 @@
 
 interface Owner {
   getTrackID(): TrackID;
-  getOwnerElement(): Element;
+  getElement(): Element;
   hasTrackID(): boolean;
   isShadow(): boolean;
   setTrackID(): void;

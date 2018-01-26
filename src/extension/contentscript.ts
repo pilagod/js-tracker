@@ -6,7 +6,7 @@ import * as fs from 'fs'
 import ActionStore from '../tracker/public/ActionStore'
 
 import initContentscriptHelpers from './contentscriptHelpers'
-import { isTestEnv } from './utils'
+import { isTestEnv } from '../utils'
 
 function main(
   helpers: {
