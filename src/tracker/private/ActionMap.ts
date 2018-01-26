@@ -1,7 +1,7 @@
 /// <reference path='./ActionMap.d.ts'/>
 
-import ActionTagMap from './ActionTagMap'
 import ActionType from '../public/ActionType'
+import ActionTagMap from './ActionTagMap'
 
 const {
   Attr,
@@ -277,20 +277,16 @@ const ActionMap: {
 const _: IActionMap = {
   getActionType({ caller, target, action, args = [] }) {
     switch (target) {
-      case 'DOMStringMap':
-        return ActionType.Attr
       case 'CSSStyleDeclaration':
         return ActionType.Style
+      case 'DOMStringMap':
+        return ActionType.Attr
       default:
         if (this.has(target, action)) {
-          return function (type: ActionType | ActionTagMap): ActionType {
-            const actionTag =
-              ActionTagMap.fetchActionTag({ caller, target, action, args })
+          const tag = ActionTagMap.fetchActionTag({ caller, target, action, args })
+          const type = ActionMap[target][action]
 
-            return actionTag
-              ? (type[actionTag] || type['default']) // ActionTagMap
-              : type // ActionType
-          }(ActionMap[target][action])
+          return tag ? (type[tag] || type['default']) : type
         }
         return ActionType.None
     }

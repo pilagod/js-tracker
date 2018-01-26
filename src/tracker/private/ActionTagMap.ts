@@ -36,7 +36,6 @@ const ActionTagMap: object = {
   }
 }
 const _: IActionTagMap = {
-
   fetchActionTag({ caller, target, action, args = [] }) {
     if (this.has(target, action)) {
       const tags = <ActionTags>ActionTagMap[target][action]
@@ -50,6 +49,7 @@ const _: IActionTagMap = {
           return (<DOMTokenList>caller)[SymbolWhich]
       }
     }
+    return null
   },
 
   has(target, action) {

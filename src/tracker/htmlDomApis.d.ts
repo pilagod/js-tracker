@@ -33,12 +33,12 @@ interface RecordWrapMessage extends RecordMessage {
   data: RecordWrap
 }
 
-interface RecordDataMessage extends RecordMessage {
-  data: RecordData
-}
-
 type RecordWrap = {
   loc: SourceLocation
+}
+
+interface RecordDataMessage extends RecordMessage {
+  data: RecordData
 }
 
 type RecordData = {

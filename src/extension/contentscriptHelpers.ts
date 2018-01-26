@@ -1,7 +1,7 @@
 /// <reference path='../tracker/public/ActionStore.d.ts'/>
 /// <reference path='./background.d.ts'/>
 
-import { isTestEnv } from '../utils'
+import { isTestEnv } from './utils'
 
 class State {
   static SELECTION_IS_CHANGED = true

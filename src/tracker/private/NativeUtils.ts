@@ -1,5 +1,5 @@
-/// <reference path='../index.d.ts'/>
 /// <reference path='../public/ActionStore.d.ts'/>
+/// <reference path='../htmlDomApis.d.ts'/>
 
 import TrackIDFactory from './TrackIDFactory'
 
@@ -24,14 +24,6 @@ export const detachListenerFrom = (function (removeEventListener) {
     removeEventListener.call(target, event, listener)
   }
 })(EventTarget.prototype.removeEventListener)
-
-export const sendActionInfoToContentscript = (function (context, dispatchEvent) {
-  return function (info: ActionInfo) {
-    dispatchEvent.call(context, new CustomEvent('js-tracker', {
-      detail: { info }
-    }))
-  }
-})(window, EventTarget.prototype.dispatchEvent)
 
 export const sendMessageToContentScript = (function (context, dispatch) {
   return function (message: RecordMessage) {

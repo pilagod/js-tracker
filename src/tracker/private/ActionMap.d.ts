@@ -1,5 +1,5 @@
-/// <reference path='../index.d.ts'/>
 /// <reference path='../public/ActionType.d.ts' />
+/// <reference path='../htmlDomApis.d.ts'/>
 
 type Target =
   'HTMLElement'

@@ -8,12 +8,14 @@ module.exports = configFactory(function (defaultConfig) {
     // all modules including in tests should be included here
     files: [
       /* targets */
-      { pattern: 'src/tracker/*[!(.d)].ts' },
+      { pattern: 'src/tracker/htmlDomApis.ts' },
+      { pattern: 'src/tracker/htmlDomApiHelpers.ts' },
+      
       { pattern: 'src/tracker/private/*[!(.d)].ts' },
       { pattern: 'src/tracker/private/checkers/*[!(.d)].ts' },
 
       /* dependencies */
-      { pattern: 'src/utils.ts' },
+      { pattern: 'src/tracker/utils.ts' },
       { pattern: 'src/tracker/public/*[!(.d)].ts' },
 
       /* tests */
@@ -23,12 +25,14 @@ module.exports = configFactory(function (defaultConfig) {
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
       /* targets */
-      'src/tracker/*[!(.d)].ts': ['karma-typescript', 'coverage'],
+      'src/tracker/htmlDomApis.ts': ['karma-typescript', 'coverage'],
+      'src/tracker/htmlDomApiHelpers.ts': ['karma-typescript', 'coverage'],
+      
       'src/tracker/private/*[!(.d)].ts': ['karma-typescript', 'coverage'],
       'src/tracker/private/checkers/*[!(.d)].ts': ['karma-typescript', 'coverage'],
 
       /* dependencies */
-      'src/utils.ts': ['karma-typescript'],
+      'src/tracker/utils.ts': ['karma-typescript'],
       'src/tracker/public/*[!(.d)].ts': ['karma-typescript'],
 
       /* tests */
