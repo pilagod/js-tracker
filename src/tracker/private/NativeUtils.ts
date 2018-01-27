@@ -26,9 +26,9 @@ export const detachListenerFrom = (function (removeEventListener) {
 })(EventTarget.prototype.removeEventListener)
 
 export const sendMessageToContentScript = (function (context, dispatch) {
-  return function (record: RecordMessage) {
+  return function (message: RecordMessage) {
     dispatch.call(context, new CustomEvent('js-tracker', {
-      detail: { record }
+      detail: { message }
     }))
   }
 })(window, EventTarget.prototype.dispatchEvent)

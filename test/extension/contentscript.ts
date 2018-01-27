@@ -19,10 +19,10 @@ describe('contentscript', () => {
 
   describe('listen on action', () => {
     const { recordHandler } = helpers
-    const dispatch = (record: RecordMessage) => {
+    const dispatch = (message: RecordMessage) => {
       window.dispatchEvent(
         new CustomEvent('js-tracker', {
-          detail: { record }
+          detail: { message }
         })
       )
     }
