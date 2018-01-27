@@ -1,5 +1,4 @@
-/// <reference path='../../recordMessage.d.ts'/>
-/// <reference path='../public/ActionStore.d.ts'/>
+/// <reference path='../../extension/RecordMessage.d.ts'/>
 
 import TrackIDFactory from './TrackIDFactory'
 
@@ -7,25 +6,25 @@ import TrackIDFactory from './TrackIDFactory'
  * A series of actions bypass tracker's record process
  */
 
-export const attachAttr = (function (setAttributeNode) {
+export const attachAttr = ((setAttributeNode) => {
   return function (container: Element, attr: Attr) {
     setAttributeNode.call(container, attr)
   }
 })(Element.prototype.setAttributeNode)
 
-export const attachListenerTo = (function (addEventListener) {
+export const attachListenerTo = ((addEventListener) => {
   return function (target: EventTarget, event: string, listener: (e: Event) => void) {
     addEventListener.call(target, event, listener)
   }
 })(EventTarget.prototype.addEventListener)
 
-export const detachListenerFrom = (function (removeEventListener) {
+export const detachListenerFrom = ((removeEventListener) => {
   return function (target: EventTarget, event: string, listener: (e: Event) => void) {
     removeEventListener.call(target, event, listener)
   }
 })(EventTarget.prototype.removeEventListener)
 
-export const sendMessageToContentScript = (function (context, dispatch) {
+export const sendMessageToContentScript = ((context, dispatch) => {
   return function (message: RecordMessage) {
     dispatch.call(context, new CustomEvent('js-tracker', {
       detail: { message }
@@ -33,13 +32,13 @@ export const sendMessageToContentScript = (function (context, dispatch) {
   }
 })(window, EventTarget.prototype.dispatchEvent)
 
-export const setAttrValue = (function (setValue) {
+export const setAttrValue = ((setValue) => {
   return function (attr: Attr, value: string) {
     return setValue.call(attr, value)
   }
 })(Reflect.getOwnPropertyDescriptor(Attr.prototype, 'value').set)
 
-export const setTrackID = (function (setAttribute) {
+export const setTrackID = ((setAttribute) => {
   return function (target: Element) {
     return setAttribute.call(target, 'trackid', (<any>TrackIDFactory).generateID())
   }

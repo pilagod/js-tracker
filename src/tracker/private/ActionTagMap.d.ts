@@ -1,4 +1,4 @@
-/// <reference path='../htmlDomApis.d.ts'/>
+/// <reference path='../trackers/dom/tracker.d.ts'/>
 /// <reference path='./ActionMap.d.ts'/>
 
 type ActionTag = string | undefined

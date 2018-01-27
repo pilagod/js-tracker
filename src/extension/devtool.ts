@@ -1,5 +1,4 @@
 /// <reference path='../../node_modules/@types/chrome/index.d.ts'/>
-/// <reference path='./background.d.ts'/>
 /// <reference path='./devtool.d.ts'/>
 
 import initDevtoolHelpers from './devtoolHelpers'

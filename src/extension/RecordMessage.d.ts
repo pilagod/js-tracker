@@ -1,8 +1,10 @@
+/* message between tracker, contentscirpt */
+
 type RecordMessage =
   RecordWrapMessage
   | RecordDataMessage
 
-interface RecordWrapMessage {
+type RecordWrapMessage = {
   state: 'record_start' | 'record_end'
   data: RecordWrap
 }
@@ -11,7 +13,7 @@ type RecordWrap = {
   loc: SourceLocation
 }
 
-interface RecordDataMessage {
+type RecordDataMessage = {
   state: 'record',
   data: RecordData
 }

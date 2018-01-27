@@ -1,5 +1,5 @@
 import * as StackTrace from 'stacktrace-js'
-import { sendMessageToContentScript } from './private/NativeUtils'
+import { sendMessageToContentScript } from '../private/NativeUtils'
 
 export function getSourceLocationGivenDepth(depth: number) {
   const stackframe = StackTrace.getSync()[depth]

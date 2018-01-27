@@ -1,3 +1,3 @@
-import htmlDomApisTracker from './htmlDomApis'
+import trackDomApis from './trackers/dom'
 
-htmlDomApisTracker()
+trackDomApis()

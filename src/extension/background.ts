@@ -1,5 +1,5 @@
 /// <reference path='../../node_modules/@types/chrome/index.d.ts' />
-/// <reference path='./background.d.ts'/>
+/// <reference path='./Message.d.ts'/>
 
 class ConnectionCache {
   private _connections: {

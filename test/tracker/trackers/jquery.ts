@@ -1,11 +1,11 @@
 import { expect } from 'chai'
 import $ from 'jquery'
 
-import ActionType from '../../src/tracker/public/ActionType'
+import ActionType from '../../../src/tracker/public/ActionType'
 import {
   attachListenerTo,
   detachListenerFrom
-} from '../../src/tracker/private/NativeUtils'
+} from '../../../src/tracker/private/NativeUtils'
 
 import * as utils from './utils'
 

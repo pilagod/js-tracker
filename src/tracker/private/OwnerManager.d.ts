@@ -1,5 +1,5 @@
+/// <reference path='../trackers/dom/tracker.d.ts'/>
 /// <reference path='../public/ActionStore.d.ts'/>
-/// <reference path='../htmlDomApis.d.ts'/>
 /// <reference path='./Owner.d.ts'/>
 
 interface IOwnerManager {

@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 
-import ActionType from '../../src/tracker/public/ActionType'
+import ActionType from '../../../src/tracker/public/ActionType'
 import * as utils from './utils'
 
 describe('HTML DOM API tracker', () => {

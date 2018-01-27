@@ -1,11 +1,11 @@
 import { expect } from 'chai'
 import * as StackTrace from 'stacktrace-js'
 
-import OwnerManager from '../../src/tracker/private/OwnerManager'
+import OwnerManager from '../../../src/tracker/private/OwnerManager'
 import {
   attachListenerTo,
   detachListenerFrom
-} from '../../src/tracker/private/NativeUtils'
+} from '../../../src/tracker/private/NativeUtils'
 
 export function getPrevLineSourceLocation(): SourceLocation {
   const loc = StackTrace.getSync()[1]
@@ -17,11 +17,7 @@ export function getPrevLineSourceLocation(): SourceLocation {
   }
 }
 
-export function createRecord(
-  trackid: string,
-  type: ActionType,
-  merge?: string
-): RecordData {
+export function createRecord(trackid: string, type: ActionType, merge?: string) {
   const record: RecordData = { trackid, type }
 
   if (merge) {

@@ -1,4 +1,4 @@
-/// <reference path='./background.d.ts'/>
+/// <reference path='./Message.d.ts'/>
 
 interface DevtoolHelpers {
   backgroundMessageHandler: (message: Message) => void;

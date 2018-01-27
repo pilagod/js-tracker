@@ -1,6 +1,6 @@
 /// <reference path='../tracker/public/ActionStore.d.ts'/>
-/// <reference path='../recordMessage.d.ts'/>
-/// <reference path='./background.d.ts'/>
+/// <reference path='./RecordMessage.d.ts'/>
+/// <reference path='./Message.d.ts'/>
 
 import { isTestEnv } from './utils'
 

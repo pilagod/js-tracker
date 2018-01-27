@@ -1,16 +1,16 @@
-/// <reference path='./htmlDomApis.d.ts'/>
-/// <reference path='./htmlDomApiHelpers.d.ts'/>
+/// <reference path='./tracker.d.ts'/>
+/// <reference path='./trackerHelpers.d.ts'/>
 
-import ActionMap from './private/ActionMap'
-import OwnerManager from './private/OwnerManager'
-import ShadowElement from './private/ShadowElement'
+import ActionMap from '../../private/ActionMap'
+import OwnerManager from '../../private/OwnerManager'
+import ShadowElement from '../../private/ShadowElement'
 import {
   attachAttr,
   sendMessageToContentScript,
   setAttrValue
-} from './private/NativeUtils'
-import { SymbolProxy, SymbolWhich } from './private/Symbols'
-import { recordWrapper } from './utils'
+} from '../../private/NativeUtils'
+import { SymbolProxy, SymbolWhich } from '../../private/Symbols'
+import { recordWrapper } from '../utils'
 
 export const decorators: { [name: string]: Decorator } = {
   general: (target, action, actionFunc) => {

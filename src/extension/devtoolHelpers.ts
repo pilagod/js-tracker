@@ -1,5 +1,4 @@
 /// <reference path='../tracker/public/ActionStore.d.ts'/>
-/// <reference path='./background.d.ts'/>
 /// <reference path='./devtool.d.ts'/>
 
 import { ISidebarRootProps } from '../extension/Sidebar/SidebarRoot'

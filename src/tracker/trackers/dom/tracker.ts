@@ -1,11 +1,11 @@
-/// <reference path='./htmlDomApis.d.ts'/>
+/// <reference path='./tracker.d.ts'/>
 
-import ActionMap from './private/ActionMap'
-import Anomalies from './private/Anomalies'
-import OwnerManager from './private/OwnerManager'
-import ShadowElement from './private/ShadowElement'
+import ActionMap from '../../private/ActionMap'
+import Anomalies from '../../private/Anomalies'
+import OwnerManager from '../../private/OwnerManager'
+import ShadowElement from '../../private/ShadowElement'
 
-import { decorators } from './htmlDomApiHelpers'
+import { decorators } from './trackerHelpers'
 
 export default function main() {
   setupShadowElement()

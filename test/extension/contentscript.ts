@@ -1,5 +1,3 @@
-/// <reference path='../../src/extension/background.d.ts'/>
-
 import { expect } from 'chai'
 import * as sinon from 'sinon'
 import * as fs from 'fs'

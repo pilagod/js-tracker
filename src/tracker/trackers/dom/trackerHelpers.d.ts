@@ -1,5 +1,5 @@
-/// <reference path='./private/ActionMap.d.ts'/>
-/// <reference path='./htmlDomApis.d.ts'/> 
+/// <reference path='../../private/ActionMap.d.ts'/>
+/// <reference path='./tracker.d.ts'/> 
 
 type RecordInfo = {
   caller: ActionTarget,
