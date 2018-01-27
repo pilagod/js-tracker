@@ -16,15 +16,16 @@ describe('contentscript helpers', () => {
     sandbox.reset()
   })
 
-  describe('recordHandler', () => {
+  describe('messageHandler', () => {
     const helpers = initContentscriptHelpers(store, updateSidebar)
     const controller = (<any>helpers).contentscriptController
-    const recordHandler = helpers.recordHandler // this is an async function
+    const messageHandler = helpers.messageHandler // this is an async function
 
     const createRecordDataMessage = (data: RecordData) => (<RecordDataMessage>{ state: 'record', data })
     const createRecordWrapMessage = (loc: SourceLocation) => ({
-      start: <RecordWrapMessage>{ state: 'record_start', data: { loc } },
-      end: <RecordWrapMessage>{ state: 'record_end', data: { loc } }
+      // @NOTE: to simulate the real environment, we copy loc to a new object
+      start: <RecordWrapMessage>{ state: 'record_start', data: { loc: Object.assign({}, loc) } },
+      end: <RecordWrapMessage>{ state: 'record_end', data: { loc: Object.assign({}, loc) } }
     })
 
     beforeEach(() => {
@@ -35,8 +36,8 @@ describe('contentscript helpers', () => {
       it('should not call store.registerFromActionInfo given RecordWrapMessage', async () => {
         const { start, end } = createRecordWrapMessage(actions[0].info.loc)
 
-        await recordHandler(start)
-        await recordHandler(end)
+        await messageHandler(start)
+        await messageHandler(end)
 
         expect(store.registerFromActionInfo.called).to.be.false
       })
@@ -52,10 +53,10 @@ describe('contentscript helpers', () => {
           trackid: actions[1].info.trackid,
           type: actions[1].info.type
         })
-        await recordHandler(start)
-        await recordHandler(record1)
-        await recordHandler(record2)
-        await recordHandler(end)
+        await messageHandler(start)
+        await messageHandler(record1)
+        await messageHandler(record2)
+        await messageHandler(end)
 
         expect(store.registerFromActionInfo.calledTwice).to.be.true
         expect(
@@ -75,11 +76,11 @@ describe('contentscript helpers', () => {
         const { trackid, type } = actions[0].info
         const record = createRecordDataMessage({ trackid, type })
 
-        await recordHandler(start1)
-        await recordHandler(start2)
-        await recordHandler(record)
-        await recordHandler(end2)
-        await recordHandler(end1)
+        await messageHandler(start1)
+        await messageHandler(start2)
+        await messageHandler(record)
+        await messageHandler(end2)
+        await messageHandler(end1)
 
         expect(store.registerFromActionInfo.calledOnce).to.be.true
         expect(
@@ -95,12 +96,12 @@ describe('contentscript helpers', () => {
         const { trackid, type } = actions[0].info
         const record = createRecordDataMessage({ trackid, type })
 
-        await recordHandler(start1)
-        await recordHandler(end1)
+        await messageHandler(start1)
+        await messageHandler(end1)
 
-        await recordHandler(start2)
-        await recordHandler(record)
-        await recordHandler(end2)
+        await messageHandler(start2)
+        await messageHandler(record)
+        await messageHandler(end2)
 
         expect(store.registerFromActionInfo.calledOnce).to.be.true
         expect(
@@ -116,17 +117,17 @@ describe('contentscript helpers', () => {
       const record = createRecordDataMessage({ trackid, type })
 
       beforeEach(async () => {
-        await recordHandler(start)
+        await messageHandler(start)
       })
 
       afterEach(async () => {
-        await recordHandler(end)
+        await messageHandler(end)
       })
 
       it('should not call updateSidebar given store.registerFromActionInfo fails', async () => {
-        store.registerFromActionInfo.returns(false)
+        store.registerFromActionInfo.returns(new Promise((resolve) => resolve(false)))
 
-        await recordHandler(record)
+        await messageHandler(record)
 
         expect(updateSidebar.called).to.be.false
       })
@@ -137,9 +138,9 @@ describe('contentscript helpers', () => {
 
         controller.selection = div
 
-        store.registerFromActionInfo.returns(true)
+        store.registerFromActionInfo.returns(new Promise((resolve) => resolve(false)))
 
-        await recordHandler(record)
+        await messageHandler(record)
 
         expect(updateSidebar.called).to.be.false
       })
@@ -153,12 +154,12 @@ describe('contentscript helpers', () => {
         controller.selection = div
 
         store.get.withArgs('1').returns([actions[0].record])
-        store.registerFromActionInfo.returns(true)
+        store.registerFromActionInfo.returns(new Promise((resolve) => resolve(true)))
 
         const logSpy = sandbox.spy(console, 'log')
         updateSidebar.callsArgWith(1, response)
 
-        await recordHandler(record)
+        await messageHandler(record)
 
         expect(updateSidebar.calledOnce).to.be.true
         expect(
