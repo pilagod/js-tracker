@@ -1,8 +1,26 @@
 /// <reference path='../src/tracker/public/ActionStore.d.ts'/>
 
 import ActionType from '../src/tracker/public/ActionType'
-import { createAction } from './utils'
+import { hash } from '../src/tracker/public/utils'
 
+function createAction(
+  trackid: TrackID,
+  type: ActionType,
+  scriptUrl: string,
+  lineNumber: number,
+  columnNumber: number,
+  code: string,
+) {
+  const loc = { scriptUrl, lineNumber, columnNumber }
+
+  return {
+    info: <ActionInfo>{ trackid, type, loc },
+    record: <ActionRecord>{
+      key: hash(`${scriptUrl}:${lineNumber}:${columnNumber}`),
+      type, loc, code
+    }
+  }
+}
 // actions in js
 const actionsOfJS = ((urlOfJS) => [
   // action[0] `div.id = 'id'`
