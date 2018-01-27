@@ -93,6 +93,6 @@ export class TrackerMessageReceiver {
   }
 
   private messageHandler = (event: CustomEvent) => {
-    this.messages.push(event.detail.message)
+    this.messages.push(event.detail.record)
   }
 }
