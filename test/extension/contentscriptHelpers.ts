@@ -16,79 +16,173 @@ describe('contentscript helpers', () => {
     sandbox.reset()
   })
 
-  describe('actionHandler', () => {
+  describe('recordHandler', () => {
     const helpers = initContentscriptHelpers(store, updateSidebar)
-    const state = (<any>helpers).state
-    // @NOTE: actionHandler is an async function
-    const actionHandler = helpers.actionHandler
+    const controller = (<any>helpers).contentscriptController
+    const recordHandler = helpers.recordHandler // this is an async function
+
+    const createRecordDataMessage = (data: RecordData) => (<RecordDataMessage>{ state: 'record', data })
+    const createRecordWrapMessage = (loc: SourceLocation) => ({
+      start: <RecordWrapMessage>{ state: 'record_start', data: { loc } },
+      end: <RecordWrapMessage>{ state: 'record_end', data: { loc } }
+    })
 
     beforeEach(() => {
-      state.selection = null
+      controller.selection = null
     })
 
-    it('should call store.registerFromActionInfo with given info', async () => {
-      await actionHandler(actions[0].info)
+    describe('handle record message stream', () => {
+      it('should not call store.registerFromActionInfo given RecordWrapMessage', async () => {
+        const { start, end } = createRecordWrapMessage(actions[0].info.loc)
 
-      expect(
-        store.registerFromActionInfo
-          .calledWith(actions[0].info)
-      ).to.be.true
+        await recordHandler(start)
+        await recordHandler(end)
+
+        expect(store.registerFromActionInfo.called).to.be.false
+      })
+
+      it('should call store.registerFromActionInfo with data of RecordDataMessage combining data of the start RecordWrapMessage', async () => {
+        const { start, end } = createRecordWrapMessage(actions[0].info.loc)
+
+        const record1 = createRecordDataMessage({
+          trackid: actions[0].info.trackid,
+          type: actions[0].info.type
+        })
+        const record2 = createRecordDataMessage({
+          trackid: actions[1].info.trackid,
+          type: actions[1].info.type
+        })
+        await recordHandler(start)
+        await recordHandler(record1)
+        await recordHandler(record2)
+        await recordHandler(end)
+
+        expect(store.registerFromActionInfo.calledTwice).to.be.true
+        expect(
+          store.registerFromActionInfo.getCall(0)
+            .calledWith(actions[0].info)
+        ).to.be.true
+        expect(
+          store.registerFromActionInfo.getCall(1)
+            .calledWith(Object.assign({}, actions[1].info, { loc: actions[0].info.loc }))
+        ).to.be.true
+      })
+
+      it('should ignore any RecordWrapMessage which is not the matched end RecordWrapMessage of the first start RecordWrapMessage', async () => {
+        const { start: start1, end: end1 } = createRecordWrapMessage(actions[0].info.loc)
+        const { start: start2, end: end2 } = createRecordWrapMessage(actions[1].info.loc)
+
+        const { trackid, type } = actions[0].info
+        const record = createRecordDataMessage({ trackid, type })
+
+        await recordHandler(start1)
+        await recordHandler(start2)
+        await recordHandler(record)
+        await recordHandler(end2)
+        await recordHandler(end1)
+
+        expect(store.registerFromActionInfo.calledOnce).to.be.true
+        expect(
+          store.registerFromActionInfo
+            .calledWith(actions[0].info)
+        ).to.be.true
+      })
+
+      it('should clear start RecordWrapMessage given the matched end RecordWrapMessage comes', async () => {
+        const { start: start1, end: end1 } = createRecordWrapMessage(actions[0].info.loc)
+        const { start: start2, end: end2 } = createRecordWrapMessage(actions[1].info.loc)
+
+        const { trackid, type } = actions[0].info
+        const record = createRecordDataMessage({ trackid, type })
+
+        await recordHandler(start1)
+        await recordHandler(end1)
+
+        await recordHandler(start2)
+        await recordHandler(record)
+        await recordHandler(end2)
+
+        expect(store.registerFromActionInfo.calledOnce).to.be.true
+        expect(
+          store.registerFromActionInfo
+            .calledWith(Object.assign({}, actions[0].info, { loc: actions[1].info.loc }))
+        ).to.be.true
+      })
     })
 
-    it('should not call updateSidebar given store.registerFromActionInfo fails', async () => {
-      store.registerFromActionInfo.returns(false)
+    describe('update sidebar', () => {
+      const { start, end } = createRecordWrapMessage(actions[0].info.loc)
+      const { trackid, type } = actions[0].info
+      const record = createRecordDataMessage({ trackid, type })
 
-      await actionHandler(actions[0].info)
+      beforeEach(async () => {
+        await recordHandler(start)
+      })
 
-      expect(updateSidebar.called).to.be.false
-    })
+      afterEach(async () => {
+        await recordHandler(end)
+      })
 
-    it('should not call updateSidebar given info\'s trackid is different from state.selection\'s trackid', async () => {
-      state.selection = document.createElement('div')
-      state.selection.setAttribute('trackid', '2')
+      it('should not call updateSidebar given store.registerFromActionInfo fails', async () => {
+        store.registerFromActionInfo.returns(false)
 
-      store.registerFromActionInfo.returns(true)
+        await recordHandler(record)
 
-      await actionHandler(actions[0].info)
+        expect(updateSidebar.called).to.be.false
+      })
 
-      expect(updateSidebar.called).to.be.false
-    })
+      it('should not call updateSidebar given store.registerFromActionInfo succeeds but info\'s trackid is different from controller.selection\'s trackid', async () => {
+        const div = document.createElement('div')
+        div.setAttribute('trackid', '2')
 
-    it('should call updateSidebar with records got from store and false selectionChanged flag given store.registerFromActionInfo succeeds and info\'s trackid is same as state.selection\'s trackid', async () => {
-      const response = { status: 'OK', description: 'done' }
+        controller.selection = div
 
-      state.selection = document.createElement('div')
-      state.selection.setAttribute('trackid', '1')
+        store.registerFromActionInfo.returns(true)
 
-      store.get.withArgs('1').returns([actions[0].record])
-      store.registerFromActionInfo.returns(true)
+        await recordHandler(record)
 
-      updateSidebar.callsArgWith(1, response)
-      const logSpy = sandbox.spy(console, 'log')
+        expect(updateSidebar.called).to.be.false
+      })
 
-      await actionHandler(actions[0].info)
+      it('should call updateSidebar with records got from store and false selectionChanged flag given store.registerFromActionInfo succeeds and info\'s trackid is same as controller.selection\'s trackid', async () => {
+        const response = { status: 'OK', description: 'done' }
 
-      expect(
-        updateSidebar
-          .calledWith(<Message>{
-            records: [actions[0].record],
-            selectionChanged: false
-          })
-      ).to.be.true
-      expect(
-        logSpy
-          .calledWith('response:', response)
-      ).to.be.true
+        const div = document.createElement('div')
+        div.setAttribute('trackid', '1')
+
+        controller.selection = div
+
+        store.get.withArgs('1').returns([actions[0].record])
+        store.registerFromActionInfo.returns(true)
+
+        const logSpy = sandbox.spy(console, 'log')
+        updateSidebar.callsArgWith(1, response)
+
+        await recordHandler(record)
+
+        expect(updateSidebar.calledOnce).to.be.true
+        expect(
+          updateSidebar
+            .calledWith(<Message>{
+              records: [actions[0].record],
+              selectionChanged: false
+            })
+        ).to.be.true
+        expect(
+          logSpy
+            .calledWith('response:', response)
+        ).to.be.true
+      })
     })
   })
 
   describe('devtoolSelectionChangedHandler', () => {
     const helpers = initContentscriptHelpers(store, updateSidebar)
-    const state = (<any>helpers).state
+    const controller = (<any>helpers).contentscriptController
     const devtoolSelectionChangedHandler = helpers.devtoolSelectionChangedHandler
 
     beforeEach(() => {
-      state.selection = null
+      controller.selection = null
     })
 
     it('should call updateSidebar with empty records and true selectionChanged flag given state.selection is null', () => {
@@ -127,7 +221,7 @@ describe('contentscript helpers', () => {
 
       devtoolSelectionChangedHandler(div)
 
-      expect(state.selection).to.equal(div)
+      expect(controller.selection).to.equal(div)
       expect(
         updateSidebar
           .calledWith(<Message>{

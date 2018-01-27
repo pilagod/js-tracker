@@ -1,7 +1,87 @@
 /// <reference path='../tracker/public/ActionStore.d.ts'/>
+/// <reference path='../recordMessage.d.ts'/>
 /// <reference path='./background.d.ts'/>
 
 import { isTestEnv } from './utils'
+
+class ContentscriptController {
+  static SELECTION_IS_CHANGED = true
+  static SELECTION_IS_NOT_CHANGED = false
+
+  public selection: Element = null
+
+  private store: IActionStore
+  private updateSidebar: (message: Message, callback?: (response: any) => void) => void
+
+  constructor(
+    store: IActionStore,
+    updateSidebar: (message: Message, callback?: (response: any) => void) => void
+  ) {
+    this.store = store
+    this.updateSidebar = updateSidebar
+  }
+
+  /* public */
+
+  public recordHandler = (() => {
+    let flag: RecordWrapMessage = null
+
+    return async (record: RecordMessage) => {
+      switch (record.state) {
+        case 'record_start':
+          flag || (flag = record)
+          break
+
+        case 'record':
+          const success =
+            flag && this.store.registerFromActionInfo(Object.assign({}, record.data, flag.data))
+
+          if (success && !this.isSelectionChanged(record.data.trackid)) {
+            console.group('contentscript')
+            console.log('--- On Selected Element Updated ---')
+            console.log('selected:', this.selection)
+            console.log('------------------------------------')
+            console.groupEnd()
+
+            this.updateSidebar({
+              records: this.store.get(record.data.trackid),
+              selectionChanged: State.SELECTION_IS_NOT_CHANGED
+            }, responseLogger)
+          }
+          break
+
+        case 'record_end':
+          (flag.data.loc === record.data.loc) && (flag = null)
+          break
+      }
+    }
+  })()
+
+  public devtoolSelectionChangedHandler = (element: Element) => {
+    console.group('contentscript')
+    console.log('--- On Devtool Selection Changed ---')
+    console.log('selected:', element)
+    console.log('------------------------------------')
+    console.groupEnd()
+
+    this.selection = element
+
+    this.updateSidebar({
+      records: this.store.get(this.getTrackIDFromSelection()),
+      selectionChanged: State.SELECTION_IS_CHANGED
+    }, responseLogger)
+  }
+
+  /* private */
+
+  private isSelectionChanged(newID: TrackID): boolean {
+    return this.getTrackIDFromSelection() !== newID
+  }
+
+  private getTrackIDFromSelection(): TrackID {
+    return this.selection instanceof Element ? this.selection.getAttribute('trackid') : null
+  }
+}
 
 class State {
   static SELECTION_IS_CHANGED = true
@@ -18,7 +98,7 @@ class State {
   }
 }
 
-function makeActionHandler(
+function makeRecordHandler(
   state: State,
   store: IActionStore,
   updateSidebar: (message: Message, callback?: (response: any) => void) => void
@@ -83,13 +163,17 @@ export default function (
   store: IActionStore,
   updateSidebar: (message: Message, callback?: (response: any) => void) => void
 ) {
+  const contentscriptController = new ContentscriptController(store, updateSidebar)
   const state = new State()
   const helpers = {
-    actionHandler: makeActionHandler(state, store, updateSidebar),
-    devtoolSelectionChangedHandler: makeDevtoolSelectionChangedHandler(state, store, updateSidebar),
+    // recordHandler: makeRecordHandler(state, store, updateSidebar),
+    recordHandler: contentscriptController.recordHandler,
+    devtoolSelectionChangedHandler: contentscriptController.devtoolSelectionChangedHandler,
     injectScript
   }
-  isTestEnv() && Object.assign(helpers, { state })
-
+  if (isTestEnv()) {
+    Object.assign(helpers, { state })
+    Object.assign(helpers, { contentscriptController })
+  }
   return helpers
 }

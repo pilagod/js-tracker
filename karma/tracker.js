@@ -10,9 +10,7 @@ module.exports = configFactory(function (defaultConfig) {
       /* targets */
       { pattern: 'src/tracker/htmlDomApis.ts' },
       { pattern: 'src/tracker/htmlDomApiHelpers.ts' },
-      
       { pattern: 'src/tracker/private/*[!(.d)].ts' },
-      { pattern: 'src/tracker/private/checkers/*[!(.d)].ts' },
 
       /* dependencies */
       { pattern: 'src/tracker/utils.ts' },
@@ -27,9 +25,7 @@ module.exports = configFactory(function (defaultConfig) {
       /* targets */
       'src/tracker/htmlDomApis.ts': ['karma-typescript', 'coverage'],
       'src/tracker/htmlDomApiHelpers.ts': ['karma-typescript', 'coverage'],
-      
       'src/tracker/private/*[!(.d)].ts': ['karma-typescript', 'coverage'],
-      'src/tracker/private/checkers/*[!(.d)].ts': ['karma-typescript', 'coverage'],
 
       /* dependencies */
       'src/tracker/utils.ts': ['karma-typescript'],

@@ -10,19 +10,19 @@ import { isTestEnv } from './utils'
 
 function main(
   helpers: {
-    actionHandler: (info: ActionInfo) => void,
+    recordHandler: (record: RecordMessage) => void,
     devtoolSelectionChangedHandler: (element: Element) => void,
     injectScript: (container: Node, scriptText: string) => void
   }
 ) {
-  listenToAction(helpers.actionHandler)
+  listenToAction(helpers.recordHandler)
   listenToDevtoolSelectionChanged(helpers.devtoolSelectionChangedHandler)
   injectTrackerScript(helpers.injectScript)
 }
 
-function listenToAction(actionHandler: (info: ActionInfo) => void) {
+function listenToAction(recordHandler: (record: RecordMessage) => void) {
   window.addEventListener('js-tracker', (event: CustomEvent) => {
-    actionHandler(<ActionInfo>event.detail.info)
+    recordHandler(<RecordMessage>event.detail.record)
   })
 }
 

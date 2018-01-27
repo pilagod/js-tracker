@@ -91,14 +91,6 @@ function makeUpdateSelection(inspectedWindow: typeof chrome.devtools.inspectedWi
   )
 }
 
-function makePackFilesHandler(packFileToDist: (path: string, distname: string) => void) {
-  return (files: { path: string, distname: string }[]) => {
-    files.map((file) => {
-      packFileToDist(file.path, file.distname)
-    })
-  }
-}
-
 export default function (
   devtools: typeof chrome.devtools,
   renderSidebar: (container: Element, props: ISidebarRootProps) => void

@@ -1,6 +1,14 @@
 /// <reference path='./private/ActionMap.d.ts'/>
 /// <reference path='./htmlDomApis.d.ts'/> 
 
+type RecordInfo = {
+  caller: ActionTarget,
+  target: Target,
+  action: Action,
+  args?: any[],
+  merge?: string
+}
+
 type Decorator = (
   target: Target,
   action: Action,

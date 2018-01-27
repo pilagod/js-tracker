@@ -9,7 +9,7 @@ import contentscript from '../../src/extension/contentscript'
 
 describe('contentscript', () => {
   const helpers = {
-    actionHandler: sinon.spy(),
+    recordHandler: sinon.spy(),
     devtoolSelectionChangedHandler: sinon.spy(),
     injectScript: sinon.spy()
   }
@@ -18,20 +18,40 @@ describe('contentscript', () => {
   })
 
   describe('listen on action', () => {
-    const { actionHandler } = helpers
-
-    it('should handle \'js-tracker\' CustomEvent and call helpers.actionHandler with event.detail.info', () => {
+    const { recordHandler } = helpers
+    const dispatch = (record: RecordMessage) => {
       window.dispatchEvent(
         new CustomEvent('js-tracker', {
-          detail: {
-            info: actions[0].info
-          }
+          detail: { record }
         })
       )
-      expect(actionHandler.calledOnce).to.be.true
+    }
+    it('should handle \'js-tracker\' CustomEvent and call helpers.recordHandler with event.detail.record', () => {
+      const start: RecordWrapMessage = { state: 'record_start', data: { loc: actions[0].info.loc } }
+      const end: RecordWrapMessage = { state: 'record_end', data: { loc: actions[0].info.loc } }
+      const record: RecordDataMessage = {
+        state: 'record',
+        data: {
+          trackid: actions[0].info.trackid,
+          type: actions[0].info.type
+        }
+      }
+      dispatch(start)
+      dispatch(record)
+      dispatch(end)
+
+      expect(recordHandler.calledThrice).to.be.true
       expect(
-        actionHandler
-          .calledWith(actions[0].info)
+        recordHandler.getCall(0)
+          .calledWith(start)
+      ).to.be.true
+      expect(
+        recordHandler.getCall(1)
+          .calledWith(record)
+      ).to.be.true
+      expect(
+        recordHandler.getCall(2)
+          .calledWith(end)
       ).to.be.true
     })
   })
