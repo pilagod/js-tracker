@@ -31,6 +31,9 @@ export function getOwnerOf(target: ActionTarget) {
 }
 
 export class TrackerMessageReceiver {
+  // @NOTE: TrackerMessageReceiver is just a message queue,
+  // reset should be called after calling each tracked action
+
   private sender: EventTarget
   private messages: RecordMessage[]
 
@@ -62,16 +65,9 @@ export class TrackerMessageReceiver {
     })
   }
 
-  public verifyOnlyWrapMessageStream(loc: SourceLocation) {
-    this.verifyMessageWrap(loc)
-
+  public verifyNoRecordMessageStream() {
     const records = this.messages.filter(({ state }) => state === 'record')
-
     expect(records).to.have.length(0)
-  }
-
-  public verifyEmptyMessageStream() {
-    expect(this.messages).to.have.length(0)
   }
 
   /* private */

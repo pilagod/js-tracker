@@ -3,6 +3,8 @@ import { expect } from 'chai'
 import ActionType from '../../../src/tracker/public/ActionType'
 import * as utils from './utils'
 
+/* this test is based on dom tracker initialized in__init__.ts */
+
 describe('HTML DOM API tracker', () => {
   const receiver = new utils.TrackerMessageReceiver(window)
 
@@ -46,7 +48,7 @@ describe('HTML DOM API tracker', () => {
       fragment.appendChild(div)
       const loc = utils.getPrevLineSourceLocation()
 
-      receiver.verifyOnlyWrapMessageStream(loc)
+      receiver.verifyNoRecordMessageStream()
     })
 
     it('should track other element appending a fragment', () => {
@@ -200,7 +202,7 @@ describe('HTML DOM API tracker', () => {
         receiver.verifyMessageStream(loc, record)
       })
 
-      it('should track setAttributeNode{NS} (error scenario)', () => {
+      it('should not track setAttributeNode{NS} (error scenario)', () => {
         const div = document.createElement('div')
         const div2 = document.createElement('div')
 
@@ -211,7 +213,7 @@ describe('HTML DOM API tracker', () => {
         const loc = utils.getPrevLineSourceLocation()
 
         expect(error).to.throw()
-        receiver.verifyOnlyWrapMessageStream(loc)
+        receiver.verifyNoRecordMessageStream()
       })
     })
   })

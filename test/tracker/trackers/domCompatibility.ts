@@ -1,5 +1,7 @@
 import { expect } from 'chai'
 
+/* this test is based on dom tracker initialized in__init__.ts */
+
 describe('tracker\'s compatibility with html dom api', () => {
 
   describe('Window', () => {
