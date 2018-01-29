@@ -169,6 +169,7 @@ button {
 
 .record {
     border-radius: 5px;
+    overflow-wrap: break-word;
     padding: 5px;
 }
 
@@ -212,12 +213,6 @@ button {
     border-radius: 3px;
     margin-right: 2px;
     padding: 2px 0;
-}
-
-/* record info */
-
-.record > .info {
-    overflow-wrap: break-word;
 }
 
 /* record link */
