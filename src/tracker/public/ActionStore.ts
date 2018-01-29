@@ -144,7 +144,8 @@ class ScriptCache {
     return this.isHTML(source) ? this.refineHTMLTags(source) : source
   }
   private isHTML(source: string): boolean {
-    return /^(<!DOCTYPE (HTML|html)[\s\S]*?>[\s]*)??<html[\s\S]*?>/.test(source)
+    // @NOTE: http://www.flycan.com/article/css/html-doctype-97.html
+    return /^(<!DOCTYPE HTML[\s\S]*?>[\s]*)??<html[\s\S]*?>/i.test(source)
   }
 
   private refineHTMLTags(source: string): string {
@@ -156,7 +157,7 @@ class ScriptCache {
     return ('/*' + this.refineComments(source) + '*/')
       // match only <script ...> and <script ... type="text/javascript" ...>
       // refine <script> ... </script> to <script>*/ ... /*</script>
-      .replace(/(<script(?:[\s\S](?:(?!type=)|(?=type="text\/javascript)))*?>)([\s\S]*?)(<\/script>)/gi, '$1*/$2/*$3')
+      .replace(/(<script(?:[\s\S](?:(?!type=)|(?=type=['"]text\/javascript['"])))*?>)([\s\S]*?)(<\/script>)/gi, '$1*/$2/*$3')
   }
 
   private refineComments(source: string) {
@@ -178,7 +179,7 @@ class ScriptCache {
   }
 
   private indexRangeOfValidScripts(source: string): [number, number][] {
-    return this.indexRangeOf(source, /<script([\s\S]((?!type=)|(?=type="text\/javascript)))*?>[\s\S]*?<\/script>/gi)
+    return this.indexRangeOf(source, /<script([\s\S]((?!type=)|(?=type=['"]text\/javascript['"])))*?>[\s\S]*?<\/script>/gi)
   }
 
   private indexRangeOf(source: string, regexp: RegExp): [number, number][] {
