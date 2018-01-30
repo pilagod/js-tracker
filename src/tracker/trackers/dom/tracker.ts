@@ -5,7 +5,7 @@ import Anomalies from '../../private/Anomalies'
 import OwnerManager from '../../private/OwnerManager'
 import ShadowElement from '../../private/ShadowElement'
 
-import { decorators } from './trackerHelpers'
+import { Decorator, decorators } from './trackerHelpers'
 
 export default function main() {
   setupShadowElement()
@@ -52,11 +52,7 @@ function trackTemplate(
   template: {
     target: Target,
     action: Action,
-    decorator: (
-      target: Target,
-      action: Action,
-      actionFunc: (this: ActionTarget, ...args: any[]) => any
-    ) => (this: ActionTarget, ...args: any[]) => any,
+    decorator: Decorator,
     getter?: boolean
   }
 ) {

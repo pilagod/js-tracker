@@ -19,7 +19,7 @@ type RecordInfo = {
   merge?: string
 }
 
-type Decorator = (
+export type Decorator = (
   target: Target,
   action: Action,
   actionFunc: (this: ActionTarget, ...args: any[]) => any
