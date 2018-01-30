@@ -1,6 +1,4 @@
-/// <reference path='./ActionType.d.ts'/>
-
-type TrackID = string
+// ActionInfo -> ActionStore -> ActionRecord
 
 type ActionInfo = {
   trackid: TrackID,
@@ -9,17 +7,19 @@ type ActionInfo = {
   merge?: TrackID,
 }
 
-type SourceLocation = {
-  scriptUrl: string;
-  lineNumber: number;
-  columnNumber: number;
-}
-
 type ActionRecord = {
   key: string;
   type: ActionType;
   loc: SourceLocation;
   code: string;
+}
+
+type TrackID = string
+
+type SourceLocation = {
+  scriptUrl: string;
+  lineNumber: number;
+  columnNumber: number;
 }
 
 interface IActionStore {

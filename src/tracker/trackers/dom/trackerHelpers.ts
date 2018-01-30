@@ -1,5 +1,4 @@
-/// <reference path='./tracker.d.ts'/>
-/// <reference path='./trackerHelpers.d.ts'/>
+/// <reference path='../../types/ActionTarget.d.ts'/>
 
 import ActionMap from '../../private/ActionMap'
 import OwnerManager from '../../private/OwnerManager'
@@ -11,6 +10,20 @@ import {
 } from '../../private/NativeUtils'
 import { SymbolProxy, SymbolWhich } from '../../private/Symbols'
 import { recordWrapper } from '../utils'
+
+type RecordInfo = {
+  caller: ActionTarget,
+  target: Target,
+  action: Action,
+  args?: any[],
+  merge?: string
+}
+
+type Decorator = (
+  target: Target,
+  action: Action,
+  actionFunc: (this: ActionTarget, ...args: any[]) => any
+) => (this: ActionTarget, ...args: any[]) => any
 
 export const decorators: { [name: string]: Decorator } = {
   general: (target, action, actionFunc) => {

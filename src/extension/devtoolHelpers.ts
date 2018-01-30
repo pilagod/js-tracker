@@ -1,5 +1,5 @@
-/// <reference path='../tracker/public/ActionStore.d.ts'/>
-/// <reference path='./devtool.d.ts'/>
+/// <reference path='../tracker/types/ActionStore.d.ts'/>
+/// <reference path='./types/DevtoolHelpers.d.ts'/>
 
 import { ISidebarRootProps } from '../extension/Sidebar/SidebarRoot'
 import { isTestEnv } from './utils'
@@ -93,7 +93,7 @@ function makeUpdateSelection(inspectedWindow: typeof chrome.devtools.inspectedWi
 export default function (
   devtools: typeof chrome.devtools,
   renderSidebar: (container: Element, props: ISidebarRootProps) => void
-) {
+): DevtoolHelpers {
   const sidebarController = new SidebarController(devtools.panels, renderSidebar)
   const updateSelection = makeUpdateSelection(devtools.inspectedWindow)
   const helpers: DevtoolHelpers = {

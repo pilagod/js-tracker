@@ -1,8 +1,6 @@
-/// <reference path='./ActionTagMap.d.ts'/>
-
 import { SymbolWhich } from './Symbols'
 
-const ActionTagMap: object = {
+const ActionTagMap = {
   'Element': {
     // general
     'removeAttribute': ['#arg', '0'],
@@ -35,8 +33,17 @@ const ActionTagMap: object = {
     'setNamedItemNS': ['#arg', '0', 'name'],
   }
 }
-const _: IActionTagMap = {
-  fetchActionTag({ caller, target, action, args = [] }) {
+
+type ActionTag = string | null
+type ActionTags = ActionTag[]
+
+const IActionTagMap = {
+  fetchActionTag({ caller, target, action, args = [] }: {
+    caller: ActionTarget,
+    target: Target,
+    action: Action,
+    args?: any[]
+  }): ActionTag {
     if (this.has(target, action)) {
       const tags = <ActionTags>ActionTagMap[target][action]
 
@@ -52,8 +59,8 @@ const _: IActionTagMap = {
     return null
   },
 
-  has(target, action) {
+  has(target: Target, action: Action): boolean {
     return !!(ActionTagMap[target] && ActionTagMap[target][action])
-  },
+  }
 }
-export default _
+export default IActionTagMap

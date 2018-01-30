@@ -1,5 +1,3 @@
-/// <reference path='./Anomalies.d.ts'/>
-
 const Anomalies = {
   'HTMLElement': {
     'dataset': true,
@@ -20,9 +18,9 @@ const Anomalies = {
     'setNamedItemNS': true
   }
 }
-const _: IAnomalies = {
-  has(target, action) {
+const IAnomalies = {
+  has(target: Target, action: Action): boolean {
     return !!(Anomalies[target] && Anomalies[target][action])
   }
 }
-export default _
+export default IAnomalies

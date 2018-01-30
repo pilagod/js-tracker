@@ -1,4 +1,4 @@
-/// <reference path='../../../src/tracker/public/ActionStore.d.ts'/> 
+/// <reference path='../../../src/tracker/types/ActionStore.d.ts'/> 
 
 import { expect } from 'chai'
 import * as React from 'react'

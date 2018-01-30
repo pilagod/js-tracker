@@ -1,4 +1,4 @@
-/// <reference path='../../tracker/public/ActionType.d.ts'/>
+/// <reference path='../../tracker/types/ActionType.d.ts'/>
 
 import * as React from 'react'
 

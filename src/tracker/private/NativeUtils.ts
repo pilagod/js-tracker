@@ -1,10 +1,8 @@
-/// <reference path='../../extension/RecordMessage.d.ts'/>
+/// <reference path='../types/RecordMessage.d.ts'/>
 
 import TrackIDFactory from './TrackIDFactory'
 
-/**
- * A series of actions bypass tracker's record process
- */
+// A series of actions bypass tracker's record process
 
 export const attachAttr = ((setAttributeNode) => {
   return function (container: Element, attr: Attr) {

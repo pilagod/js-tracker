@@ -1,5 +1,5 @@
 /// <reference path='../../node_modules/@types/chrome/index.d.ts'/>
-/// <reference path='./devtool.d.ts'/>
+/// <reference path='./types/DevtoolHelpers.d.ts'/>
 
 import initDevtoolHelpers from './devtoolHelpers'
 import { isTestEnv } from './utils'

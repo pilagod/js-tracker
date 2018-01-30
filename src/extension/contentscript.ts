@@ -1,5 +1,5 @@
 /// <reference path='../../node_modules/@types/chrome/index.d.ts' />
-/// <reference path='./contentscript.d.ts'/>
+/// <reference path='./types/ContentscriptHelpers.d.ts'/>
 
 import * as fs from 'fs'
 
@@ -8,13 +8,7 @@ import ActionStore from '../tracker/public/ActionStore'
 import initContentscriptHelpers from './contentscriptHelpers'
 import { isTestEnv } from './utils'
 
-function main(
-  helpers: {
-    messageHandler: (message: RecordMessage) => void,
-    devtoolSelectionChangedHandler: (element: Element) => void,
-    injectScript: (container: Node, scriptText: string) => void
-  }
-) {
+function main(helpers: ContentscriptHelpers) {
   listenToRecordMessage(helpers.messageHandler)
   listenToDevtoolSelectionChanged(helpers.devtoolSelectionChangedHandler)
   injectTrackerScript(helpers.injectScript)

@@ -1,9 +1,5 @@
 class TrackIDFactory {
-  private trackid
-
-  constructor() {
-    this.trackid = 0
-  }
+  private trackid = 0
 
   /* private */
 

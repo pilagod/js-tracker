@@ -1,4 +1,4 @@
-/// <reference path='./ActionStore.d.ts'/>
+/// <reference path='../types/ActionStore.d.ts'/>
 
 import * as ESTree from '../../../node_modules/@types/estree'
 import * as esprima from 'esprima'

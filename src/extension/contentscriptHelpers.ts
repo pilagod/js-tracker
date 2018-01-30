@@ -1,6 +1,7 @@
-/// <reference path='../tracker/public/ActionStore.d.ts'/>
-/// <reference path='./RecordMessage.d.ts'/>
-/// <reference path='./Message.d.ts'/>
+/// <reference path='../tracker/types/ActionStore.d.ts'/>
+/// <reference path='../tracker/types/RecordMessage.d.ts'/>
+/// <reference path='./types/ContentscriptHelpers.d.ts'/>
+/// <reference path='./types/Message.d.ts'/>
 
 import { isTestEnv } from './utils'
 
@@ -121,7 +122,7 @@ function injectScript(container: Node, scriptText: string) {
 export default function (
   store: IActionStore,
   updateSidebar: (message: Message, callback?: (response: any) => void) => void
-) {
+): ContentscriptHelpers {
   const contentscriptController = new ContentscriptController(store, updateSidebar)
   const helpers = {
     messageHandler: contentscriptController.messageHandler,

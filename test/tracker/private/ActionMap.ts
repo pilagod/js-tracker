@@ -221,7 +221,7 @@ describe('ActionMap', () => {
     })
 
     it('should return false given invalid target', () => {
-      expect(ActionMap.has('InvalidTarget', 'InvalidAction')).to.be.false
+      expect(ActionMap.has(<any>'InvalidTarget', 'InvalidAction')).to.be.false
     })
   })
 
