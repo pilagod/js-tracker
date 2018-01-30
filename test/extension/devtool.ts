@@ -1,5 +1,3 @@
-/// <reference path='../../src/extension/devtool.d.ts'/>
-
 import { expect } from 'chai'
 import * as sinon from 'sinon'
 
@@ -25,7 +23,7 @@ describe('devtool', () => {
       connect: sandbox.stub().returns(background)
     }
   }
-  const helpers: DevtoolHelpers = {
+  const helpers = {
     backgroundMessageHandler: sandbox.spy(),
     selectionChangedHandler: sandbox.spy(),
     sidebarInitHandler: sandbox.spy()

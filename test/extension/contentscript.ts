@@ -11,6 +11,7 @@ describe('contentscript', () => {
     devtoolSelectionChangedHandler: sinon.spy(),
     injectScript: sinon.spy()
   }
+
   before(() => {
     contentscript(helpers)
   })
