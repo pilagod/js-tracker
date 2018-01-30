@@ -7,9 +7,5 @@
         "removeComments": true,
         "sourceMap": true,
         "target": "es6"
-    },
-    "include": [
-        "src/**/*.ts",
-        "test/**/*.ts"
-    ]
+    }
 }

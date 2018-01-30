@@ -1,17 +1,14 @@
 {
   "name": "js-tracker",
-  "version": "2.1.3",
-  "description": "A chrome extension tracks front-end JavaScript using DOM or jQuery APIs to manipulate html dom elements at runtime.",
-  "main": "index.js",
+  "version": "3.0.0",
+  "description": "A chrome extension tracks front-end JavaScript that uses DOM / jQuery APIs to manipulate html dom elements at runtime.",
   "scripts": {
     "test": "karma start ./karma/tracker.js --single-run & karma start ./karma/modules.js --single-run & karma start ./karma/extension.js --single-run",
     "test-tracker": "karma start ./karma/tracker.js",
     "test-modules": "karma start ./karma/modules.js",
     "test-extension": "karma start ./karma/extension.js",
-    "build": "node webpack/compiler.js && find ./dist -name StaticFilesPacker.* -exec rm -f {} \\;",
-    "watch": "webpack --watch",
-    "dev": "webpack-dev-server --port 3000",
-    "deploy": "rm ~/Desktop/JS-Tracker.zip & zip -r ~/Desktop/JS-Tracker.zip manifest.json assets/ background.js devtools.* contentscript-dist.js"
+    "build": "node webpack/compiler.js && rm ./dist/tracker.js ./dist/StaticFilesPacker.js",
+    "deploy": "rm ~/Desktop/JS-Tracker.zip & zip ~/Desktop/JS-Tracker.zip manifest.json assets/* dist/*"
   },
   "repository": {
     "type": "git",
@@ -20,14 +17,15 @@
   "keywords": [
     "chrome",
     "extension",
+    "track",
+    "debug",
     "web",
-    "html",
-    "css",
+    "front-end",
     "javascript",
     "dom",
     "jquery",
     "manipulation",
-    "debug"
+    "api"
   ],
   "author": "pilagod <pilagooood@gmail.com>",
   "license": "MIT",
@@ -45,60 +43,29 @@
     "@types/sinon": "^2.3.3",
     "@types/stacktrace-js": "0.0.32",
     "awesome-typescript-loader": "^3.1.2",
-    "babel-preset-es2015": "^6.9.0",
-    "babel-preset-stage-3": "^6.24.1",
-    "babelify": "^7.3.0",
     "brfs": "^1.4.3",
-    "browserify": "^13.3.0",
     "chai": "^3.5.0",
-    "diff-dom": "^2.1.0",
-    "es6-promise": "^3.3.1",
     "escodegen": "^1.9.0",
     "esprima": "^4.0.0",
     "file-loader": "^0.11.2",
-    "isomorphic-fetch": "^2.2.1",
     "istanbul": "^0.4.5",
     "jquery": "^3.3.1",
     "karma": "^1.6.0",
-    "karma-browserify": "^5.1.0",
     "karma-chrome-launcher": "^2.0.0",
-    "karma-clear-screen-reporter": "^1.0.0",
     "karma-cli": "^1.0.1",
     "karma-coverage": "^1.1.1",
     "karma-mocha": "^1.1.1",
     "karma-mocha-reporter": "^2.1.0",
     "karma-source-map-support": "^1.2.0",
     "karma-typescript": "^3.0.9",
-    "karma-typescript-es6-transform": "^1.0.0",
     "mocha": "^3.0.2",
     "react": "^15.6.1",
     "react-dom": "^15.6.1",
     "sinon": "^2.4.1",
-    "stackframe": "^1.0.3",
+    "stackframe": "^1.0.4",
     "stacktrace-js": "^2.0.0",
     "transform-loader": "^0.2.4",
     "typescript": "^2.6.2",
-    "watchify": "^3.9.0",
-    "webpack": "^3.3.0",
-    "webpack-dev-server": "^2.5.1"
-  },
-  "browserify": {
-    "options": {
-      "browserifyOptions": {
-        "debug": true
-      }
-    },
-    "transform": [
-      [
-        "babelify",
-        {
-          "presets": [
-            "es2015",
-            "stage-3"
-          ]
-        }
-      ],
-      "brfs"
-    ]
+    "webpack": "^3.3.0"
   }
 }

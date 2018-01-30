@@ -5,7 +5,6 @@ module.exports = {
     path: path.join(__dirname, '..', 'dist'),
     filename: '[name].js'
   },
-  devtool: 'source-map',
   resolve: {
     extensions: ['*', '.ts', '.tsx', '.js', '.jsx']
   },
