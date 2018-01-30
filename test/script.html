@@ -17,17 +17,19 @@
     </script>
 
     <script some='property' type='text/javascript'>
-        /* comment in type='text/javascript' (single quote) should be parsed correctly */
+        /* script of type='text/javascript' (single quote) should be parsed correctly */
         div.innerText = 'js-tracker'
     </script>
 
     <script some='property' type="text/javascript">
-        /* comment in type="text/javascript" (double quote) should be parsed correctly */
+        /* script of type="text/javascript" (double quote) should be parsed correctly */
         div.addEventListener('click', function () {
             console.log('clicked')
         })
     </script>
 
+    <script></script><script></script><script></script><script></script><script></script><script>/* one line (minified) html offset test */ div.id = 'id'</script>
+    
     <script some='property' type="text/custom">
         /* comment in non-target script block will make esprima broken  */
         should not include this

@@ -156,8 +156,12 @@ class ScriptCache {
     // source code we fetched here.
     return ('/*' + this.refineComments(source) + '*/')
       // match only <script ...> and <script ... type="text/javascript" ...>
-      // refine <script> ... </script> to <script>*/ ... /*</script>
-      .replace(/(<script(?:[\s\S](?:(?!type=)|(?=type=['"]text\/javascript['"])))*?>)([\s\S]*?)(<\/script>)/gi, '$1*/$2/*$3')
+      .replace(/(<script(?:[\s\S](?:(?!type=)|(?=type=['"]text\/javascript['"])))*?>)([\s\S]*?)(<\/script>)/gi, (_, p1, p2, p3) => {
+        // @NOTE: for those minified (a.k.a one line) html, directly change 
+        // <script> ... </script> to <script>*/ ... /*</script> will cause 
+        // the parsed code to shift count of characters of new added comments 
+        return `${p1.slice(0, -2)}*/${p2}/*${p3.slice(2)}`
+      })
   }
 
   private refineComments(source: string) {

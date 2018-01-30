@@ -24,20 +24,18 @@ describe('ActionStore', () => {
 
   describe('registerFromActionInfo', () => {
     describe('correctness of parsing record info', () => {
-      async function parse(index: number, action: { info: ActionInfo, record: ActionRecord }) {
+      async function parse(index: number, info: ActionInfo) {
         await actionStore.registerFromActionInfo(
-          Object.assign({}, action.info, {
-            trackid: index
-          })
+          Object.assign({}, info, { trackid: index })
         )
       }
       it('should parse action info correctly given javascript source', async () => {
         return Promise.all([
-          parse(0, actionsOfJS[0]),
-          parse(1, actionsOfJS[1]),
-          parse(2, actionsOfJS[2]),
-          parse(3, actionsOfJS[3]),
-          parse(4, actionsOfJS[4]),
+          parse(0, actionsOfJS[0].info),
+          parse(1, actionsOfJS[1].info),
+          parse(2, actionsOfJS[2].info),
+          parse(3, actionsOfJS[3].info),
+          parse(4, actionsOfJS[4].info),
         ]).then(() => {
           expect(actionStore.get('0')).to.deep.equal([actionsOfJS[0].record])
           expect(actionStore.get('1')).to.deep.equal([actionsOfJS[1].record])
@@ -49,11 +47,13 @@ describe('ActionStore', () => {
 
       it('should parse action info correctly given html source', async () => {
         return Promise.all([
-          parse(0, actionsOfHTML[0]),
-          parse(1, actionsOfHTML[1]),
+          parse(0, actionsOfHTML[0].info),
+          parse(1, actionsOfHTML[1].info),
+          parse(2, actionsOfHTML[2].info),
         ]).then(() => {
           expect(actionStore.get('0')).to.deep.equal([actionsOfHTML[0].record])
           expect(actionStore.get('1')).to.deep.equal([actionsOfHTML[1].record])
+          expect(actionStore.get('2')).to.deep.equal([actionsOfHTML[2].record])
         })
       })
 
@@ -61,7 +61,7 @@ describe('ActionStore', () => {
         return Promise.all((() => {
           const result = []
           for (let i = 0; i < 3; i++) {
-            result.push(parse(5, actionsOfJS[5]))
+            result.push(parse(5, actionsOfJS[5].info))
           }
           return result
         })()).then(() => {
@@ -70,13 +70,13 @@ describe('ActionStore', () => {
       })
 
       it('should parse repeated action info at different time correctly', async () => {
-        await parse(5, actionsOfJS[5])
+        await parse(5, actionsOfJS[5].info)
         expect(actionStore.get('5')).to.deep.equal([actionsOfJS[5].record])
 
-        await parse(5, actionsOfJS[5])
+        await parse(5, actionsOfJS[5].info)
         expect(actionStore.get('5')).to.deep.equal([actionsOfJS[5].record])
 
-        await parse(5, actionsOfJS[5])
+        await parse(5, actionsOfJS[5].info)
         expect(actionStore.get('5')).to.deep.equal([actionsOfJS[5].record])
       })
     })
