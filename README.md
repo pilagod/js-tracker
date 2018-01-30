@@ -1,7 +1,15 @@
-JavaScript Tracker [![Build Status](https://travis-ci.org/pilagod/js-tracker.svg?branch=master)](https://travis-ci.org/pilagod/js-tracker) [![Test coverage](https://img.shields.io/badge/coverage-100%25-brightgreen.svg)](https://travis-ci.org/pilagod/js-tracker#L1395)
+JavaScript Tracker [![Build Status](https://travis-ci.org/pilagod/js-tracker.svg?branch=master)](https://travis-ci.org/pilagod/js-tracker)
 ==================
 
 A chrome extension tracks front-end JavaScript which using DOM or jQuery APIs to manipulate html dom elements (e.g., change style, attach event listener) on web page at runtime.
+
+## Features
+
+* **Live Tracking**, what changes you see on page is what code you get.
+* **Code by Elements**, only listing the code that affects selected element.
+* **Brief Overview**, getting rough code information at a glance.
+* **Easy Filtering**, grouping manipulations into 5 types.
+* **Link to Source**, one click to see all details.
 
 ## Demo
 
@@ -21,11 +29,9 @@ Add JavaScript Tracker to your Google Chrome from [Chrome Web Store](https://goo
 
 4. Open Elements panel in Chrome DevTools and select the button
 
-5. Check the sidebar pane "JS Tracker" to see information about only those JavaScript code manipulating the button
+5. Check the sidebar pane "JS-Tracker" to see information about those JavaScript code manipulating the button
 
 There are also many cool websites built with jQuery in [Best jQuery Websites](http://www.awwwards.com/websites/jquery/), you can try it out there : )
-
-**NOTE:** Updating information in sidebar pane "JS Tracker" is triggered by selection change among elements in Elements panel, thus it needs to re-select the element to see any new  updates.  
 
 ## Contribution
 
