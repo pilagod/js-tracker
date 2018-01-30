@@ -6,7 +6,8 @@ module.exports = configFactory(function (defaultConfig) {
 
     proxies: {
       '/script.js': `/base/test/script.js`,
-      '/script.html': `/base/test/script.html`
+      '/script.html': `/base/test/script.html`,
+      '/script.min.html': `/base/test/script.min.html`
     },
     // list of files / patterns to load in the browser
     // all modules including in tests should be included here
@@ -26,6 +27,7 @@ module.exports = configFactory(function (defaultConfig) {
       /* static */
       { pattern: 'test/script.js', served: true, included: false },
       { pattern: 'test/script.html', served: true, included: false },
+      { pattern: 'test/script.min.html', served: true, included: false },
 
       /* tests */
       { pattern: 'test/*.ts' },

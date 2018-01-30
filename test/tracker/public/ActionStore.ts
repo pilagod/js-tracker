@@ -4,7 +4,11 @@ import * as sinon from 'sinon'
 import ActionStore from '../../../src/tracker/public/ActionStore'
 import ActionType from '../../../src/tracker/public/ActionType'
 
-import { actionsOfJS, actionsOfHTML } from '../../actions'
+import {
+  actionsOfJS,
+  actionsOfHTML,
+  actionsOfMinHTML
+} from '../../actions'
 
 describe('ActionStore', () => {
   let actionStore: IActionStore
@@ -49,11 +53,17 @@ describe('ActionStore', () => {
         return Promise.all([
           parse(0, actionsOfHTML[0].info),
           parse(1, actionsOfHTML[1].info),
-          parse(2, actionsOfHTML[2].info),
         ]).then(() => {
           expect(actionStore.get('0')).to.deep.equal([actionsOfHTML[0].record])
           expect(actionStore.get('1')).to.deep.equal([actionsOfHTML[1].record])
-          expect(actionStore.get('2')).to.deep.equal([actionsOfHTML[2].record])
+        })
+      })
+
+      it('should parse action info correctly given minified html source', async () => {
+        return Promise.all([
+          parse(0, actionsOfMinHTML[0].info),
+        ]).then(() => {
+          expect(actionStore.get('0')).to.deep.equal([actionsOfMinHTML[0].record])
         })
       })
 

@@ -149,22 +149,13 @@ class ScriptCache {
   }
 
   private refineHTMLTags(source: string): string {
-    // @NOTE: commenting out html tags instead of removing is
-    // because removing html part will cause code location
-    // (line and column) to change, and this will bring 
-    // inconsistency of code location between stack trace and 
-    // source code we fetched here.
-    return ('/*' + this.refineComments(source) + '*/')
-      // match only <script ...> and <script ... type="text/javascript" ...>
-      .replace(/(<script(?:[\s\S](?:(?!type=)|(?=type=['"]text\/javascript['"])))*?>)([\s\S]*?)(<\/script>)/gi, (_, p1, p2, p3) => {
-        // @NOTE: for those minified (a.k.a one line) html, directly change 
-        // <script> ... </script> to <script>*/ ... /*</script> will cause 
-        // the parsed code to shift count of characters of new added comments 
-        return `${p1.slice(0, -2)}*/${p2}/*${p3.slice(2)}`
-      })
+    const trimmedSource = this.trimHtmlTags(this.trimComments(source))
+    // @NOTE: add open/close comments around whole html source,
+    // use slice to avoid code shifting in final parsed source
+    return `/*${trimmedSource.slice(2, -2)}*/`
   }
 
-  private refineComments(source: string) {
+  private trimComments(source: string) {
     const rangeOfBlockComments = this.indexRangeOfBlockComments(source)
     const rangeOfValidScripts = this.indexRangeOfValidScripts(source)
     const rangeOfBlockCommentsNotInScript = rangeOfBlockComments.filter(([commentStart, commentEnd]) => {
@@ -173,7 +164,7 @@ class ScriptCache {
       }, false)
     })
     return rangeOfBlockCommentsNotInScript.reduce((source, [commentStart, commentEnd]) => {
-      // refine /* ... */ to ** ... **
+      // change /* ... */ to ** ... **
       return source.slice(0, commentStart) + '*' + source.slice(commentStart + 1, commentEnd) + '*' + source.slice(commentEnd + 1)
     }, source)
   }
@@ -195,6 +186,20 @@ class ScriptCache {
       result.push([match.index, regexp.lastIndex - 1])
     }
     return result
+  }
+
+  private trimHtmlTags(source: string) {
+    // @NOTE: commenting out html tags instead of removing is
+    // because removing html part will cause code location
+    // (line and column) to change, and this will bring 
+    // inconsistency of code location between stack trace and 
+    // source code we fetched here.
+    return source.replace(/(<script(?:[\s\S](?:(?!type=)|(?=type=['"]text\/javascript['"])))*?>)([\s\S]*?)(<\/script>)/gi, (_, p1, p2, p3) => {
+      // @NOTE: for those minified (a.k.a one line) html, directly change 
+      // <script> ... </script> to <script>*/ ... /*</script> will cause 
+      // the parsed source to shift the count of characters of new added comments 
+      return `${p1.slice(0, -2)}*/${p2}/*${p3.slice(2)}`
+    })
   }
 
   private async parseScriptIntoCandidateESTNodes(script: Promise<string>): Promise<ESTree.Node[]> {
