@@ -38,7 +38,7 @@ class Owner implements IOwner {
   }
 
   public hasTrackID() {
-    return !!this.getTrackID()
+    return this.element.hasAttribute('trackid')
   }
 
   public isShadow() {

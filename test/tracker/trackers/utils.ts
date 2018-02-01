@@ -31,8 +31,6 @@ export function getOwnerOf(target: ActionTarget) {
 }
 
 export class TrackerMessageReceiver {
-  // @NOTE: TrackerMessageReceiver is just a message queue,
-  // reset should be called after calling each tracked action
 
   private sender: EventTarget
   private messages: RecordMessage[]
@@ -57,6 +55,11 @@ export class TrackerMessageReceiver {
   }
 
   public verifyMessageStream(loc: SourceLocation, data: RecordData | RecordData[]) {
+    console.log('-------- on verify --------')
+    this.messages.map((message) => {
+      console.log(message.state, message.data)
+    })
+    console.log('---------------------------')
     this.verifyMessageWrap(loc)
 
     Array.prototype.concat.call([], data).map((datum) => {

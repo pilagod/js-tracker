@@ -380,4 +380,145 @@ describe('jQuery API tracker', () => {
       receiver.verifyMessageStream(loc, record2)
     })
   })
+
+  describe('animation apis', () => {
+    it('should track only animate and exclude all details of its implementation code', (done) => {
+      const div = document.createElement('div')
+
+      $(div).animate({ "top": "100px" }, 100, () => {
+        const loc = utils.getPrevLineSourceLocation()
+        const owner = utils.getOwnerOf(div)
+
+        expect(owner.hasTrackID()).to.be.true
+
+        const record = {
+          trackid: owner.getTrackID(),
+          type: ActionType.Style
+        }
+        receiver.verifyMessageStream(loc, record)
+        done()
+      })
+    })
+    // @NOTE: animate opacity to hide/show, when animation finishes, jquery will set display to none/null 
+    it('should track only specific animation (e.g., fadeIn, fadeOut) and exclude all details of its implementation code', (done) => {
+      const div = document.createElement('div')
+
+      $(div).fadeOut(100, () => {
+        const loc = utils.getPrevLineSourceLocation()
+        const owner = utils.getOwnerOf(div)
+
+        expect(owner.hasTrackID()).to.be.true
+
+        const record = {
+          trackid: owner.getTrackID(),
+          type: ActionType.Style
+        }
+        receiver.verifyMessageStream(loc, record)
+        done()
+      })
+    })
+
+    it('should track other Style action after animation finishes', (done) => {
+      const div = document.createElement('div')
+
+      $(div).slideUp(100, () => {
+        receiver.reset()
+
+        $(div).css('color', 'red')
+        const loc = utils.getPrevLineSourceLocation()
+        const owner = utils.getOwnerOf(div)
+
+        expect(owner.hasTrackID()).to.be.true
+
+        const record = {
+          trackid: owner.getTrackID(),
+          type: ActionType.Style
+        }
+        receiver.verifyMessageStream(loc, record)
+        done()
+      })
+    })
+
+    it('should track delay animation properly', (done) => {
+      const div = document.createElement('div')
+
+      $(div).css('display', 'none')
+      receiver.reset()
+
+      $(div).delay(100).slideDown(100, () => {
+        const loc = utils.getPrevLineSourceLocation()
+        const owner = utils.getOwnerOf(div)
+
+        expect(owner.hasTrackID()).to.be.true
+
+        const record = {
+          trackid: owner.getTrackID(),
+          type: ActionType.Style
+        }
+        receiver.verifyMessageStream(loc, record)
+        done()
+      })
+    })
+
+    it('should track stop properly', (done) => {
+      const div = document.createElement('div')
+
+      $(div).fadeOut(100)
+      $(div)
+        .stop()
+        .queue(function () {
+          receiver.reset()
+          $(this).dequeue()
+        })
+        .fadeIn(100, () => {
+          const loc = utils.getPrevLineSourceLocation()
+          const owner = utils.getOwnerOf(div)
+
+          expect(owner.hasTrackID()).to.be.true
+
+          const record = {
+            trackid: owner.getTrackID(),
+            type: ActionType.Style
+          }
+          receiver.verifyMessageStream(loc, record)
+          done()
+        })
+    })
+
+    it('should track double animation properly', (done) => {
+      const div1 = document.createElement('div')
+      const div2 = document.createElement('div')
+
+      // for div1
+      $(div1).animate({ 'margin-top': '300px', 'opacity': 0 }, 100)
+      const loc1 = utils.getPrevLineSourceLocation()
+      const owner1 = utils.getOwnerOf(div1)
+
+      expect(owner1.hasTrackID()).to.be.true
+
+      const record1 = {
+        trackid: owner1.getTrackID(),
+        type: ActionType.Style
+      }
+      receiver.verifyMessageStream(loc1, record1)
+      receiver.reset()
+
+      // for div2
+      $(div2).animate({ 'top': -200 }, 100)
+      const loc2 = utils.getPrevLineSourceLocation()
+
+      setTimeout(() => {
+        const owner2 = utils.getOwnerOf(div2)
+
+        expect(owner2.hasTrackID()).to.be.true
+
+        const record2 = {
+          trackid: owner2.getTrackID(),
+          type: ActionType.Style
+        }
+        receiver.verifyMessageStream(loc2, record2)
+        done()
+      }, 0)
+    })
+  })
 })

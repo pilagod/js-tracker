@@ -1,5 +1,6 @@
 import * as StackTrace from 'stacktrace-js'
-import { sendMessageToContentScript } from '../private/NativeUtils'
+import MessageBroker from '../private/MessageBroker'
+// import { sendMessageToContentScript } from '../private/NativeUtils'
 
 export function recordWrapper(action: () => any) {
   const loc = getSourceLocationGivenDepth(3)
@@ -25,15 +26,23 @@ function getSourceLocationGivenDepth(depth: number) {
 }
 
 function recordStart(loc: SourceLocation) {
-  sendMessageToContentScript({
+  MessageBroker.send({
     state: 'record_start',
     data: { loc }
   })
+  // sendMessageToContentScript({
+  //   state: 'record_start',
+  //   data: { loc }
+  // })
 }
 
 function recordEnd(loc: SourceLocation) {
-  sendMessageToContentScript({
+  MessageBroker.send({
     state: 'record_end',
     data: { loc }
   })
+  // sendMessageToContentScript({
+  //   state: 'record_end',
+  //   data: { loc }
+  // })
 }

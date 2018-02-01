@@ -65,8 +65,13 @@ class ContentscriptController {
 
   private async recordDataHandler(message: RecordDataMessage) {
     const info: ActionInfo = Object.assign({}, message.data, this.flag.data)
+    const ok = this.flag.data.loc.lineNumber === 26
     const success = !!this.flag && await this.store.registerFromActionInfo(info)
     // @NOTE: it's easy to forget await store, success must be resolved value of boolean instead of Promise
+    if (ok) {
+      console.log(info)
+      console.log(await this.store.get(info.trackid))
+    }
     if (success === true && !this.isSelectionChanged(info.trackid)) {
       console.group('contentscript')
       console.log('--- On Selected Element Updated ---')

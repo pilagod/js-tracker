@@ -76,9 +76,13 @@ class RecordPool {
   /* public */
 
   public async update({ type, loc }: ActionInfo): Promise<ActionRecord> {
+    // @TODO: add trackid to hash
+    // @TODO: need to refine actions related test
     const key =
       hash(`${loc.scriptUrl}:${loc.lineNumber}:${loc.columnNumber}`)
-
+    if (key === '-iemj9v') {
+      console.log(type)
+    }
     if (!this.pool.hasOwnProperty(key)) {
       // @NOTE: same call/assignment might execute multiple times in short period, 
       // before any code fetched, these actions will send duplicate requests to

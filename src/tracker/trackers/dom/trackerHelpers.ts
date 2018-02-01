@@ -1,13 +1,10 @@
 /// <reference path='../../types/ActionTarget.d.ts'/>
 
 import ActionMap from '../../private/ActionMap'
+import MessageBroker from '../../private/MessageBroker'
 import OwnerManager from '../../private/OwnerManager'
 import ShadowElement from '../../private/ShadowElement'
-import {
-  attachAttr,
-  sendMessageToContentScript,
-  setAttrValue
-} from '../../private/NativeUtils'
+import { attachAttr, setAttrValue } from '../../private/NativeUtils'
 import { SymbolProxy, SymbolWhich } from '../../private/Symbols'
 import { recordWrapper } from '../utils'
 
@@ -98,7 +95,7 @@ export const decorators: { [name: string]: Decorator } = {
 
   // dataset
   DOMStringMap: proxyDecorator(<ProxyHandler<DOMStringMap>>{
-    set: (target, action, value: string) => {
+    set: function (target, action, value) {
       return recordWrapper(() => {
         target[action] = value
         record({ caller: target, target: 'DOMStringMap', action })
@@ -157,10 +154,14 @@ function record(info: RecordInfo): void {
   if (info.merge) {
     record.merge = info.merge
   }
-  sendMessageToContentScript({
+  MessageBroker.send({
     state: 'record',
     data: record
   })
+  // sendMessageToContentScript({
+  //   state: 'record',
+  //   data: record
+  // })
 }
 
 function proxyDecorator<T extends ActionTarget>(proxyHandler: ProxyHandler<T>) {
