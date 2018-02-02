@@ -4,12 +4,12 @@ import * as ESTree from '../../../node_modules/@types/estree'
 import * as esprima from 'esprima'
 import * as escodegen from 'escodegen'
 
-import { hash } from './utils'
+import { hashSourceLocation } from './utils'
 
 export default class ActionStore implements IActionStore {
 
   private store = new Store()
-  private recordPool = new RecordPool()
+  private scriptProcessor = new ScriptProcessor()
 
   /* public */
 
@@ -18,16 +18,34 @@ export default class ActionStore implements IActionStore {
   }
 
   public async registerFromActionInfo(info: ActionInfo): Promise<boolean> {
-    return this.updateStore(info, await this.recordPool.update(info))
+    const { trackid, type, loc, merge } = info
+    const key = hashSourceLocation(loc)
+
+    if (this.store.contains(trackid, key)) {
+      return false
+    }
+    // @NOTE: same call/assignment might execute multiple times in short period, 
+    // before any code fetched, these actions will send duplicate requests to
+    // fetch the same code segment. To fix this, we use record with default value 
+    // on its not yet fetched code property, in order to occupy the position in 
+    // record pool in advance, avoiding upcoming same actions to do duplicate requests. 
+    const record = { key, type, loc, code: 'loading...' }
+
+    if (merge) {
+      this.store.merge(merge, trackid)
+    }
+    this.store.add(trackid, record)
+    record.code = await this.fetchCode(key, loc)
+    return true
   }
 
   /* private */
 
-  private updateStore({ trackid, merge }: ActionInfo, record: ActionRecord): boolean {
-    return !this.store.contains(trackid, record) && !(() => {
-      merge && this.store.merge(merge, trackid)
-      this.store.add(trackid, record)
-    })()
+  private async fetchCode(key: string, loc: SourceLocation): Promise<string> {
+    if (!this.scriptProcessor.has(loc.scriptUrl)) {
+      this.scriptProcessor.add(loc.scriptUrl)
+    }
+    return await this.scriptProcessor.get(key, loc)
   }
 }
 
@@ -39,19 +57,20 @@ class Store {
 
   /* public */
 
-  public add(trackid: TrackID, record: ActionRecord): void {
+  public add(trackid: TrackID, record: ActionRecord): boolean {
     if (!this.store[trackid]) {
       this.store[trackid] = []
     }
     this.store[trackid].unshift(record)
+    return true
   }
 
   public get(trackid: TrackID): ActionRecord[] {
     return this.store[trackid] || []
   }
 
-  public contains(trackid: TrackID, record: ActionRecord): boolean {
-    return this.store.hasOwnProperty(trackid) && this.store[trackid].indexOf(record) > -1
+  public contains(trackid: TrackID, key: string): boolean {
+    return this.store.hasOwnProperty(trackid) && this.store[trackid].some((record) => record.key === key)
   }
 
   public merge(from: TrackID, to: TrackID): ActionRecord[] {
@@ -66,74 +85,62 @@ class Store {
   }
 }
 
-class RecordPool {
+// class ActionRecordPool {
+//   static LOADING = 'loading...'
 
-  private scriptCache = new ScriptCache()
-  private pool: {
-    [hashOfSourceLocation: string]: ActionRecord
-  } = {};
+//   private scriptCache = new ScriptCache()
+//   private pool: {
+//     [hashOfSourceLocation: string]: ActionRecord
+//   } = {};
 
-  /* public */
+//   /* public */
+//   // @TODO: await here
+//   public async update(info: ActionInfo): Promise<ActionRecord> {
+//     const key = hashActionInfo(info)
 
-  public async update({ type, loc }: ActionInfo): Promise<ActionRecord> {
-    // @TODO: add trackid to hash
-    // @TODO: need to refine actions related test
-    const key =
-      hash(`${loc.scriptUrl}:${loc.lineNumber}:${loc.columnNumber}`)
-    if (key === '-iemj9v') {
-      console.log(type)
-    }
-    if (!this.pool.hasOwnProperty(key)) {
-      // @NOTE: same call/assignment might execute multiple times in short period, 
-      // before any code fetched, these actions will send duplicate requests to
-      // fetch the same code segment. To fix this, we use record with default value 
-      // on its not yet fetched code property, in order to occupy the position in 
-      // record pool in advance, avoiding upcoming same actions to do duplicate requests. 
-      this.pool[key] = { key, type, loc, code: 'loading...' }
-      this.pool[key].code = await this.fetchCode(loc)
-    }
-    return this.pool[key]
+//     // @TODO: add type to key ?
+//     if (!this.pool.hasOwnProperty(key)) {
+//       // @NOTE: same call/assignment might execute multiple times in short period, 
+//       // before any code fetched, these actions will send duplicate requests to
+//       // fetch the same code segment. To fix this, we use record with default value 
+//       // on its not yet fetched code property, in order to occupy the position in 
+//       // record pool in advance, avoiding upcoming same actions to do duplicate requests. 
+//       this.pool[key] = { key, type, loc, code: SourcePool.LOADING }
+//       this.pool[key].code = await this.fetchCode(loc)
+//     }
+//     return this.pool[key]
+//   }
 
-  }
+//   /* private */
 
-  /* private */
+//   private async fetchCode({ scriptUrl, lineNumber, columnNumber }: SourceLocation): Promise<string> {
+//     if (!this.scriptCache.has(scriptUrl)) {
+//       this.scriptCache.add(scriptUrl)
+//     }
+//     return await this.scriptCache.get(scriptUrl, lineNumber, columnNumber)
+//   }
+// }
 
-  private async fetchCode({ scriptUrl, lineNumber, columnNumber }: SourceLocation): Promise<string> {
-    if (!this.scriptCache.has(scriptUrl)) {
-      this.scriptCache.add(scriptUrl)
-    }
-    return await this.scriptCache.get(scriptUrl, lineNumber, columnNumber)
-  }
-}
-
-class ScriptCache {
+class ScriptProcessor {
 
   private cache: {
     [scriptUrl: string]: Promise<ESTree.Node[]>
+  } = {}
+  private code: {
+    [key: string]: Promise<string>
   } = {}
 
   /* public */
 
   public add(scriptUrl: string): void {
-    this.cache[scriptUrl] =
-      this.parseScriptIntoCandidateESTNodes(
-        this.fetchScript(scriptUrl)
-      )
+    this.cache[scriptUrl] = this.parseScriptIntoCandidateESTNodes(scriptUrl)
   }
 
-  public async get(scriptUrl: string, lineNumber: number, columnNumber: number): Promise<string> {
-    const candidates = await this.cache[scriptUrl]
-
-    return escodegen.generate(
-      this.elect(candidates, lineNumber, columnNumber),
-      {
-        format: {
-          indent: { style: '' },
-          newline: '',
-          semicolons: false
-        }
-      }
-    ).replace(/{}/, '{ ... }')
+  public async get(key: string, loc: SourceLocation): Promise<string> {
+    if (!this.code.hasOwnProperty(key)) {
+      this.code[key] = this.fetchCode(loc)
+    }
+    return await this.code[key]
   }
 
   public has(scriptUrl: string): boolean {
@@ -142,24 +149,46 @@ class ScriptCache {
 
   /* private */
 
+  private async parseScriptIntoCandidateESTNodes(scriptUrl: string): Promise<ESTree.Node[]> {
+    const script = await this.fetchScript(scriptUrl)
+    const candidates = []
+
+    esprima.parseScript(script, { loc: true }, (node) => {
+      switch (node.type) {
+        case 'AssignmentExpression':
+        case 'CallExpression':
+          candidates.push(node)
+          break
+        case 'BlockStatement':
+          node.body = [] // ignore unimportant details
+          break
+      }
+    })
+    return candidates
+  }
+
   private async fetchScript(scriptUrl: string): Promise<string> {
     const source = await (await fetch(scriptUrl)).text()
 
-    return this.isHTML(source) ? this.refineHTMLTags(source) : source
+    return this.isHTML(source) ? this.handleHTMLTags(source) : source
   }
+
   private isHTML(source: string): boolean {
     // @NOTE: http://www.flycan.com/article/css/html-doctype-97.html
     return /^(<!DOCTYPE HTML[\s\S]*?>[\s]*)??<html[\s\S]*?>/i.test(source)
   }
 
-  private refineHTMLTags(source: string): string {
-    const trimmedSource = this.trimHtmlTags(this.trimComments(source))
+  private handleHTMLTags(source: string): string {
+    const trimmedSource = [
+      this.trimComments,
+      this.trimHtmlTags
+    ].reduce((source, trimmer) => trimmer(source), source)
     // @NOTE: add open/close comments around whole html source,
     // use slice to avoid code shifting in final parsed source
     return `/*${trimmedSource.slice(2, -2)}*/`
   }
 
-  private trimComments(source: string) {
+  private trimComments = (source: string) => {
     const rangeOfBlockComments = this.indexRangeOfBlockComments(source)
     const rangeOfValidScripts = this.indexRangeOfValidScripts(source)
     const rangeOfBlockCommentsNotInScript = rangeOfBlockComments.filter(([commentStart, commentEnd]) => {
@@ -192,7 +221,7 @@ class ScriptCache {
     return result
   }
 
-  private trimHtmlTags(source: string) {
+  private trimHtmlTags = (source: string) => {
     // @NOTE: commenting out html tags instead of removing is
     // because removing html part will cause code location
     // (line and column) to change, and this will bring 
@@ -206,21 +235,19 @@ class ScriptCache {
     })
   }
 
-  private async parseScriptIntoCandidateESTNodes(script: Promise<string>): Promise<ESTree.Node[]> {
-    const candidates = []
+  private async fetchCode({ scriptUrl, lineNumber, columnNumber }: SourceLocation) {
+    const candidates = await this.cache[scriptUrl]
 
-    esprima.parseScript(await script, { loc: true }, (node) => {
-      switch (node.type) {
-        case 'AssignmentExpression':
-        case 'CallExpression':
-          candidates.push(node)
-          break
-        case 'BlockStatement':
-          node.body = [] // ignore unimportant details
-          break
+    return escodegen.generate(
+      this.elect(candidates, lineNumber, columnNumber),
+      {
+        format: {
+          indent: { style: '' },
+          newline: '',
+          semicolons: false
+        }
       }
-    })
-    return candidates
+    ).replace(/{}/, '{ ... }')
   }
 
   private elect(

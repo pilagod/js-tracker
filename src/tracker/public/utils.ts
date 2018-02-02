@@ -1,3 +1,9 @@
+/// <reference path='../types/ActionStore.d.ts'/>
+
+export function hashSourceLocation({ scriptUrl, lineNumber, columnNumber }: SourceLocation) {
+  return hash(`${scriptUrl}:${lineNumber}:${columnNumber}`)
+}
+
 // https://stackoverflow.com/questions/7616461/generate-a-hash-from-string-in-javascript-jquery
 export function hash(s: string): string {
   let hash = 0

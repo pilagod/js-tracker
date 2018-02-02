@@ -134,6 +134,21 @@ describe('ActionStore', () => {
       expect(actionStore.get('1')).to.deep.equal([actionsOfJS[0].record])
     })
 
+    it('should store two info with same loc but different type properly', async () => {
+      return Promise.all([
+        actionStore.registerFromActionInfo(actionsOfJS[0].info),
+        actionStore.registerFromActionInfo(
+          Object.assign({}, actionsOfJS[0].info, {
+            trackid: '2',
+            type: ActionType.Style
+          })
+        )
+      ]).then(() => {
+        expect(actionStore.get('1')).to.deep.equal([actionsOfJS[0].record])
+        expect(actionStore.get('2')).to.deep.equal([Object.assign({}, actionsOfJS[0].record, { type: ActionType.Style })])
+      })
+    })
+
     it('should return true given info added successfully', async () => {
       const shouldSuccess =
         await actionStore.registerFromActionInfo(actionsOfJS[0].info)
