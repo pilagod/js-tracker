@@ -9,7 +9,7 @@ import { hashSourceLocation } from './utils'
 export default class ActionStore implements IActionStore {
 
   private store = new Store()
-  private scriptProcessor = new ScriptProcessor()
+  private scriptParser = new ScriptParser()
 
   /* public */
 
@@ -35,17 +35,17 @@ export default class ActionStore implements IActionStore {
       this.store.merge(merge, trackid)
     }
     this.store.add(trackid, record)
-    record.code = await this.fetchCode(key, loc)
+    record.code = await this.fetchCode(loc)
     return true
   }
 
   /* private */
 
-  private async fetchCode(key: string, loc: SourceLocation): Promise<string> {
-    if (!this.scriptProcessor.has(loc.scriptUrl)) {
-      this.scriptProcessor.add(loc.scriptUrl)
+  private async fetchCode(loc: SourceLocation): Promise<string> {
+    if (!this.scriptParser.isParsed(loc.scriptUrl)) {
+      this.scriptParser.parse(loc.scriptUrl)
     }
-    return await this.scriptProcessor.get(key, loc)
+    return await this.scriptParser.getCode(loc)
   }
 }
 
@@ -85,66 +85,32 @@ class Store {
   }
 }
 
-// class ActionRecordPool {
-//   static LOADING = 'loading...'
-
-//   private scriptCache = new ScriptCache()
-//   private pool: {
-//     [hashOfSourceLocation: string]: ActionRecord
-//   } = {};
-
-//   /* public */
-//   // @TODO: await here
-//   public async update(info: ActionInfo): Promise<ActionRecord> {
-//     const key = hashActionInfo(info)
-
-//     // @TODO: add type to key ?
-//     if (!this.pool.hasOwnProperty(key)) {
-//       // @NOTE: same call/assignment might execute multiple times in short period, 
-//       // before any code fetched, these actions will send duplicate requests to
-//       // fetch the same code segment. To fix this, we use record with default value 
-//       // on its not yet fetched code property, in order to occupy the position in 
-//       // record pool in advance, avoiding upcoming same actions to do duplicate requests. 
-//       this.pool[key] = { key, type, loc, code: SourcePool.LOADING }
-//       this.pool[key].code = await this.fetchCode(loc)
-//     }
-//     return this.pool[key]
-//   }
-
-//   /* private */
-
-//   private async fetchCode({ scriptUrl, lineNumber, columnNumber }: SourceLocation): Promise<string> {
-//     if (!this.scriptCache.has(scriptUrl)) {
-//       this.scriptCache.add(scriptUrl)
-//     }
-//     return await this.scriptCache.get(scriptUrl, lineNumber, columnNumber)
-//   }
-// }
-
-class ScriptProcessor {
+class ScriptParser {
 
   private cache: {
     [scriptUrl: string]: Promise<ESTree.Node[]>
   } = {}
   private code: {
-    [key: string]: Promise<string>
+    [hashOfSourceLocation: string]: Promise<string>
   } = {}
 
   /* public */
 
-  public add(scriptUrl: string): void {
+  public parse(scriptUrl: string): void {
     this.cache[scriptUrl] = this.parseScriptIntoCandidateESTNodes(scriptUrl)
   }
 
-  public async get(key: string, loc: SourceLocation): Promise<string> {
+  public isParsed(scriptUrl: string): boolean {
+    return this.cache.hasOwnProperty(scriptUrl)
+  }
+
+  public async getCode(loc: SourceLocation): Promise<string> {
+    const key = hashSourceLocation(loc)
+
     if (!this.code.hasOwnProperty(key)) {
       this.code[key] = this.fetchCode(loc)
     }
     return await this.code[key]
-  }
-
-  public has(scriptUrl: string): boolean {
-    return this.cache.hasOwnProperty(scriptUrl)
   }
 
   /* private */
@@ -271,6 +237,7 @@ class ScriptProcessor {
         })
     // remove elected candidate
     candidates.splice(candidates.indexOf(elected), 1)
+    // @TODO: remove subset node of elected one 
 
     return elected
   }
