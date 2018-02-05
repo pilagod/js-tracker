@@ -399,7 +399,7 @@ describe('jQuery API tracker', () => {
         done()
       })
     })
-    // @NOTE: animate opacity to hide/show, when animation finishes, jquery will set display to none/null 
+
     it('should track only specific animation (e.g., fadeIn, fadeOut) and exclude all details of its implementation code', (done) => {
       const div = document.createElement('div')
 
@@ -506,7 +506,9 @@ describe('jQuery API tracker', () => {
       // for div2
       $(div2).animate({ 'top': -200 }, 100)
       const loc2 = utils.getPrevLineSourceLocation()
-
+      // @NOTE: setTimeout to wait for animation executing of div2.
+      // jquery will not execute second immediately, it will wait 
+      // until next animate cycle and do animation after first one.
       setTimeout(() => {
         const owner2 = utils.getOwnerOf(div2)
 
@@ -518,7 +520,7 @@ describe('jQuery API tracker', () => {
         }
         receiver.verifyMessageStream(loc2, record2)
         done()
-      }, 0)
+      }, 10)
     })
   })
 })
