@@ -53,12 +53,12 @@ export default (jquery) => {
         data = new Proxy(data, {
           apply: function (target, thisArg, argumentList) {
             const shouldReproduce = MessageBroker.isEmpty()
-            console.log('should reproduce:', shouldReproduce)
+
             if (shouldReproduce) {
               MessageBroker.send(wrap)
             }
             const result = target.apply(thisArg, argumentList)
-            console.log('should reproduce:', shouldReproduce)
+
             if (shouldReproduce) {
               MessageBroker.send(Object.assign({}, wrap, { state: 'record_end' }))
             }
@@ -80,45 +80,8 @@ export default (jquery) => {
     }
   })(jquery.prototype.queue)
 
-  // jquery.prototype.queue = ((queue) => {
-  //   return function (type, data) {
-  //     console.log('queue')
-  //     // @NOTE: skip non-tracked api
-  //     if (!MessageBroker.isEmpty()) {
-  //       console.log('non broker')
-  //       // @TODO: cannot call doAnimation, jquery might be minified
-  //       if (typeof data === 'function' /* && data.name === 'doAnimation' */) {
-  //         const wrap = MessageBroker.getWrap()
-  //         console.log(wrap.data.loc)
-  //         const endWrap = Object.assign({}, wrap, { state: 'record_end' })
-
-  //         data = new Proxy(data, {
-  //           apply: function (target, thisArg, argumentList) {
-  //             const shouldReproduce = MessageBroker.isEmpty()
-  //             console.log('should reproduce:', shouldReproduce, MessageBroker.getWrap().data)
-  //             if (shouldReproduce) {
-  //               MessageBroker.send(wrap)
-  //             }
-  //             const result = target.apply(thisArg, argumentList)
-  //             console.log('should reproduce:', shouldReproduce, MessageBroker.getWrap().data)
-  //             if (shouldReproduce) {
-  //               MessageBroker.send(endWrap)
-  //             }
-  //             return result
-  //           }
-  //         })
-  //         this.each(function (this: Element) {
-  //           MessageBroker.subscribe(new JqueryOnFlushAddAnimationFilter(this))
-  //         })
-  //       }
-  //     }
-  //     return queue.call(this, type, data)
-  //   }
-  // })(jquery.prototype.queue)
-
   jquery.fx.timer = ((fxTimer) => {
     return function (timer) {
-      console.log('timer.called')
       const element = timer.elem
       const animID = element[SymbolAnimation]
 
@@ -140,12 +103,12 @@ export default (jquery) => {
       const proxyTimer = new Proxy(timer, {
         apply: function (target, thisArg, argumentList) {
           const shouldReproduce = MessageBroker.isEmpty()
-          console.log('timer', shouldTrack, shouldReproduce)
+
           if (shouldTrack && shouldReproduce) {
-            console.log('timer send wrap')
             MessageBroker.send(wrap)
           }
           const result = target.apply(thisArg, argumentList)
+
           if (shouldTrack && shouldReproduce) {
             MessageBroker.send(Object.assign({}, wrap, { state: 'record_end' }))
           }
@@ -163,7 +126,7 @@ export default (jquery) => {
 
       this.each(function () {
         const owner = OwnerManager.getOwner(this)
-        console.log('stop')
+
         if (owner.hasTrackID()) {
           MessageBroker.removeFilter(owner.getTrackID(), ActionType.Style)
         }
@@ -179,7 +142,7 @@ export default (jquery) => {
       opt.complete = new Proxy(opt.complete, {
         apply: function (target, thisArg, argumentList) {
           const owner = OwnerManager.getOwner(thisArg)
-          console.log('complete')
+
           if (owner.hasTrackID()) {
             MessageBroker.removeFilter(owner.getTrackID(), ActionType.Style)
           }

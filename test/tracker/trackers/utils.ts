@@ -55,11 +55,6 @@ export class TrackerMessageReceiver {
   }
 
   public verifyMessageStream(loc: SourceLocation, data: RecordData | RecordData[]) {
-    console.log('-------- on verify --------')
-    this.messages.map((message) => {
-      console.log(message.state, message.data)
-    })
-    console.log('---------------------------')
     this.verifyMessageWrap(loc)
 
     Array.prototype.concat.call([], data).map((datum) => {
