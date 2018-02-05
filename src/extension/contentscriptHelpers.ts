@@ -93,7 +93,7 @@ class ContentscriptController {
     console.group('contentscript')
     console.log('--- Response from Background---')
     console.log('response:', response)
-    console.log('-----------------------------')
+    console.log('-------------------------------')
     console.groupEnd()
   }
 
