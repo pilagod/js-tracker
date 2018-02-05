@@ -11,7 +11,7 @@ class ContentscriptController {
 
   public selection: Element = null
 
-  private flag: RecordWrapMessage = null
+  private source: RecordSource = null
   private store: IActionStore
   private updateSidebar: (message: Message, callback?: (response: any) => void) => void
 
@@ -28,13 +28,19 @@ class ContentscriptController {
   public messageHandler = async (message: RecordMessage) => {
     switch (message.state) {
       case 'record_start':
-        this.recordStartHandler(message)
+        if (!this.source) {
+          this.source = message.data
+        }
         break
+
       case 'record':
-        await this.recordDataHandler(message)
+        await this.recordDataHandler(message.data)
         break
+
       case 'record_end':
-        this.recordEndHandler(message)
+        if (this.doesSourceMatch(message.data)) {
+          this.source = null
+        }
         break
     }
   }
@@ -56,16 +62,9 @@ class ContentscriptController {
 
   /* private */
 
-  private recordStartHandler(message: RecordWrapMessage) {
-    if (this.flag) {
-      return
-    }
-    this.flag = message
-  }
-
-  private async recordDataHandler(message: RecordDataMessage) {
-    const info: ActionInfo = Object.assign({}, message.data, this.flag.data)
-    const success = !!this.flag && await this.store.registerFromActionInfo(info)
+  private async recordDataHandler(data: RecordData) {
+    const info: ActionInfo = Object.assign({}, data, this.source)
+    const success = await this.store.registerFromActionInfo(info)
     // @NOTE: it's easy to forget await store, success must be resolved value of boolean instead of Promise
     if (success === true && !this.isSelectionChanged(info.trackid)) {
       console.group('contentscript')
@@ -81,8 +80,8 @@ class ContentscriptController {
     }
   }
 
-  private isSelectionChanged(newID: TrackID): boolean {
-    return this.getTrackIDFromSelection() !== newID
+  private isSelectionChanged(trackid: TrackID): boolean {
+    return this.getTrackIDFromSelection() !== trackid
   }
 
   private getTrackIDFromSelection(): TrackID {
@@ -97,16 +96,13 @@ class ContentscriptController {
     console.groupEnd()
   }
 
-  private recordEndHandler(message: RecordWrapMessage) {
-    const { loc: loc1 } = this.flag.data
-    const { loc: loc2 } = message.data
+  private doesSourceMatch(source: RecordSource) {
+    const loc1 = this.source.loc
+    const loc2 = source.loc
 
-    if (loc1.scriptUrl === loc2.scriptUrl
+    return loc1.scriptUrl === loc2.scriptUrl
       && loc1.lineNumber === loc2.lineNumber
       && loc1.columnNumber === loc2.columnNumber
-    ) {
-      this.flag = null
-    }
   }
 }
 

@@ -25,9 +25,8 @@ class AnimationOnFirstTickAddStyleFilter implements ISubscriber {
 const SIMULT_ANIMATION = 1000
 const SymbolAnimation = Symbol('Animation')
 const trackedApis = ['addClass', 'after', 'ajaxComplete', 'ajaxError', 'ajaxSend', 'ajaxStart', 'ajaxStop', 'ajaxSuccess', 'animate', 'append', 'appendTo', 'attr', 'before', 'bind', 'blur', 'change', 'click', 'contextmenu', 'css', 'dblclick', 'delegate', 'detach', 'die', 'empty', 'error', 'fadeIn', 'fadeOut', 'fadeTo', 'fadeToggle', 'focus', 'focusin', 'focusout', 'height', 'hide', 'hover', 'html', 'innerHeight', 'innerWidth', 'insertAfter', 'insertBefore', 'keydown', 'keypress', 'keyup', 'live', 'load', 'mousedown', 'mouseenter', 'mouseleave', 'mousemove', 'mouseout', 'mouseover', 'mouseup', 'off', 'offset', 'on', 'one', 'outerHeight', 'outerWidth', 'prepend', 'prependTo', 'prop', 'ready', 'remove', 'removeAttr', 'removeClass', 'removeProp', 'replaceAll', 'replaceWith', 'resize', 'scroll', 'scrollLeft', 'scrollTop', 'select', 'show', 'slideDown', 'slideToggle', 'slideUp', 'submit', 'text', 'toggle', 'toggleClass', 'trigger', 'triggerHandler', 'unbind', 'undelegate', 'unload', 'unwrap', 'val', 'width', 'wrap', 'wrapAll', 'wrapInner']
-const untrackedAnimations: {
-  [animationID: number]: RecordWrapMessage[]
-} = {}
+const untrackedAnimations: { [animid: number]: RecordSource[] } = {}
+
 let animationID = 0
 
 export default (jquery) => {
@@ -48,19 +47,19 @@ export default (jquery) => {
   jquery.prototype.queue = ((queue) => {
     return function (type, data) {
       if (!MessageBroker.isEmpty()) {
-        const wrap = MessageBroker.getWrapMessage()
+        const source = MessageBroker.getCurrentSource()
 
         data = new Proxy(data, {
           apply: function (target, thisArg, argumentList) {
             const shouldReproduce = MessageBroker.isEmpty()
 
             if (shouldReproduce) {
-              MessageBroker.send(wrap)
+              MessageBroker.send({ state: 'record_start', data: source })
             }
             const result = target.apply(thisArg, argumentList)
 
             if (shouldReproduce) {
-              MessageBroker.send(Object.assign({}, wrap, { state: 'record_end' }))
+              MessageBroker.send({ state: 'record_end', data: source })
             }
             return result
           }
@@ -68,12 +67,12 @@ export default (jquery) => {
 
         this.each(function () {
           const element = this
-          const animID = element[SymbolAnimation] || (element[SymbolAnimation] = (animationID++ % SIMULT_ANIMATION) + 1)
+          const animid = element[SymbolAnimation] || (element[SymbolAnimation] = (animationID++ % SIMULT_ANIMATION) + 1)
 
-          if (!untrackedAnimations.hasOwnProperty(animID)) {
-            untrackedAnimations[animID] = []
+          if (!untrackedAnimations.hasOwnProperty(animid)) {
+            untrackedAnimations[animid] = []
           }
-          untrackedAnimations[animID].push(wrap)
+          untrackedAnimations[animid].push(source)
         })
       }
       return queue.call(this, type, data)
@@ -83,12 +82,12 @@ export default (jquery) => {
   jquery.fx.timer = ((fxTimer) => {
     return function (timer) {
       const element = timer.elem
-      const animID = element[SymbolAnimation]
+      const animid = element[SymbolAnimation]
 
-      if (!animID) {
+      if (!animid) {
         return fxTimer.call(this, timer)
       }
-      if (untrackedAnimations[animID].length === 0) {
+      if (untrackedAnimations[animid].length === 0) {
         delete element[SymbolAnimation]
         return fxTimer.call(this, timer)
       }
@@ -96,8 +95,9 @@ export default (jquery) => {
         new AnimationOnFirstTickAddStyleFilter(element)
       )
       let shouldTrack = true
-      const wrap = untrackedAnimations[animID].shift()
-      if (untrackedAnimations[animID].length === 0) {
+      const source = untrackedAnimations[animid].shift()
+
+      if (untrackedAnimations[animid].length === 0) {
         delete element[SymbolAnimation]
       }
       const proxyTimer = new Proxy(timer, {
@@ -105,12 +105,12 @@ export default (jquery) => {
           const shouldReproduce = MessageBroker.isEmpty()
 
           if (shouldTrack && shouldReproduce) {
-            MessageBroker.send(wrap)
+            MessageBroker.send({ state: 'record_start', data: source })
           }
           const result = target.apply(thisArg, argumentList)
 
           if (shouldTrack && shouldReproduce) {
-            MessageBroker.send(Object.assign({}, wrap, { state: 'record_end' }))
+            MessageBroker.send({ state: 'record_end', data: source })
           }
           shouldTrack = false
           return result
