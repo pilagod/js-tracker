@@ -55,7 +55,7 @@ module.exports = configFactory(function (defaultConfig) {
       'test/tracker/private/*.ts': ['karma-typescript']
     }
   })
-  customConfig.karmaTypescriptConfig.reports.html = 'coverage/trackerModules'
+  customConfig.karmaTypescriptConfig.reports.html = 'coverage/modules'
 
   return customConfig
 })
