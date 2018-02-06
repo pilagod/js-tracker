@@ -141,7 +141,7 @@ class ScriptParser {
 
   private isHTML(source: string): boolean {
     // @NOTE: http://www.flycan.com/article/css/html-doctype-97.html
-    return /^(<!DOCTYPE HTML[\s\S]*?>[\s]*)??<html[\s\S]*?>/i.test(source)
+    return /^([\s]*?<!DOCTYPE HTML[\s\S]*?>[\s]*)??<html[\s\S]*?>/i.test(source)
   }
 
   private handleHTMLTags(source: string): string {
