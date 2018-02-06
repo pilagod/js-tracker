@@ -83,6 +83,7 @@ export class TrackerMessageReceiver {
   }
 
   private messageHandler = (event: CustomEvent) => {
-    this.messages.push(event.detail.message)
+    // @NOTE: cannot concat array of objects
+    this.messages = event.detail.messages
   }
 }

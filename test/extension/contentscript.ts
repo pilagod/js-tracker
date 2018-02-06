@@ -18,10 +18,10 @@ describe('contentscript', () => {
 
   describe('listen to record message', () => {
     const { messageHandler } = helpers
-    const dispatch = (message: RecordMessage) => {
+    const dispatch = (messages: RecordMessage[]) => {
       window.dispatchEvent(
         new CustomEvent('js-tracker', {
-          detail: { message }
+          detail: { messages }
         })
       )
     }
@@ -35,9 +35,7 @@ describe('contentscript', () => {
           type: actions[0].info.type
         }
       }
-      dispatch(start)
-      dispatch(record)
-      dispatch(end)
+      dispatch([start, record, end])
 
       expect(messageHandler.calledThrice).to.be.true
       expect(

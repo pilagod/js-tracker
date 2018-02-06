@@ -16,7 +16,9 @@ function main(helpers: ContentscriptHelpers) {
 
 function listenToRecordMessage(messageHandler: (message: RecordMessage) => void) {
   window.addEventListener('js-tracker', (event: CustomEvent) => {
-    messageHandler(<RecordMessage>event.detail.message)
+    event.detail.messages.map((message: RecordMessage) => {
+      messageHandler(message)
+    })
   })
 }
 

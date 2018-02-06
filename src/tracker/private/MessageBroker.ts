@@ -1,6 +1,6 @@
 /// <reference path='../types/RecordMessage.d.ts'/>
 
-import { sendMessageToContentScript } from './NativeUtils'
+import { sendMessagesToContentScript } from './NativeUtils'
 
 class MessageBroker {
 
@@ -75,9 +75,7 @@ class MessageBroker {
       return
     }
     this.messageSubscriber.flush(messages)
-    messages.map((message) => {
-      sendMessageToContentScript(message)
-    })
+    sendMessagesToContentScript(messages)
   }
 
   private clearMessages(): RecordMessage[] {
@@ -105,6 +103,9 @@ class MessageFilter {
   }
 
   public remove(trackid: string, type: ActionType) {
+    if (!this.filters[trackid]) {
+      return
+    }
     const index = this.filters[trackid].indexOf(type)
 
     if (index > - 1) {
