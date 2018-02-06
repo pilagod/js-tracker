@@ -1,7 +1,7 @@
 /// <reference path='../../types/RecordMessage.d.ts'/>
 
 import AnimationController from './trackerHelpers'
-import { recordWrapper } from '../utils'
+import { wrapActionWithSourceMessages } from '../utils'
 
 export default function main(jquery) {
   trackGeneralCases(jquery)
@@ -14,7 +14,7 @@ function trackGeneralCases(jquery) {
   trackedApis.map((api) => {
     jquery.prototype[api] = ((actionFunc) => {
       return function (...args: any[]) {
-        return recordWrapper(() => {
+        return wrapActionWithSourceMessages(() => {
           return actionFunc.call(this, ...args)
         })
       }

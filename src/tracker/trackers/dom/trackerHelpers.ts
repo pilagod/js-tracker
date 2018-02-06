@@ -6,7 +6,7 @@ import OwnerManager from '../../private/OwnerManager'
 import ShadowElement from '../../private/ShadowElement'
 import { attachAttr, setAttrValue } from '../../private/NativeUtils'
 import { SymbolProxy, SymbolWhich } from '../../private/Symbols'
-import { recordWrapper } from '../utils'
+import { wrapActionWithSourceMessages } from '../utils'
 
 type RecordInfo = {
   caller: ActionTarget,
@@ -25,7 +25,7 @@ export type Decorator = (
 export const decorators: { [name: string]: Decorator } = {
   general: (target, action, actionFunc) => {
     return function (...args) {
-      return recordWrapper(() => {
+      return wrapActionWithSourceMessages(() => {
         const result = actionFunc.call(this, ...args)
         const info: RecordInfo = { caller: this, target, action, args }
 
@@ -40,7 +40,7 @@ export const decorators: { [name: string]: Decorator } = {
   // element.attributes.setNamedItem(...)
   setAttributeNode: (target, action, actionFunc: (attr: Attr) => void) => {
     return function (attr: Attr): void {
-      return recordWrapper(() => {
+      return wrapActionWithSourceMessages(() => {
         const pureAttr = getPureAttr(attr)
         const result = actionFunc.call(this, pureAttr)
         const info: RecordInfo = { caller: this, target, action, args: [pureAttr] }
@@ -58,7 +58,7 @@ export const decorators: { [name: string]: Decorator } = {
   // documemt.createAttribute('...').value = '...'
   value: (target, action, setter: (value: string) => void) => {
     return function (this: Attr, value: string): void {
-      return recordWrapper(() => {
+      return wrapActionWithSourceMessages(() => {
         if (!OwnerManager.hasOwner(this)) {
           // @TODO: check namespaceURI
           attachAttr(document.createElement(ShadowElement.TagName), this)
@@ -85,7 +85,7 @@ export const decorators: { [name: string]: Decorator } = {
         : target[action]
     },
     set: function (target, action, value) {
-      return recordWrapper(() => {
+      return wrapActionWithSourceMessages(() => {
         target[action] = value
         record({ caller: target, target: 'CSSStyleDeclaration', action })
         return true
@@ -96,7 +96,7 @@ export const decorators: { [name: string]: Decorator } = {
   // dataset
   DOMStringMap: proxyDecorator(<ProxyHandler<DOMStringMap>>{
     set: function (target, action, value) {
-      return recordWrapper(() => {
+      return wrapActionWithSourceMessages(() => {
         target[action] = value
         record({ caller: target, target: 'DOMStringMap', action })
         return true
@@ -158,10 +158,6 @@ function record(info: RecordInfo): void {
     state: 'record',
     data: record
   })
-  // sendMessageToContentScript({
-  //   state: 'record',
-  //   data: record
-  // })
 }
 
 function proxyDecorator<T extends ActionTarget>(proxyHandler: ProxyHandler<T>) {

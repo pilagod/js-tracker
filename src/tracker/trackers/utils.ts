@@ -1,16 +1,16 @@
 import * as StackTrace from 'stacktrace-js'
 import MessageBroker from '../private/MessageBroker'
 
-export function recordWrapper(action: () => any) {
+export function wrapActionWithSourceMessages(actionFunc: () => any) {
   const loc = getSourceLocationGivenDepth(3)
 
   try {
-    recordStart(loc)
-    return action()
+    recordStartWith(loc)
+    return actionFunc()
   } catch (e) {
     throw (e)
   } finally {
-    recordEnd(loc)
+    recordEndWith(loc)
   }
 }
 
@@ -24,14 +24,14 @@ function getSourceLocationGivenDepth(depth: number) {
   }
 }
 
-function recordStart(loc: SourceLocation) {
+function recordStartWith(loc: SourceLocation) {
   MessageBroker.send({
     state: 'record_start',
     data: { loc }
   })
 }
 
-function recordEnd(loc: SourceLocation) {
+function recordEndWith(loc: SourceLocation) {
   MessageBroker.send({
     state: 'record_end',
     data: { loc }
