@@ -38,7 +38,7 @@ class AnimationController {
     )
   }
 
-  public addSourceToUntrackList(element: Element) {
+  public addUntrackSource(element: Element) {
     if (MessageBroker.isEmpty()) {
       return
     }
@@ -51,7 +51,7 @@ class AnimationController {
     this.untrackAnims[animid].push(source)
   }
 
-  public getSourceFromUntrackList(element: Element): RecordSource {
+  public getUntrackSource(element: Element): RecordSource {
     if (!element.hasOwnProperty(SymbolAnim)) {
       return
     }
