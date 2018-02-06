@@ -1,18 +1,21 @@
 import trackJqueryApis from './tracker'
 
 export default function () {
-  let __jquery__ = null;
+  let shouldTrack = true;
 
   ['jQuery', '$'].map((propOfJquery) => {
+    let value = undefined
+
     Reflect.defineProperty(window, propOfJquery, {
       set: function (jquery) {
-        if (!__jquery__) {
+        if (shouldTrack) {
           trackJqueryApis(jquery)
-          __jquery__ = jquery
+          shouldTrack = false
         }
+        value = jquery
       },
       get: function () {
-        return __jquery__
+        return value
       }
     })
   })
