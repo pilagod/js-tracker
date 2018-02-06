@@ -46,9 +46,8 @@ describe('HTML DOM API tracker', () => {
       const fragment = document.createDocumentFragment()
 
       fragment.appendChild(div)
-      const loc = utils.getPrevLineSourceLocation()
 
-      receiver.verifyNoRecordMessageStream()
+      receiver.verifyNoMessage()
     })
 
     it('should track other element appending a fragment', () => {
@@ -66,7 +65,7 @@ describe('HTML DOM API tracker', () => {
       const ownerID = utils.getOwnerOf(div).getTrackID()
 
       expect(ownerID).to.equal(record.trackid)
-      receiver.verifyMessageStream(loc, record)
+      receiver.verifyMessages(loc, record)
     })
   })
 
@@ -80,7 +79,7 @@ describe('HTML DOM API tracker', () => {
       const ownerID = utils.getOwnerOf(div).getTrackID()
 
       expect(ownerID).to.equal(record.trackid)
-      receiver.verifyMessageStream(loc, record)
+      receiver.verifyMessages(loc, record)
     })
 
     it('should track its method call', () => {
@@ -92,7 +91,7 @@ describe('HTML DOM API tracker', () => {
       const ownerID = utils.getOwnerOf(div).getTrackID()
 
       expect(ownerID).to.equal(record.trackid)
-      receiver.verifyMessageStream(loc, record)
+      receiver.verifyMessages(loc, record)
     })
   })
 
@@ -106,7 +105,7 @@ describe('HTML DOM API tracker', () => {
       const ownerID = utils.getOwnerOf(div).getTrackID()
 
       expect(ownerID).to.equal(record.trackid)
-      receiver.verifyMessageStream(loc, record)
+      receiver.verifyMessages(loc, record)
     })
 
     it('should track its method call', () => {
@@ -119,7 +118,7 @@ describe('HTML DOM API tracker', () => {
       const ownerID = utils.getOwnerOf(div).getTrackID()
 
       expect(ownerID).to.equal(record.trackid)
-      receiver.verifyMessageStream(loc, record)
+      receiver.verifyMessages(loc, record)
     })
 
     /* composite actions */
@@ -134,7 +133,7 @@ describe('HTML DOM API tracker', () => {
         const ownerID = utils.getOwnerOf(div).getTrackID()
 
         expect(ownerID).to.equal(record.trackid)
-        receiver.verifyMessageStream(loc, record)
+        receiver.verifyMessages(loc, record)
       })
 
       it('should track removeAttribute', () => {
@@ -149,7 +148,7 @@ describe('HTML DOM API tracker', () => {
         const ownerID = utils.getOwnerOf(div).getTrackID()
 
         expect(ownerID).to.equal(record.trackid)
-        receiver.verifyMessageStream(loc, record)
+        receiver.verifyMessages(loc, record)
       })
 
       it('should track removeAttributeNode', () => {
@@ -164,7 +163,7 @@ describe('HTML DOM API tracker', () => {
         const ownerID = utils.getOwnerOf(div).getTrackID()
 
         expect(ownerID).to.equal(record.trackid)
-        receiver.verifyMessageStream(loc, record)
+        receiver.verifyMessages(loc, record)
       })
     })
 
@@ -183,7 +182,7 @@ describe('HTML DOM API tracker', () => {
         const ownerID = utils.getOwnerOf(div).getTrackID()
 
         expect(ownerID).to.equal(record.trackid)
-        receiver.verifyMessageStream(loc, record)
+        receiver.verifyMessages(loc, record)
       })
 
       it('should track setAttributeNode{NS} (merge scenario)', () => {
@@ -199,7 +198,7 @@ describe('HTML DOM API tracker', () => {
         const ownerID = utils.getOwnerOf(div).getTrackID()
 
         expect(ownerID).to.equal(record.trackid)
-        receiver.verifyMessageStream(loc, record)
+        receiver.verifyMessages(loc, record)
       })
 
       it('should not track setAttributeNode{NS} (error scenario)', () => {
@@ -210,10 +209,9 @@ describe('HTML DOM API tracker', () => {
         receiver.reset()
 
         const error = () => div2.setAttributeNode(div.attributes[0])
-        const loc = utils.getPrevLineSourceLocation()
 
         expect(error).to.throw()
-        receiver.verifyNoRecordMessageStream()
+        receiver.verifyNoMessage()
       })
     })
   })
@@ -228,7 +226,7 @@ describe('HTML DOM API tracker', () => {
       const ownerID = utils.getOwnerOf(div).getTrackID()
 
       expect(ownerID).to.equal(record.trackid)
-      receiver.verifyMessageStream(loc, record)
+      receiver.verifyMessages(loc, record)
     })
 
     it('should track its method call', () => {
@@ -241,7 +239,7 @@ describe('HTML DOM API tracker', () => {
       const ownerID = utils.getOwnerOf(div).getTrackID()
 
       expect(ownerID).to.equal(record.trackid)
-      receiver.verifyMessageStream(loc, record)
+      receiver.verifyMessages(loc, record)
     })
   })
 
@@ -255,7 +253,7 @@ describe('HTML DOM API tracker', () => {
       const ownerID = utils.getOwnerOf(div).getTrackID()
 
       expect(ownerID).to.equal(record.trackid)
-      receiver.verifyMessageStream(loc, record)
+      receiver.verifyMessages(loc, record)
     })
   })
 
@@ -269,7 +267,7 @@ describe('HTML DOM API tracker', () => {
       const ownerID = utils.getOwnerOf(idAttr).getTrackID()
 
       expect(ownerID).to.equal(record.trackid)
-      receiver.verifyMessageStream(loc, record)
+      receiver.verifyMessages(loc, record)
     })
   })
 
@@ -291,7 +289,7 @@ describe('HTML DOM API tracker', () => {
       const ownerID = utils.getOwnerOf(div.style).getTrackID()
 
       expect(ownerID).to.equal(record.trackid)
-      receiver.verifyMessageStream(loc, record)
+      receiver.verifyMessages(loc, record)
     })
   })
 
@@ -313,7 +311,7 @@ describe('HTML DOM API tracker', () => {
       const ownerID = utils.getOwnerOf(div.dataset).getTrackID()
 
       expect(ownerID).to.equal(record.trackid)
-      receiver.verifyMessageStream(loc, record)
+      receiver.verifyMessages(loc, record)
     })
   })
 
@@ -335,7 +333,7 @@ describe('HTML DOM API tracker', () => {
       const ownerID = utils.getOwnerOf(div.classList).getTrackID()
 
       expect(ownerID).to.equal(record.trackid)
-      receiver.verifyMessageStream(loc, record)
+      receiver.verifyMessages(loc, record)
     })
 
     it('should track its methods', () => {
@@ -347,7 +345,7 @@ describe('HTML DOM API tracker', () => {
       const ownerID = utils.getOwnerOf(div.classList).getTrackID()
 
       expect(ownerID).to.equal(record.trackid)
-      receiver.verifyMessageStream(loc, record)
+      receiver.verifyMessages(loc, record)
     })
   })
 
@@ -372,7 +370,7 @@ describe('HTML DOM API tracker', () => {
       const ownerID = utils.getOwnerOf(div.attributes).getTrackID()
 
       expect(ownerID).to.equal(record.trackid)
-      receiver.verifyMessageStream(loc, record)
+      receiver.verifyMessages(loc, record)
     })
 
     it('should track removeNamedItem (style scenario)', () => {
@@ -387,7 +385,7 @@ describe('HTML DOM API tracker', () => {
       const ownerID = utils.getOwnerOf(div.attributes).getTrackID()
 
       expect(ownerID).to.equal(record.trackid)
-      receiver.verifyMessageStream(loc, record)
+      receiver.verifyMessages(loc, record)
     })
 
     /* anomalies */
@@ -405,7 +403,7 @@ describe('HTML DOM API tracker', () => {
       const ownerID = utils.getOwnerOf(div.attributes).getTrackID()
 
       expect(ownerID).to.equal(record.trackid)
-      receiver.verifyMessageStream(loc, record)
+      receiver.verifyMessages(loc, record)
     })
 
     it('should track setNamedItem (style scenario)', () => {
@@ -421,7 +419,7 @@ describe('HTML DOM API tracker', () => {
       const ownerID = utils.getOwnerOf(div.attributes).getTrackID()
 
       expect(ownerID).to.equal(record.trackid)
-      receiver.verifyMessageStream(loc, record)
+      receiver.verifyMessages(loc, record)
     })
   })
 })

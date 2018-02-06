@@ -54,8 +54,8 @@ export class TrackerMessageReceiver {
     this.messages = []
   }
 
-  public verifyMessageStream(loc: SourceLocation, data: RecordData | RecordData[]) {
-    this.verifyMessageWrap(loc)
+  public verifyMessages(loc: SourceLocation, data: RecordData | RecordData[]) {
+    this.verifySourceMessage(loc)
 
     Array.prototype.concat.call([], data).map((datum) => {
       const record = { state: 'record', data: datum }
@@ -63,14 +63,13 @@ export class TrackerMessageReceiver {
     })
   }
 
-  public verifyNoRecordMessageStream() {
-    const records = this.messages.filter(({ state }) => state === 'record')
-    expect(records).to.have.length(0)
+  public verifyNoMessage() {
+    expect(this.messages).to.have.length(0)
   }
 
   /* private */
 
-  private verifyMessageWrap(loc: SourceLocation) {
+  private verifySourceMessage(loc: SourceLocation) {
     const start = <RecordSourceMessage>this.messages[0]
     expect(start.state).to.equal('record_start')
     expect(start.data.loc.scriptUrl).to.equal(loc.scriptUrl)

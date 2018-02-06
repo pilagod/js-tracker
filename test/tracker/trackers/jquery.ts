@@ -33,16 +33,15 @@ describe('jQuery API tracker', () => {
       const ownerID = utils.getOwnerOf(div).getTrackID()
 
       expect(ownerID).to.equal(record.trackid)
-      receiver.verifyMessageStream(loc, record)
+      receiver.verifyMessages(loc, record)
     })
 
     it('should not track attr getter', () => {
       const div = document.createElement('div')
 
       $(div).attr('id')
-      const loc = utils.getPrevLineSourceLocation()
 
-      receiver.verifyNoRecordMessageStream()
+      receiver.verifyNoMessage()
     })
 
     it('should track prop setter properly', () => {
@@ -54,16 +53,15 @@ describe('jQuery API tracker', () => {
       const ownerID = utils.getOwnerOf(div).getTrackID()
 
       expect(ownerID).to.equal(record.trackid)
-      receiver.verifyMessageStream(loc, record)
+      receiver.verifyMessages(loc, record)
     })
 
     it('should not track prop getter', () => {
       const div = document.createElement('div')
 
       $(div).prop('id')
-      const loc = utils.getPrevLineSourceLocation()
 
-      receiver.verifyNoRecordMessageStream()
+      receiver.verifyNoMessage()
     })
 
     it('should track multiple targets of attr action properly', () => {
@@ -78,14 +76,14 @@ describe('jQuery API tracker', () => {
       const ownerID1 = utils.getOwnerOf(div1).getTrackID()
 
       expect(ownerID1).to.equal(record1.trackid)
-      receiver.verifyMessageStream(loc, record1)
+      receiver.verifyMessages(loc, record1)
 
       // for div2
       const record2 = utils.createRecord('2', ActionType.Attr)
       const ownerID2 = utils.getOwnerOf(div2).getTrackID()
 
       expect(ownerID2).to.equal(record2.trackid)
-      receiver.verifyMessageStream(loc, record2)
+      receiver.verifyMessages(loc, record2)
     })
   })
 
@@ -99,7 +97,7 @@ describe('jQuery API tracker', () => {
       const ownerID = utils.getOwnerOf(div).getTrackID()
 
       expect(ownerID).to.equal(record.trackid)
-      receiver.verifyMessageStream(loc, record)
+      receiver.verifyMessages(loc, record)
     })
 
     it('should track multiple targets of behav action properly', () => {
@@ -114,14 +112,14 @@ describe('jQuery API tracker', () => {
       const ownerID1 = utils.getOwnerOf(div1).getTrackID()
 
       expect(ownerID1).to.equal(record1.trackid)
-      receiver.verifyMessageStream(loc, record1)
+      receiver.verifyMessages(loc, record1)
 
       // for div2
       const record2 = utils.createRecord('2', ActionType.Behav)
       const ownerID2 = utils.getOwnerOf(div2).getTrackID()
 
       expect(ownerID2).to.equal(record2.trackid)
-      receiver.verifyMessageStream(loc, record2)
+      receiver.verifyMessages(loc, record2)
     })
   })
 
@@ -135,7 +133,7 @@ describe('jQuery API tracker', () => {
       const ownerID = utils.getOwnerOf(div).getTrackID()
 
       expect(ownerID).to.equal(record.trackid)
-      receiver.verifyMessageStream(loc, record)
+      receiver.verifyMessages(loc, record)
     })
 
     it('should track on (general event) properly', () => {
@@ -147,7 +145,7 @@ describe('jQuery API tracker', () => {
       const ownerID = utils.getOwnerOf(div).getTrackID()
 
       expect(ownerID).to.equal(record.trackid)
-      receiver.verifyMessageStream(loc, record)
+      receiver.verifyMessages(loc, record)
     })
 
     it('should track click (explicit event) properly', () => {
@@ -159,7 +157,7 @@ describe('jQuery API tracker', () => {
       const ownerID = utils.getOwnerOf(div).getTrackID()
 
       expect(ownerID).to.equal(record.trackid)
-      receiver.verifyMessageStream(loc, record)
+      receiver.verifyMessages(loc, record)
     })
 
     it('should track multiple targets of event action properly', () => {
@@ -174,14 +172,14 @@ describe('jQuery API tracker', () => {
       const ownerID1 = utils.getOwnerOf(div1).getTrackID()
 
       expect(ownerID1).to.equal(record1.trackid)
-      receiver.verifyMessageStream(loc, record1)
+      receiver.verifyMessages(loc, record1)
 
       // for div2
       const record2 = utils.createRecord('2', ActionType.Event)
       const ownerID2 = utils.getOwnerOf(div2).getTrackID()
 
       expect(ownerID2).to.equal(record2.trackid)
-      receiver.verifyMessageStream(loc, record2)
+      receiver.verifyMessages(loc, record2)
     })
   })
 
@@ -200,7 +198,7 @@ describe('jQuery API tracker', () => {
       const ownerID = utils.getOwnerOf(parent).getTrackID()
 
       expect(ownerID).to.equal(record.trackid)
-      receiver.verifyMessageStream(loc, record)
+      receiver.verifyMessages(loc, record)
     })
 
     it('should track append properly', () => {
@@ -213,7 +211,7 @@ describe('jQuery API tracker', () => {
       const ownerID = utils.getOwnerOf(parent).getTrackID()
 
       expect(ownerID).to.equal(record.trackid)
-      receiver.verifyMessageStream(loc, record)
+      receiver.verifyMessages(loc, record)
     })
 
     it('should track multiple targets of node action properly', () => {
@@ -229,14 +227,14 @@ describe('jQuery API tracker', () => {
       const ownerID1 = utils.getOwnerOf(parent1).getTrackID()
 
       expect(ownerID1).to.equal(record1.trackid)
-      receiver.verifyMessageStream(loc, record1)
+      receiver.verifyMessages(loc, record1)
 
       // for parent2
       const record2 = utils.createRecord('2', ActionType.Node)
       const ownerID2 = utils.getOwnerOf(parent2).getTrackID()
 
       expect(ownerID2).to.equal(record2.trackid)
-      receiver.verifyMessageStream(loc, record2)
+      receiver.verifyMessages(loc, record2)
     })
   })
 
@@ -250,7 +248,7 @@ describe('jQuery API tracker', () => {
       const ownerID = utils.getOwnerOf(div).getTrackID()
 
       expect(ownerID).to.equal(record.trackid)
-      receiver.verifyMessageStream(loc, record)
+      receiver.verifyMessages(loc, record)
     })
 
     it('should track css setter properly', () => {
@@ -262,7 +260,7 @@ describe('jQuery API tracker', () => {
       const ownerID = utils.getOwnerOf(div).getTrackID()
 
       expect(ownerID).to.equal(record.trackid)
-      receiver.verifyMessageStream(loc, record)
+      receiver.verifyMessages(loc, record)
     })
 
     it('should not track css getter', () => {
@@ -272,9 +270,8 @@ describe('jQuery API tracker', () => {
       receiver.reset()
 
       $(div).css('background-color')
-      const loc = utils.getPrevLineSourceLocation()
 
-      receiver.verifyNoRecordMessageStream()
+      receiver.verifyNoMessage()
     })
 
     it('should track prop setter (class) properly', () => {
@@ -286,16 +283,15 @@ describe('jQuery API tracker', () => {
       const ownerID = utils.getOwnerOf(div).getTrackID()
 
       expect(ownerID).to.equal(record.trackid)
-      receiver.verifyMessageStream(loc, record)
+      receiver.verifyMessages(loc, record)
     })
 
     it('should not track prop getter (class)', () => {
       const div = document.createElement('div')
 
       $(div).prop('class')
-      const loc = utils.getPrevLineSourceLocation()
 
-      receiver.verifyNoRecordMessageStream()
+      receiver.verifyNoMessage()
     })
 
     it('should track prop setter (style) properly', () => {
@@ -307,16 +303,15 @@ describe('jQuery API tracker', () => {
       const ownerID = utils.getOwnerOf(div).getTrackID()
 
       expect(ownerID).to.equal(record.trackid)
-      receiver.verifyMessageStream(loc, record)
+      receiver.verifyMessages(loc, record)
     })
 
     it('should not track prop getter (style)', () => {
       const div = document.createElement('div')
 
       $(div).prop('style')
-      const loc = utils.getPrevLineSourceLocation()
 
-      receiver.verifyNoRecordMessageStream()
+      receiver.verifyNoMessage()
     })
 
     it('should track show properly', () => {
@@ -331,7 +326,7 @@ describe('jQuery API tracker', () => {
       const ownerID = utils.getOwnerOf(div).getTrackID()
 
       expect(ownerID).to.equal(record.trackid)
-      receiver.verifyMessageStream(loc, record)
+      receiver.verifyMessages(loc, record)
     })
 
     it('should track hide properly', () => {
@@ -343,7 +338,7 @@ describe('jQuery API tracker', () => {
       const ownerID = utils.getOwnerOf(div).getTrackID()
 
       expect(ownerID).to.equal(record.trackid)
-      receiver.verifyMessageStream(loc, record)
+      receiver.verifyMessages(loc, record)
     })
 
     it('should track toggle properly', () => {
@@ -355,7 +350,7 @@ describe('jQuery API tracker', () => {
       const ownerID = utils.getOwnerOf(div).getTrackID()
 
       expect(ownerID).to.equal(record.trackid)
-      receiver.verifyMessageStream(loc, record)
+      receiver.verifyMessages(loc, record)
     })
 
     it('should track multiple targets of style action properly', () => {
@@ -370,14 +365,14 @@ describe('jQuery API tracker', () => {
       const ownerID1 = utils.getOwnerOf(div1).getTrackID()
 
       expect(ownerID1).to.equal(record1.trackid)
-      receiver.verifyMessageStream(loc, record1)
+      receiver.verifyMessages(loc, record1)
 
       // for div2
       const record2 = utils.createRecord('2', ActionType.Style)
       const ownerID2 = utils.getOwnerOf(div2).getTrackID()
 
       expect(ownerID2).to.equal(record2.trackid)
-      receiver.verifyMessageStream(loc, record2)
+      receiver.verifyMessages(loc, record2)
     })
   })
 
@@ -395,7 +390,7 @@ describe('jQuery API tracker', () => {
           trackid: owner.getTrackID(),
           type: ActionType.Style
         }
-        receiver.verifyMessageStream(loc, record)
+        receiver.verifyMessages(loc, record)
         done()
       })
     })
@@ -413,7 +408,7 @@ describe('jQuery API tracker', () => {
           trackid: owner.getTrackID(),
           type: ActionType.Style
         }
-        receiver.verifyMessageStream(loc, record)
+        receiver.verifyMessages(loc, record)
         done()
       })
     })
@@ -434,7 +429,7 @@ describe('jQuery API tracker', () => {
           trackid: owner.getTrackID(),
           type: ActionType.Style
         }
-        receiver.verifyMessageStream(loc, record)
+        receiver.verifyMessages(loc, record)
         done()
       })
     })
@@ -455,7 +450,7 @@ describe('jQuery API tracker', () => {
           trackid: owner.getTrackID(),
           type: ActionType.Style
         }
-        receiver.verifyMessageStream(loc, record)
+        receiver.verifyMessages(loc, record)
         done()
       })
     })
@@ -480,7 +475,7 @@ describe('jQuery API tracker', () => {
             trackid: owner.getTrackID(),
             type: ActionType.Style
           }
-          receiver.verifyMessageStream(loc, record)
+          receiver.verifyMessages(loc, record)
           done()
         })
     })
@@ -500,7 +495,7 @@ describe('jQuery API tracker', () => {
         trackid: owner1.getTrackID(),
         type: ActionType.Style
       }
-      receiver.verifyMessageStream(loc1, record1)
+      receiver.verifyMessages(loc1, record1)
       receiver.reset()
 
       // for div2
@@ -518,7 +513,7 @@ describe('jQuery API tracker', () => {
           trackid: owner2.getTrackID(),
           type: ActionType.Style
         }
-        receiver.verifyMessageStream(loc2, record2)
+        receiver.verifyMessages(loc2, record2)
         done()
       }, 10)
     })
