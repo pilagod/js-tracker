@@ -1,35 +1,15 @@
 /// <reference path='../../types/RecordMessage.d.ts'/>
 
-import ActionType from '../../public/ActionType'
-import MessageBroker, { ISubscriber } from '../../private/MessageBroker'
-import OwnerManager from '../../private/OwnerManager'
+import AnimationController from './trackerHelpers'
 import { recordWrapper } from '../utils'
 
-class AnimationOnFirstTickAddStyleFilter implements ISubscriber {
-  private element: Element
-
-  constructor(element: Element) {
-    this.element = element
-  }
-
-  public flush(messages: RecordMessage[]) {
-    const owner = OwnerManager.getOwner(this.element)
-
-    if (!owner.hasTrackID()) {
-      return
-    }
-    MessageBroker.addFilter(owner.getTrackID(), ActionType.Style)
-    MessageBroker.unsubscribe(this)
-  }
+export default function main(jquery) {
+  trackGeneralCases(jquery)
+  trackAnimation(jquery)
 }
-const SIMULT_ANIMATION = 1000
-const SymbolAnimation = Symbol('Animation')
-const trackedApis = ['addClass', 'after', 'ajaxComplete', 'ajaxError', 'ajaxSend', 'ajaxStart', 'ajaxStop', 'ajaxSuccess', 'animate', 'append', 'appendTo', 'attr', 'before', 'bind', 'blur', 'change', 'click', 'contextmenu', 'css', 'dblclick', 'delegate', 'detach', 'die', 'empty', 'error', 'fadeIn', 'fadeOut', 'fadeTo', 'fadeToggle', 'focus', 'focusin', 'focusout', 'height', 'hide', 'hover', 'html', 'innerHeight', 'innerWidth', 'insertAfter', 'insertBefore', 'keydown', 'keypress', 'keyup', 'live', 'load', 'mousedown', 'mouseenter', 'mouseleave', 'mousemove', 'mouseout', 'mouseover', 'mouseup', 'off', 'offset', 'on', 'one', 'outerHeight', 'outerWidth', 'prepend', 'prependTo', 'prop', 'ready', 'remove', 'removeAttr', 'removeClass', 'removeProp', 'replaceAll', 'replaceWith', 'resize', 'scroll', 'scrollLeft', 'scrollTop', 'select', 'show', 'slideDown', 'slideToggle', 'slideUp', 'submit', 'text', 'toggle', 'toggleClass', 'trigger', 'triggerHandler', 'unbind', 'undelegate', 'unload', 'unwrap', 'val', 'width', 'wrap', 'wrapAll', 'wrapInner']
-const untrackedAnimations: { [animid: number]: RecordSource[] } = {}
 
-let animationID = 0
-
-export default (jquery) => {
+function trackGeneralCases(jquery) {
+  const trackedApis = ['addClass', 'after', 'ajaxComplete', 'ajaxError', 'ajaxSend', 'ajaxStart', 'ajaxStop', 'ajaxSuccess', 'animate', 'append', 'appendTo', 'attr', 'before', 'bind', 'blur', 'change', 'click', 'contextmenu', 'css', 'dblclick', 'delegate', 'detach', 'die', 'empty', 'error', 'fadeIn', 'fadeOut', 'fadeTo', 'fadeToggle', 'focus', 'focusin', 'focusout', 'height', 'hide', 'hover', 'html', 'innerHeight', 'innerWidth', 'insertAfter', 'insertBefore', 'keydown', 'keypress', 'keyup', 'live', 'load', 'mousedown', 'mouseenter', 'mouseleave', 'mousemove', 'mouseout', 'mouseover', 'mouseup', 'off', 'offset', 'on', 'one', 'outerHeight', 'outerWidth', 'prepend', 'prependTo', 'prop', 'ready', 'remove', 'removeAttr', 'removeClass', 'removeProp', 'replaceAll', 'replaceWith', 'resize', 'scroll', 'scrollLeft', 'scrollTop', 'select', 'show', 'slideDown', 'slideToggle', 'slideUp', 'submit', 'text', 'toggle', 'toggleClass', 'trigger', 'triggerHandler', 'unbind', 'undelegate', 'unload', 'unwrap', 'val', 'width', 'wrap', 'wrapAll', 'wrapInner']
   // @NOTE: never wrap init !!
   trackedApis.map((api) => {
     jquery.prototype[api] = ((actionFunc) => {
@@ -40,116 +20,79 @@ export default (jquery) => {
       }
     })(jquery.prototype[api])
   })
+}
+
+function trackAnimation(jquery) {
   // @NOTE: process of animation
-  // queue -> speed -> queue ? wait : dequeue -> stop ? null : speed.complete -> dequeue
+  // queue -> speed -> is processing ? wait : dequeue -> animating ? wait : timer -> stop ? null : speed.complete -> dequeue -> next animation
+  trackAnimationEntryPoint(jquery)
+  trackAnimationExitPoint(jquery)
+}
 
-  // @TODO: save wrap in queue
-  jquery.prototype.queue = ((queue) => {
-    return function (type, data) {
-      if (!MessageBroker.isEmpty()) {
-        const source = MessageBroker.getCurrentSource()
+function trackAnimationEntryPoint(jquery) {
+  trackQueue(jquery.prototype.queue)
+  trackTimer(jquery.fx.timer)
 
-        data = new Proxy(data, {
-          apply: function (target, thisArg, argumentList) {
-            const shouldReproduce = MessageBroker.isEmpty()
-
-            if (shouldReproduce) {
-              MessageBroker.send({ state: 'record_start', data: source })
-            }
-            const result = target.apply(thisArg, argumentList)
-
-            if (shouldReproduce) {
-              MessageBroker.send({ state: 'record_end', data: source })
-            }
-            return result
-          }
-        })
-
-        this.each(function () {
-          const element = this
-          const animid = element[SymbolAnimation] || (element[SymbolAnimation] = (animationID++ % SIMULT_ANIMATION) + 1)
-
-          if (!untrackedAnimations.hasOwnProperty(animid)) {
-            untrackedAnimations[animid] = []
-          }
-          untrackedAnimations[animid].push(source)
-        })
-      }
-      return queue.call(this, type, data)
-    }
-  })(jquery.prototype.queue)
-
-  jquery.fx.timer = ((fxTimer) => {
-    return function (timer) {
-      const element = timer.elem
-      const animid = element[SymbolAnimation]
-
-      if (!animid) {
-        return fxTimer.call(this, timer)
-      }
-      if (untrackedAnimations[animid].length === 0) {
-        delete element[SymbolAnimation]
-        return fxTimer.call(this, timer)
-      }
-      MessageBroker.subscribe(
-        new AnimationOnFirstTickAddStyleFilter(element)
-      )
-      let shouldTrack = true
-      const source = untrackedAnimations[animid].shift()
-
-      if (untrackedAnimations[animid].length === 0) {
-        delete element[SymbolAnimation]
-      }
-      const proxyTimer = new Proxy(timer, {
-        apply: function (target, thisArg, argumentList) {
-          const shouldReproduce = MessageBroker.isEmpty()
-
-          if (shouldTrack && shouldReproduce) {
-            MessageBroker.send({ state: 'record_start', data: source })
-          }
-          const result = target.apply(thisArg, argumentList)
-
-          if (shouldTrack && shouldReproduce) {
-            MessageBroker.send({ state: 'record_end', data: source })
-          }
-          shouldTrack = false
-          return result
-        }
+  function trackQueue(queue) {
+    jquery.prototype.queue = function (type, doAnimation) {
+      this.each(function (this: Element) {
+        AnimationController.addSourceToUntrackList(this)
       })
-      return fxTimer.call(this, proxyTimer)
+      // @NOTE: first time call doAnimation will do many other operations,
+      // thus doAnimation also need to be wrapped
+      return queue.call(
+        this,
+        type,
+        AnimationController.wrapAnimWithSourceMessagesOnce(
+          doAnimation,
+          AnimationController.getSourceFromMessageBroker()
+        )
+      )
     }
-  })(jquery.fx.timer)
+  }
 
-  jquery.prototype.stop = ((stop) => {
-    return function (...args) {
+  function trackTimer(fxTimer) {
+    jquery.fx.timer = function (timer) {
+      // @NOTE: timer is where animation actually executing
+      AnimationController.addAnimationFilterAfterFirstTick(timer.elem)
+      return fxTimer.call(
+        this,
+        AnimationController.wrapAnimWithSourceMessagesOnce(
+          timer,
+          AnimationController.getSourceFromUntrackList(timer.elem)
+        )
+      )
+    }
+  }
+}
+
+function trackAnimationExitPoint(jquery) {
+  trackStop(jquery.prototype.stop)
+  trackSpeed(jquery.speed)
+
+  function trackStop(stop) {
+    jquery.prototype.stop = function (...args) {
       const result = stop.apply(this, args)
 
-      this.each(function () {
-        const owner = OwnerManager.getOwner(this)
-
-        if (owner.hasTrackID()) {
-          MessageBroker.removeFilter(owner.getTrackID(), ActionType.Style)
-        }
+      this.each(function (this: Element) {
+        AnimationController.clearAnimation(this)
       })
       return result
     }
-  })(jquery.prototype.stop)
+  }
 
-  jquery.speed = ((speed) => {
-    return function (...args) {
+  function trackSpeed(speed) {
+    jquery.speed = function (...args) {
       const opt = speed.apply(this, args)
-
+      // @NOTE: stop api will skip opt.complete
       opt.complete = new Proxy(opt.complete, {
         apply: function (target, thisArg, argumentList) {
-          const owner = OwnerManager.getOwner(thisArg)
-
-          if (owner.hasTrackID()) {
-            MessageBroker.removeFilter(owner.getTrackID(), ActionType.Style)
-          }
+          AnimationController.clearAnimation(thisArg)
           return target.apply(thisArg, argumentList)
         }
       })
       return opt
     }
-  })(jquery.speed)
+  }
 }
+
