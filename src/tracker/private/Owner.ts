@@ -15,7 +15,10 @@ export default class Owner implements IOwner {
     constructor() {
       super(null)
     }
-    isShadow() {
+    public getTrackID() {
+      return undefined
+    }
+    public isShadow() {
       return false
     }
   })()

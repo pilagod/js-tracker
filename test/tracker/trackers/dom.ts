@@ -230,6 +230,36 @@ describe('HTML DOM API tracker', () => {
         receiver.verifyMessages(loc, record)
       })
 
+      it('should track setAttributeNode{NS} (attr has no value scenario)', () => {
+        const div = document.createElement('div')
+        const idAttr = document.createAttribute('id')
+
+        // pre-set trackid on div, for more details, please checkout 
+        // [src/tracker/trackers/dom/trackerHelpers.ts] decorators.setAttributeNode
+        div.accessKey = 'accessKey'
+        receiver.reset()
+
+        // test set no owner attribute
+        div.setAttributeNode(idAttr)
+        const loc1 = utils.getPrevLineSourceLocation()
+        const record1 = utils.createRecord('1', ActionType.Attr)
+        const ownerID1 = utils.getOwnerOf(div).getTrackID()
+
+        expect(ownerID1).to.equal(record1.trackid)
+        receiver.verifyMessages(loc1, record1)
+
+        receiver.reset()
+
+        // test set value after attach to element
+        idAttr.value = 'id'
+        const loc2 = utils.getPrevLineSourceLocation()
+        const record2 = utils.createRecord('1', ActionType.Attr)
+        const ownerID2 = utils.getOwnerOf(idAttr).getTrackID()
+
+        expect(ownerID2).to.equal(record2.trackid)
+        receiver.verifyMessages(loc2, record2)
+      })
+
       it('should not track setAttributeNode{NS} (error scenario)', () => {
         const div = document.createElement('div')
         const div2 = document.createElement('div')
