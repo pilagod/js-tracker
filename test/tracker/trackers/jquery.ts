@@ -93,7 +93,7 @@ describe('jQuery API tracker', () => {
 
       $(div).click()
       const loc = utils.getPrevLineSourceLocation()
-      const record = utils.createRecord('1', ActionType.Behav)
+      const record = utils.createRecord('1', ActionType.Behav | ActionType.Event)
       const ownerID = utils.getOwnerOf(div).getTrackID()
 
       expect(ownerID).to.equal(record.trackid)
@@ -108,14 +108,14 @@ describe('jQuery API tracker', () => {
       const loc = utils.getPrevLineSourceLocation()
 
       // for div1
-      const record1 = utils.createRecord('1', ActionType.Behav)
+      const record1 = utils.createRecord('1', ActionType.Behav | ActionType.Event)
       const ownerID1 = utils.getOwnerOf(div1).getTrackID()
 
       expect(ownerID1).to.equal(record1.trackid)
       receiver.verifyMessages(loc, record1)
 
       // for div2
-      const record2 = utils.createRecord('2', ActionType.Behav)
+      const record2 = utils.createRecord('2', ActionType.Behav | ActionType.Event)
       const ownerID2 = utils.getOwnerOf(div2).getTrackID()
 
       expect(ownerID2).to.equal(record2.trackid)

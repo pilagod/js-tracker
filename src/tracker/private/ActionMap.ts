@@ -143,9 +143,9 @@ const ActionMap: {[target in Target]: object} = {
 
     /* methods */
 
-    'blur': Behav,
-    'click': Behav,
-    'focus': Behav,
+    'blur': Behav | Event,
+    'click': Behav | Event,
+    'focus': Behav | Event,
     'forceSpellCheck': Behav,
   },
   'Element': {
@@ -225,9 +225,9 @@ const ActionMap: {[target in Target]: object} = {
     // https://developer.mozilla.org/zh-TW/docs/Web/API/EventTarget
 
     /* methods */
+    'dispatchEvent': Behav | Event,
 
     'addEventListener': Event,
-    'dispatchEvent': Event,
     'removeEventListener': Event,
   },
   'Attr': {

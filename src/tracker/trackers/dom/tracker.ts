@@ -105,6 +105,7 @@ function trackGeneralCases(): void {
 function trackHTMLElementAnomalies(): void {
   trackDataset()
   trackStyle()
+  trackBehaviors()
 
   function trackDataset(): void {
     trackTemplate({
@@ -121,6 +122,17 @@ function trackHTMLElementAnomalies(): void {
       action: 'style',
       decorator: decorators.CSSStyleDeclaration,
       getter: true
+    })
+  }
+
+  function trackBehaviors() {
+    ['blur', 'click', 'focus'].map((behav) => {
+      trackTemplate({
+        target: 'HTMLElement',
+        action: behav,
+        decorator: decorators.trigger,
+        getter: true
+      })
     })
   }
 }

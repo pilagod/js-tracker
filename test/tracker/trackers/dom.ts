@@ -85,13 +85,41 @@ describe('HTML DOM API tracker', () => {
     it('should track its method call', () => {
       const div = document.createElement('div')
 
-      div.click()
+      div.focus()
       const loc = utils.getPrevLineSourceLocation()
-      const record = utils.createRecord('1', ActionType.Behav)
+      const record = utils.createRecord('1', ActionType.Behav | ActionType.Event)
       const ownerID = utils.getOwnerOf(div).getTrackID()
 
       expect(ownerID).to.equal(record.trackid)
       receiver.verifyMessages(loc, record)
+    })
+
+    it('should track behavior (e.g., click, focus) and actions triggered by it properly', () => {
+      const div1 = document.createElement('div')
+      const div2 = document.createElement('div')
+
+      div2.addEventListener('click', () => {
+        div1.style.color = 'red'
+      })
+      const loc1 = utils.getPrevLineSourceLocation(-1)
+      const record1 = utils.createRecord('2', ActionType.Style)
+
+      receiver.reset()
+
+      div2.click()
+      const loc2 = utils.getPrevLineSourceLocation()
+      const record2 = utils.createRecord('1', ActionType.Behav | ActionType.Event)
+
+      const ownerID1 = utils.getOwnerOf(div1.style).getTrackID()
+      const ownerID2 = utils.getOwnerOf(div2).getTrackID()
+
+      expect(ownerID1).to.equal(record1.trackid)
+      expect(ownerID2).to.equal(record2.trackid)
+
+      receiver.verifyListOfMessages([
+        { loc: loc1, data: record1 },
+        { loc: loc2, data: record2 }
+      ])
     })
   })
 

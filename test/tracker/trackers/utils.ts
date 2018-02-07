@@ -7,12 +7,12 @@ import {
   detachListenerFrom
 } from '../../../src/tracker/private/NativeUtils'
 
-export function getPrevLineSourceLocation(): SourceLocation {
+export function getPrevLineSourceLocation(offset: number = 0): SourceLocation {
   const loc = StackTrace.getSync()[1]
 
   return {
     scriptUrl: loc.fileName,
-    lineNumber: loc.lineNumber - 1,
+    lineNumber: loc.lineNumber - 1 + offset,
     columnNumber: loc.columnNumber
   }
 }
@@ -54,12 +54,30 @@ export class TrackerMessageReceiver {
     this.messages = []
   }
 
-  public verifyMessages(loc: SourceLocation, data: RecordData | RecordData[]) {
-    this.verifySourceMessage(loc)
+  public verifyMessages(
+    loc: SourceLocation,
+    data: RecordData,
+    messages: RecordMessage[] = this.messages
+  ) {
+    this.verifySourceMessage(loc, messages);
 
-    Array.prototype.concat.call([], data).map((datum) => {
+    [].concat(data).map((datum) => {
       const record = { state: 'record', data: datum }
-      expect(this.messages).to.include(record)
+      expect(messages).to.include(record)
+    })
+  }
+
+  public verifyListOfMessages(list: Array<{ loc: SourceLocation, data: RecordData }>) {
+    const chunks = this.sliceMessagesToChunks(this.messages)
+
+    expect(
+      chunks.length,
+      'length of message chunks received is not equal to length of list with expected chunks'
+    ).to.equal(list.length)
+
+    chunks.map((chunk, index) => {
+      const { loc, data } = list[index]
+      this.verifyMessages(loc, data, chunk)
     })
   }
 
@@ -69,20 +87,48 @@ export class TrackerMessageReceiver {
 
   /* private */
 
-  private verifySourceMessage(loc: SourceLocation) {
-    const start = <RecordSourceMessage>this.messages[0]
+  private verifySourceMessage(
+    loc: SourceLocation,
+    messages: RecordMessage[]
+  ) {
+    const start = <RecordSourceMessage>messages[0]
     expect(start.state).to.equal('record_start')
     expect(start.data.loc.scriptUrl).to.equal(loc.scriptUrl)
     expect(start.data.loc.lineNumber).to.equal(loc.lineNumber)
 
-    const end = <RecordSourceMessage>this.messages.slice(-1)[0]
+    const end = <RecordSourceMessage>messages.slice(-1)[0]
     expect(end.state).to.equal('record_end')
     expect(end.data.loc.scriptUrl).to.equal(loc.scriptUrl)
     expect(end.data.loc.lineNumber).to.equal(loc.lineNumber)
   }
 
+  private sliceMessagesToChunks(messages: RecordMessage[]) {
+    const result = []
+
+    let count = 0
+    let head = -1
+
+    for (let i = 0; i < this.messages.length; i++) {
+      switch (this.messages[i].state) {
+        case 'record_start':
+          if (count === 0) {
+            head = i
+          }
+          count += 1
+          break
+
+        case 'record_end':
+          count -= 1
+          if (count === 0) {
+            result.push(this.messages.slice(head, i + 1))
+          }
+          break
+      }
+    }
+    return result
+  }
+
   private messageHandler = (event: CustomEvent) => {
-    // @NOTE: cannot concat array of objects
-    this.messages = event.detail.messages
+    this.messages = this.messages.concat(event.detail.messages)
   }
 }

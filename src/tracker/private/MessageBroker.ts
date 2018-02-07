@@ -8,6 +8,7 @@ class MessageBroker {
   private messageSubscriber = new MessageSubscriber()
 
   private source: RecordSource = null
+  private stack: (RecordMessage[])[] = []
   private messages: RecordMessage[] = []
 
   /* public */
@@ -18,6 +19,15 @@ class MessageBroker {
 
   public getCurrentSource(): RecordSource {
     return this.source
+  }
+
+  public stackMessages() {
+    this.stack.push(this.clearMessages())
+  }
+
+  public restoreMessages() {
+    this.messages = this.stack.pop()
+    this.source = (<RecordSourceMessage>this.messages[0]).data
   }
 
   public subscribe(subscriber: ISubscriber) {
@@ -80,7 +90,10 @@ class MessageBroker {
 
   private clearMessages(): RecordMessage[] {
     const messages = this.messages
+
     this.messages = []
+    this.source = null
+
     return messages
   }
 

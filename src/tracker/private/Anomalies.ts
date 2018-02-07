@@ -1,7 +1,11 @@
 const Anomalies = {
   'HTMLElement': {
     'dataset': true,
-    'style': true
+    'style': true,
+
+    'blur': true,
+    'click': true,
+    'focus': true
   },
   'Element': {
     'attributes': true,

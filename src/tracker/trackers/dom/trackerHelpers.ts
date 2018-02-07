@@ -27,9 +27,21 @@ export const decorators: { [name: string]: Decorator } = {
     return function (...args) {
       return wrapActionWithSourceMessages(() => {
         const result = actionFunc.call(this, ...args)
-        const info: RecordInfo = { caller: this, target, action, args }
+        record({ caller: this, target, action, args })
+        return result
+      })
+    }
+  },
 
-        record(info)
+  trigger: (target, action, actionFunc) => {
+    return function () {
+      return wrapActionWithSourceMessages(() => {
+        MessageBroker.stackMessages()
+
+        const result = actionFunc.call(this)
+
+        MessageBroker.restoreMessages()
+        record({ caller: this, target, action })
 
         return result
       })
@@ -49,7 +61,6 @@ export const decorators: { [name: string]: Decorator } = {
           info.merge = OwnerManager.getOwner(attr).getTrackID()
         }
         record(info)
-
         return result
       })
     }
@@ -64,10 +75,7 @@ export const decorators: { [name: string]: Decorator } = {
           attachAttr(document.createElement(ShadowElement.TagName), this)
         }
         const result = setter.call(this, value)
-        const info: RecordInfo = { caller: this, target, action }
-
-        record(info)
-
+        record({ caller: this, target, action })
         return result
       })
     }
