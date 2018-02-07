@@ -3,6 +3,7 @@
 /// <reference path='./types/ContentscriptHelpers.d.ts'/>
 /// <reference path='./types/Message.d.ts'/>
 
+import { match } from '../tracker/public/SourceLocation'
 import { isTestEnv } from './utils'
 
 class ContentscriptController {
@@ -38,7 +39,7 @@ class ContentscriptController {
         break
 
       case 'record_end':
-        if (this.doesSourceMatch(message.data)) {
+        if (match(this.source.loc, message.data.loc)) {
           this.source = null
         }
         break
@@ -94,15 +95,6 @@ class ContentscriptController {
     console.log('response:', response)
     console.log('-------------------------------')
     console.groupEnd()
-  }
-
-  private doesSourceMatch(source: RecordSource) {
-    const loc1 = this.source.loc
-    const loc2 = source.loc
-
-    return loc1.scriptUrl === loc2.scriptUrl
-      && loc1.lineNumber === loc2.lineNumber
-      && loc1.columnNumber === loc2.columnNumber
   }
 }
 

@@ -1,5 +1,6 @@
 /// <reference path='../types/RecordMessage.d.ts'/>
 
+import { match } from '../public/SourceLocation'
 import { sendMessagesToContentScript } from './NativeUtils'
 
 class MessageBroker {
@@ -57,7 +58,7 @@ class MessageBroker {
         break
 
       case 'record_end':
-        if (this.doesSourceMatch(message.data)) {
+        if (match(this.source.loc, message.data.loc)) {
           this.flush()
         }
         break
@@ -65,15 +66,6 @@ class MessageBroker {
   }
 
   /* private */
-
-  private doesSourceMatch(source: RecordSource): boolean {
-    const loc1 = this.source.loc
-    const loc2 = source.loc
-
-    return loc1.scriptUrl === loc2.scriptUrl
-      && loc1.lineNumber === loc2.lineNumber
-      && loc1.columnNumber === loc2.columnNumber
-  }
 
   private flush() {
     const messages = this.clearMessages()
