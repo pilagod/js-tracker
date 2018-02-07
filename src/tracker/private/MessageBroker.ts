@@ -4,11 +4,11 @@ import { sendMessagesToContentScript } from './NativeUtils'
 
 class MessageBroker {
 
-  private messageFilter = new MessageFilter()
-  private messageSubscriber = new MessageSubscriber()
+  private filters = new MessageFilter()
+  private subscribers = new MessageSubscriber()
 
   private source: RecordSource = null
-  private stack: (RecordMessage[])[] = []
+  private stack: RecordMessage[][] = []
   private messages: RecordMessage[] = []
 
   /* public */
@@ -31,19 +31,19 @@ class MessageBroker {
   }
 
   public subscribe(subscriber: ISubscriber) {
-    this.messageSubscriber.add(subscriber)
+    this.subscribers.add(subscriber)
   }
 
   public unsubscribe(subscriber: ISubscriber) {
-    this.messageSubscriber.remove(subscriber)
+    this.subscribers.remove(subscriber)
   }
 
   public addFilter(trackid: TrackID, type: ActionType) {
-    this.messageFilter.add(trackid, type)
+    this.filters.add(trackid, type)
   }
 
   public removeFilter(trackid: TrackID, type: ActionType) {
-    this.messageFilter.remove(trackid, type)
+    this.filters.remove(trackid, type)
   }
 
   public send(message: RecordMessage) {
@@ -58,7 +58,6 @@ class MessageBroker {
 
       case 'record_end':
         if (this.doesSourceMatch(message.data)) {
-          this.source = null
           this.flush()
         }
         break
@@ -79,12 +78,12 @@ class MessageBroker {
   private flush() {
     const messages = this.clearMessages()
 
-    this.messageFilter.filter(messages)
+    this.filters.filter(messages)
 
-    if (!this.doesMessagesContainRecordData(messages)) {
+    if (!this.doMessagesHaveRecordData(messages)) {
       return
     }
-    this.messageSubscriber.flush(messages)
+    this.subscribers.flush(messages)
     sendMessagesToContentScript(messages)
   }
 
@@ -97,8 +96,8 @@ class MessageBroker {
     return messages
   }
 
-  private doesMessagesContainRecordData(messages: RecordMessage[]) {
-    return messages.filter((message) => message.state === 'record').length > 0
+  private doMessagesHaveRecordData(messages: RecordMessage[]) {
+    return messages.some((message) => message.state === 'record')
   }
 }
 
