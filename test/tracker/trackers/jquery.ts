@@ -148,6 +148,33 @@ describe('jQuery API tracker', () => {
         { loc: loc2, data: record2 }
       ])
     })
+
+    it('should track triggerHandler and actions triggered by it properly', () => {
+      const div = document.createElement('div')
+      // @NOTE: triggerHandler only trigger event registered by jquery 
+      $(div).on('click', () => {
+        div.style.color = 'red'
+      })
+      const loc1 = utils.getPrevLineSourceLocation(-1)
+      const record1 = utils.createRecord('1', ActionType.Style)
+
+      receiver.reset()
+
+      $(div).triggerHandler('click')
+      const loc2 = utils.getPrevLineSourceLocation()
+      const record2 = utils.createRecord('1', ActionType.Behav | ActionType.Event)
+
+      const ownerID1 = utils.getOwnerOf(div.style).getTrackID()
+      const ownerID2 = utils.getOwnerOf(div).getTrackID()
+
+      expect(ownerID1).to.equal(record1.trackid)
+      expect(ownerID2).to.equal(record2.trackid)
+
+      receiver.verifyListOfMessages([
+        { loc: loc1, data: record1 },
+        { loc: loc2, data: record2 }
+      ])
+    })
   })
 
   describe('Event action type', () => {

@@ -114,4 +114,4 @@ class AnimationController {
     return element[SymbolAnim] = (this.animid++ % AnimationController.MAX_ANIM_NUM + 1)
   }
 }
-export default new AnimationController()
+export const AnimController = new AnimationController

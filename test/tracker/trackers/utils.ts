@@ -69,7 +69,13 @@ export class TrackerMessageReceiver {
 
   public verifyListOfMessages(list: Array<{ loc: SourceLocation, data: RecordData }>) {
     const chunks = this.sliceMessagesToChunks(this.messages)
-
+    chunks.map((chunk, index) => {
+      console.log(`----- chunk ${index} -----`)
+      chunk.map((message) => {
+        console.log(message.state, message.data)
+      })
+      console.log(`----- chunk ${index} -----`)
+    })
     expect(
       chunks.length,
       'length of message chunks received is not equal to length of list with expected chunks'

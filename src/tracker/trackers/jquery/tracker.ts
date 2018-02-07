@@ -1,15 +1,23 @@
 /// <reference path='../../types/RecordMessage.d.ts'/>
 
-import AnimationController from './trackerHelpers'
+import MessageBroker from '../../private/MessageBroker';
+import OwnerManager from '../../private/OwnerManager'
 import { wrapActionWithSourceMessages } from '../utils'
+import { AnimController } from './trackerHelpers'
+import ActionType from '../../public/ActionType';
 
-export default function main(jquery) {
-  trackGeneralCases(jquery)
-  trackAnimation(jquery)
+let jquery
+
+export default function main(__jquery__) {
+  jquery = __jquery__
+
+  trackGeneralCases()
+  trackAnimation()
+  trackTriggerHandler(jquery.prototype.triggerHandler)
 }
 
-function trackGeneralCases(jquery) {
-  const trackedApis = ['addClass', 'after', 'ajaxComplete', 'ajaxError', 'ajaxSend', 'ajaxStart', 'ajaxStop', 'ajaxSuccess', 'animate', 'append', 'appendTo', 'attr', 'before', 'bind', 'blur', 'change', 'click', 'contextmenu', 'css', 'dblclick', 'delegate', 'detach', 'die', 'empty', 'error', 'fadeIn', 'fadeOut', 'fadeTo', 'fadeToggle', 'focus', 'focusin', 'focusout', 'height', 'hide', 'hover', 'html', 'innerHeight', 'innerWidth', 'insertAfter', 'insertBefore', 'keydown', 'keypress', 'keyup', 'live', 'load', 'mousedown', 'mouseenter', 'mouseleave', 'mousemove', 'mouseout', 'mouseover', 'mouseup', 'off', 'offset', 'on', 'one', 'outerHeight', 'outerWidth', 'prepend', 'prependTo', 'prop', 'ready', 'remove', 'removeAttr', 'removeClass', 'removeProp', 'replaceAll', 'replaceWith', 'resize', 'scroll', 'scrollLeft', 'scrollTop', 'select', 'show', 'slideDown', 'slideToggle', 'slideUp', 'submit', 'text', 'toggle', 'toggleClass', 'trigger', 'triggerHandler', 'unbind', 'undelegate', 'unload', 'unwrap', 'val', 'width', 'wrap', 'wrapAll', 'wrapInner']
+function trackGeneralCases() {
+  const trackedApis = ['addClass', 'after', 'ajaxComplete', 'ajaxError', 'ajaxSend', 'ajaxStart', 'ajaxStop', 'ajaxSuccess', 'animate', 'append', 'appendTo', 'attr', 'before', 'bind', 'blur', 'change', 'click', 'contextmenu', 'css', 'dblclick', 'delegate', 'detach', 'die', 'empty', 'error', 'fadeIn', 'fadeOut', 'fadeTo', 'fadeToggle', 'focus', 'focusin', 'focusout', 'height', 'hide', 'hover', 'html', 'innerHeight', 'innerWidth', 'insertAfter', 'insertBefore', 'keydown', 'keypress', 'keyup', 'live', 'load', 'mousedown', 'mouseenter', 'mouseleave', 'mousemove', 'mouseout', 'mouseover', 'mouseup', 'off', 'offset', 'on', 'one', 'outerHeight', 'outerWidth', 'prepend', 'prependTo', 'prop', 'ready', 'remove', 'removeAttr', 'removeClass', 'removeProp', 'replaceAll', 'replaceWith', 'resize', 'scroll', 'scrollLeft', 'scrollTop', 'select', 'show', 'slideDown', 'slideToggle', 'slideUp', 'submit', 'text', 'toggle', 'toggleClass', 'trigger', /*'triggerHandler',*/ 'unbind', 'undelegate', 'unload', 'unwrap', 'val', 'width', 'wrap', 'wrapAll', 'wrapInner']
   // @NOTE: never wrap init !!
   trackedApis.map((api) => {
     jquery.prototype[api] = ((actionFunc) => {
@@ -22,30 +30,30 @@ function trackGeneralCases(jquery) {
   })
 }
 
-function trackAnimation(jquery) {
+function trackAnimation() {
   // @NOTE: process of animation
   // queue -> speed -> is processing ? wait : dequeue -> animating ? wait : timer -> stop ? null : speed.complete -> dequeue -> next animation
-  trackAnimationEntryPoint(jquery)
-  trackAnimationExitPoint(jquery)
+  trackAnimationEntryPoint()
+  trackAnimationExitPoint()
 }
 
-function trackAnimationEntryPoint(jquery) {
+function trackAnimationEntryPoint() {
   trackQueue(jquery.prototype.queue)
   trackTimer(jquery.fx.timer)
 
   function trackQueue(queue) {
     jquery.prototype.queue = function (type, doAnimation) {
       this.each(function (this: Element) {
-        AnimationController.addUntrackSource(this)
+        AnimController.addUntrackSource(this)
       })
       // @NOTE: first time call doAnimation will do many other operations,
       // thus doAnimation also need to be wrapped
       return queue.call(
         this,
         type,
-        AnimationController.wrapAnimWithSourceMessagesOnce(
+        AnimController.wrapAnimWithSourceMessagesOnce(
           doAnimation,
-          AnimationController.getSourceFromMessageBroker()
+          AnimController.getSourceFromMessageBroker()
         )
       )
     }
@@ -54,19 +62,19 @@ function trackAnimationEntryPoint(jquery) {
   function trackTimer(fxTimer) {
     jquery.fx.timer = function (timer) {
       // @NOTE: timer is where animation actually executing
-      AnimationController.addAnimationFilterAfterFirstTick(timer.elem)
+      AnimController.addAnimationFilterAfterFirstTick(timer.elem)
       return fxTimer.call(
         this,
-        AnimationController.wrapAnimWithSourceMessagesOnce(
+        AnimController.wrapAnimWithSourceMessagesOnce(
           timer,
-          AnimationController.getUntrackSource(timer.elem)
+          AnimController.getUntrackSource(timer.elem)
         )
       )
     }
   }
 }
 
-function trackAnimationExitPoint(jquery) {
+function trackAnimationExitPoint() {
   trackStop(jquery.prototype.stop)
   trackSpeed(jquery.speed)
 
@@ -75,7 +83,7 @@ function trackAnimationExitPoint(jquery) {
       const result = stop.apply(this, args)
 
       this.each(function (this: Element) {
-        AnimationController.clearAnimation(this)
+        AnimController.clearAnimation(this)
       })
       return result
     }
@@ -87,7 +95,7 @@ function trackAnimationExitPoint(jquery) {
       // @NOTE: stop api will skip opt.complete
       opt.complete = new Proxy(opt.complete, {
         apply: function (target, thisArg, argumentList) {
-          AnimationController.clearAnimation(thisArg)
+          AnimController.clearAnimation(thisArg)
           return target.apply(thisArg, argumentList)
         }
       })
@@ -96,3 +104,27 @@ function trackAnimationExitPoint(jquery) {
   }
 }
 
+function trackTriggerHandler(triggerHandler) {
+  jquery.prototype.triggerHandler = function (...args) {
+    return wrapActionWithSourceMessages(() => {
+      MessageBroker.stackMessages()
+
+      const result = triggerHandler.apply(this, args)
+
+      MessageBroker.restoreMessages()
+
+      const owner = OwnerManager.getOwner(this[0])
+
+      if (!owner.hasTrackID()) {
+        owner.setTrackID()
+      }
+      MessageBroker.send({
+        state: 'record',
+        data: {
+          trackid: owner.getTrackID(),
+          type: ActionType.Behav | ActionType.Event
+        }
+      })
+    })
+  }
+}
