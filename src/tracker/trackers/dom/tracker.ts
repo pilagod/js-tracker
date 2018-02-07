@@ -14,6 +14,7 @@ export default function main() {
   trackGeneralCases()
   trackHTMLElementAnomalies()
   trackElementAnomalies()
+  trackEventTargetAnomalies()
   trackAttrAnomalies()
   trackNamedNodeMapAnomalies()
 }
@@ -181,6 +182,20 @@ function trackElementAnomalies(): void {
         decorator: decorators.setAttributeNode
       })
     }
+  }
+}
+
+/* trackEventAnomalies */
+
+function trackEventTargetAnomalies() {
+  trackDispatchEvent()
+
+  function trackDispatchEvent() {
+    trackTemplate({
+      target: 'EventTarget',
+      action: 'dispatchEvent',
+      decorator: decorators.trigger
+    })
   }
 }
 

@@ -34,11 +34,11 @@ export const decorators: { [name: string]: Decorator } = {
   },
 
   trigger: (target, action, actionFunc) => {
-    return function () {
+    return function (...args) {
       return wrapActionWithSourceMessages(() => {
         MessageBroker.stackMessages()
 
-        const result = actionFunc.call(this)
+        const result = actionFunc.call(this, ...args)
 
         MessageBroker.restoreMessages()
         record({ caller: this, target, action })

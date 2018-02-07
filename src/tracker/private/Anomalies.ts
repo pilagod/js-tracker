@@ -14,6 +14,9 @@ const Anomalies = {
     'setAttributeNode': true,
     'setAttributeNodeNS': true
   },
+  'EventTarget': {
+    'dispatchEvent': true
+  },
   'Attr': {
     'value': true
   },
