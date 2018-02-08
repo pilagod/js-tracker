@@ -88,6 +88,11 @@ describe('jQuery API tracker', () => {
   })
 
   describe('Behav action type', () => {
+    it('should have no error when no matched element', () => {
+      $(null).click()
+      expect(true).to.be.true
+    })
+
     it('should track click properly (native event listener)', () => {
       const div = document.createElement('div')
 

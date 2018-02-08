@@ -17,7 +17,7 @@ export default function main(__jquery__) {
 }
 
 function trackGeneralCases() {
-  const trackedApis = ['addClass', 'after', 'ajaxComplete', 'ajaxError', 'ajaxSend', 'ajaxStart', 'ajaxStop', 'ajaxSuccess', 'animate', 'append', 'appendTo', 'attr', 'before', 'bind', 'blur', 'change', 'click', 'contextmenu', 'css', 'dblclick', 'delegate', 'detach', 'die', 'empty', 'error', 'fadeIn', 'fadeOut', 'fadeTo', 'fadeToggle', 'focus', 'focusin', 'focusout', 'height', 'hide', 'hover', 'html', 'innerHeight', 'innerWidth', 'insertAfter', 'insertBefore', 'keydown', 'keypress', 'keyup', 'live', 'load', 'mousedown', 'mouseenter', 'mouseleave', 'mousemove', 'mouseout', 'mouseover', 'mouseup', 'off', 'offset', 'on', 'one', 'outerHeight', 'outerWidth', 'prepend', 'prependTo', 'prop', 'ready', 'remove', 'removeAttr', 'removeClass', 'removeProp', 'replaceAll', 'replaceWith', 'resize', 'scroll', 'scrollLeft', 'scrollTop', 'select', 'show', 'slideDown', 'slideToggle', 'slideUp', 'submit', 'text', 'toggle', 'toggleClass', 'unbind', 'undelegate', 'unload', 'unwrap', 'val', 'width', 'wrap', 'wrapAll', 'wrapInner']
+  const trackedApis = ['addClass', 'after', 'ajaxComplete', 'ajaxError', 'ajaxSend', 'ajaxStart', 'ajaxStop', 'ajaxSuccess', 'animate', 'append', 'appendTo', 'attr', 'before', 'bind', 'blur', 'change', 'click', 'contextmenu', 'css', 'dblclick', 'delegate', 'detach', 'die', 'empty', 'error', 'fadeIn', 'fadeOut', 'fadeTo', 'fadeToggle', 'focus', 'focusin', 'focusout', 'height', 'hide', 'hover', 'html', 'innerHeight', 'innerWidth', 'insertAfter', 'insertBefore', 'keydown', 'keypress', 'keyup', 'live', 'load', 'mousedown', 'mouseenter', 'mouseleave', 'mousemove', 'mouseout', 'mouseover', 'mouseup', 'off', 'offset', 'on', 'one', 'outerHeight', 'outerWidth', 'prepend', 'prependTo', 'prop', 'ready', 'remove', 'removeAttr', 'removeClass', 'removeProp', 'replaceAll', 'replaceWith', 'resize', 'scroll', 'scrollLeft', 'scrollTop', 'select', 'show', 'slideDown', 'slideToggle', 'slideUp', 'submit', 'text', 'toggle', 'toggleClass', 'trigger', 'triggerHandler', 'unbind', 'undelegate', 'unload', 'unwrap', 'val', 'width', 'wrap', 'wrapAll', 'wrapInner']
   // @NOTE: never wrap init !!
   trackedApis.map((api) => {
     jquery.prototype[api] = ((actionFunc) => {
@@ -106,7 +106,7 @@ function trackAnimationExitPoint() {
 
 function trackEventTriggers() {
   hookPropEventTriggered()
-  trackTriggers()
+  trackEventTrigger(jquery.event.trigger)
 
   function hookPropEventTriggered() {
     // @NOTE: trigger process:
@@ -134,11 +134,28 @@ function trackEventTriggers() {
     })
   }
 
-  function trackTriggers() {
+  function trackEventTrigger(trigger) {
     // @NOTE: all trigger methods, like click and mouseenter, are all based on trigger
-    ['trigger', 'triggerHandler'].map((trigger) => {
-      jquery.prototype[trigger] = trackTriggerFunc(jquery.prototype[trigger])
-    })
+    jquery.event.trigger = function (event, data, elem, onlyHandlers) {
+      return wrapActionWithSourceMessages(() => {
+        MessageBroker.stackMessages()
+        const result = trigger.call(this, event, data, elem, onlyHandlers)
+        MessageBroker.restoreMessages()
+
+        const owner = OwnerManager.getOwner(elem)
+
+        if (!owner.hasTrackID()) {
+          owner.setTrackID()
+        }
+        MessageBroker.send({
+          state: 'record',
+          data: {
+            trackid: owner.getTrackID(),
+            type: ActionType.Behav | ActionType.Event
+          }
+        })
+      })
+    }
   }
 }
 
@@ -148,6 +165,7 @@ function trackTriggerFunc(trigger: (...args: any[]) => any) {
       MessageBroker.stackMessages()
       const result = trigger.apply(this, args)
       MessageBroker.restoreMessages()
+
       const owner = OwnerManager.getOwner(this[0])
 
       if (!owner.hasTrackID()) {
