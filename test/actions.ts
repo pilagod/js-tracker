@@ -40,9 +40,9 @@ const actionsOfJS = ((urlOfJS) => [
 // actions in html
 const actionsOfHTML = ((urlOfHTML) => [
   // action[0] `div.innerText = 'js-tracker'`
-  createAction('1', ActionType.Attr | ActionType.Node, urlOfHTML, 21, 23, `div.innerText = 'js-tracker'`),
+  createAction('1', ActionType.Attr | ActionType.Node, urlOfHTML, 22, 23, `div.innerText = 'js-tracker'`),
   // action[1] `div.addEventListener('click', function () {console.log('clicked')})`
-  createAction('1', ActionType.Event, urlOfHTML, 26, 13, `div.addEventListener('click', function () { ... })`),
+  createAction('1', ActionType.Event, urlOfHTML, 27, 13, `div.addEventListener('click', function () { ... })`),
 ])(`/script.html`)
 
 // actions for minified html
