@@ -88,41 +88,85 @@ describe('jQuery API tracker', () => {
   })
 
   describe('Behav action type', () => {
-    it('should track click properly', () => {
+    it('should track click properly (native event listener)', () => {
       const div = document.createElement('div')
 
+      div.addEventListener('click', () => {
+        div.style.color = 'red'
+      })
+      const loc1 = utils.getPrevLineSourceLocation(-1)
+      const record1 = utils.createRecord('1', ActionType.Style)
+
+      receiver.reset()
+
       $(div).click()
-      const loc = utils.getPrevLineSourceLocation()
-      const record = utils.createRecord('1', ActionType.Behav | ActionType.Event)
-      const ownerID = utils.getOwnerOf(div).getTrackID()
+      const loc2 = utils.getPrevLineSourceLocation()
+      const record2 = utils.createRecord('1', ActionType.Behav | ActionType.Event)
 
-      expect(ownerID).to.equal(record.trackid)
-      receiver.verifyMessages(loc, record)
-    })
-
-    it('should track multiple targets of click properly', () => {
-      const div1 = document.createElement('div')
-      const div2 = document.createElement('div')
-
-      $(div1).add(div2).click()
-      const loc = utils.getPrevLineSourceLocation()
-
-      // for div1
-      const record1 = utils.createRecord('1', ActionType.Behav | ActionType.Event)
-      const ownerID1 = utils.getOwnerOf(div1).getTrackID()
+      const ownerID1 = utils.getOwnerOf(div.style).getTrackID()
+      const ownerID2 = utils.getOwnerOf(div).getTrackID()
 
       expect(ownerID1).to.equal(record1.trackid)
-      receiver.verifyMessages(loc, record1)
-
-      // for div2
-      const record2 = utils.createRecord('2', ActionType.Behav | ActionType.Event)
-      const ownerID2 = utils.getOwnerOf(div2).getTrackID()
-
       expect(ownerID2).to.equal(record2.trackid)
-      receiver.verifyMessages(loc, record2)
+      receiver.verifyListOfMessages([
+        { loc: loc1, data: record1 },
+        { loc: loc2, data: record2 },
+      ])
     })
 
-    it('should track trigger and actions triggered by it properly', () => {
+    it('should track click properly (jquery event listener)', () => {
+      const div = document.createElement('div')
+
+      $(div).on('click', () => {
+        div.style.color = 'red'
+      })
+      const loc1 = utils.getPrevLineSourceLocation(-1)
+      const record1 = utils.createRecord('1', ActionType.Style)
+
+      receiver.reset()
+
+      $(div).click()
+      const loc2 = utils.getPrevLineSourceLocation()
+      const record2 = utils.createRecord('1', ActionType.Behav | ActionType.Event)
+
+      const ownerID1 = utils.getOwnerOf(div.style).getTrackID()
+      const ownerID2 = utils.getOwnerOf(div).getTrackID()
+
+      expect(ownerID1).to.equal(record1.trackid)
+      expect(ownerID2).to.equal(record2.trackid)
+      receiver.verifyListOfMessages([
+        { loc: loc1, data: record1 },
+        { loc: loc2, data: record2 },
+      ])
+    })
+
+    it('should track mouseenter (and those have no native trigger method like click()) and actions triggered by it properly', () => {
+      const div = document.createElement('div')
+
+      $(div).on('mouseenter', () => {
+        div.style.color = 'red'
+      })
+      const loc1 = utils.getPrevLineSourceLocation(-1)
+      const record1 = utils.createRecord('1', ActionType.Style)
+
+      receiver.reset()
+
+      $(div).mouseenter()
+      const loc2 = utils.getPrevLineSourceLocation()
+      const record2 = utils.createRecord('1', ActionType.Behav | ActionType.Event)
+
+      const ownerID1 = utils.getOwnerOf(div.style).getTrackID()
+      const ownerID2 = utils.getOwnerOf(div).getTrackID()
+
+      expect(ownerID1).to.equal(record1.trackid)
+      expect(ownerID2).to.equal(record2.trackid)
+      receiver.verifyListOfMessages([
+        { loc: loc1, data: record1 },
+        { loc: loc2, data: record2 },
+      ])
+    })
+
+    it('should track trigger and actions triggered by it properly (add native event listener)', () => {
       const div = document.createElement('div')
 
       div.addEventListener('click', () => {

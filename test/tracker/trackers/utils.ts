@@ -7,29 +7,6 @@ import {
   detachListenerFrom
 } from '../../../src/tracker/private/NativeUtils'
 
-export function getPrevLineSourceLocation(offset: number = 0): SourceLocation {
-  const loc = StackTrace.getSync()[1]
-
-  return {
-    scriptUrl: loc.fileName,
-    lineNumber: loc.lineNumber - 1 + offset,
-    columnNumber: loc.columnNumber
-  }
-}
-
-export function createRecord(trackid: string, type: ActionType, merge?: string) {
-  const record: RecordData = { trackid, type }
-
-  if (merge) {
-    record.merge = merge
-  }
-  return record
-}
-
-export function getOwnerOf(target: ActionTarget) {
-  return OwnerManager.getOwner(target)
-}
-
 export class TrackerMessageReceiver {
 
   private sender: EventTarget
@@ -131,4 +108,27 @@ export class TrackerMessageReceiver {
   private messageHandler = (event: CustomEvent) => {
     this.messages = this.messages.concat(event.detail.messages)
   }
+}
+
+export function getPrevLineSourceLocation(offset: number = 0): SourceLocation {
+  const loc = StackTrace.getSync()[1]
+
+  return {
+    scriptUrl: loc.fileName,
+    lineNumber: loc.lineNumber - 1 + offset,
+    columnNumber: loc.columnNumber
+  }
+}
+
+export function createRecord(trackid: string, type: ActionType, merge?: string) {
+  const record: RecordData = { trackid, type }
+
+  if (merge) {
+    record.merge = merge
+  }
+  return record
+}
+
+export function getOwnerOf(target: ActionTarget) {
+  return OwnerManager.getOwner(target)
 }
