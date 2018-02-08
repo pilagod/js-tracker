@@ -18,8 +18,8 @@ export const decorators: { [name: string]: Decorator } = {
   general: (target, action, actionFunc) => {
     return function (...args) {
       return wrapActionWithSourceMessages(() => {
-        const result = actionFunc.call(this, ...args)
-        record({ caller: this, target, action, args })
+        const result = actionFunc.call(this || window, ...args)
+        record({ caller: this || window, target, action, args })
         return result
       })
     }

@@ -28,6 +28,16 @@ describe('HTML DOM API tracker', () => {
       expect(windowInfoElement).to.be.not.undefined
       expect(ownerElement).to.equal(windowInfoElement)
     })
+
+    it('should track method call (e.g., addEventListener) as from window given no explicit target', () => {
+      addEventListener('click', () => { })
+      const loc = utils.getPrevLineSourceLocation()
+      const record = utils.createRecord('1', ActionType.Event)
+      const ownerID = utils.getOwnerOf(window).getTrackID()
+
+      expect(ownerID).to.equal(record.trackid)
+      receiver.verifyMessages(loc, record)
+    })
   })
 
   describe('Document', () => {
