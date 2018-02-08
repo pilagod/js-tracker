@@ -7,6 +7,15 @@ const Anomalies = {
     'click': true,
     'focus': true
   },
+
+  'SVGElement': {
+    'dataset': true,
+    'style': true,
+
+    'blur': true,
+    'focus': true
+  },
+
   'Element': {
     'attributes': true,
     'classList': true,
@@ -14,12 +23,15 @@ const Anomalies = {
     'setAttributeNode': true,
     'setAttributeNodeNS': true
   },
+
   'EventTarget': {
     'dispatchEvent': true
   },
+
   'Attr': {
     'value': true
   },
+
   'NamedNodeMap': {
     'setNamedItem': true,
     'setNamedItemNS': true

@@ -13,6 +13,7 @@ export default function main() {
   setupDocument()
   trackGeneralCases()
   trackHTMLElementAnomalies()
+  trackSVGElementAnomalies()
   trackElementAnomalies()
   trackEventTargetAnomalies()
   trackAttrAnomalies()
@@ -130,6 +131,43 @@ function trackHTMLElementAnomalies(): void {
     ['blur', 'click', 'focus'].map((behav) => {
       trackTemplate({
         target: 'HTMLElement',
+        action: behav,
+        decorator: decorators.trigger,
+        getter: true
+      })
+    })
+  }
+}
+
+/* trackElementAnomalies */
+
+function trackSVGElementAnomalies() {
+  trackDataset()
+  trackStyle()
+  trackBehaviors()
+
+  function trackDataset(): void {
+    trackTemplate({
+      target: 'SVGElement',
+      action: 'dataset',
+      decorator: decorators.DOMStringMap,
+      getter: true
+    })
+  }
+
+  function trackStyle(): void {
+    trackTemplate({
+      target: 'SVGElement',
+      action: 'style',
+      decorator: decorators.CSSStyleDeclaration,
+      getter: true
+    })
+  }
+
+  function trackBehaviors() {
+    ['blur', 'focus'].map((behav) => {
+      trackTemplate({
+        target: 'SVGElement',
         action: behav,
         decorator: decorators.trigger,
         getter: true

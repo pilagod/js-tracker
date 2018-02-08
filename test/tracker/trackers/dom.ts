@@ -7,6 +7,7 @@ import * as utils from './utils'
 
 describe('HTML DOM API tracker', () => {
   const receiver = new utils.TrackerMessageReceiver(window)
+  const svgns = 'http://www.w3.org/2000/svg'
 
   before(() => {
     receiver.setup()
@@ -92,18 +93,6 @@ describe('HTML DOM API tracker', () => {
       receiver.verifyMessages(loc, record)
     })
 
-    it('should track its method call', () => {
-      const div = document.createElement('div')
-
-      div.focus()
-      const loc = utils.getPrevLineSourceLocation()
-      const record = utils.createRecord('1', ActionType.Behav | ActionType.Event)
-      const ownerID = utils.getOwnerOf(div).getTrackID()
-
-      expect(ownerID).to.equal(record.trackid)
-      receiver.verifyMessages(loc, record)
-    })
-
     /* anomalies */
 
     it('should track behavior (e.g., click, focus) and actions triggered by it properly', () => {
@@ -132,6 +121,32 @@ describe('HTML DOM API tracker', () => {
         { loc: loc1, data: record1 },
         { loc: loc2, data: record2 }
       ])
+    })
+  })
+
+  describe('SVGElement', () => {
+    it('should track its property assignment', () => {
+      const svg = document.createElementNS(svgns, 'svg');
+
+      (<any>svg).tabIndex = 1
+      const loc = utils.getPrevLineSourceLocation()
+      const record = utils.createRecord('1', ActionType.Attr)
+      const ownerID = utils.getOwnerOf(svg).getTrackID()
+
+      expect(ownerID).to.equal(record.trackid)
+      receiver.verifyMessages(loc, record)
+    })
+
+    it('should track its method call', () => {
+      const svg = document.createElementNS(svgns, 'svg');
+
+      (<any>svg).focus()
+      const loc = utils.getPrevLineSourceLocation()
+      const record = utils.createRecord('1', ActionType.Behav | ActionType.Event)
+      const ownerID = utils.getOwnerOf(svg).getTrackID()
+
+      expect(ownerID).to.equal(record.trackid)
+      receiver.verifyMessages(loc, record)
     })
   })
 
@@ -370,7 +385,7 @@ describe('HTML DOM API tracker', () => {
   })
 
   describe('CSSStyleDeclaration', () => {
-    it('should set its owner properly', () => {
+    it('should set HTMLElement owner properly', () => {
       const div = document.createElement('div')
 
       expect(
@@ -378,13 +393,33 @@ describe('HTML DOM API tracker', () => {
       ).to.equal(div)
     })
 
-    it('should track its property assignment', () => {
+    it('should set SVGElement owner properly', () => {
+      const svg = document.createElementNS(svgns, 'svg')
+
+      expect(
+        utils.getOwnerOf(svg.style).getElement()
+      ).to.equal(svg)
+    })
+
+    it('should track HTMLElement owner style property assignment', () => {
       const div = document.createElement('div')
 
       div.style.color = 'red'
       const loc = utils.getPrevLineSourceLocation()
       const record = utils.createRecord('1', ActionType.Style)
       const ownerID = utils.getOwnerOf(div.style).getTrackID()
+
+      expect(ownerID).to.equal(record.trackid)
+      receiver.verifyMessages(loc, record)
+    })
+
+    it('should track SVGElement owner style property assignment', () => {
+      const svg = document.createElementNS(svgns, 'svg')
+
+      svg.style.color = 'red'
+      const loc = utils.getPrevLineSourceLocation()
+      const record = utils.createRecord('1', ActionType.Style)
+      const ownerID = utils.getOwnerOf(svg.style).getTrackID()
 
       expect(ownerID).to.equal(record.trackid)
       receiver.verifyMessages(loc, record)

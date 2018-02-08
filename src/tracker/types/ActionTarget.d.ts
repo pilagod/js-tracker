@@ -1,5 +1,6 @@
 type Target =
   'HTMLElement'
+  | 'SVGElement'
   | 'Element'
   | 'Node'
   | 'EventTarget'
