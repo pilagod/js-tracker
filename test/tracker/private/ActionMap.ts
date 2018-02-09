@@ -229,6 +229,7 @@ describe('ActionMap', () => {
     it('should iterate all tracked target in ActionMap', () => {
       const expected = [
         'HTMLElement'
+        , 'SVGElement'
         , 'Element'
         , 'Node'
         , 'EventTarget'
