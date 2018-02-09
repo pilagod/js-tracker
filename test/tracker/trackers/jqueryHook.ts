@@ -6,8 +6,9 @@ import * as tracker from '../../../src/tracker/trackers/jquery/tracker'
 
 describe('jquery hook', () => {
   const sandbox = sinon.sandbox.create()
+  const context = <any>window
 
-  let trackerStub
+  let jQuery, trackerStub
 
   before(() => {
     trackerStub = sandbox.stub(tracker, 'default')
@@ -20,20 +21,50 @@ describe('jquery hook', () => {
 
   beforeEach(() => {
     sandbox.reset()
+
+    jQuery = function () { }
+    jQuery.prototype.jquery = '1.0.0'
   })
 
-  it('should call default export of tracker with value set on window.jQuery', () => {
-    const jQuery = {}
+  afterEach(() => {
+    context.$ = undefined
+    context.jQuery = undefined
+  })
 
-    expect(window['$']).to.be.undefined
-    window['$'] = jQuery
-    expect(window['$']).to.equal(jQuery)
+  it('should call jquery tracker with value set on window.jQuery', () => {
+    expect(context.jQuery).to.be.undefined
 
-    expect(window['jQuery']).to.be.undefined
-    window['jQuery'] = jQuery
-    expect(window['jQuery']).to.equal(jQuery)
+    context.jQuery = jQuery
+    expect(context.jQuery).to.equal(jQuery)
 
     expect(trackerStub.calledOnce).to.be.true
     expect(trackerStub.calledWith(jQuery)).to.be.true
+  })
+
+  it('should call jquery tracker with value set on window.$', () => {
+    expect(context.$).to.be.undefined
+
+    context.$ = jQuery
+    expect(context.$).to.equal(jQuery)
+
+    expect(trackerStub.calledOnce).to.be.true
+    expect(trackerStub.calledWith(jQuery)).to.be.true
+  })
+
+  it('should only call jquery tracker once given window.jQuery and window.$ set the same jquery', () => {
+    context.$ = jQuery
+    context.jQuery = jQuery
+
+    expect(trackerStub.calledOnce).to.be.true
+    expect(trackerStub.calledWith(jQuery)).to.be.true
+  })
+
+  it('should not call jquery tracker on those not jQuery value', () => {
+    context.jQuery = function () { }
+    context.jQuery = {}
+    context.jQuery = 'this is not a jquery'
+    context.jQuery = undefined
+
+    expect(trackerStub.called).to.be.false
   })
 })

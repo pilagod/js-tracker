@@ -1,22 +1,34 @@
 import trackJqueryApis from './tracker'
 
 export default function () {
-  let __jquery__ = null;
-
   ['jQuery', '$'].map((propOfJquery) => {
     let value = undefined
-
+    // noConflict issue: [http://api.jquery.com/jQuery.noconflict/]
     Reflect.defineProperty(window, propOfJquery, {
-      set: function (jquery) {
-        if (jquery !== __jquery__) {
-          trackJqueryApis(jquery)
-          __jquery__ = jquery
+      set: function (obj) {
+        if (isJquery(obj) && !isTracked(obj)) {
+          trackJqueryApis(obj)
+          markTracked(obj)
         }
-        value = jquery
+        value = obj
       },
       get: function () {
         return value
       }
     })
   })
+}
+
+const SymbolTracked = Symbol('tracked')
+
+function isJquery(obj) {
+  return typeof obj === 'function' && typeof obj.prototype.jquery === 'string'
+}
+
+function isTracked(obj) {
+  return !!obj[SymbolTracked]
+}
+
+function markTracked(obj) {
+  obj[SymbolTracked] = true
 }
