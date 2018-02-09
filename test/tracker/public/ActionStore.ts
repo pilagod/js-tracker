@@ -28,66 +28,74 @@ describe('ActionStore', () => {
 
   describe('registerFromActionInfo', () => {
     describe('correctness of parsing record info', () => {
-      async function parse(index: number, info: ActionInfo) {
-        await actionStore.registerFromActionInfo(
-          Object.assign({}, info, { trackid: index })
+      function register(infos: ActionInfo[]) {
+        return Promise.all(
+          infos.map((info) => actionStore.registerFromActionInfo(info))
         )
       }
-      it('should parse action info correctly given javascript source', async () => {
-        return Promise.all([
-          parse(0, actionsOfJS[0].info),
-          parse(1, actionsOfJS[1].info),
-          parse(2, actionsOfJS[2].info),
-          parse(3, actionsOfJS[3].info),
-          parse(4, actionsOfJS[4].info),
-        ]).then(() => {
-          expect(actionStore.get('0')).to.deep.equal([actionsOfJS[0].record])
-          expect(actionStore.get('1')).to.deep.equal([actionsOfJS[1].record])
-          expect(actionStore.get('2')).to.deep.equal([actionsOfJS[2].record])
-          expect(actionStore.get('3')).to.deep.equal([actionsOfJS[3].record])
-          expect(actionStore.get('4')).to.deep.equal([actionsOfJS[4].record])
+      it('should register action info correctly given javascript source', async () => {
+        const infos = actionsOfJS.map((action) => action.info)
+        const records = actionsOfJS.map((action) => action.record)
+
+        return register(infos).then(() => {
+          const results = actionStore.get('1')
+
+          expect(results).to.have.length(records.length)
+          records.map((record) => {
+            expect(results).to.include(record)
+          })
         })
       })
 
-      it('should parse action info correctly given html source', async () => {
-        return Promise.all([
-          parse(0, actionsOfHTML[0].info),
-          parse(1, actionsOfHTML[1].info),
-        ]).then(() => {
-          expect(actionStore.get('0')).to.deep.equal([actionsOfHTML[0].record])
-          expect(actionStore.get('1')).to.deep.equal([actionsOfHTML[1].record])
+      it('should register action info correctly given html source', async () => {
+        const infos = actionsOfHTML.map((action) => action.info)
+        const records = actionsOfHTML.map((action) => action.record)
+
+        return register(infos).then(() => {
+          const results = actionStore.get('1')
+
+          expect(results).to.have.length(records.length)
+          records.map((record) => {
+            expect(results).to.include(record)
+          })
         })
       })
 
-      it('should parse action info correctly given minified html source', async () => {
-        return Promise.all([
-          parse(0, actionsOfMinHTML[0].info),
-        ]).then(() => {
-          expect(actionStore.get('0')).to.deep.equal([actionsOfMinHTML[0].record])
+      it('should register action info correctly given minified html source', async () => {
+        const infos = actionsOfHTML.map((action) => action.info)
+        const records = actionsOfHTML.map((action) => action.record)
+
+        return register(infos).then(() => {
+          const results = actionStore.get('1')
+
+          expect(results).to.have.length(records.length)
+          records.map((record) => {
+            expect(results).to.include(record)
+          })
         })
       })
 
-      it('should parse repeated action info at the same time correctly', () => {
-        return Promise.all((() => {
-          const result = []
-          for (let i = 0; i < 3; i++) {
-            result.push(parse(5, actionsOfJS[5].info))
-          }
-          return result
-        })()).then(() => {
-          expect(actionStore.get('5')).to.deep.equal([actionsOfJS[5].record])
+      it('should register repeated action info at the same time correctly', () => {
+        const infos = Array(3).fill(actionsOfJS[5].info)
+        const record = actionsOfJS[5].record
+
+        return register(infos).then(() => {
+          const results = actionStore.get('1')
+
+          expect(results).to.have.length(1)
+          expect(results).to.include(record)
         })
       })
 
-      it('should parse repeated action info at different time correctly', async () => {
-        await parse(5, actionsOfJS[5].info)
-        expect(actionStore.get('5')).to.deep.equal([actionsOfJS[5].record])
+      it('should register repeated action info at different time correctly', async () => {
+        for (let i = 0; i < 3; i++) {
+          await actionStore.registerFromActionInfo(actionsOfJS[5].info)
 
-        await parse(5, actionsOfJS[5].info)
-        expect(actionStore.get('5')).to.deep.equal([actionsOfJS[5].record])
+          const results = actionStore.get('1')
 
-        await parse(5, actionsOfJS[5].info)
-        expect(actionStore.get('5')).to.deep.equal([actionsOfJS[5].record])
+          expect(results).to.have.length(1)
+          expect(results).to.include(actionsOfJS[5].record)
+        }
       })
     })
 
@@ -98,14 +106,14 @@ describe('ActionStore', () => {
       expect(actionStore.get('1')).to.deep.equal([actionsOfJS[1].record, actionsOfJS[0].record])
     })
 
-    it('should not allow ActionStore to add duplicate (same source.loc) records (parsed from info) to same trackid group', async () => {
+    it('should not allow ActionStore to add duplicate (same source.loc) records (registerd from info) to same trackid group', async () => {
       await actionStore.registerFromActionInfo(actionsOfJS[0].info)
       await actionStore.registerFromActionInfo(actionsOfJS[0].info)
 
       expect(actionStore.get('1')).to.deep.equal([actionsOfJS[0].record])
     })
 
-    it('should allow ActionStore to add duplicate (same source.loc) records (parsed from info) to different trackid group', async () => {
+    it('should allow ActionStore to add duplicate (same source.loc) records (registerd from info) to different trackid group', async () => {
       await actionStore.registerFromActionInfo(actionsOfJS[0].info)
       await actionStore.registerFromActionInfo(
         Object.assign({}, actionsOfJS[0].info, { trackid: '2' })

@@ -141,17 +141,17 @@ class ScriptParser {
 
   private isHTML(source: string): boolean {
     // @NOTE: http://www.flycan.com/article/css/html-doctype-97.html
+    // @NOTE: not sure if every html page is start from <!DOCTYPE>
     return /^([\s]*?<!DOCTYPE HTML[\s\S]*?>[\s]*)??<html[\s\S]*?>/i.test(source)
   }
 
   private handleHTMLTags(source: string): string {
-    const trimmedSource = [
+    return [
       this.trimComments,
-      this.trimHtmlTags
+      this.trimHtmlTags,
+      this.trimOpenCloseTags,
+      this.trimSpecialCharacters
     ].reduce((source, trimmer) => trimmer(source), source)
-    // @NOTE: add open/close comments around whole html source,
-    // use slice to avoid code shifting in final parsed source
-    return `/*${trimmedSource.slice(2, -2)}*/`
   }
 
   private trimComments = (source: string) => {
@@ -199,6 +199,26 @@ class ScriptParser {
       // the parsed source to shift the count of characters of new added comments 
       return `${p1.slice(0, -2)}*/${p2}/*${p3.slice(2)}`
     })
+  }
+
+  private trimOpenCloseTags = (source) => {
+    // @NOTE: add open/close comments around whole html source,
+    // use replace to avoid code location shifting in trimmed source
+    // @NOTE: since there might be newline before and after source, 
+    // we only try to replace first and last two occurences of character
+    return source
+      .replace(/^([\s]*?)([\S]{2})/i, '$1/*') // replace first two occurence of character 
+      .replace(/([\S]{2})([\s]*?)$/i, '*/$2') // replace last two occurences of character
+  }
+
+  private trimSpecialCharacters(source) {
+    // @NOTE: [http://www.cnblogs.com/rrooyy/p/5349978.html]
+    // @NOTE: [https://github.com/decaffeinate/decaffeinate/commit/e1322ab2f276c786c57d6bb205b42f2090081a06]
+    // @NOTE: [https://stackoverflow.com/questions/2965293/javascript-parse-error-on-u2028-unicode-character]
+    // @NOTE: \u2029 and \u2029 will be treated as newline in esprima parser,
+    // location generate from stacktrace doesn't take it as a character,
+    // so we directly replace it with empty string
+    return source.replace(/[\u2028\u2029]/g, '')
   }
 
   private async fetchCode({ scriptUrl, lineNumber, columnNumber }: SourceLocation) {
