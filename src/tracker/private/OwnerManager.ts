@@ -1,8 +1,8 @@
-import Owner, { IOwner } from './Owner'
+import Owner from './Owner'
 import { SymbolOwner } from './Symbols'
 
 interface IOwnerManager {
-  getOwner(target: ActionTarget): IOwner;
+  getOwner(target: ActionTarget): Owner;
   hasOwner(target: ActionTarget): boolean;
   hasShadowOwner(target: ActionTarget): boolean;
   setOwner(target: ActionTarget, ownerElement: Element): boolean;
@@ -45,4 +45,4 @@ class OwnerManager implements IOwnerManager {
     })
   }
 }
-export default new OwnerManager()
+export default <IOwnerManager>new OwnerManager()

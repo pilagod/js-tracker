@@ -1,7 +1,7 @@
 import ShadowElement from './ShadowElement'
 import { setTrackID } from './NativeUtils'
 
-export interface IOwner {
+interface IOwner {
   getTrackID(): TrackID;
   getElement(): Element;
   hasTrackID(): boolean;
@@ -9,15 +9,17 @@ export interface IOwner {
   setTrackID(): void;
 }
 
-export default class Owner implements IOwner {
+export default class Owner {
 
-  static NullOwner = new (class extends Owner {
+  static NullOwner = new (class NullOwner extends Owner {
     constructor() {
       super(null)
     }
+
     public getTrackID() {
       return undefined
     }
+
     public isShadow() {
       return false
     }
