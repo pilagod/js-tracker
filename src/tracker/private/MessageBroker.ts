@@ -38,7 +38,9 @@ class MessageBroker {
 
   public restoreMessages() {
     this.messages = this.stack.pop()
-    this.source = (<RecordSourceMessage>this.messages[0]).data
+    if (this.messages.length > 0) {
+      this.source = (<RecordSourceMessage>this.messages[0]).data
+    }
   }
 
   public send(message: RecordMessage) {

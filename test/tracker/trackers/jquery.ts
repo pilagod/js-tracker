@@ -224,6 +224,18 @@ describe('jQuery API tracker', () => {
         { loc: loc2, data: record2 }
       ])
     })
+
+    describe('low level api: event.trigger', () => {
+      const MessageBroker = require('../../../src/tracker/private/MessageBroker').default
+
+      it('should not record event.trigger given event is fired by page interaction (e.g., focusin -> event.simulate -> event.trigger)', () => {
+        const div = document.createElement('div')
+
+        $.event.trigger('click', null, div)
+
+        expect(MessageBroker.isEmpty()).to.be.true
+      })
+    })
   })
 
   describe('Event action type', () => {

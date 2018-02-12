@@ -143,15 +143,13 @@ function trackEventTriggers() {
     jquery.event.trigger = function (event, data, elem, onlyHandlers) {
       // @NOTE: in jQuery.ajax, it will call event.trigger with no elem for 
       // series of ajax events, we should not track these low-level actions  
-      const shouldTrack = !!elem
-
-      if (shouldTrack) {
-        MessageBroker.stackMessages()
-      }
+      const shouldTrack = !MessageBroker.isEmpty()
+      MessageBroker.stackMessages()
       const result = trigger.call(this, event, data, elem, onlyHandlers)
-
-      if (shouldTrack) {
-        MessageBroker.restoreMessages()
+      MessageBroker.restoreMessages()
+      // @NOTE: in order to simulate focusin, jquery call event.simulate -> event.trigger
+      // every time focus event happens
+      if (!!elem && shouldTrack) {
         saveRecordDataTo(elem, ActionType.Behav | ActionType.Event)
       }
       return result
