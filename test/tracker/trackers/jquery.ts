@@ -516,7 +516,7 @@ describe('jQuery API tracker', () => {
       })
     })
 
-    it('should track other Style action after animation finishes', (done) => {
+    it('should track other Style actions after animation finishes', (done) => {
       const div = document.createElement('div')
 
       $(div).slideUp(100, () => {
@@ -535,6 +535,28 @@ describe('jQuery API tracker', () => {
         receiver.verifyMessages(loc, record)
         done()
       })
+    })
+
+    it('should track other Style actions during animation', (done) => {
+      const div = document.createElement('div')
+      const owner = utils.getOwnerOf(div)
+
+      $(div).fadeOut(100, () => { done() })
+      const loc1 = utils.getPrevLineSourceLocation()
+      const record1 = {
+        trackid: owner.getTrackID(),
+        type: ActionType.Style
+      }
+      $(div).css('color', 'red')
+      const loc2 = utils.getPrevLineSourceLocation()
+      const record2 = {
+        trackid: owner.getTrackID(),
+        type: ActionType.Style
+      }
+      receiver.verifyListOfMessages([
+        { loc: loc1, data: record1 },
+        { loc: loc2, data: record2 }
+      ])
     })
 
     it('should track delay animation properly', (done) => {
