@@ -17,17 +17,21 @@ export function wrapActionWithSourceMessages(actionFunc: () => any) {
 }
 
 export function saveRecordDataTo(target: ActionTarget, type: ActionType, merge?: TrackID) {
-  const owner = OwnerManager.getOwner(target)
+  try {
+    const owner = OwnerManager.getOwner(target)
 
-  if (!owner.hasTrackID()) {
-    owner.setTrackID()
-  }
-  const record: RecordData = { trackid: owner.getTrackID(), type }
+    if (!owner.hasTrackID()) {
+      owner.setTrackID()
+    }
+    const record: RecordData = { trackid: owner.getTrackID(), type }
 
-  if (merge) {
-    record.merge = merge
+    if (merge) {
+      record.merge = merge
+    }
+    MessageBroker.send({ state: 'record', data: record })
+  } catch (e) {
+    console.log('error:', e, target)
   }
-  MessageBroker.send({ state: 'record', data: record })
 }
 
 function getSourceLocationGivenDepth(depth: number) {

@@ -114,10 +114,10 @@ function trackEventTriggers() {
     Reflect.defineProperty(jquery.event, 'triggered', {
       set: function (value) {
         if (value) {
-          // @NOTE: take out before trigger recording to give native behavior a right source
+          // @NOTE: take out messages before trigger record process to give native trigger a right source
           MessageBroker.restoreMessages()
         } else {
-          // @NOTE: put back to continue trigger restore process
+          // @NOTE: put back messages to continue trigger restore process
           MessageBroker.stackMessages()
         }
         triggered = value
@@ -131,15 +131,20 @@ function trackEventTriggers() {
   function trackEventTrigger(trigger) {
     // @NOTE: all trigger methods, like click and mouseenter, are all based on trigger
     jquery.event.trigger = function (event, data, elem, onlyHandlers) {
-      return wrapActionWithSourceMessages(() => {
+      // @NOTE: in jQuery.ajax, it will call event.trigger with no elem for 
+      // series of ajax events, we should not track these low-level actions  
+      const shouldTrack = !!elem
+
+      if (shouldTrack) {
         MessageBroker.stackMessages()
-        const result = trigger.call(this, event, data, elem, onlyHandlers)
+      }
+      const result = trigger.call(this, event, data, elem, onlyHandlers)
+
+      if (shouldTrack) {
         MessageBroker.restoreMessages()
-
         saveRecordDataTo(elem, ActionType.Behav | ActionType.Event)
-
-        return result
-      })
+      }
+      return result
     }
   }
 }
