@@ -5,7 +5,7 @@ import { sendMessagesToContentScript } from './NativeUtils'
 
 class MessageBroker {
 
-  private ignore: boolean = false
+  private block: boolean = false
   private stack: RecordMessage[][] = []
   private source: RecordSource = null
   private messages: RecordMessage[] = []
@@ -20,12 +20,16 @@ class MessageBroker {
     return this.source
   }
 
-  public startIgnoreMessages() {
-    this.ignore = true
+  public isBlocking(): boolean {
+    return this.block
   }
 
-  public endIgnoreMessages() {
-    this.ignore = false
+  public startBlocking() {
+    this.block = true
+  }
+
+  public stopBlocking() {
+    this.block = false
   }
 
   public stackMessages() {
@@ -38,7 +42,7 @@ class MessageBroker {
   }
 
   public send(message: RecordMessage) {
-    if (this.ignore) {
+    if (this.block) {
       return
     }
     this.handleMessage(message)

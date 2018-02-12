@@ -489,10 +489,8 @@ describe('jQuery API tracker', () => {
 
         expect(owner.hasTrackID()).to.be.true
 
-        const record = {
-          trackid: owner.getTrackID(),
-          type: ActionType.Style
-        }
+        const record = utils.createRecord(owner.getTrackID(), ActionType.Style)
+
         receiver.verifyMessages(loc, record)
         done()
       })
@@ -507,10 +505,8 @@ describe('jQuery API tracker', () => {
 
         expect(owner.hasTrackID()).to.be.true
 
-        const record = {
-          trackid: owner.getTrackID(),
-          type: ActionType.Style
-        }
+        const record = utils.createRecord(owner.getTrackID(), ActionType.Style)
+
         receiver.verifyMessages(loc, record)
         done()
       })
@@ -528,13 +524,28 @@ describe('jQuery API tracker', () => {
 
         expect(owner.hasTrackID()).to.be.true
 
-        const record = {
-          trackid: owner.getTrackID(),
-          type: ActionType.Style
-        }
+        const record = utils.createRecord(owner.getTrackID(), ActionType.Style)
+
         receiver.verifyMessages(loc, record)
         done()
       })
+    })
+
+    it('should track other Style actions properly given animation executes only one tick ', () => {
+      const div = document.createElement('div')
+
+      $(div).fadeOut(0)
+      receiver.reset()
+
+      $(div).css('color', 'red')
+      const loc = utils.getPrevLineSourceLocation()
+      const owner = utils.getOwnerOf(div)
+
+      expect(owner.hasTrackID()).to.be.true
+
+      const record = utils.createRecord(owner.getTrackID(), ActionType.Style)
+
+      receiver.verifyMessages(loc, record)
     })
 
     it('should track other Style actions during animation', (done) => {
@@ -543,16 +554,12 @@ describe('jQuery API tracker', () => {
 
       $(div).fadeOut(100, () => { done() })
       const loc1 = utils.getPrevLineSourceLocation()
-      const record1 = {
-        trackid: owner.getTrackID(),
-        type: ActionType.Style
-      }
+      const record1 = utils.createRecord(owner.getTrackID(), ActionType.Style)
+
       $(div).css('color', 'red')
       const loc2 = utils.getPrevLineSourceLocation()
-      const record2 = {
-        trackid: owner.getTrackID(),
-        type: ActionType.Style
-      }
+      const record2 = utils.createRecord(owner.getTrackID(), ActionType.Style)
+
       receiver.verifyListOfMessages([
         { loc: loc1, data: record1 },
         { loc: loc2, data: record2 }
@@ -571,10 +578,8 @@ describe('jQuery API tracker', () => {
 
         expect(owner.hasTrackID()).to.be.true
 
-        const record = {
-          trackid: owner.getTrackID(),
-          type: ActionType.Style
-        }
+        const record = utils.createRecord(owner.getTrackID(), ActionType.Style)
+
         receiver.verifyMessages(loc, record)
         done()
       })
@@ -596,10 +601,8 @@ describe('jQuery API tracker', () => {
 
           expect(owner.hasTrackID()).to.be.true
 
-          const record = {
-            trackid: owner.getTrackID(),
-            type: ActionType.Style
-          }
+          const record = utils.createRecord(owner.getTrackID(), ActionType.Style)
+
           receiver.verifyMessages(loc, record)
           done()
         })
@@ -616,10 +619,8 @@ describe('jQuery API tracker', () => {
 
       expect(owner1.hasTrackID()).to.be.true
 
-      const record1 = {
-        trackid: owner1.getTrackID(),
-        type: ActionType.Style
-      }
+      const record1 = utils.createRecord(owner1.getTrackID(), ActionType.Style)
+
       receiver.verifyMessages(loc1, record1)
       receiver.reset()
 
@@ -634,10 +635,8 @@ describe('jQuery API tracker', () => {
 
         expect(owner2.hasTrackID()).to.be.true
 
-        const record2 = {
-          trackid: owner2.getTrackID(),
-          type: ActionType.Style
-        }
+        const record2 = utils.createRecord(owner2.getTrackID(), ActionType.Style)
+
         receiver.verifyMessages(loc2, record2)
         done()
       }, 10)

@@ -67,11 +67,11 @@ class AnimationController {
         if (shouldReproduce) {
           MessageBroker.send({ state: 'record_end', data: source })
         }
-        // @NOTE: reset func (track only once)
+        // @NOTE: reset animFunc and ignore duplicate actions (track only once)
         this.apply = function (target, thisArg, argumentList) {
-          MessageBroker.startIgnoreMessages()
+          MessageBroker.startBlocking()
           const result = target.apply(thisArg, argumentList)
-          MessageBroker.endIgnoreMessages()
+          MessageBroker.stopBlocking()
           return result
         }
         return result

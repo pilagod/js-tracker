@@ -6,6 +6,7 @@ import {
   attachListenerTo,
   detachListenerFrom
 } from '../../../src/tracker/private/NativeUtils'
+import MessageBroker from '../../../src/tracker/private/MessageBroker';
 
 export class TrackerMessageReceiver {
 

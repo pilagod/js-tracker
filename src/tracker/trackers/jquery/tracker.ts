@@ -84,12 +84,20 @@ function trackAnimationExitPoint() {
       // @NOTE: stop api will skip opt.complete
       opt.complete = new Proxy(opt.complete, {
         apply: function (target, thisArg, argumentList) {
-          // @NOTE: complete is called during last animation tick
+          // @NOTE: complete is called during last animation tick,
           // actions in non-first tick is ignored, but actions in
-          // complete should be take into account
-          MessageBroker.endIgnoreMessages()
+          // complete should be take into account, so we should reset
+          // blocking state here
+          const shouldResetBlocking = MessageBroker.isBlocking()
+
+          if (shouldResetBlocking) {
+            MessageBroker.stopBlocking()
+          }
           const result = target.apply(thisArg, argumentList)
-          MessageBroker.startIgnoreMessages()
+
+          if (shouldResetBlocking) {
+            MessageBroker.startBlocking()
+          }
           return result
         }
       })
@@ -114,10 +122,12 @@ function trackEventTriggers() {
     Reflect.defineProperty(jquery.event, 'triggered', {
       set: function (value) {
         if (value) {
-          // @NOTE: take out messages before trigger record process to give native trigger a right source
+          // @NOTE: native trigger is about to begin, take out messages 
+          // before trigger record process to give native trigger a right source
           MessageBroker.restoreMessages()
         } else {
-          // @NOTE: put back messages to continue trigger restore process
+          // @NOTE: native trigger is about to end, put back messages to 
+          // continue trigger restore process
           MessageBroker.stackMessages()
         }
         triggered = value
