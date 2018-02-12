@@ -1,26 +1,8 @@
 import ActionType from '../../public/ActionType'
-import MessageBroker, { ISubscriber } from '../../private/MessageBroker'
+import MessageBroker from '../../private/MessageBroker'
 import OwnerManager from '../../private/OwnerManager'
 
 const SymbolAnim = Symbol('Animation')
-
-class AnimationAfterFirstTickAddStyleFilter implements ISubscriber {
-  private element: Element
-
-  constructor(element: Element) {
-    this.element = element
-  }
-
-  public flush(messages: RecordMessage[]) {
-    MessageBroker.unsubscribe(this)
-
-    const owner = OwnerManager.getOwner(this.element)
-
-    if (owner.hasTrackID()) {
-      MessageBroker.addFilter(owner.getTrackID(), ActionType.Style)
-    }
-  }
-}
 
 class AnimationController {
   private static MAX_ANIM_NUM = 10000
@@ -31,12 +13,6 @@ class AnimationController {
   } = {}
 
   /* public */
-
-  public addAnimationFilterAfterFirstTick(element: Element) {
-    MessageBroker.subscribe(
-      new AnimationAfterFirstTickAddStyleFilter(element)
-    )
-  }
 
   public addUntrackSource(element: Element) {
     if (MessageBroker.isEmpty()) {
@@ -74,7 +50,7 @@ class AnimationController {
     source: RecordSource
   ): (...args: any[]) => void {
     if (!source) {
-      // @NOTE: func is not a tracking target
+      // @NOTE: animFunc here is not a tracking target
       return animFunc
     }
     return new Proxy(animFunc, {
@@ -93,19 +69,14 @@ class AnimationController {
         }
         // @NOTE: reset func (track only once)
         this.apply = function (target, thisArg, argumentList) {
-          return target.apply(thisArg, argumentList)
+          MessageBroker.startIgnoreMessages()
+          const result = target.apply(thisArg, argumentList)
+          MessageBroker.endIgnoreMessages()
+          return result
         }
         return result
       }
     })
-  }
-
-  public clearAnimation(element: Element) {
-    const owner = OwnerManager.getOwner(element)
-
-    if (owner.hasTrackID()) {
-      MessageBroker.removeFilter(owner.getTrackID(), ActionType.Style)
-    }
   }
 
   /* private */

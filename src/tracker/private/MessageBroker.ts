@@ -5,11 +5,9 @@ import { sendMessagesToContentScript } from './NativeUtils'
 
 class MessageBroker {
 
-  private filters = new MessageFilter()
-  private subscribers = new MessageSubscriber()
-
-  private source: RecordSource = null
+  private ignore: boolean = false
   private stack: RecordMessage[][] = []
+  private source: RecordSource = null
   private messages: RecordMessage[] = []
 
   /* public */
@@ -22,6 +20,14 @@ class MessageBroker {
     return this.source
   }
 
+  public startIgnoreMessages() {
+    this.ignore = true
+  }
+
+  public endIgnoreMessages() {
+    this.ignore = false
+  }
+
   public stackMessages() {
     this.stack.push(this.clearMessages())
   }
@@ -31,23 +37,16 @@ class MessageBroker {
     this.source = (<RecordSourceMessage>this.messages[0]).data
   }
 
-  public subscribe(subscriber: ISubscriber) {
-    this.subscribers.add(subscriber)
-  }
-
-  public unsubscribe(subscriber: ISubscriber) {
-    this.subscribers.remove(subscriber)
-  }
-
-  public addFilter(trackid: TrackID, type: ActionType) {
-    this.filters.add(trackid, type)
-  }
-
-  public removeFilter(trackid: TrackID, type: ActionType) {
-    this.filters.remove(trackid, type)
-  }
-
   public send(message: RecordMessage) {
+    if (this.ignore) {
+      return
+    }
+    this.handleMessage(message)
+  }
+
+  /* private */
+
+  private handleMessage(message: RecordMessage) {
     this.messages.push(message)
 
     switch (message.state) {
@@ -65,17 +64,12 @@ class MessageBroker {
     }
   }
 
-  /* private */
-
   private flush() {
     const messages = this.clearMessages()
 
-    this.filters.filter(messages)
-
-    if (!this.doMessagesHaveRecordData(messages)) {
+    if (!this.hasRecord(messages)) {
       return
     }
-    this.subscribers.flush(messages)
     sendMessagesToContentScript(messages)
   }
 
@@ -88,68 +82,8 @@ class MessageBroker {
     return messages
   }
 
-  private doMessagesHaveRecordData(messages: RecordMessage[]) {
+  private hasRecord(messages: RecordMessage[]) {
     return messages.some((message) => message.state === 'record')
-  }
-}
-
-class MessageFilter {
-
-  private filters: {
-    [trackid: string]: ActionType[]
-  } = {}
-
-  public add(trackid: string, type: ActionType) {
-    if (!this.filters.hasOwnProperty(trackid)) {
-      this.filters[trackid] = []
-    }
-    this.filters[trackid].push(type)
-  }
-
-  public remove(trackid: string, type: ActionType) {
-    if (!this.filters[trackid]) {
-      return
-    }
-    const index = this.filters[trackid].indexOf(type)
-
-    if (index > - 1) {
-      this.filters[trackid].splice(index, 1)
-    }
-  }
-
-  public filter(messages: RecordMessage[]) {
-    for (let i = messages.length; i--;) {
-      const message = messages[i]
-
-      if (message.state === 'record') {
-        const { trackid, type } = message.data
-
-        if (!!this.filters[trackid] && this.filters[trackid].indexOf(type) > -1) {
-          messages.splice(i, 1)
-        }
-      }
-    }
-  }
-}
-
-export interface ISubscriber {
-  flush: (messages: RecordMessage[]) => void
-}
-
-class MessageSubscriber {
-
-  private subscribers: ISubscriber[] = []
-
-  public add(subscriber: ISubscriber) {
-    this.subscribers.push(subscriber)
-  }
-
-  public remove(subscriber: ISubscriber) {
-    this.subscribers.splice(this.subscribers.indexOf(subscriber), 1)
-  }
-
-  public flush(messages: any) {
-    this.subscribers.map((subscriber) => subscriber.flush(messages))
   }
 }
 // @NOTE: MessageBroker is a singleton

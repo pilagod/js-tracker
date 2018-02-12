@@ -1,5 +1,7 @@
 import * as StackTrace from 'stacktrace-js'
+
 import MessageBroker from '../private/MessageBroker'
+import OwnerManager from '../private/OwnerManager'
 
 export function wrapActionWithSourceMessages(actionFunc: () => any) {
   const loc = getSourceLocationGivenDepth(3)
@@ -14,6 +16,20 @@ export function wrapActionWithSourceMessages(actionFunc: () => any) {
   }
 }
 
+export function saveRecordDataTo(target: ActionTarget, type: ActionType, merge?: TrackID) {
+  const owner = OwnerManager.getOwner(target)
+
+  if (!owner.hasTrackID()) {
+    owner.setTrackID()
+  }
+  const record: RecordData = { trackid: owner.getTrackID(), type }
+
+  if (merge) {
+    record.merge = merge
+  }
+  MessageBroker.send({ state: 'record', data: record })
+}
+
 function getSourceLocationGivenDepth(depth: number) {
   const stackframe = StackTrace.getSync()[depth]
 
@@ -25,15 +41,9 @@ function getSourceLocationGivenDepth(depth: number) {
 }
 
 function recordStartWith(loc: SourceLocation) {
-  MessageBroker.send({
-    state: 'record_start',
-    data: { loc }
-  })
+  MessageBroker.send({ state: 'record_start', data: { loc } })
 }
 
 function recordEndWith(loc: SourceLocation) {
-  MessageBroker.send({
-    state: 'record_end',
-    data: { loc }
-  })
+  MessageBroker.send({ state: 'record_end', data: { loc } })
 }

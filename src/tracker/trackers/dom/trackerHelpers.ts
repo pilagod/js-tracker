@@ -1,4 +1,5 @@
 /// <reference path='../../types/ActionTarget.d.ts'/>
+/// <reference path='../../types/ActionStore.d.ts'/>
 
 import ActionMap from '../../private/ActionMap'
 import MessageBroker from '../../private/MessageBroker'
@@ -6,7 +7,10 @@ import OwnerManager from '../../private/OwnerManager'
 import ShadowElement from '../../private/ShadowElement'
 import { attachAttr, setAttrValue } from '../../private/NativeUtils'
 import { SymbolProxy, SymbolWhich } from '../../private/Symbols'
-import { wrapActionWithSourceMessages } from '../utils'
+import {
+  saveRecordDataTo,
+  wrapActionWithSourceMessages
+} from '../utils'
 
 export type Decorator = (
   target: Target,
@@ -29,10 +33,9 @@ export const decorators: { [name: string]: Decorator } = {
     return function (...args) {
       return wrapActionWithSourceMessages(() => {
         MessageBroker.stackMessages()
-
         const result = actionFunc.call(this, ...args)
-
         MessageBroker.restoreMessages()
+
         record({ caller: this, target, action })
 
         return result
@@ -142,7 +145,7 @@ function record(info: {
   target: Target,
   action: Action,
   args?: any[],
-  merge?: string
+  merge?: TrackID
 }): void {
   // @NOTE: target should not be derived from the type of caller
   // e.g., { caller: HTMLDivElement, target: Element, action: id }
@@ -152,22 +155,7 @@ function record(info: {
     // callers, e.g., DocumentFragment, XHRHttpRequst
     return
   }
-  const owner = OwnerManager.getOwner(info.caller)
-
-  if (!owner.hasTrackID()) {
-    owner.setTrackID()
-  }
-  const record: RecordData = {
-    trackid: owner.getTrackID(),
-    type: ActionMap.getActionType(info),
-  }
-  if (info.merge) {
-    record.merge = info.merge
-  }
-  MessageBroker.send({
-    state: 'record',
-    data: record
-  })
+  saveRecordDataTo(info.caller, ActionMap.getActionType(info), info.merge)
 }
 
 function proxyDecorator<T extends ActionTarget>(proxyHandler: ProxyHandler<T>) {

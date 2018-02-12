@@ -2,9 +2,11 @@
 
 import ActionType from '../../public/ActionType';
 import MessageBroker from '../../private/MessageBroker';
-import OwnerManager from '../../private/OwnerManager'
-import { wrapActionWithSourceMessages } from '../utils'
 import { AnimController } from './trackerHelpers'
+import {
+  saveRecordDataTo,
+  wrapActionWithSourceMessages
+} from '../utils'
 
 let jquery
 
@@ -18,7 +20,7 @@ export default function main(__jquery__) {
 
 function trackGeneralCases() {
   const trackedApis = ['addClass', 'after', 'ajaxComplete', 'ajaxError', 'ajaxSend', 'ajaxStart', 'ajaxStop', 'ajaxSuccess', 'animate', 'append', 'appendTo', 'attr', 'before', 'bind', 'blur', 'change', 'click', 'contextmenu', 'css', 'dblclick', 'delegate', 'detach', 'die', 'empty', 'error', 'fadeIn', 'fadeOut', 'fadeTo', 'fadeToggle', 'focus', 'focusin', 'focusout', 'height', 'hide', 'hover', 'html', 'innerHeight', 'innerWidth', 'insertAfter', 'insertBefore', 'keydown', 'keypress', 'keyup', 'live', 'load', 'mousedown', 'mouseenter', 'mouseleave', 'mousemove', 'mouseout', 'mouseover', 'mouseup', 'off', 'offset', 'on', 'one', 'outerHeight', 'outerWidth', 'prepend', 'prependTo', 'prop', 'ready', 'remove', 'removeAttr', 'removeClass', 'removeProp', 'replaceAll', 'replaceWith', 'resize', 'scroll', 'scrollLeft', 'scrollTop', 'select', 'show', 'slideDown', 'slideToggle', 'slideUp', 'submit', 'text', 'toggle', 'toggleClass', 'trigger', 'triggerHandler', 'unbind', 'undelegate', 'unload', 'unwrap', 'val', 'width', 'wrap', 'wrapAll', 'wrapInner']
-  // @NOTE: never wrap init !!
+  // @NOTE: never wrap jQuery.prototype init !!
   trackedApis.map((api) => {
     jquery.prototype[api] = ((actionFunc) => {
       return function (...args: any[]) {
@@ -62,7 +64,6 @@ function trackAnimationEntryPoint() {
   function trackTimer(fxTimer) {
     jquery.fx.timer = function (timer) {
       // @NOTE: timer is where animation actually executing
-      AnimController.addAnimationFilterAfterFirstTick(timer.elem)
       return fxTimer.call(
         this,
         AnimController.wrapAnimWithSourceMessagesOnce(
@@ -75,19 +76,7 @@ function trackAnimationEntryPoint() {
 }
 
 function trackAnimationExitPoint() {
-  trackStop(jquery.prototype.stop)
   trackSpeed(jquery.speed)
-
-  function trackStop(stop) {
-    jquery.prototype.stop = function (...args) {
-      const result = stop.apply(this, args)
-
-      this.each(function (this: Element) {
-        AnimController.clearAnimation(this)
-      })
-      return result
-    }
-  }
 
   function trackSpeed(speed) {
     jquery.speed = function (...args) {
@@ -95,8 +84,13 @@ function trackAnimationExitPoint() {
       // @NOTE: stop api will skip opt.complete
       opt.complete = new Proxy(opt.complete, {
         apply: function (target, thisArg, argumentList) {
-          AnimController.clearAnimation(thisArg)
-          return target.apply(thisArg, argumentList)
+          // @NOTE: complete is called during last animation tick
+          // actions in non-first tick is ignored, but actions in
+          // complete should be take into account
+          MessageBroker.endIgnoreMessages()
+          const result = target.apply(thisArg, argumentList)
+          MessageBroker.startIgnoreMessages()
+          return result
         }
       })
       return opt
@@ -142,18 +136,9 @@ function trackEventTriggers() {
         const result = trigger.call(this, event, data, elem, onlyHandlers)
         MessageBroker.restoreMessages()
 
-        const owner = OwnerManager.getOwner(elem)
+        saveRecordDataTo(elem, ActionType.Behav | ActionType.Event)
 
-        if (!owner.hasTrackID()) {
-          owner.setTrackID()
-        }
-        MessageBroker.send({
-          state: 'record',
-          data: {
-            trackid: owner.getTrackID(),
-            type: ActionType.Behav | ActionType.Event
-          }
-        })
+        return result
       })
     }
   }
