@@ -235,6 +235,16 @@ describe('jQuery API tracker', () => {
 
         expect(MessageBroker.isEmpty()).to.be.true
       })
+
+      it('should not record anything during ajax executing', () => {
+        // @NOTE: [http://api.jquery.com/jquery.ajax/]
+        // use ajax to fetch javascript will load and execute immediately,
+        // thus we use html file for this test
+        return $.ajax({ method: 'GET', url: '/script.html' }).done(() => {
+          expect(MessageBroker.isEmpty()).to.be.true
+          receiver.verifyNoMessage()
+        })
+      })
     })
   })
 

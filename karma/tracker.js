@@ -1,9 +1,12 @@
 var configFactory = require('./configFactory')
-var PORT = 9877
 
 module.exports = configFactory(function (defaultConfig) {
   var customConfig = Object.assign({}, defaultConfig, {
-    port: PORT,
+    port: 9877,
+
+    proxies: {
+      '/script.html': `/base/test/script.html`
+    },
     // list of files / patterns to load in the browser
     // all modules including in tests should be included here
     files: [
@@ -14,6 +17,9 @@ module.exports = configFactory(function (defaultConfig) {
       /* dependencies */
       { pattern: 'src/tracker/trackers/utils.ts' },
       { pattern: 'src/tracker/public/*[!(.d)].ts' },
+
+      /* static */
+      { pattern: 'test/script.html', served: true, included: false },
 
       /* tests */
       { pattern: 'test/tracker/trackers/*.ts' }
