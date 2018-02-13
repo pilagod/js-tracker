@@ -62,8 +62,8 @@ describe('ActionStore', () => {
       })
 
       it('should register action info correctly given minified html source', async () => {
-        const infos = actionsOfHTML.map((action) => action.info)
-        const records = actionsOfHTML.map((action) => action.record)
+        const infos = actionsOfMinHTML.map((action) => action.info)
+        const records = actionsOfMinHTML.map((action) => action.record)
 
         return register(infos).then(() => {
           const results = actionStore.get('1')

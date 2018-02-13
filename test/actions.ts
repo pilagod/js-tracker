@@ -48,7 +48,7 @@ const actionsOfHTML = ((urlOfHTML) => [
 // actions for minified html
 const actionsOfMinHTML = ((urlOfMinHTML) => [
   // action[0] `div.id = 'id'`
-  createAction('1', ActionType.Style, urlOfMinHTML, 4, 236, `$(div).addClass('class')`)
+  createAction('1', ActionType.Style, urlOfMinHTML, 4, 253, `$(div).addClass('class')`)
 ])(`/script.min.html`)
 
 export { actionsOfJS, actionsOfHTML, actionsOfMinHTML }

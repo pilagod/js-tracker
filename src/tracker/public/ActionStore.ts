@@ -197,7 +197,7 @@ class ScriptParser {
       // @NOTE: for those minified (a.k.a one line) html, directly change 
       // <script> ... </script> to <script>*/ ... /*</script> will cause 
       // the parsed source to shift the count of characters of new added comments 
-      return `${p1.slice(0, -2)}*/${p2}/*${p3.slice(2)}`
+      return `${p1.slice(0, -2)}*/${p2};/*${p3.slice(3)}`
     })
   }
 
