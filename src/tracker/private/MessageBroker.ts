@@ -92,5 +92,4 @@ class MessageBroker {
     return messages.some((message) => message.state === 'record')
   }
 }
-// @NOTE: MessageBroker is a singleton
 export default new MessageBroker()
