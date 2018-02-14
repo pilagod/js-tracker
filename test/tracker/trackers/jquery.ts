@@ -191,7 +191,6 @@ describe('jQuery API tracker', () => {
 
       expect(ownerID1).to.equal(record1.trackid)
       expect(ownerID2).to.equal(record2.trackid)
-
       receiver.verifyListOfMessages([
         { loc: loc1, data: record1 },
         { loc: loc2, data: record2 }
@@ -218,7 +217,6 @@ describe('jQuery API tracker', () => {
 
       expect(ownerID1).to.equal(record1.trackid)
       expect(ownerID2).to.equal(record2.trackid)
-
       receiver.verifyListOfMessages([
         { loc: loc1, data: record1 },
         { loc: loc2, data: record2 }
