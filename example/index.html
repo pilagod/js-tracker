@@ -38,13 +38,12 @@
       cursor: pointer;
       font-size: 1.5em;
       text-align: center;
-      width: 300px;
-      height: 100px;
       outline: none;
-      padding: 10px;
+      padding: 10px 15px;
       margin: auto;
       border: 2px solid rgba(0, 0, 0, 0.5);
       border-radius: 5px;
+      background-color: snow;
     }
   </style>
 </head>
@@ -54,24 +53,20 @@
 </body>
 <script src="./jquery.js"></script>
 <script>
-  (function () {
-    var count = 0
+  var count = 0
 
-    document.getElementById('demo').addEventListener('click', function (e) {
-      var elem = e.target
+  document.getElementById('demo').addEventListener('click', function (e) {
+    var elem = e.target
 
-      switch (count) {
-        case 0:
-          elem.innerHTML = 'Nice to meet you !'
-          break
-        case 1:
-          $(elem).html('Thanks for your coming :)')
-          break
-      }
-      count = (count + 1) % 2
-    })
-  })()
-
+    switch (count = (count % 2) + 1) {
+      case 1:
+        elem.innerHTML = 'Nice to meet you !'
+        break
+      case 2:
+        $(elem).html('Thanks for your coming :)')
+        break
+    }
+  })
 </script>
 
 </html>
