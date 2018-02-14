@@ -52,27 +52,23 @@
 <body>
   <button id="demo">Click Me :)</button>
 </body>
-
 <script src="./jquery.js"></script>
-<script src="./stylescript.js"></script>
 <script>
   (function () {
     var count = 0
 
-    document.addEventListener('click', function (e) {
-      if (e.target.id === 'demo') {
-        var element = e.target
+    document.getElementById('demo').addEventListener('click', function (e) {
+      var elem = e.target
 
-        switch (count) {
-          case 0:
-            e.target.innerHTML = 'Nice to meet you !'
-            break
-          case 1:
-            element.textContent = 'Thanks for your coming :)'
-            break
-        }
-        count = (count + 1) % 2
+      switch (count) {
+        case 0:
+          elem.innerHTML = 'Nice to meet you !'
+          break
+        case 1:
+          $(elem).html('Thanks for your coming :)')
+          break
       }
+      count = (count + 1) % 2
     })
   })()
 
