@@ -6,6 +6,6 @@
   })
 
   demo.addEventListener('mouseleave', function () {
-    demo.classList.remove('hover')
+    $(demo).removeClass('hover')
   })
 })()
