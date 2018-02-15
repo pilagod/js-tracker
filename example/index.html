@@ -10,65 +10,21 @@
   <title>JavaScript Tracker Example</title>
 
   <link rel="shortcut icon" href="./favicon.png">
-
-  <style>
-    body {
-      display: flex;
-      font-size: 18px;
-      width: 100vw;
-      height: 100vh;
-      margin: 0;
-    }
-
-    body::after {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      z-index: -1;
-      opacity: 0.1;
-      width: 100%;
-      height: 100%;
-      background-image: url('./background.png');
-      background-repeat: no-repeat;
-      background-size: cover;
-    }
-
-    button {
-      display: block;
-      cursor: pointer;
-      font-size: 1.5em;
-      text-align: center;
-      outline: none;
-      padding: 10px 15px;
-      margin: auto;
-      border: 2px solid rgba(0, 0, 0, 0.5);
-      border-radius: 5px;
-      background-color: snow;
-    }
-  </style>
+  <link rel="stylesheet" href="./index.css">
 </head>
 
 <body>
-  <button id="demo">Click Me :)</button>
+  <div id="demo">
+    <span>Click Me :)</span>
+    <div class='border top-border'></div>
+    <div class='border bottom-border'></div>
+    <div class='border left-border'></div>
+    <div class='border right-border'></div>
+  </div>
 </body>
 
 <script src="./jquery.js"></script>
-<script>
-  var count = 0
-
-  $('#demo').click(function (e) {
-    var elem = e.target
-
-    switch (count = (count % 2) + 1) {
-      case 1:
-        elem.innerHTML = 'Nice to meet you !'
-        break
-      case 2:
-        $(elem).html('Thanks for your coming :)')
-        break
-    }
-  })
-</script>
+<script src="./click.js"></script>
+<script src="./hover.js"></script>
 
 </html>

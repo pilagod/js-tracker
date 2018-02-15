@@ -1,0 +1,125 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+    display: flex;
+    font-size: 18px;
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+  }
+
+  body::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: -1;
+    opacity: 0.1;
+    width: 100%;
+    height: 100%;
+    background-image: url('./background.png');
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
+
+  #demo {
+    position: relative;
+    display: block;
+    cursor: pointer;
+    font-size: 1.5em;
+    text-align: center;
+    outline: none;
+    padding: 10px 15px;
+    margin: auto;
+    border: 2px solid rgba(0, 0, 0, 0.5);
+    border-radius: 5px;
+    background-color: snow;
+  }
+
+  /* borders */
+
+  #demo > .border {
+    position: absolute;
+    border-width: 2px;
+    border-color: burlywood;
+    transition: all 0.05s linear;
+  }
+
+  /* top and bottom */
+
+  #demo > .top-border,
+  #demo > .bottom-border {
+    width: 0;
+    height: 20px;
+    border-top-style: solid;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+  }
+
+  #demo.hover > .top-border,
+  #demo.hover > .bottom-border {
+    width: calc(100% + 4px);
+  }
+
+  #demo > .top-border {
+    top: -2px;
+    left: -2px;
+    transition-delay: 0.15s;
+  }
+
+  #demo > .bottom-border {
+    bottom: -2px;
+    right: -2px;
+    transform: rotate(-180deg);
+    transition-delay: 0.05s;
+  }
+
+  #demo.hover > .top-border {
+    transition-delay: 0s;
+  }
+  
+  #demo.hover > .bottom-border {
+    transition-delay: 0.1s;
+  }
+
+  /* left and right */
+
+  #demo > .left-border,
+  #demo > .right-border {
+    width: 20px;
+    height: 0;
+    border-right-style: solid;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+  }
+
+  #demo.hover > .left-border, 
+  #demo.hover > .right-border {
+    height: calc(100% + 4px);
+  }
+
+  #demo > .left-border {
+    top: -2px;
+    left: -2px;
+    transform: rotate(-180deg) translateY(-53.98px);
+    transform-origin: top;
+    transition-delay: 0s;
+  }
+
+  #demo > .right-border {
+    top: -2px;
+    right: -2px;
+    transition-delay: 0.1s;
+  }
+
+  #demo.hover > .left-border {
+    transition-delay: 0.15s;
+  }  
+
+  #demo.hover > .right-border {
+    transition-delay: 0.05s;
+  }  
+
+  
