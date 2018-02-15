@@ -1,16 +1,13 @@
 (function () {
-  var count = 0
+  var flag = false
   var $demo = $('#demo')
   var $text = $demo.find('span')
 
   $demo.click(function (e) {
-    switch (count = (count % 2) + 1) {
-      case 1:
-        $text[0].innerHTML = 'Nice to meet you !'
-        break
-      case 2:
-        $text.html('Thanks for your coming :)')
-        break
+    if ((flag = !flag)) {
+      $text[0].innerHTML = 'Nice to meet you !'
+    } else {
+      $text.html('Hope you like it :)')
     }
   })
 })()
