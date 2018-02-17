@@ -27,15 +27,26 @@ body {
   #demo {
     position: relative;
     display: block;
-    cursor: pointer;
     font-size: 1.5em;
-    text-align: center;
-    outline: none;
-    padding: 10px 15px;
+    width: 225px;
+    height: 65px;
     margin: auto;
     border: 2px solid rgba(0, 0, 0, 0.5);
     border-radius: 5px;
     background-color: snow;
+  }
+
+  /* content */
+
+  #demo > .content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
   }
 
   /* borders */
@@ -103,7 +114,7 @@ body {
   #demo > .left-border {
     top: -2px;
     left: -2px;
-    transform: rotate(-180deg) translateY(-53.98px);
+    transform: rotate(-180deg) translateY(-65px);
     transform-origin: top;
     transition-delay: 0s;
   }

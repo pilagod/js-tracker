@@ -1,13 +1,10 @@
 (function () {
-  var flag = false
-  var $demo = $('#demo')
-  var $text = $demo.find('span')
+  var contentSwitch = false
+  var $content = $('#demo').find('.content')
 
-  $demo.click(function (e) {
-    if ((flag = !flag)) {
-      $text[0].innerHTML = 'Nice to meet you !'
-    } else {
-      $text.html('Hope you like it :)')
-    }
+  $content.click(function (e) {
+    (contentSwitch = !contentSwitch)
+      ? $content[0].innerHTML = 'Nice to meet you !'
+      : $content.html('Hope you like it :)')
   })
 })()
