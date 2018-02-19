@@ -18,7 +18,7 @@ class AnimationController {
     if (MessageBroker.isEmpty()) {
       return
     }
-    const source = MessageBroker.getCurrentSource()
+    const source = MessageBroker.getSource()
     const animid = element[SymbolAnim] || this.setAnimIDOnElement(element)
 
     if (!this.untrackAnims.hasOwnProperty(animid)) {
@@ -42,7 +42,7 @@ class AnimationController {
   }
 
   public getSourceFromMessageBroker(): RecordSource {
-    return MessageBroker.getCurrentSource()
+    return MessageBroker.getSource()
   }
 
   public wrapAnimWithSourceMessagesOnce(

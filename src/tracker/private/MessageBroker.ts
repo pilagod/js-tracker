@@ -23,12 +23,12 @@ class MessageBroker {
     return this.messages.length === 0
   }
 
-  public getCurrentSource(): RecordSource {
-    return this.source
-  }
-
   public isBlocking(): boolean {
     return this.block
+  }
+
+  public getSource(): RecordSource {
+    return this.source
   }
 
   public startBlocking() {
@@ -40,23 +40,12 @@ class MessageBroker {
   }
 
   public stackSnapshot() {
-    this.snapshots.push({
-      block: this.block,
-      source: this.source,
-      messages: this.clearMessages()
-    })
-    this.block = false
+    this.snapshots.push(this.createSnapshot())
+    this.use(this.createEmptySnapshot())
   }
 
   public restoreSnapshot() {
-    const snapshot = this.snapshots.pop()
-
-    this.block = snapshot.block
-    this.source = snapshot.source
-    this.messages = snapshot.messages
-    // if (this.messages.length > 0) {
-    //   this.source = (<RecordSourceMessage>this.messages[0]).data
-    // }
+    this.use(this.snapshots.pop())
   }
 
   public send(message: RecordMessage) {
@@ -67,6 +56,28 @@ class MessageBroker {
   }
 
   /* private */
+
+  private createSnapshot(): SnapShot {
+    return {
+      block: this.block,
+      source: this.source,
+      messages: this.messages.slice()
+    }
+  }
+
+  private createEmptySnapshot(): SnapShot {
+    return {
+      block: false,
+      source: null,
+      messages: []
+    }
+  }
+
+  private use(snapshot: SnapShot) {
+    this.block = snapshot.block
+    this.source = snapshot.source
+    this.messages = snapshot.messages
+  }
 
   private handleMessage(message: RecordMessage) {
     this.messages.push(message)
@@ -80,6 +91,7 @@ class MessageBroker {
 
       case 'record_end':
         if (match(this.source.loc, message.data.loc)) {
+          this.source = null
           this.flush()
         }
         break
@@ -87,7 +99,7 @@ class MessageBroker {
   }
 
   private flush() {
-    const messages = this.clearMessages()
+    const messages = this.flushMessages()
 
     if (!this.hasRecord(messages)) {
       return
@@ -95,12 +107,9 @@ class MessageBroker {
     sendMessagesToContentScript(messages)
   }
 
-  private clearMessages(): RecordMessage[] {
+  private flushMessages(): RecordMessage[] {
     const messages = this.messages
-
     this.messages = []
-    this.source = null
-
     return messages
   }
 
