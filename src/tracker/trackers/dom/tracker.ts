@@ -4,8 +4,10 @@ import ActionMap from '../../private/ActionMap'
 import Anomalies from '../../private/Anomalies'
 import OwnerManager from '../../private/OwnerManager'
 import ShadowElement from '../../private/ShadowElement'
-
-import { Decorator, decorators } from './trackerHelpers'
+import {
+  decorators,
+  trackTemplate
+} from './trackerHelpers'
 
 export default function main() {
   setupShadowElement()
@@ -20,7 +22,7 @@ export default function main() {
   trackNamedNodeMapAnomalies()
 }
 
-/* register custom elements */
+/* setup custom elements */
 
 function setupShadowElement(): void {
   customElements.define(ShadowElement.TagName, ShadowElement)
@@ -46,46 +48,6 @@ function setupNonElementTarget(target: ActionTarget, name: string): void {
 
   OwnerManager.setOwner(target, infoElement)
   document.documentElement.appendChild(infoElement)
-}
-
-/* utils */
-
-function trackTemplate(
-  template: {
-    target: Target,
-    action: Action,
-    decorator: Decorator,
-    getter?: boolean
-  }
-) {
-  const { target, action, decorator } = template
-  const shouldTrackGetter = template.getter
-  const descriptor =
-    Reflect.getOwnPropertyDescriptor(window[target].prototype, action)
-  // @NOTE: getter, setter, method are mutual exclusive
-  if (shouldTrackGetter && hasGetter(descriptor)) {
-    descriptor.get =
-      decorator(target, action, descriptor.get)
-  } else if (hasSetter(descriptor)) {
-    descriptor.set =
-      decorator(target, action, descriptor.set)
-  } else if (hasMethod(descriptor)) {
-    descriptor.value =
-      decorator(target, action, descriptor.value)
-  }
-  Reflect.defineProperty(window[target].prototype, action, descriptor)
-}
-
-function hasGetter(descriptor: PropertyDescriptor): boolean {
-  return !!descriptor.get
-}
-
-function hasSetter(descriptor: PropertyDescriptor): boolean {
-  return !!descriptor.set
-}
-
-function hasMethod(descriptor: PropertyDescriptor): boolean {
-  return !!descriptor.value && (typeof descriptor.value === 'function')
 }
 
 /* trackGeneralCases */

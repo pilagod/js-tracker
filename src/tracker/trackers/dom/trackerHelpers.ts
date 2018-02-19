@@ -2,17 +2,17 @@
 /// <reference path='../../types/ActionStore.d.ts'/>
 
 import ActionMap from '../../private/ActionMap'
-import MessageBroker from '../../private/MessageBroker'
 import OwnerManager from '../../private/OwnerManager'
 import ShadowElement from '../../private/ShadowElement'
 import { attachAttr, setAttrValue } from '../../private/NativeUtils'
 import { SymbolProxy, SymbolWhich } from '../../private/Symbols'
 import {
   callActionInCallerContext,
+  callActionInIsolatedContext,
   saveRecordDataTo
 } from '../utils'
 
-export type Decorator = (
+type Decorator = (
   target: Target,
   action: Action,
   actionFunc: (this: ActionTarget, ...args: any[]) => any
@@ -32,12 +32,10 @@ export const decorators: { [name: string]: Decorator } = {
   trigger: (target, action, actionFunc) => {
     return function (...args) {
       return callActionInCallerContext(() => {
-        MessageBroker.stackSnapshot()
-        const result = actionFunc.call(this, ...args)
-        MessageBroker.restoreSnapshot()
-
+        const result = callActionInIsolatedContext(() => {
+          return actionFunc.call(this, ...args)
+        })
         record({ caller: this, target, action })
-
         return result
       })
     }
@@ -138,6 +136,44 @@ export const decorators: { [name: string]: Decorator } = {
       return target
     }
   }
+}
+
+export function trackTemplate(
+  template: {
+    target: Target,
+    action: Action,
+    decorator: Decorator,
+    getter?: boolean
+  }
+) {
+  const { target, action, decorator } = template
+  const shouldTrackGetter = template.getter
+  const descriptor =
+    Reflect.getOwnPropertyDescriptor(window[target].prototype, action)
+  // @NOTE: getter, setter, method are mutual exclusive
+  if (shouldTrackGetter && hasGetter(descriptor)) {
+    descriptor.get =
+      decorator(target, action, descriptor.get)
+  } else if (hasSetter(descriptor)) {
+    descriptor.set =
+      decorator(target, action, descriptor.set)
+  } else if (hasMethod(descriptor)) {
+    descriptor.value =
+      decorator(target, action, descriptor.value)
+  }
+  Reflect.defineProperty(window[target].prototype, action, descriptor)
+}
+
+function hasGetter(descriptor: PropertyDescriptor): boolean {
+  return !!descriptor.get
+}
+
+function hasSetter(descriptor: PropertyDescriptor): boolean {
+  return !!descriptor.set
+}
+
+function hasMethod(descriptor: PropertyDescriptor): boolean {
+  return !!descriptor.value && (typeof descriptor.value === 'function')
 }
 
 function record(info: {
