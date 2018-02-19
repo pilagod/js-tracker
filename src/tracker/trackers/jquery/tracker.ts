@@ -156,12 +156,15 @@ function trackEventTriggers() {
 
   function trackSpecialTriggers(specials: object) {
     ['focus', 'blur', 'click'].map((action: string) => {
-      const trigger = specials[action].trigger
+      // @NOTE: jquery 1.8.2 has no special triggers
+      if (specials[action] && specials[action].trigger) {
+        const trigger = specials[action].trigger
 
-      specials[action].trigger = function () {
-        return callActionInNonTrackingContext(() => {
-          return trigger.call(this)
-        })
+        specials[action].trigger = function () {
+          return callActionInNonTrackingContext(() => {
+            return trigger.call(this)
+          })
+        }
       }
     })
   }
