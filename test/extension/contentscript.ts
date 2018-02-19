@@ -26,8 +26,8 @@ describe('contentscript', () => {
       )
     }
     it('should handle \'js-tracker\' CustomEvent and call helpers.messageHandler with event.detail.record', () => {
-      const start: RecordSourceMessage = { state: 'record_start', data: { loc: actions[0].info.loc } }
-      const end: RecordSourceMessage = { state: 'record_end', data: { loc: actions[0].info.loc } }
+      const start: RecordContextMessage = { state: 'record_start', data: { loc: actions[0].info.loc } }
+      const end: RecordContextMessage = { state: 'record_end', data: { loc: actions[0].info.loc } }
       const record: RecordDataMessage = {
         state: 'record',
         data: {

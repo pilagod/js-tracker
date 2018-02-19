@@ -69,12 +69,12 @@ export class TrackerMessageReceiver {
     loc: SourceLocation,
     messages: RecordMessage[]
   ) {
-    const start = <RecordSourceMessage>messages[0]
+    const start = <RecordContextMessage>messages[0]
     expect(start.state).to.equal('record_start')
     expect(start.data.loc.scriptUrl).to.equal(loc.scriptUrl)
     expect(start.data.loc.lineNumber).to.equal(loc.lineNumber)
 
-    const end = <RecordSourceMessage>messages.slice(-1)[0]
+    const end = <RecordContextMessage>messages.slice(-1)[0]
     expect(end.state).to.equal('record_end')
     expect(end.data.loc.scriptUrl).to.equal(loc.scriptUrl)
     expect(end.data.loc.lineNumber).to.equal(loc.lineNumber)

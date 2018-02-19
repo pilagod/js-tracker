@@ -46,7 +46,7 @@ function trackAnimationEntryPoint() {
   function trackQueue(queue) {
     jquery.prototype.queue = function (type, doAnimation) {
       this.each(function (this: Element) {
-        AnimController.addUntrackSource(this)
+        AnimController.addUntrackContext(this)
       })
       // @NOTE: first time call doAnimation will do many other operations,
       // thus doAnimation also need to be wrapped
@@ -55,7 +55,7 @@ function trackAnimationEntryPoint() {
         type,
         AnimController.wrapAnimWithSourceMessagesOnce(
           doAnimation,
-          AnimController.getSourceFromMessageBroker()
+          AnimController.getContextFromMessageBroker()
         )
       )
     }
@@ -68,7 +68,7 @@ function trackAnimationEntryPoint() {
         this,
         AnimController.wrapAnimWithSourceMessagesOnce(
           timer,
-          AnimController.getUntrackSource(timer.elem)
+          AnimController.getUntrackContext(timer.elem)
         )
       )
     }

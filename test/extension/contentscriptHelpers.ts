@@ -22,10 +22,10 @@ describe('contentscript helpers', () => {
     const messageHandler = helpers.messageHandler // this is an async function
 
     const createRecordDataMessage = (data: RecordData) => (<RecordDataMessage>{ state: 'record', data })
-    const createRecordSourceMessage = (loc: SourceLocation) => ({
+    const createRecordContextMessage = (loc: SourceLocation) => ({
       // @NOTE: to simulate the real environment, we copy loc to a new object
-      start: <RecordSourceMessage>{ state: 'record_start', data: { loc: Object.assign({}, loc) } },
-      end: <RecordSourceMessage>{ state: 'record_end', data: { loc: Object.assign({}, loc) } }
+      start: <RecordContextMessage>{ state: 'record_start', data: { loc: Object.assign({}, loc) } },
+      end: <RecordContextMessage>{ state: 'record_end', data: { loc: Object.assign({}, loc) } }
     })
 
     beforeEach(() => {
@@ -33,8 +33,8 @@ describe('contentscript helpers', () => {
     })
 
     describe('handle record message stream', () => {
-      it('should not call store.registerFromActionInfo given RecordSourceMessage', async () => {
-        const { start, end } = createRecordSourceMessage(actions[0].info.loc)
+      it('should not call store.registerFromActionInfo given RecordContextMessage', async () => {
+        const { start, end } = createRecordContextMessage(actions[0].info.loc)
 
         await messageHandler(start)
         await messageHandler(end)
@@ -42,8 +42,8 @@ describe('contentscript helpers', () => {
         expect(store.registerFromActionInfo.called).to.be.false
       })
 
-      it('should call store.registerFromActionInfo with data of RecordDataMessage combining data of the start RecordSourceMessage', async () => {
-        const { start, end } = createRecordSourceMessage(actions[0].info.loc)
+      it('should call store.registerFromActionInfo with data of RecordDataMessage combining data of the start RecordContextMessage', async () => {
+        const { start, end } = createRecordContextMessage(actions[0].info.loc)
 
         const record1 = createRecordDataMessage({
           trackid: actions[0].info.trackid,
@@ -69,9 +69,9 @@ describe('contentscript helpers', () => {
         ).to.be.true
       })
 
-      it('should ignore any RecordSourceMessage which is not the matched end RecordSourceMessage of the first start RecordSourceMessage', async () => {
-        const { start: start1, end: end1 } = createRecordSourceMessage(actions[0].info.loc)
-        const { start: start2, end: end2 } = createRecordSourceMessage(actions[1].info.loc)
+      it('should ignore any RecordContextMessage which is not the matched end RecordContextMessage of the first start RecordContextMessage', async () => {
+        const { start: start1, end: end1 } = createRecordContextMessage(actions[0].info.loc)
+        const { start: start2, end: end2 } = createRecordContextMessage(actions[1].info.loc)
 
         const { trackid, type } = actions[0].info
         const record = createRecordDataMessage({ trackid, type })
@@ -89,9 +89,9 @@ describe('contentscript helpers', () => {
         ).to.be.true
       })
 
-      it('should clear start RecordSourceMessage given the matched end RecordSourceMessage comes', async () => {
-        const { start: start1, end: end1 } = createRecordSourceMessage(actions[0].info.loc)
-        const { start: start2, end: end2 } = createRecordSourceMessage(actions[1].info.loc)
+      it('should clear start RecordContextMessage given the matched end RecordContextMessage comes', async () => {
+        const { start: start1, end: end1 } = createRecordContextMessage(actions[0].info.loc)
+        const { start: start2, end: end2 } = createRecordContextMessage(actions[1].info.loc)
 
         const { trackid, type } = actions[0].info
         const record = createRecordDataMessage({ trackid, type })
@@ -112,7 +112,7 @@ describe('contentscript helpers', () => {
     })
 
     describe('update sidebar', () => {
-      const { start, end } = createRecordSourceMessage(actions[0].info.loc)
+      const { start, end } = createRecordContextMessage(actions[0].info.loc)
       const { trackid, type } = actions[0].info
       const record = createRecordDataMessage({ trackid, type })
 

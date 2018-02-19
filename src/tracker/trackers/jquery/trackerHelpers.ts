@@ -9,63 +9,63 @@ class AnimationController {
 
   private animid = 0
   private untrackAnims: {
-    [animid: number]: RecordSource[]
+    [animid: number]: RecordContext[]
   } = {}
 
   /* public */
 
-  public addUntrackSource(element: Element) {
+  public addUntrackContext(element: Element) {
     if (MessageBroker.isEmpty()) {
       return
     }
-    const source = MessageBroker.getSource()
+    const context = MessageBroker.getContext()
     const animid = element[SymbolAnim] || this.setAnimIDOnElement(element)
 
     if (!this.untrackAnims.hasOwnProperty(animid)) {
       this.untrackAnims[animid] = []
     }
-    this.untrackAnims[animid].push(source)
+    this.untrackAnims[animid].push(context)
   }
 
-  public getUntrackSource(element: Element): RecordSource {
+  public getUntrackContext(element: Element): RecordContext {
     if (!element.hasOwnProperty(SymbolAnim)) {
       return
     }
     const untrackList = this.untrackAnims[element[SymbolAnim]]
     // @NOTE: each element will animate by queueing order
-    const source = untrackList.shift()
+    const context = untrackList.shift()
 
     if (untrackList.length === 0) {
       delete element[SymbolAnim]
     }
-    return source
+    return context
   }
 
-  public getSourceFromMessageBroker(): RecordSource {
-    return MessageBroker.getSource()
+  public getContextFromMessageBroker(): RecordContext {
+    return MessageBroker.getContext()
   }
 
   public wrapAnimWithSourceMessagesOnce(
     animFunc: (...args: any[]) => void,
-    source: RecordSource
+    context: RecordContext
   ): (...args: any[]) => void {
-    if (!source) {
+    if (!context) {
       // @NOTE: animFunc here is not a tracking target
       return animFunc
     }
     return new Proxy(animFunc, {
       apply: function (target, thisArg, argumentList) {
         // @NOTE: when this function is called from jquery queue, 
-        // it should not send any RecordSourceMessage
+        // it should not send any RecordContextMessage
         const shouldReproduce = MessageBroker.isEmpty()
 
         if (shouldReproduce) {
-          MessageBroker.send({ state: 'record_start', data: source })
+          MessageBroker.send({ state: 'record_start', data: context })
         }
         const result = target.apply(thisArg, argumentList)
 
         if (shouldReproduce) {
-          MessageBroker.send({ state: 'record_end', data: source })
+          MessageBroker.send({ state: 'record_end', data: context })
         }
         // @NOTE: reset animFunc and ignore duplicate actions (track only once)
         this.apply = function (target, thisArg, argumentList) {

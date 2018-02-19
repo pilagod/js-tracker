@@ -12,7 +12,7 @@ class ContentscriptController {
 
   public selection: Element = null
 
-  private source: RecordSource = null
+  private context: RecordContext = null
   private store: IActionStore
   private updateSidebar: (message: Message, callback?: (response: any) => void) => void
 
@@ -29,8 +29,8 @@ class ContentscriptController {
   public messageHandler = async (message: RecordMessage) => {
     switch (message.state) {
       case 'record_start':
-        if (!this.source) {
-          this.source = message.data
+        if (!this.context) {
+          this.context = message.data
         }
         break
 
@@ -39,8 +39,8 @@ class ContentscriptController {
         break
 
       case 'record_end':
-        if (match(this.source.loc, message.data.loc)) {
-          this.source = null
+        if (match(this.context.loc, message.data.loc)) {
+          this.context = null
         }
         break
     }
@@ -64,7 +64,7 @@ class ContentscriptController {
   /* private */
 
   private async recordDataHandler(data: RecordData) {
-    const info: ActionInfo = Object.assign({}, data, this.source)
+    const info: ActionInfo = Object.assign({}, data, this.context)
     const success = await this.store.registerFromActionInfo(info)
     // @NOTE: it's easy to forget await store, success must be resolved value of boolean instead of Promise
     if (success === true && !this.isSelectionChanged(info.trackid)) {

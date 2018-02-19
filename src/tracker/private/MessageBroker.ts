@@ -5,7 +5,7 @@ import { sendMessagesToContentScript } from './NativeUtils'
 
 type SnapShot = {
   block: boolean;
-  source: RecordSource;
+  context: RecordContext;
   messages: RecordMessage[];
 }
 
@@ -14,7 +14,7 @@ class MessageBroker {
   private snapshots: SnapShot[] = []
 
   private block: boolean = false
-  private source: RecordSource = null
+  private context: RecordContext = null
   private messages: RecordMessage[] = []
 
   /* public */
@@ -27,8 +27,8 @@ class MessageBroker {
     return this.block
   }
 
-  public getSource(): RecordSource {
-    return this.source
+  public getContext(): RecordContext {
+    return this.context
   }
 
   public startBlocking() {
@@ -60,7 +60,7 @@ class MessageBroker {
   private createSnapshot(): SnapShot {
     return {
       block: this.block,
-      source: this.source,
+      context: this.context,
       messages: this.messages.slice()
     }
   }
@@ -68,14 +68,14 @@ class MessageBroker {
   private createEmptySnapshot(): SnapShot {
     return {
       block: false,
-      source: null,
+      context: null,
       messages: []
     }
   }
 
   private use(snapshot: SnapShot) {
     this.block = snapshot.block
-    this.source = snapshot.source
+    this.context = snapshot.context
     this.messages = snapshot.messages
   }
 
@@ -84,14 +84,14 @@ class MessageBroker {
 
     switch (message.state) {
       case 'record_start':
-        if (!this.source) {
-          this.source = message.data
+        if (!this.context) {
+          this.context = message.data
         }
         break
 
       case 'record_end':
-        if (match(this.source.loc, message.data.loc)) {
-          this.source = null
+        if (match(this.context.loc, message.data.loc)) {
+          this.context = null
           this.flush()
         }
         break

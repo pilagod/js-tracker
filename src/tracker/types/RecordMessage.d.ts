@@ -1,15 +1,15 @@
 /* message between tracker, contentscirpt */
 
 type RecordMessage =
-  RecordSourceMessage
+  RecordContextMessage
   | RecordDataMessage
 
-type RecordSourceMessage = {
+type RecordContextMessage = {
   state: 'record_start' | 'record_end'
-  data: RecordSource
+  data: RecordContext
 }
 
-type RecordSource = {
+type RecordContext = {
   loc: SourceLocation
 }
 
