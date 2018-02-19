@@ -109,6 +109,7 @@ function trackAnimationExitPoint() {
 function trackEventTriggers() {
   hookPropEventTriggered()
   trackEventTrigger(jquery.event.trigger)
+  trackSpecialTriggers(jquery.event.special)
 
   function hookPropEventTriggered() {
     // @NOTE: trigger process:
@@ -124,11 +125,11 @@ function trackEventTriggers() {
         if (value) {
           // @NOTE: native trigger is about to begin, take out messages 
           // before trigger record process to give native trigger a right source
-          MessageBroker.restoreMessages()
+          MessageBroker.restoreSnapshot()
         } else {
           // @NOTE: native trigger is about to end, put back messages to 
           // continue trigger restore process
-          MessageBroker.stackMessages()
+          MessageBroker.stackSnapshot()
         }
         triggered = value
       },
@@ -144,9 +145,9 @@ function trackEventTriggers() {
       // @NOTE: in jQuery.ajax, it will call event.trigger with no elem for 
       // series of ajax events, we should not track these low-level actions  
       const shouldTrack = !MessageBroker.isEmpty()
-      MessageBroker.stackMessages()
+      MessageBroker.stackSnapshot()
       const result = trigger.call(this, event, data, elem, onlyHandlers)
-      MessageBroker.restoreMessages()
+      MessageBroker.restoreSnapshot()
       // @NOTE: in order to simulate focusin, jquery call event.simulate -> event.trigger
       // every time focus event happens
       if (!!elem && shouldTrack) {
@@ -154,5 +155,18 @@ function trackEventTriggers() {
       }
       return result
     }
+  }
+
+  function trackSpecialTriggers(specials: object) {
+    ['focus', 'blur', 'click'].map((action: string) => {
+      const trigger = specials[action].trigger
+
+      specials[action].trigger = function () {
+        MessageBroker.startBlocking()
+        const result = trigger.call(this)
+        MessageBroker.stopBlocking()
+        return result
+      }
+    })
   }
 }

@@ -93,7 +93,19 @@ describe('jQuery API tracker', () => {
       expect(true).to.be.true
     })
 
-    it('should track click properly (native event listener)', () => {
+    it('should track click with no listener', () => {
+      const div = document.createElement('div')
+
+      $(div).click()
+      const loc1 = utils.getPrevLineSourceLocation()
+      const record1 = utils.createRecord('1', ActionType.Behav | ActionType.Event)
+      const ownerID = utils.getOwnerOf(div).getTrackID()
+
+      expect(ownerID).to.equal('1')
+      receiver.verifyMessages(loc1, record1)
+    })
+
+    it('should track click with native listener', () => {
       const div = document.createElement('div')
 
       div.addEventListener('click', () => {
@@ -119,7 +131,7 @@ describe('jQuery API tracker', () => {
       ])
     })
 
-    it('should track click properly (jquery event listener)', () => {
+    it('should track click with jquery listener', () => {
       const div = document.createElement('div')
 
       $(div).on('click', () => {
@@ -142,6 +154,76 @@ describe('jQuery API tracker', () => {
       receiver.verifyListOfMessages([
         { loc: loc1, data: record1 },
         { loc: loc2, data: record2 },
+      ])
+    })
+
+    it('should track focus (which will use special trigger, same as blur) with no listener', () => {
+      const div = document.createElement('div')
+
+      $(div).focus()
+      const loc1 = utils.getPrevLineSourceLocation()
+      const record1 = utils.createRecord('1', ActionType.Behav | ActionType.Event)
+      const ownerID = utils.getOwnerOf(div).getTrackID()
+
+      expect(ownerID).to.equal('1')
+      receiver.verifyMessages(loc1, record1)
+    })
+
+    function createFocusableDiv() {
+      const div = document.createElement('div')
+      // @NOTE: https://stackoverflow.com/questions/3656467/is-it-possible-to-focus-on-a-div-using-javascript-focus-function
+      // make div focusable (1) set tabIndex (2) attach to page
+      div.tabIndex = -1
+      document.body.appendChild(div)
+
+      receiver.reset()
+
+      return div
+    }
+
+    it('should track focus (which will use special trigger, same as blur) with native listener', () => {
+      const div = createFocusableDiv()
+
+      div.addEventListener('focus', () => {
+        div.style.color = 'red'
+      })
+      const loc1 = utils.getPrevLineSourceLocation(-1)
+      const record1 = utils.createRecord('1', ActionType.Style)
+
+      receiver.reset()
+
+      $(div).focus()
+      const loc2 = utils.getPrevLineSourceLocation()
+      const record2 = utils.createRecord('1', ActionType.Behav | ActionType.Event)
+      const ownerID = utils.getOwnerOf(div).getTrackID()
+
+      expect(ownerID).to.equal('1')
+      receiver.verifyListOfMessages([
+        { loc: loc1, data: record1 },
+        { loc: loc2, data: record2 }
+      ])
+    })
+
+    it('should track focus (which will use special trigger, same as blur) with jquery listener', () => {
+      const div = createFocusableDiv()
+
+      $(div).on('focus', () => {
+        div.style.color = 'red'
+      })
+      const loc1 = utils.getPrevLineSourceLocation(-1)
+      const record1 = utils.createRecord('1', ActionType.Style)
+
+      receiver.reset()
+
+      $(div).focus()
+      const loc2 = utils.getPrevLineSourceLocation()
+      const record2 = utils.createRecord('1', ActionType.Behav | ActionType.Event)
+      const ownerID = utils.getOwnerOf(div).getTrackID()
+
+      expect(ownerID).to.equal('1')
+      receiver.verifyListOfMessages([
+        { loc: loc1, data: record1 },
+        { loc: loc2, data: record2 }
       ])
     })
 

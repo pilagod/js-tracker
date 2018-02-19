@@ -3,10 +3,17 @@
 import { match } from '../public/SourceLocation'
 import { sendMessagesToContentScript } from './NativeUtils'
 
+type SnapShot = {
+  block: boolean;
+  source: RecordSource;
+  messages: RecordMessage[];
+}
+
 class MessageBroker {
 
+  private snapshots: SnapShot[] = []
+
   private block: boolean = false
-  private stack: RecordMessage[][] = []
   private source: RecordSource = null
   private messages: RecordMessage[] = []
 
@@ -32,15 +39,24 @@ class MessageBroker {
     this.block = false
   }
 
-  public stackMessages() {
-    this.stack.push(this.clearMessages())
+  public stackSnapshot() {
+    this.snapshots.push({
+      block: this.block,
+      source: this.source,
+      messages: this.clearMessages()
+    })
+    this.block = false
   }
 
-  public restoreMessages() {
-    this.messages = this.stack.pop()
-    if (this.messages.length > 0) {
-      this.source = (<RecordSourceMessage>this.messages[0]).data
-    }
+  public restoreSnapshot() {
+    const snapshot = this.snapshots.pop()
+
+    this.block = snapshot.block
+    this.source = snapshot.source
+    this.messages = snapshot.messages
+    // if (this.messages.length > 0) {
+    //   this.source = (<RecordSourceMessage>this.messages[0]).data
+    // }
   }
 
   public send(message: RecordMessage) {
