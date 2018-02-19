@@ -15,12 +15,9 @@ class AnimationController {
 
   /* public */
 
-  public addUntrackContext(element: Element) {
-    if (MessageBroker.isEmpty()) {
-      return
-    }
-    const context = MessageBroker.getContext()
+  public addUntrackContextTo(element: Element) {
     const animid = element[SymbolAnim] || this.setAnimIDOnElement(element)
+    const context = MessageBroker.getContext()
 
     if (!this.untrackAnims.hasOwnProperty(animid)) {
       this.untrackAnims[animid] = []
@@ -28,7 +25,7 @@ class AnimationController {
     this.untrackAnims[animid].push(context)
   }
 
-  public getUntrackContext(element: Element): RecordContext {
+  public getUntrackContextFrom(element: Element): RecordContext {
     if (!element.hasOwnProperty(SymbolAnim)) {
       return
     }
@@ -49,32 +46,6 @@ class AnimationController {
   }
 }
 export const AnimController = new AnimationController()
-
-export function callAnimInGivenContextOnce(
-  animFunc: (...args: any[]) => void,
-  context: RecordContext
-): (...args: any[]) => void {
-  if (!context) {
-    // @NOTE: animFunc here is not a tracking target
-    return animFunc
-  }
-  return new Proxy(animFunc, {
-    apply: function (target, thisArg, argumentList) {
-      // @NOTE: when this function is called directly while queueing,
-      // it should not send any RecordContextMessage
-      const result = MessageBroker.isEmpty()
-        ? callActionInGivenContext(() => target.apply(thisArg, argumentList), context)
-        : target.apply(thisArg, argumentList)
-      // @NOTE: reset animFunc and ignore already tracked actions (track only once)
-      this.apply = function (target, thisArg, argumentList) {
-        return callActionInNonTrackingContext(() => {
-          return target.apply(thisArg, argumentList)
-        })
-      }
-      return result
-    }
-  })
-}
 
 export function callActionInNonTrackingContext(actionFunc: () => any) {
   try {
@@ -103,3 +74,27 @@ export function callActionInTrackingContext(actionFunc: () => any) {
     }
   }
 }
+
+export function packAnimInGivenContextOnce(
+  animFunc: (...args: any[]) => void,
+  context: RecordContext
+): (...args: any[]) => void {
+  return new Proxy(animFunc, {
+    apply: function (target, thisArg, argumentList) {
+      // @NOTE: when this function is called while queueing (MessageBroker is not empty),
+      // it should not send any RecordContextMessage
+      const result = MessageBroker.isEmpty()
+        ? callActionInGivenContext(() => target.apply(thisArg, argumentList), context)
+        : target.apply(thisArg, argumentList)
+      // @NOTE: reset animFunc and ignore already tracked actions (track only once)
+      this.apply = function (target, thisArg, argumentList) {
+        return callActionInNonTrackingContext(() => {
+          return target.apply(thisArg, argumentList)
+        })
+      }
+      return result
+    }
+  })
+}
+
+

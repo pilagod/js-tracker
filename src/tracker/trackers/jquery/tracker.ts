@@ -4,9 +4,9 @@ import ActionType from '../../public/ActionType';
 import MessageBroker from '../../private/MessageBroker';
 import {
   AnimController,
-  callAnimInGivenContextOnce,
   callActionInNonTrackingContext,
-  callActionInTrackingContext
+  callActionInTrackingContext,
+  packAnimInGivenContextOnce
 } from './trackerHelpers'
 import {
   callActionInCallerContext,
@@ -51,25 +51,28 @@ function trackAnimationEntryPoint() {
 
   function trackQueue(queue) {
     jquery.prototype.queue = function (type, doAnimation) {
+      if (MessageBroker.isEmpty()) {
+        return queue.call(this, type, doAnimation)
+      }
       this.each(function (this: Element) {
-        AnimController.addUntrackContext(this)
+        AnimController.addUntrackContextTo(this)
       })
       // @NOTE: first time call doAnimation will do many other operations,
       // thus doAnimation also need to be wrapped
       return queue.call(
         this,
         type,
-        callAnimInGivenContextOnce(doAnimation, MessageBroker.getContext())
+        packAnimInGivenContextOnce(doAnimation, MessageBroker.getContext())
       )
     }
   }
 
-  function trackTimer(fxTimer) {
-    jquery.fx.timer = function (timer) {
+  function trackTimer(timer) {
+    jquery.fx.timer = function (tick) {
       // @NOTE: timer is where animation actually executing
-      return fxTimer.call(
+      return timer.call(
         this,
-        callAnimInGivenContextOnce(timer, AnimController.getUntrackContext(timer.elem))
+        packAnimInGivenContextOnce(tick, AnimController.getUntrackContextFrom(tick.elem))
       )
     }
   }
