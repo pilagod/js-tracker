@@ -4,8 +4,8 @@ import ActionType from '../../public/ActionType';
 import MessageBroker from '../../private/MessageBroker';
 import { AnimController } from './trackerHelpers'
 import {
-  saveRecordDataTo,
-  wrapActionWithSourceMessages
+  callActionInCallerContext,
+  saveRecordDataTo
 } from '../utils'
 
 let jquery
@@ -24,7 +24,7 @@ function trackGeneralCases() {
   trackedApis.map((api) => {
     jquery.prototype[api] = ((actionFunc) => {
       return function (...args: any[]) {
-        return wrapActionWithSourceMessages(() => {
+        return callActionInCallerContext(() => {
           return actionFunc.call(this, ...args)
         })
       }

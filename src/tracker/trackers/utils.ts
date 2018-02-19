@@ -1,18 +1,31 @@
+/// <reference path='../types/RecordMessage.d.ts'/>
+
 import * as StackTrace from 'stacktrace-js'
 
 import MessageBroker from '../private/MessageBroker'
 import OwnerManager from '../private/OwnerManager'
 
-export function wrapActionWithSourceMessages(actionFunc: () => any) {
-  const loc = getSourceLocationGivenDepth(3)
+export function callActionInCallerContext(actionFunc: () => any) {
+  return callActionInGivenContext(actionFunc, getCallerContext())
+}
 
+export function callActionInGivenContext(
+  actionFunc: () => any,
+  context: RecordContext
+) {
   try {
-    recordStartWith(loc)
-    return actionFunc()
+    MessageBroker.send({
+      state: 'record_start',
+      data: context
+    })
+    return actionFunc.call(this)
   } catch (e) {
     throw (e)
   } finally {
-    recordEndWith(loc)
+    MessageBroker.send({
+      state: 'record_end',
+      data: context
+    })
   }
 }
 
@@ -30,20 +43,14 @@ export function saveRecordDataTo(target: ActionTarget, type: ActionType, merge?:
   MessageBroker.send({ state: 'record', data: record })
 }
 
-function getSourceLocationGivenDepth(depth: number) {
-  const stackframe = StackTrace.getSync()[depth]
+function getCallerContext(): RecordContext {
+  const stackframe = StackTrace.getSync()[3]
 
-  return {
-    scriptUrl: stackframe.fileName,
-    lineNumber: stackframe.lineNumber,
-    columnNumber: stackframe.columnNumber,
+  return <RecordContext>{
+    loc: {
+      scriptUrl: stackframe.fileName,
+      lineNumber: stackframe.lineNumber,
+      columnNumber: stackframe.columnNumber
+    }
   }
-}
-
-function recordStartWith(loc: SourceLocation) {
-  MessageBroker.send({ state: 'record_start', data: { loc } })
-}
-
-function recordEndWith(loc: SourceLocation) {
-  MessageBroker.send({ state: 'record_end', data: { loc } })
 }

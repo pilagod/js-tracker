@@ -8,8 +8,8 @@ import ShadowElement from '../../private/ShadowElement'
 import { attachAttr, setAttrValue } from '../../private/NativeUtils'
 import { SymbolProxy, SymbolWhich } from '../../private/Symbols'
 import {
-  saveRecordDataTo,
-  wrapActionWithSourceMessages
+  callActionInCallerContext,
+  saveRecordDataTo
 } from '../utils'
 
 export type Decorator = (
@@ -21,7 +21,7 @@ export type Decorator = (
 export const decorators: { [name: string]: Decorator } = {
   general: (target, action, actionFunc) => {
     return function (...args) {
-      return wrapActionWithSourceMessages(() => {
+      return callActionInCallerContext(() => {
         const result = actionFunc.call(this || window, ...args)
         record({ caller: this || window, target, action, args })
         return result
@@ -31,7 +31,7 @@ export const decorators: { [name: string]: Decorator } = {
 
   trigger: (target, action, actionFunc) => {
     return function (...args) {
-      return wrapActionWithSourceMessages(() => {
+      return callActionInCallerContext(() => {
         MessageBroker.stackSnapshot()
         const result = actionFunc.call(this, ...args)
         MessageBroker.restoreSnapshot()
@@ -54,7 +54,7 @@ export const decorators: { [name: string]: Decorator } = {
       const owner = OwnerManager.getOwner(attr)
       const attattr = getAttachableAttr(attr)
 
-      return wrapActionWithSourceMessages(() => {
+      return callActionInCallerContext(() => {
         const result = actionFunc.call(this, attattr)
         record({
           caller: this, target, action, args: [attattr],
@@ -72,7 +72,7 @@ export const decorators: { [name: string]: Decorator } = {
         // @TODO: check namespaceURI
         attachAttr(document.createElement(ShadowElement.TagName), this)
       }
-      return wrapActionWithSourceMessages(() => {
+      return callActionInCallerContext(() => {
         const result = setter.call(this, value)
         record({ caller: this, target, action })
         return result
@@ -92,7 +92,7 @@ export const decorators: { [name: string]: Decorator } = {
         : target[action]
     },
     set: function (target, action, value) {
-      return wrapActionWithSourceMessages(() => {
+      return callActionInCallerContext(() => {
         target[action] = value
         record({ caller: target, target: 'CSSStyleDeclaration', action })
         return true
@@ -103,7 +103,7 @@ export const decorators: { [name: string]: Decorator } = {
   // dataset
   DOMStringMap: proxyDecorator(<ProxyHandler<DOMStringMap>>{
     set: function (target, action, value) {
-      return wrapActionWithSourceMessages(() => {
+      return callActionInCallerContext(() => {
         target[action] = value
         record({ caller: target, target: 'DOMStringMap', action })
         return true
