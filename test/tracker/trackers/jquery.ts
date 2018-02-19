@@ -502,69 +502,64 @@ describe('jQuery API tracker', () => {
   describe('animation apis', () => {
     it('should track only animate and exclude all details of its implementation code', (done) => {
       const div = document.createElement('div')
+      const owner = utils.getOwnerOf(div)
 
       $(div).animate({ "top": "100px" }, 100, () => {
         const loc = utils.getPrevLineSourceLocation()
-        const owner = utils.getOwnerOf(div)
-
-        expect(owner.hasTrackID()).to.be.true
-
         const record = utils.createRecord(owner.getTrackID(), ActionType.Style)
 
+        expect(owner.hasTrackID()).to.be.true
         receiver.verifyMessages(loc, record)
+
         done()
       })
     })
 
     it('should track only specific animation (e.g., fadeIn, fadeOut) and exclude all details of its implementation code', (done) => {
       const div = document.createElement('div')
+      const owner = utils.getOwnerOf(div)
 
       $(div).fadeOut(100, () => {
         const loc = utils.getPrevLineSourceLocation()
-        const owner = utils.getOwnerOf(div)
-
-        expect(owner.hasTrackID()).to.be.true
-
         const record = utils.createRecord(owner.getTrackID(), ActionType.Style)
 
+        expect(owner.hasTrackID()).to.be.true
         receiver.verifyMessages(loc, record)
+
         done()
       })
     })
 
     it('should track other Style actions after animation finishes', (done) => {
       const div = document.createElement('div')
+      const owner = utils.getOwnerOf(div)
 
       $(div).slideUp(100, () => {
         receiver.reset()
 
         $(div).css('color', 'red')
         const loc = utils.getPrevLineSourceLocation()
-        const owner = utils.getOwnerOf(div)
-
-        expect(owner.hasTrackID()).to.be.true
-
         const record = utils.createRecord(owner.getTrackID(), ActionType.Style)
 
+        expect(owner.hasTrackID()).to.be.true
         receiver.verifyMessages(loc, record)
+
         done()
       })
     })
 
     it('should track other Style actions properly given animation executes only one tick ', () => {
       const div = document.createElement('div')
+      const owner = utils.getOwnerOf(div)
 
       $(div).fadeOut(0)
       receiver.reset()
 
       $(div).css('color', 'red')
       const loc = utils.getPrevLineSourceLocation()
-      const owner = utils.getOwnerOf(div)
-
-      expect(owner.hasTrackID()).to.be.true
-
       const record = utils.createRecord(owner.getTrackID(), ActionType.Style)
 
+      expect(owner.hasTrackID()).to.be.true
       receiver.verifyMessages(loc, record)
     })
 
@@ -588,25 +583,25 @@ describe('jQuery API tracker', () => {
 
     it('should track delay animation properly', (done) => {
       const div = document.createElement('div')
+      const owner = utils.getOwnerOf(div)
 
       $(div).css('display', 'none')
       receiver.reset()
 
       $(div).delay(100).slideDown(100, () => {
         const loc = utils.getPrevLineSourceLocation()
-        const owner = utils.getOwnerOf(div)
-
-        expect(owner.hasTrackID()).to.be.true
-
         const record = utils.createRecord(owner.getTrackID(), ActionType.Style)
 
+        expect(owner.hasTrackID()).to.be.true
         receiver.verifyMessages(loc, record)
+
         done()
       })
     })
 
     it('should track stop properly', (done) => {
       const div = document.createElement('div')
+      const owner = utils.getOwnerOf(div)
 
       $(div).fadeOut(100)
       $(div)
@@ -617,13 +612,11 @@ describe('jQuery API tracker', () => {
         })
         .fadeIn(100, () => {
           const loc = utils.getPrevLineSourceLocation()
-          const owner = utils.getOwnerOf(div)
-
-          expect(owner.hasTrackID()).to.be.true
-
           const record = utils.createRecord(owner.getTrackID(), ActionType.Style)
 
+          expect(owner.hasTrackID()).to.be.true
           receiver.verifyMessages(loc, record)
+
           done()
         })
     })
@@ -631,17 +624,17 @@ describe('jQuery API tracker', () => {
     it('should track double animation properly', (done) => {
       const div1 = document.createElement('div')
       const div2 = document.createElement('div')
+      const owner1 = utils.getOwnerOf(div1)
+      const owner2 = utils.getOwnerOf(div2)
 
       // for div1
       $(div1).animate({ 'margin-top': '300px', 'opacity': 0 }, 100)
       const loc1 = utils.getPrevLineSourceLocation()
-      const owner1 = utils.getOwnerOf(div1)
-
-      expect(owner1.hasTrackID()).to.be.true
-
       const record1 = utils.createRecord(owner1.getTrackID(), ActionType.Style)
 
+      expect(owner1.hasTrackID()).to.be.true
       receiver.verifyMessages(loc1, record1)
+
       receiver.reset()
 
       // for div2
@@ -651,13 +644,11 @@ describe('jQuery API tracker', () => {
       // jquery will not execute second immediately, it will wait 
       // until next animate cycle and do animation after first one.
       setTimeout(() => {
-        const owner2 = utils.getOwnerOf(div2)
-
-        expect(owner2.hasTrackID()).to.be.true
-
         const record2 = utils.createRecord(owner2.getTrackID(), ActionType.Style)
 
+        expect(owner2.hasTrackID()).to.be.true
         receiver.verifyMessages(loc2, record2)
+
         done()
       }, 10)
     })
