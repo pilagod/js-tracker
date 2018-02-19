@@ -2,9 +2,15 @@
 
 import ActionType from '../../public/ActionType';
 import MessageBroker from '../../private/MessageBroker';
-import { AnimController } from './trackerHelpers'
+import {
+  AnimController,
+  callAnimInGivenContextOnce,
+  callActionInNonTrackingContext,
+  callActionInTrackingContext
+} from './trackerHelpers'
 import {
   callActionInCallerContext,
+  callActionInIsolatedContext,
   saveRecordDataTo
 } from '../utils'
 
@@ -53,10 +59,7 @@ function trackAnimationEntryPoint() {
       return queue.call(
         this,
         type,
-        AnimController.wrapAnimWithSourceMessagesOnce(
-          doAnimation,
-          AnimController.getContextFromMessageBroker()
-        )
+        callAnimInGivenContextOnce(doAnimation, MessageBroker.getContext())
       )
     }
   }
@@ -66,10 +69,7 @@ function trackAnimationEntryPoint() {
       // @NOTE: timer is where animation actually executing
       return fxTimer.call(
         this,
-        AnimController.wrapAnimWithSourceMessagesOnce(
-          timer,
-          AnimController.getUntrackContext(timer.elem)
-        )
+        callAnimInGivenContextOnce(timer, AnimController.getUntrackContext(timer.elem))
       )
     }
   }
@@ -85,20 +85,12 @@ function trackAnimationExitPoint() {
       opt.complete = new Proxy(opt.complete, {
         apply: function (target, thisArg, argumentList) {
           // @NOTE: complete is called during last animation tick,
-          // actions in non-first tick is ignored, but actions in
-          // complete should be take into account, so we should reset
-          // blocking state here
-          const shouldResetBlocking = MessageBroker.isBlocking()
-
-          if (shouldResetBlocking) {
-            MessageBroker.stopBlocking()
-          }
-          const result = target.apply(thisArg, argumentList)
-
-          if (shouldResetBlocking) {
-            MessageBroker.startBlocking()
-          }
-          return result
+          // actions in not first tick will call in non-tracking context,
+          // in order to track actions in complete properly, we need to
+          // call complete in tracking context
+          return callActionInTrackingContext(() => {
+            return target.apply(thisArg, argumentList)
+          })
         }
       })
       return opt
@@ -142,15 +134,17 @@ function trackEventTriggers() {
   function trackEventTrigger(trigger) {
     // @NOTE: all trigger methods, like click and mouseenter, are all based on trigger
     jquery.event.trigger = function (event, data, elem, onlyHandlers) {
+      const result = callActionInIsolatedContext(() => {
+        return trigger.call(this, event, data, elem, onlyHandlers)
+      })
       // @NOTE: in jQuery.ajax, it will call event.trigger with no elem for 
       // series of ajax events, we should not track these low-level actions  
-      const shouldTrack = !MessageBroker.isEmpty()
-      MessageBroker.stackSnapshot()
-      const result = trigger.call(this, event, data, elem, onlyHandlers)
-      MessageBroker.restoreSnapshot()
-      // @NOTE: in order to simulate focusin, jquery call event.simulate -> event.trigger
-      // every time focus event happens
-      if (!!elem && shouldTrack) {
+      const hasEventTarget = !!elem
+      // @NOTE: in order to simulate focusin/out, jquery will directly call 
+      // event.trigger (in event.simulate) when focus/blur event happens
+      const isCalledByTrackedApi = !MessageBroker.isEmpty()
+
+      if (hasEventTarget && isCalledByTrackedApi) {
         saveRecordDataTo(elem, ActionType.Behav | ActionType.Event)
       }
       return result
@@ -162,10 +156,9 @@ function trackEventTriggers() {
       const trigger = specials[action].trigger
 
       specials[action].trigger = function () {
-        MessageBroker.startBlocking()
-        const result = trigger.call(this)
-        MessageBroker.stopBlocking()
-        return result
+        return callActionInNonTrackingContext(() => {
+          return trigger.call(this)
+        })
       }
     })
   }

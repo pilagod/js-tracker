@@ -29,6 +29,17 @@ export function callActionInGivenContext(
   }
 }
 
+export function callActionInIsolatedContext(actionFunc: () => any) {
+  try {
+    MessageBroker.stackSnapshot()
+    return actionFunc.call(this)
+  } catch (e) {
+    throw (e)
+  } finally {
+    MessageBroker.restoreSnapshot()
+  }
+}
+
 export function saveRecordDataTo(target: ActionTarget, type: ActionType, merge?: TrackID) {
   const owner = OwnerManager.getOwner(target)
 

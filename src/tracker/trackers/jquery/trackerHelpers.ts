@@ -1,6 +1,7 @@
-import ActionType from '../../public/ActionType'
+/// <reference path='../../types/RecordMessage.d.ts'/>
+
 import MessageBroker from '../../private/MessageBroker'
-import OwnerManager from '../../private/OwnerManager'
+import { callActionInGivenContext } from '../utils'
 
 const SymbolAnim = Symbol('Animation')
 
@@ -41,48 +42,64 @@ class AnimationController {
     return context
   }
 
-  public getContextFromMessageBroker(): RecordContext {
-    return MessageBroker.getContext()
-  }
-
-  public wrapAnimWithSourceMessagesOnce(
-    animFunc: (...args: any[]) => void,
-    context: RecordContext
-  ): (...args: any[]) => void {
-    if (!context) {
-      // @NOTE: animFunc here is not a tracking target
-      return animFunc
-    }
-    return new Proxy(animFunc, {
-      apply: function (target, thisArg, argumentList) {
-        // @NOTE: when this function is called from jquery queue, 
-        // it should not send any RecordContextMessage
-        const shouldReproduce = MessageBroker.isEmpty()
-
-        if (shouldReproduce) {
-          MessageBroker.send({ state: 'record_start', data: context })
-        }
-        const result = target.apply(thisArg, argumentList)
-
-        if (shouldReproduce) {
-          MessageBroker.send({ state: 'record_end', data: context })
-        }
-        // @NOTE: reset animFunc and ignore duplicate actions (track only once)
-        this.apply = function (target, thisArg, argumentList) {
-          MessageBroker.startBlocking()
-          const result = target.apply(thisArg, argumentList)
-          MessageBroker.stopBlocking()
-          return result
-        }
-        return result
-      }
-    })
-  }
-
   /* private */
 
   private setAnimIDOnElement(element: Element): number {
     return element[SymbolAnim] = (this.animid++ % AnimationController.MAX_ANIM_NUM + 1)
   }
 }
-export const AnimController = new AnimationController
+export const AnimController = new AnimationController()
+
+export function callAnimInGivenContextOnce(
+  animFunc: (...args: any[]) => void,
+  context: RecordContext
+): (...args: any[]) => void {
+  if (!context) {
+    // @NOTE: animFunc here is not a tracking target
+    return animFunc
+  }
+  return new Proxy(animFunc, {
+    apply: function (target, thisArg, argumentList) {
+      // @NOTE: when this function is called directly while queueing,
+      // it should not send any RecordContextMessage
+      const result = MessageBroker.isEmpty()
+        ? callActionInGivenContext(() => target.apply(thisArg, argumentList), context)
+        : target.apply(thisArg, argumentList)
+      // @NOTE: reset animFunc and ignore already tracked actions (track only once)
+      this.apply = function (target, thisArg, argumentList) {
+        return callActionInNonTrackingContext(() => {
+          return target.apply(thisArg, argumentList)
+        })
+      }
+      return result
+    }
+  })
+}
+
+export function callActionInNonTrackingContext(actionFunc: () => any) {
+  try {
+    MessageBroker.startBlocking()
+    return actionFunc.call(this)
+  } catch (e) {
+    throw (e)
+  } finally {
+    MessageBroker.stopBlocking()
+  }
+}
+
+export function callActionInTrackingContext(actionFunc: () => any) {
+  const isInNonTrackingContext = MessageBroker.isBlocking()
+
+  try {
+    if (isInNonTrackingContext) {
+      MessageBroker.stopBlocking()
+    }
+    return actionFunc.call(this)
+  } catch (e) {
+    throw (e)
+  } finally {
+    if (isInNonTrackingContext) {
+      MessageBroker.startBlocking()
+    }
+  }
+}
