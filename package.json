@@ -4,9 +4,10 @@
   "description": "A chrome extension tracks front-end JavaScript that uses DOM / jQuery APIs to manipulate html dom elements at runtime.",
   "scripts": {
     "test": "karma start ./karma/tracker.js --single-run & karma start ./karma/modules.js --single-run & karma start ./karma/extension.js --single-run",
-    "test-tracker": "karma start ./karma/tracker.js",
-    "test-modules": "karma start ./karma/modules.js",
+    "test-benchmark": "karma start ./karma/benchmark.js --single-run",
     "test-extension": "karma start ./karma/extension.js",
+    "test-modules": "karma start ./karma/modules.js",
+    "test-tracker": "karma start ./karma/tracker.js",
     "build": "node webpack/compiler.js && rm ./dist/tracker.js ./dist/StaticFilesPacker.js",
     "deploy": "rm ~/Desktop/JS-Tracker.zip & zip ~/Desktop/JS-Tracker.zip manifest.json assets/* dist/*"
   },
