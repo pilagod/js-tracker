@@ -1,7 +1,7 @@
 /// <reference path='../src/tracker/types/ActionStore.d.ts'/>
 
 import ActionType from '../src/tracker/public/ActionType'
-import { hash } from '../src/tracker/public/utils'
+import { hashSourceLocation } from '../src/tracker/public/SourceLocation'
 
 function createAction(
   trackid: TrackID,
@@ -16,7 +16,7 @@ function createAction(
   return {
     info: <ActionInfo>{ trackid, type, loc },
     record: <ActionRecord>{
-      key: hash(`${scriptUrl}:${lineNumber}:${columnNumber}`),
+      key: hashSourceLocation(loc),
       type, loc, code
     }
   }

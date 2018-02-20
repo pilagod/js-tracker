@@ -5,7 +5,7 @@ import * as esprima from 'esprima'
 import * as escodegen from 'escodegen'
 
 import { ESTreeNodeBinaryFinder } from '../private/libs/ESTreeNodeFinder'
-import { hashSourceLocation } from './utils'
+import { hashSourceLocation } from './SourceLocation'
 
 export default class ActionStore implements IActionStore {
 
