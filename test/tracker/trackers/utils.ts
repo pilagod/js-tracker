@@ -31,12 +31,12 @@ export class TrackerMessageReceiver {
     this.messages = []
   }
 
-  public verifyMessages(
-    loc: SourceLocation,
+  public verifySingleMessageChunk(
+    context: RecordContext,
     data: RecordData,
     messages: RecordMessage[] = this.messages
   ) {
-    this.verifySourceMessage(loc, messages);
+    this.verifyContextMessage(context, messages);
 
     [].concat(data).map((datum) => {
       const record = { state: 'record', data: datum }
@@ -44,7 +44,7 @@ export class TrackerMessageReceiver {
     })
   }
 
-  public verifyListOfMessages(list: Array<{ loc: SourceLocation, data: RecordData }>) {
+  public verifyMultipleMessageChunks(list: Array<{ context: RecordContext, data: RecordData }>) {
     const chunks = this.sliceMessagesToChunks(this.messages)
 
     expect(
@@ -53,8 +53,11 @@ export class TrackerMessageReceiver {
     ).to.equal(list.length)
 
     chunks.map((chunk, index) => {
-      const { loc, data } = list[index]
-      this.verifyMessages(loc, data, chunk)
+      this.verifySingleMessageChunk(
+        list[index].context,
+        list[index].data,
+        chunk
+      )
     })
   }
 
@@ -64,19 +67,19 @@ export class TrackerMessageReceiver {
 
   /* private */
 
-  private verifySourceMessage(
-    loc: SourceLocation,
+  private verifyContextMessage(
+    context: RecordContext,
     messages: RecordMessage[]
   ) {
     const start = <RecordContextMessage>messages[0]
     expect(start.state).to.equal('record_start')
-    expect(start.data.loc.scriptUrl).to.equal(loc.scriptUrl)
-    expect(start.data.loc.lineNumber).to.equal(loc.lineNumber)
+    expect(start.data.loc.scriptUrl).to.equal(context.loc.scriptUrl)
+    expect(start.data.loc.lineNumber).to.equal(context.loc.lineNumber)
 
     const end = <RecordContextMessage>messages.slice(-1)[0]
     expect(end.state).to.equal('record_end')
-    expect(end.data.loc.scriptUrl).to.equal(loc.scriptUrl)
-    expect(end.data.loc.lineNumber).to.equal(loc.lineNumber)
+    expect(end.data.loc.scriptUrl).to.equal(context.loc.scriptUrl)
+    expect(end.data.loc.lineNumber).to.equal(context.loc.lineNumber)
   }
 
   private sliceMessagesToChunks(messages: RecordMessage[]) {
@@ -110,17 +113,19 @@ export class TrackerMessageReceiver {
   }
 }
 
-export function getPrevLineSourceLocation(offset: number = 0): SourceLocation {
+export function getRecordContextFromPrevLine(offset: number = 0): RecordContext {
   const loc = StackTrace.getSync()[1]
 
   return {
-    scriptUrl: loc.fileName,
-    lineNumber: loc.lineNumber - 1 + offset,
-    columnNumber: loc.columnNumber
+    loc: {
+      scriptUrl: loc.fileName,
+      lineNumber: loc.lineNumber - 1 + offset,
+      columnNumber: loc.columnNumber
+    }
   }
 }
 
-export function createRecord(trackid: string, type: ActionType, merge?: string) {
+export function createRecordData(trackid: string, type: ActionType, merge?: string) {
   const record: RecordData = { trackid, type }
 
   if (merge) {

@@ -29,12 +29,12 @@ describe('jQuery API tracker', () => {
       const div = document.createElement('div')
 
       $(div).attr('id', '1')
-      const loc = utils.getPrevLineSourceLocation()
-      const record = utils.createRecord('1', ActionType.Attr)
+      const context = utils.getRecordContextFromPrevLine()
+      const record = utils.createRecordData('1', ActionType.Attr)
       const ownerID = OwnerManager.getTrackIDFromItsOwner(div)
 
       expect(ownerID).to.equal(record.trackid)
-      receiver.verifyMessages(loc, record)
+      receiver.verifySingleMessageChunk(context, record)
     })
 
     it('should not track attr getter', () => {
@@ -49,12 +49,12 @@ describe('jQuery API tracker', () => {
       const div = document.createElement('div')
 
       $(div).prop('id', '1')
-      const loc = utils.getPrevLineSourceLocation()
-      const record = utils.createRecord('1', ActionType.Attr)
+      const context = utils.getRecordContextFromPrevLine()
+      const record = utils.createRecordData('1', ActionType.Attr)
       const ownerID = OwnerManager.getTrackIDFromItsOwner(div)
 
       expect(ownerID).to.equal(record.trackid)
-      receiver.verifyMessages(loc, record)
+      receiver.verifySingleMessageChunk(context, record)
     })
 
     it('should not track prop getter', () => {
@@ -70,21 +70,21 @@ describe('jQuery API tracker', () => {
       const div2 = document.createElement('div')
 
       $(div1).add(div2).prop('id', '1')
-      const loc = utils.getPrevLineSourceLocation()
+      const context = utils.getRecordContextFromPrevLine()
 
       // for div1
-      const record1 = utils.createRecord('1', ActionType.Attr)
+      const record1 = utils.createRecordData('1', ActionType.Attr)
       const ownerID1 = OwnerManager.getTrackIDFromItsOwner(div1)
 
       expect(ownerID1).to.equal(record1.trackid)
-      receiver.verifyMessages(loc, record1)
+      receiver.verifySingleMessageChunk(context, record1)
 
       // for div2
-      const record2 = utils.createRecord('2', ActionType.Attr)
+      const record2 = utils.createRecordData('2', ActionType.Attr)
       const ownerID2 = OwnerManager.getTrackIDFromItsOwner(div2)
 
       expect(ownerID2).to.equal(record2.trackid)
-      receiver.verifyMessages(loc, record2)
+      receiver.verifySingleMessageChunk(context, record2)
     })
   })
 
@@ -98,12 +98,12 @@ describe('jQuery API tracker', () => {
       const div = document.createElement('div')
 
       $(div).click()
-      const loc1 = utils.getPrevLineSourceLocation()
-      const record1 = utils.createRecord('1', ActionType.Behav | ActionType.Event)
+      const context1 = utils.getRecordContextFromPrevLine()
+      const record1 = utils.createRecordData('1', ActionType.Behav | ActionType.Event)
       const ownerID = OwnerManager.getTrackIDFromItsOwner(div)
 
       expect(ownerID).to.equal('1')
-      receiver.verifyMessages(loc1, record1)
+      receiver.verifySingleMessageChunk(context1, record1)
     })
 
     it('should track click with native listener', () => {
@@ -112,22 +112,22 @@ describe('jQuery API tracker', () => {
       div.addEventListener('click', () => {
         div.style.color = 'red'
       })
-      const loc1 = utils.getPrevLineSourceLocation(-1)
-      const record1 = utils.createRecord('1', ActionType.Style)
+      const context1 = utils.getRecordContextFromPrevLine(-1)
+      const record1 = utils.createRecordData('1', ActionType.Style)
 
       receiver.reset()
 
       $(div).click()
-      const loc2 = utils.getPrevLineSourceLocation()
-      const record2 = utils.createRecord('1', ActionType.Behav | ActionType.Event)
+      const context2 = utils.getRecordContextFromPrevLine()
+      const record2 = utils.createRecordData('1', ActionType.Behav | ActionType.Event)
       const ownerID1 = OwnerManager.getTrackIDFromItsOwner(div.style)
       const ownerID2 = OwnerManager.getTrackIDFromItsOwner(div)
 
       expect(ownerID1).to.equal(record1.trackid)
       expect(ownerID2).to.equal(record2.trackid)
-      receiver.verifyListOfMessages([
-        { loc: loc1, data: record1 },
-        { loc: loc2, data: record2 },
+      receiver.verifyMultipleMessageChunks([
+        { context: context1, data: record1 },
+        { context: context2, data: record2 },
       ])
     })
 
@@ -137,22 +137,22 @@ describe('jQuery API tracker', () => {
       $(div).on('click', () => {
         div.style.color = 'red'
       })
-      const loc1 = utils.getPrevLineSourceLocation(-1)
-      const record1 = utils.createRecord('1', ActionType.Style)
+      const context1 = utils.getRecordContextFromPrevLine(-1)
+      const record1 = utils.createRecordData('1', ActionType.Style)
 
       receiver.reset()
 
       $(div).click()
-      const loc2 = utils.getPrevLineSourceLocation()
-      const record2 = utils.createRecord('1', ActionType.Behav | ActionType.Event)
+      const context2 = utils.getRecordContextFromPrevLine()
+      const record2 = utils.createRecordData('1', ActionType.Behav | ActionType.Event)
       const ownerID1 = OwnerManager.getTrackIDFromItsOwner(div.style)
       const ownerID2 = OwnerManager.getTrackIDFromItsOwner(div)
 
       expect(ownerID1).to.equal(record1.trackid)
       expect(ownerID2).to.equal(record2.trackid)
-      receiver.verifyListOfMessages([
-        { loc: loc1, data: record1 },
-        { loc: loc2, data: record2 },
+      receiver.verifyMultipleMessageChunks([
+        { context: context1, data: record1 },
+        { context: context2, data: record2 },
       ])
     })
 
@@ -160,12 +160,12 @@ describe('jQuery API tracker', () => {
       const div = document.createElement('div')
 
       $(div).focus()
-      const loc1 = utils.getPrevLineSourceLocation()
-      const record1 = utils.createRecord('1', ActionType.Behav | ActionType.Event)
+      const context1 = utils.getRecordContextFromPrevLine()
+      const record1 = utils.createRecordData('1', ActionType.Behav | ActionType.Event)
       const ownerID = OwnerManager.getTrackIDFromItsOwner(div)
 
       expect(ownerID).to.equal('1')
-      receiver.verifyMessages(loc1, record1)
+      receiver.verifySingleMessageChunk(context1, record1)
     })
 
     function createFocusableDiv() {
@@ -185,20 +185,20 @@ describe('jQuery API tracker', () => {
       div.addEventListener('focus', () => {
         div.style.color = 'red'
       })
-      const loc1 = utils.getPrevLineSourceLocation(-1)
-      const record1 = utils.createRecord('1', ActionType.Style)
+      const context1 = utils.getRecordContextFromPrevLine(-1)
+      const record1 = utils.createRecordData('1', ActionType.Style)
 
       receiver.reset()
 
       $(div).focus()
-      const loc2 = utils.getPrevLineSourceLocation()
-      const record2 = utils.createRecord('1', ActionType.Behav | ActionType.Event)
+      const context2 = utils.getRecordContextFromPrevLine()
+      const record2 = utils.createRecordData('1', ActionType.Behav | ActionType.Event)
       const ownerID = OwnerManager.getTrackIDFromItsOwner(div)
 
       expect(ownerID).to.equal('1')
-      receiver.verifyListOfMessages([
-        { loc: loc1, data: record1 },
-        { loc: loc2, data: record2 }
+      receiver.verifyMultipleMessageChunks([
+        { context: context1, data: record1 },
+        { context: context2, data: record2 }
       ])
     })
 
@@ -208,20 +208,20 @@ describe('jQuery API tracker', () => {
       $(div).on('focus', () => {
         div.style.color = 'red'
       })
-      const loc1 = utils.getPrevLineSourceLocation(-1)
-      const record1 = utils.createRecord('1', ActionType.Style)
+      const context1 = utils.getRecordContextFromPrevLine(-1)
+      const record1 = utils.createRecordData('1', ActionType.Style)
 
       receiver.reset()
 
       $(div).focus()
-      const loc2 = utils.getPrevLineSourceLocation()
-      const record2 = utils.createRecord('1', ActionType.Behav | ActionType.Event)
+      const context2 = utils.getRecordContextFromPrevLine()
+      const record2 = utils.createRecordData('1', ActionType.Behav | ActionType.Event)
       const ownerID = OwnerManager.getTrackIDFromItsOwner(div)
 
       expect(ownerID).to.equal('1')
-      receiver.verifyListOfMessages([
-        { loc: loc1, data: record1 },
-        { loc: loc2, data: record2 }
+      receiver.verifyMultipleMessageChunks([
+        { context: context1, data: record1 },
+        { context: context2, data: record2 }
       ])
     })
 
@@ -231,22 +231,22 @@ describe('jQuery API tracker', () => {
       $(div).on('mouseenter', () => {
         div.style.color = 'red'
       })
-      const loc1 = utils.getPrevLineSourceLocation(-1)
-      const record1 = utils.createRecord('1', ActionType.Style)
+      const context1 = utils.getRecordContextFromPrevLine(-1)
+      const record1 = utils.createRecordData('1', ActionType.Style)
 
       receiver.reset()
 
       $(div).mouseenter()
-      const loc2 = utils.getPrevLineSourceLocation()
-      const record2 = utils.createRecord('1', ActionType.Behav | ActionType.Event)
+      const context2 = utils.getRecordContextFromPrevLine()
+      const record2 = utils.createRecordData('1', ActionType.Behav | ActionType.Event)
       const ownerID1 = OwnerManager.getTrackIDFromItsOwner(div.style)
       const ownerID2 = OwnerManager.getTrackIDFromItsOwner(div)
 
       expect(ownerID1).to.equal(record1.trackid)
       expect(ownerID2).to.equal(record2.trackid)
-      receiver.verifyListOfMessages([
-        { loc: loc1, data: record1 },
-        { loc: loc2, data: record2 },
+      receiver.verifyMultipleMessageChunks([
+        { context: context1, data: record1 },
+        { context: context2, data: record2 },
       ])
     })
 
@@ -256,22 +256,22 @@ describe('jQuery API tracker', () => {
       div.addEventListener('click', () => {
         div.style.color = 'red'
       })
-      const loc1 = utils.getPrevLineSourceLocation(-1)
-      const record1 = utils.createRecord('1', ActionType.Style)
+      const context1 = utils.getRecordContextFromPrevLine(-1)
+      const record1 = utils.createRecordData('1', ActionType.Style)
 
       receiver.reset()
 
       $(div).trigger('click')
-      const loc2 = utils.getPrevLineSourceLocation()
-      const record2 = utils.createRecord('1', ActionType.Behav | ActionType.Event)
+      const context2 = utils.getRecordContextFromPrevLine()
+      const record2 = utils.createRecordData('1', ActionType.Behav | ActionType.Event)
       const ownerID1 = OwnerManager.getTrackIDFromItsOwner(div.style)
       const ownerID2 = OwnerManager.getTrackIDFromItsOwner(div)
 
       expect(ownerID1).to.equal(record1.trackid)
       expect(ownerID2).to.equal(record2.trackid)
-      receiver.verifyListOfMessages([
-        { loc: loc1, data: record1 },
-        { loc: loc2, data: record2 }
+      receiver.verifyMultipleMessageChunks([
+        { context: context1, data: record1 },
+        { context: context2, data: record2 }
       ])
     })
 
@@ -281,22 +281,22 @@ describe('jQuery API tracker', () => {
       $(div).on('click', () => {
         div.style.color = 'red'
       })
-      const loc1 = utils.getPrevLineSourceLocation(-1)
-      const record1 = utils.createRecord('1', ActionType.Style)
+      const context1 = utils.getRecordContextFromPrevLine(-1)
+      const record1 = utils.createRecordData('1', ActionType.Style)
 
       receiver.reset()
 
       $(div).triggerHandler('click')
-      const loc2 = utils.getPrevLineSourceLocation()
-      const record2 = utils.createRecord('1', ActionType.Behav | ActionType.Event)
+      const context2 = utils.getRecordContextFromPrevLine()
+      const record2 = utils.createRecordData('1', ActionType.Behav | ActionType.Event)
       const ownerID1 = OwnerManager.getTrackIDFromItsOwner(div.style)
       const ownerID2 = OwnerManager.getTrackIDFromItsOwner(div)
 
       expect(ownerID1).to.equal(record1.trackid)
       expect(ownerID2).to.equal(record2.trackid)
-      receiver.verifyListOfMessages([
-        { loc: loc1, data: record1 },
-        { loc: loc2, data: record2 }
+      receiver.verifyMultipleMessageChunks([
+        { context: context1, data: record1 },
+        { context: context2, data: record2 }
       ])
     })
 
@@ -328,36 +328,36 @@ describe('jQuery API tracker', () => {
       const div = document.createElement('div')
 
       $(div).ajaxStart(() => { })
-      const loc = utils.getPrevLineSourceLocation()
-      const record = utils.createRecord('1', ActionType.Event)
+      const context = utils.getRecordContextFromPrevLine()
+      const record = utils.createRecordData('1', ActionType.Event)
       const ownerID = OwnerManager.getTrackIDFromItsOwner(div)
 
       expect(ownerID).to.equal(record.trackid)
-      receiver.verifyMessages(loc, record)
+      receiver.verifySingleMessageChunk(context, record)
     })
 
     it('should track on (general event) properly', () => {
       const div = document.createElement('div')
 
       $(div).on('click', () => { })
-      const loc = utils.getPrevLineSourceLocation()
-      const record = utils.createRecord('1', ActionType.Event)
+      const context = utils.getRecordContextFromPrevLine()
+      const record = utils.createRecordData('1', ActionType.Event)
       const ownerID = OwnerManager.getTrackIDFromItsOwner(div)
 
       expect(ownerID).to.equal(record.trackid)
-      receiver.verifyMessages(loc, record)
+      receiver.verifySingleMessageChunk(context, record)
     })
 
     it('should track click (explicit event) properly', () => {
       const div = document.createElement('div')
 
       $(div).click(() => { })
-      const loc = utils.getPrevLineSourceLocation()
-      const record = utils.createRecord('1', ActionType.Event)
+      const context = utils.getRecordContextFromPrevLine()
+      const record = utils.createRecordData('1', ActionType.Event)
       const ownerID = OwnerManager.getTrackIDFromItsOwner(div)
 
       expect(ownerID).to.equal(record.trackid)
-      receiver.verifyMessages(loc, record)
+      receiver.verifySingleMessageChunk(context, record)
     })
 
     it('should track multiple targets of event action properly', () => {
@@ -365,21 +365,21 @@ describe('jQuery API tracker', () => {
       const div2 = document.createElement('div')
 
       $(div1).add(div2).on('click', () => { })
-      const loc = utils.getPrevLineSourceLocation()
+      const context = utils.getRecordContextFromPrevLine()
 
       // for div1
-      const record1 = utils.createRecord('1', ActionType.Event)
+      const record1 = utils.createRecordData('1', ActionType.Event)
       const ownerID1 = OwnerManager.getTrackIDFromItsOwner(div1)
 
       expect(ownerID1).to.equal(record1.trackid)
-      receiver.verifyMessages(loc, record1)
+      receiver.verifySingleMessageChunk(context, record1)
 
       // for div2
-      const record2 = utils.createRecord('2', ActionType.Event)
+      const record2 = utils.createRecordData('2', ActionType.Event)
       const ownerID2 = OwnerManager.getTrackIDFromItsOwner(div2)
 
       expect(ownerID2).to.equal(record2.trackid)
-      receiver.verifyMessages(loc, record2)
+      receiver.verifySingleMessageChunk(context, record2)
     })
   })
 
@@ -393,12 +393,12 @@ describe('jQuery API tracker', () => {
       receiver.reset()
       // @NOTE: this record will be saved on parent
       $(child).after(content)
-      const loc = utils.getPrevLineSourceLocation()
-      const record = utils.createRecord('1', ActionType.Node)
+      const context = utils.getRecordContextFromPrevLine()
+      const record = utils.createRecordData('1', ActionType.Node)
       const ownerID = OwnerManager.getTrackIDFromItsOwner(parent)
 
       expect(ownerID).to.equal(record.trackid)
-      receiver.verifyMessages(loc, record)
+      receiver.verifySingleMessageChunk(context, record)
     })
 
     it('should track append properly', () => {
@@ -406,12 +406,12 @@ describe('jQuery API tracker', () => {
       const child = document.createElement('div')
 
       $(parent).append(child)
-      const loc = utils.getPrevLineSourceLocation()
-      const record = utils.createRecord('1', ActionType.Node)
+      const context = utils.getRecordContextFromPrevLine()
+      const record = utils.createRecordData('1', ActionType.Node)
       const ownerID = OwnerManager.getTrackIDFromItsOwner(parent)
 
       expect(ownerID).to.equal(record.trackid)
-      receiver.verifyMessages(loc, record)
+      receiver.verifySingleMessageChunk(context, record)
     })
 
     it('should track multiple targets of node action properly', () => {
@@ -420,21 +420,21 @@ describe('jQuery API tracker', () => {
       const child = document.createElement('div')
 
       $(parent1).add(parent2).append(child)
-      const loc = utils.getPrevLineSourceLocation()
+      const context = utils.getRecordContextFromPrevLine()
 
       // for parent1
-      const record1 = utils.createRecord('1', ActionType.Node)
+      const record1 = utils.createRecordData('1', ActionType.Node)
       const ownerID1 = OwnerManager.getTrackIDFromItsOwner(parent1)
 
       expect(ownerID1).to.equal(record1.trackid)
-      receiver.verifyMessages(loc, record1)
+      receiver.verifySingleMessageChunk(context, record1)
 
       // for parent2
-      const record2 = utils.createRecord('2', ActionType.Node)
+      const record2 = utils.createRecordData('2', ActionType.Node)
       const ownerID2 = OwnerManager.getTrackIDFromItsOwner(parent2)
 
       expect(ownerID2).to.equal(record2.trackid)
-      receiver.verifyMessages(loc, record2)
+      receiver.verifySingleMessageChunk(context, record2)
     })
   })
 
@@ -443,24 +443,24 @@ describe('jQuery API tracker', () => {
       const div = document.createElement('div')
 
       $(div).addClass('class')
-      const loc = utils.getPrevLineSourceLocation()
-      const record = utils.createRecord('1', ActionType.Style)
+      const context = utils.getRecordContextFromPrevLine()
+      const record = utils.createRecordData('1', ActionType.Style)
       const ownerID = OwnerManager.getTrackIDFromItsOwner(div)
 
       expect(ownerID).to.equal(record.trackid)
-      receiver.verifyMessages(loc, record)
+      receiver.verifySingleMessageChunk(context, record)
     })
 
     it('should track css setter properly', () => {
       const div = document.createElement('div')
 
       $(div).css('background-color', 'red')
-      const loc = utils.getPrevLineSourceLocation()
-      const record = utils.createRecord('1', ActionType.Style)
+      const context = utils.getRecordContextFromPrevLine()
+      const record = utils.createRecordData('1', ActionType.Style)
       const ownerID = OwnerManager.getTrackIDFromItsOwner(div)
 
       expect(ownerID).to.equal(record.trackid)
-      receiver.verifyMessages(loc, record)
+      receiver.verifySingleMessageChunk(context, record)
     })
 
     it('should not track css getter', () => {
@@ -478,12 +478,12 @@ describe('jQuery API tracker', () => {
       const div = document.createElement('div')
 
       $(div).prop('class', 'class')
-      const loc = utils.getPrevLineSourceLocation()
-      const record = utils.createRecord('1', ActionType.Style)
+      const context = utils.getRecordContextFromPrevLine()
+      const record = utils.createRecordData('1', ActionType.Style)
       const ownerID = OwnerManager.getTrackIDFromItsOwner(div)
 
       expect(ownerID).to.equal(record.trackid)
-      receiver.verifyMessages(loc, record)
+      receiver.verifySingleMessageChunk(context, record)
     })
 
     it('should not track prop getter (class)', () => {
@@ -498,12 +498,12 @@ describe('jQuery API tracker', () => {
       const div = document.createElement('div')
 
       $(div).prop('style', 'background-color: red')
-      const loc = utils.getPrevLineSourceLocation()
-      const record = utils.createRecord('1', ActionType.Style)
+      const context = utils.getRecordContextFromPrevLine()
+      const record = utils.createRecordData('1', ActionType.Style)
       const ownerID = OwnerManager.getTrackIDFromItsOwner(div)
 
       expect(ownerID).to.equal(record.trackid)
-      receiver.verifyMessages(loc, record)
+      receiver.verifySingleMessageChunk(context, record)
     })
 
     it('should not track prop getter (style)', () => {
@@ -521,36 +521,36 @@ describe('jQuery API tracker', () => {
       receiver.reset()
 
       $(div).show()
-      const loc = utils.getPrevLineSourceLocation()
-      const record = utils.createRecord('1', ActionType.Style)
+      const context = utils.getRecordContextFromPrevLine()
+      const record = utils.createRecordData('1', ActionType.Style)
       const ownerID = OwnerManager.getTrackIDFromItsOwner(div)
 
       expect(ownerID).to.equal(record.trackid)
-      receiver.verifyMessages(loc, record)
+      receiver.verifySingleMessageChunk(context, record)
     })
 
     it('should track hide properly', () => {
       const div = document.createElement('div')
 
       $(div).hide()
-      const loc = utils.getPrevLineSourceLocation()
-      const record = utils.createRecord('1', ActionType.Style)
+      const context = utils.getRecordContextFromPrevLine()
+      const record = utils.createRecordData('1', ActionType.Style)
       const ownerID = OwnerManager.getTrackIDFromItsOwner(div)
 
       expect(ownerID).to.equal(record.trackid)
-      receiver.verifyMessages(loc, record)
+      receiver.verifySingleMessageChunk(context, record)
     })
 
     it('should track toggle properly', () => {
       const div = document.createElement('div')
 
       $(div).toggle()
-      const loc = utils.getPrevLineSourceLocation()
-      const record = utils.createRecord('1', ActionType.Style)
+      const context = utils.getRecordContextFromPrevLine()
+      const record = utils.createRecordData('1', ActionType.Style)
       const ownerID = OwnerManager.getTrackIDFromItsOwner(div)
 
       expect(ownerID).to.equal(record.trackid)
-      receiver.verifyMessages(loc, record)
+      receiver.verifySingleMessageChunk(context, record)
     })
 
     it('should track multiple targets of style action properly', () => {
@@ -558,21 +558,21 @@ describe('jQuery API tracker', () => {
       const div2 = document.createElement('div')
 
       $(div1).add(div2).addClass('class')
-      const loc = utils.getPrevLineSourceLocation()
+      const context = utils.getRecordContextFromPrevLine()
 
       // for div1
-      const record1 = utils.createRecord('1', ActionType.Style)
+      const record1 = utils.createRecordData('1', ActionType.Style)
       const ownerID1 = OwnerManager.getTrackIDFromItsOwner(div1)
 
       expect(ownerID1).to.equal(record1.trackid)
-      receiver.verifyMessages(loc, record1)
+      receiver.verifySingleMessageChunk(context, record1)
 
       // for div2
-      const record2 = utils.createRecord('2', ActionType.Style)
+      const record2 = utils.createRecordData('2', ActionType.Style)
       const ownerID2 = OwnerManager.getTrackIDFromItsOwner(div2)
 
       expect(ownerID2).to.equal(record2.trackid)
-      receiver.verifyMessages(loc, record2)
+      receiver.verifySingleMessageChunk(context, record2)
     })
   })
 
@@ -581,12 +581,12 @@ describe('jQuery API tracker', () => {
       const div = document.createElement('div')
 
       $(div).animate({ "top": "100px" }, 100, () => {
-        const loc = utils.getPrevLineSourceLocation()
-        const record = utils.createRecord(
+        const context = utils.getRecordContextFromPrevLine()
+        const record = utils.createRecordData(
           OwnerManager.getTrackIDFromItsOwner(div),
           ActionType.Style
         )
-        receiver.verifyMessages(loc, record)
+        receiver.verifySingleMessageChunk(context, record)
         done()
       })
     })
@@ -595,12 +595,12 @@ describe('jQuery API tracker', () => {
       const div = document.createElement('div')
 
       $(div).fadeOut(100, () => {
-        const loc = utils.getPrevLineSourceLocation()
-        const record = utils.createRecord(
+        const context = utils.getRecordContextFromPrevLine()
+        const record = utils.createRecordData(
           OwnerManager.getTrackIDFromItsOwner(div),
           ActionType.Style
         )
-        receiver.verifyMessages(loc, record)
+        receiver.verifySingleMessageChunk(context, record)
         done()
       })
     })
@@ -612,12 +612,12 @@ describe('jQuery API tracker', () => {
         receiver.reset()
 
         $(div).css('color', 'red')
-        const loc = utils.getPrevLineSourceLocation()
-        const record = utils.createRecord(
+        const context = utils.getRecordContextFromPrevLine()
+        const record = utils.createRecordData(
           OwnerManager.getTrackIDFromItsOwner(div),
           ActionType.Style
         )
-        receiver.verifyMessages(loc, record)
+        receiver.verifySingleMessageChunk(context, record)
         done()
       })
     })
@@ -629,32 +629,32 @@ describe('jQuery API tracker', () => {
       receiver.reset()
 
       $(div).css('color', 'red')
-      const loc = utils.getPrevLineSourceLocation()
-      const record = utils.createRecord(
+      const context = utils.getRecordContextFromPrevLine()
+      const record = utils.createRecordData(
         OwnerManager.getTrackIDFromItsOwner(div),
         ActionType.Style
       )
-      receiver.verifyMessages(loc, record)
+      receiver.verifySingleMessageChunk(context, record)
     })
 
     it('should track other Style actions during animation', (done) => {
       const div = document.createElement('div')
 
       $(div).fadeOut(100, () => { done() })
-      const loc1 = utils.getPrevLineSourceLocation()
-      const record1 = utils.createRecord(
+      const context1 = utils.getRecordContextFromPrevLine()
+      const record1 = utils.createRecordData(
         OwnerManager.getTrackIDFromItsOwner(div),
         ActionType.Style
       )
       $(div).css('color', 'red')
-      const loc2 = utils.getPrevLineSourceLocation()
-      const record2 = utils.createRecord(
+      const context2 = utils.getRecordContextFromPrevLine()
+      const record2 = utils.createRecordData(
         OwnerManager.getTrackIDFromItsOwner(div),
         ActionType.Style
       )
-      receiver.verifyListOfMessages([
-        { loc: loc1, data: record1 },
-        { loc: loc2, data: record2 }
+      receiver.verifyMultipleMessageChunks([
+        { context: context1, data: record1 },
+        { context: context2, data: record2 }
       ])
     })
 
@@ -665,12 +665,12 @@ describe('jQuery API tracker', () => {
       receiver.reset()
 
       $(div).delay(100).slideDown(100, () => {
-        const loc = utils.getPrevLineSourceLocation()
-        const record = utils.createRecord(
+        const context = utils.getRecordContextFromPrevLine()
+        const record = utils.createRecordData(
           OwnerManager.getTrackIDFromItsOwner(div),
           ActionType.Style
         )
-        receiver.verifyMessages(loc, record)
+        receiver.verifySingleMessageChunk(context, record)
         done()
       })
     })
@@ -686,12 +686,12 @@ describe('jQuery API tracker', () => {
           $(this).dequeue()
         })
         .fadeIn(100, () => {
-          const loc = utils.getPrevLineSourceLocation()
-          const record = utils.createRecord(
+          const context = utils.getRecordContextFromPrevLine()
+          const record = utils.createRecordData(
             OwnerManager.getTrackIDFromItsOwner(div),
             ActionType.Style
           )
-          receiver.verifyMessages(loc, record)
+          receiver.verifySingleMessageChunk(context, record)
           done()
         })
     })
@@ -702,26 +702,26 @@ describe('jQuery API tracker', () => {
 
       // for div1
       $(div1).animate({ 'margin-top': '300px', 'opacity': 0 }, 100)
-      const loc1 = utils.getPrevLineSourceLocation()
-      const record1 = utils.createRecord(
+      const context1 = utils.getRecordContextFromPrevLine()
+      const record1 = utils.createRecordData(
         OwnerManager.getTrackIDFromItsOwner(div1),
         ActionType.Style
       )
-      receiver.verifyMessages(loc1, record1)
+      receiver.verifySingleMessageChunk(context1, record1)
       receiver.reset()
 
       // for div2
       $(div2).animate({ 'top': -200 }, 100)
-      const loc2 = utils.getPrevLineSourceLocation()
+      const context2 = utils.getRecordContextFromPrevLine()
       // @NOTE: setTimeout to wait for animation executing of div2.
       // jquery will not execute second immediately, it will wait 
       // until next animate cycle and do animation after first one.
       setTimeout(() => {
-        const record2 = utils.createRecord(
+        const record2 = utils.createRecordData(
           OwnerManager.getTrackIDFromItsOwner(div2),
           ActionType.Style
         )
-        receiver.verifyMessages(loc2, record2)
+        receiver.verifySingleMessageChunk(context2, record2)
         done()
       }, 10)
     })
