@@ -1,7 +1,10 @@
 /// <reference path='../../types/RecordMessage.d.ts'/>
 
 import MessageBroker from '../../private/MessageBroker'
-import { packActionInGivenContext } from '../utils'
+import {
+  packActionInGivenContext,
+  packActionInNonTrackingContext
+} from '../utils'
 
 const SymbolAnim = Symbol('Animation')
 
@@ -47,34 +50,6 @@ class AnimationController {
 }
 export const AnimController = new AnimationController()
 
-export function callActionInNonTrackingContext(actionFunc: () => any) {
-  try {
-    MessageBroker.startBlocking()
-    return actionFunc.call(this)
-  } catch (e) {
-    throw (e)
-  } finally {
-    MessageBroker.stopBlocking()
-  }
-}
-
-export function callActionInTrackingContext(actionFunc: () => any) {
-  const isInNonTrackingContext = MessageBroker.isBlocking()
-
-  try {
-    if (isInNonTrackingContext) {
-      MessageBroker.stopBlocking()
-    }
-    return actionFunc.call(this)
-  } catch (e) {
-    throw (e)
-  } finally {
-    if (isInNonTrackingContext) {
-      MessageBroker.startBlocking()
-    }
-  }
-}
-
 export function packAnimInGivenContextOnce(
   animFunc: (...args: any[]) => void,
   context: RecordContext
@@ -87,11 +62,9 @@ export function packAnimInGivenContextOnce(
         ? packActionInGivenContext(target, context).apply(thisArg, argumentList)
         : target.apply(thisArg, argumentList)
       // @NOTE: reset animFunc and ignore already tracked actions (track only once)
-      this.apply = function (target, thisArg, argumentList) {
-        return callActionInNonTrackingContext(() => {
-          return target.apply(thisArg, argumentList)
-        })
-      }
+      this.apply = packActionInNonTrackingContext(function (target, thisArg, argumentList) {
+        return target.apply(thisArg, argumentList)
+      })
       return result
     }
   })

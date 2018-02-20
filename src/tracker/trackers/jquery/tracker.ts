@@ -4,13 +4,13 @@ import ActionType from '../../public/ActionType';
 import MessageBroker from '../../private/MessageBroker';
 import {
   AnimController,
-  callActionInNonTrackingContext,
-  callActionInTrackingContext,
-  packAnimInGivenContextOnce
+  packAnimInGivenContextOnce,
 } from './trackerHelpers'
 import {
   packActionInCallerContext,
   packActionInIsolatedContext,
+  packActionInNonTrackingContext,
+  packActionInTrackingContext,
   saveRecordDataTo
 } from '../utils'
 
@@ -85,15 +85,13 @@ function trackAnimationExitPoint() {
       const opt = speed.apply(this, args)
       // @NOTE: stop api will skip opt.complete
       opt.complete = new Proxy(opt.complete, {
-        apply: function (target, thisArg, argumentList) {
+        apply: packActionInTrackingContext(function (target, thisArg, argumentList) {
           // @NOTE: complete is called during last animation tick,
           // actions in not first tick will call in non-tracking context,
           // in order to track actions in complete properly, we need to
           // call complete in tracking context
-          return callActionInTrackingContext(() => {
-            return target.apply(thisArg, argumentList)
-          })
-        }
+          return target.apply(thisArg, argumentList)
+        })
       })
       return opt
     }
@@ -158,13 +156,8 @@ function trackEventTriggers() {
     ['focus', 'blur', 'click'].map((action: string) => {
       // @NOTE: jquery 1.8.2 has no special triggers
       if (specials[action] && specials[action].trigger) {
-        const trigger = specials[action].trigger
-
-        specials[action].trigger = function () {
-          return callActionInNonTrackingContext(() => {
-            return trigger.call(this)
-          })
-        }
+        specials[action].trigger =
+          packActionInNonTrackingContext(specials[action].trigger)
       }
     })
   }
