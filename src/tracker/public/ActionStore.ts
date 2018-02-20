@@ -8,8 +8,8 @@ import { hashSourceLocation } from './utils'
 
 export default class ActionStore implements IActionStore {
 
-  private store = new Store()
-  private scriptParser = new ScriptParser()
+  private fetcher = new CodeFetcher()
+  private store = new RecordStore()
 
   /* public */
 
@@ -35,21 +35,12 @@ export default class ActionStore implements IActionStore {
       this.store.merge(merge, trackid)
     }
     this.store.add(trackid, record)
-    record.code = await this.fetchCode(loc)
+    record.code = await this.fetcher.fetchCodeFrom(loc)
     return true
-  }
-
-  /* private */
-
-  private async fetchCode(loc: SourceLocation): Promise<string> {
-    if (!this.scriptParser.isParsed(loc.scriptUrl)) {
-      this.scriptParser.parse(loc.scriptUrl)
-    }
-    return await this.scriptParser.getCode(loc)
   }
 }
 
-class Store {
+class RecordStore {
 
   private store: {
     [trackid in TrackID]: ActionRecord[]
@@ -85,37 +76,74 @@ class Store {
   }
 }
 
-class ScriptParser {
+class CodeFetcher {
 
-  private cache: {
-    [scriptUrl: string]: Promise<ESTree.Node[]>
-  } = {}
+  private parser = new ScriptParser(new ESTreeNodeBinaryFinder())
   private code: {
     [hashOfSourceLocation: string]: Promise<string>
   } = {}
 
-  /* public */
-
-  public parse(scriptUrl: string): void {
-    this.cache[scriptUrl] = this.parseScriptIntoCandidateESTNodes(scriptUrl)
-  }
-
-  public isParsed(scriptUrl: string): boolean {
-    return this.cache.hasOwnProperty(scriptUrl)
-  }
-
-  public async getCode(loc: SourceLocation): Promise<string> {
+  public async fetchCodeFrom(loc: SourceLocation): Promise<string> {
     const key = hashSourceLocation(loc)
 
     if (!this.code.hasOwnProperty(key)) {
-      this.code[key] = this.fetchCode(loc)
+      this.code[key] = this.fetchCodeFromSourceLocation(loc)
     }
     return await this.code[key]
   }
 
+  private async fetchCodeFromSourceLocation(loc: SourceLocation): Promise<string> {
+    if (!this.parser.hasParsed(loc.scriptUrl)) {
+      this.parser.parse(loc.scriptUrl)
+    }
+    return this.fetchCodeFromESTreeNode(await this.parser.findNode(loc))
+  }
+
+  private fetchCodeFromESTreeNode(node: ESTree.Node): string {
+    return escodegen.generate(node, {
+      format: {
+        indent: { style: '' },
+        newline: '',
+        semicolons: false
+      }
+    }).replace(/{}/, '{ ... }')
+  }
+}
+
+class ScriptParser {
+
+  private finder: ESTreeNodeFinder
+  private nodes: {
+    [scriptUrl: string]: Promise<ESTree.Node[]>
+  } = {}
+
+  constructor(finder?: ESTreeNodeFinder) {
+    this.finder = finder || new ESTreeNodeSequentialFinder()
+  }
+
+  /* public */
+
+  public async findNode(loc: SourceLocation): Promise<ESTree.Node> {
+    // @TODO: remove subset node of elected one 
+    return this.finder.find(
+      await this.nodes[loc.scriptUrl],
+      loc.lineNumber,
+      loc.columnNumber
+    )
+  }
+
+  public hasParsed(scriptUrl: string): boolean {
+    return this.nodes.hasOwnProperty(scriptUrl)
+  }
+
+  public parse(scriptUrl: string): void {
+    this.nodes[scriptUrl] =
+      this.parseScriptIntoCandidateESTreeNodes(scriptUrl)
+  }
+
   /* private */
 
-  private async parseScriptIntoCandidateESTNodes(scriptUrl: string): Promise<ESTree.Node[]> {
+  private async parseScriptIntoCandidateESTreeNodes(scriptUrl: string): Promise<ESTree.Node[]> {
     const script = await this.fetchScript(scriptUrl)
     const candidates = []
 
@@ -220,49 +248,17 @@ class ScriptParser {
     // so we directly replace it with empty string
     return source.replace(/[\u2028\u2029]/g, '')
   }
+}
 
-  private async fetchCode({ scriptUrl, lineNumber, columnNumber }: SourceLocation) {
-    const candidates = await this.cache[scriptUrl]
+abstract class ESTreeNodeFinder {
 
-    return escodegen.generate(
-      this.elect(candidates, lineNumber, columnNumber),
-      {
-        format: {
-          indent: { style: '' },
-          newline: '',
-          semicolons: false
-        }
-      }
-    ).replace(/{}/, '{ ... }')
-  }
+  /* abstract */
 
-  private elect(
-    candidates: ESTree.Node[],
-    lineNumber: number,
-    columnNumber: number
-  ): ESTree.Node {
-    const action = {
-      loc: {
-        start: { line: lineNumber, column: columnNumber },
-        end: { line: lineNumber, column: columnNumber }
-      }
-    }
-    const elected =
-      candidates
-        .filter((candidate: ESTree.Node) => {
-          return this.contains(candidate.loc, action.loc)
-        })
-        .reduce((elected: ESTree.Node, candidate: ESTree.Node) => {
-          return this.contains(elected.loc, candidate.loc) ? candidate : elected
-        })
-    // remove elected candidate
-    candidates.splice(candidates.indexOf(elected), 1)
-    // @TODO: remove subset node of elected one 
+  public abstract find(nodes: ESTree.Node[], line: number, column: number): ESTree.Node
 
-    return elected
-  }
+  /* protected */
 
-  private contains(loc1: ESTree.SourceLocation, loc2: ESTree.SourceLocation): boolean {
+  protected contains(loc1: ESTree.SourceLocation, loc2: ESTree.SourceLocation): boolean {
     return (
       (
         loc1.start.line < loc2.start.line ||
@@ -276,6 +272,77 @@ class ScriptParser {
           loc1.end.line === loc2.end.line &&
           loc1.end.column >= loc2.end.column
         )
+      )
+    )
+  }
+}
+
+class ESTreeNodeSequentialFinder extends ESTreeNodeFinder {
+
+  /* public */
+
+  public find(nodes: ESTree.Node[], line: number, column: number): ESTree.Node {
+    return this.sequentialSearch(nodes, {
+      start: { line, column },
+      end: { line, column }
+    })
+  }
+
+  /* private */
+
+  private sequentialSearch(nodes: ESTree.Node[], source: ESTree.SourceLocation): ESTree.Node {
+    return nodes.filter((candidate: ESTree.Node) => {
+      return this.contains(candidate.loc, source)
+    }).reduce((elected: ESTree.Node, candidate: ESTree.Node) => {
+      return this.contains(elected.loc, candidate.loc) ? candidate : elected
+    })
+  }
+}
+
+class ESTreeNodeBinaryFinder extends ESTreeNodeFinder {
+
+  /* public */
+
+  public find(nodes: ESTree.Node[], line: number, column: number): ESTree.Node {
+    return this.binarySearch(nodes, 0, nodes.length - 1, {
+      start: { line, column },
+      end: { line, column },
+    })
+  }
+
+  /* private */
+
+  private binarySearch(
+    nodes: ESTree.Node[],
+    left: number,
+    right: number,
+    source: ESTree.SourceLocation
+  ): ESTree.Node {
+    if (left > right) {
+      return null
+    }
+    const mid = Math.floor((left + right) / 2)
+
+    if (this.contains(nodes[mid].loc, source)) {
+      const node = this.binarySearch(nodes, left, mid - 1, source)
+      return node && this.contains(nodes[mid].loc, node.loc) ? node : nodes[mid]
+    } else if (this.precedes(nodes[mid].loc, source)) {
+      return this.binarySearch(nodes, mid + 1, right, source)
+    } else {
+      const node = this.binarySearch(nodes, left, mid - 1, source)
+      return node ? node : this.binarySearch(nodes, mid + 1, right, source)
+    }
+  }
+
+  private precedes(
+    loc1: ESTree.SourceLocation,
+    loc2: ESTree.SourceLocation
+  ): boolean {
+    return (
+      loc1.end.line < loc2.start.line ||
+      (
+        loc1.end.line === loc2.start.line &&
+        loc1.end.column < loc2.start.column
       )
     )
   }
