@@ -4,6 +4,7 @@ import * as ESTree from '../../../node_modules/@types/estree'
 import * as esprima from 'esprima'
 import * as escodegen from 'escodegen'
 
+import { ESTreeNodeBinaryFinder } from '../private/libs/ESTreeNodeFinder'
 import { hashSourceLocation } from './utils'
 
 export default class ActionStore implements IActionStore {
@@ -78,7 +79,7 @@ class RecordStore {
 
 class CodeFetcher {
 
-  private parser = new ScriptParser(new ESTreeNodeBinaryFinder())
+  private parser = new ScriptParser()
   private code: {
     [hashOfSourceLocation: string]: Promise<string>
   } = {}
@@ -110,16 +111,16 @@ class CodeFetcher {
   }
 }
 
+export interface ESTreeNodeFinder {
+  find(nodes: ESTree.Node[], line: number, column: number): ESTree.Node
+}
+
 class ScriptParser {
 
-  private finder: ESTreeNodeFinder
+  private finder: ESTreeNodeFinder = new ESTreeNodeBinaryFinder()
   private nodes: {
     [scriptUrl: string]: Promise<ESTree.Node[]>
   } = {}
-
-  constructor(finder?: ESTreeNodeFinder) {
-    this.finder = finder || new ESTreeNodeSequentialFinder()
-  }
 
   /* public */
 
@@ -249,103 +250,5 @@ class ScriptParser {
     // location generate from stacktrace doesn't take it as a character,
     // so we directly replace it with empty string
     return source.replace(/[\u2028\u2029]/g, '')
-  }
-}
-
-abstract class ESTreeNodeFinder {
-
-  /* abstract */
-
-  public abstract find(nodes: ESTree.Node[], line: number, column: number): ESTree.Node
-
-  /* protected */
-
-  protected contains(loc1: ESTree.SourceLocation, loc2: ESTree.SourceLocation): boolean {
-    return (
-      (
-        loc1.start.line < loc2.start.line ||
-        (
-          loc1.start.line === loc2.start.line &&
-          loc1.start.column <= loc2.start.column
-        )
-      ) && (
-        loc1.end.line > loc2.end.line ||
-        (
-          loc1.end.line === loc2.end.line &&
-          loc1.end.column >= loc2.end.column
-        )
-      )
-    )
-  }
-}
-
-class ESTreeNodeSequentialFinder extends ESTreeNodeFinder {
-
-  /* public */
-
-  public find(nodes: ESTree.Node[], line: number, column: number): ESTree.Node {
-    return this.sequentialSearch(nodes, {
-      start: { line, column },
-      end: { line, column }
-    })
-  }
-
-  /* private */
-
-  private sequentialSearch(nodes: ESTree.Node[], source: ESTree.SourceLocation): ESTree.Node {
-    return nodes.filter((candidate: ESTree.Node) => {
-      return this.contains(candidate.loc, source)
-    }).reduce((elected: ESTree.Node, candidate: ESTree.Node) => {
-      return this.contains(elected.loc, candidate.loc) ? candidate : elected
-    })
-  }
-}
-
-class ESTreeNodeBinaryFinder extends ESTreeNodeFinder {
-
-  /* public */
-
-  public find(nodes: ESTree.Node[], line: number, column: number): ESTree.Node {
-    return this.binarySearch(nodes, 0, nodes.length - 1, {
-      start: { line, column },
-      end: { line, column },
-    })
-  }
-
-  /* private */
-
-  private binarySearch(
-    nodes: ESTree.Node[],
-    left: number,
-    right: number,
-    source: ESTree.SourceLocation
-  ): ESTree.Node {
-    if (left > right) {
-      return null
-    }
-    const mid = Math.floor((left + right) / 2)
-
-    if (this.contains(nodes[mid].loc, source)) {
-      const node = this.binarySearch(nodes, left, mid - 1, source)
-      return node && this.contains(nodes[mid].loc, node.loc) ? node : nodes[mid]
-    } else if (this.precedes(nodes[mid].loc, source)) {
-      return this.binarySearch(nodes, mid + 1, right, source)
-    } else {
-      const node = this.binarySearch(nodes, left, mid - 1, source)
-      return node ? node : this.binarySearch(nodes, mid + 1, right, source)
-    }
-  }
-
-  private precedes(
-    loc1: ESTree.SourceLocation,
-    loc2: ESTree.SourceLocation
-  ): boolean {
-    return (
-      loc1.end.line < loc2.start.line ||
-      (
-        loc1.end.line === loc2.start.line &&
-        loc1.end.column < loc2.start.column
-      )
-    )
   }
 }
