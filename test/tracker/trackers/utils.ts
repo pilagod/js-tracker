@@ -1,12 +1,11 @@
 import { expect } from 'chai'
 import * as StackTrace from 'stacktrace-js'
 
-import OwnerManager from '../../../src/tracker/private/OwnerManager'
+import MessageBroker from '../../../src/tracker/private/MessageBroker';
 import {
   attachListenerTo,
   detachListenerFrom
 } from '../../../src/tracker/private/NativeUtils'
-import MessageBroker from '../../../src/tracker/private/MessageBroker';
 
 export class TrackerMessageReceiver {
 
@@ -128,8 +127,4 @@ export function createRecord(trackid: string, type: ActionType, merge?: string) 
     record.merge = merge
   }
   return record
-}
-
-export function getOwnerOf(target: ActionTarget) {
-  return OwnerManager.getOwner(target)
 }

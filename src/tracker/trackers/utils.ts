@@ -6,13 +6,8 @@ import MessageBroker from '../private/MessageBroker'
 import OwnerManager from '../private/OwnerManager'
 
 export function saveRecordDataTo(target: ActionTarget, type: ActionType, merge?: TrackID) {
-  const owner = OwnerManager.getOwner(target)
-
-  if (!owner.hasTrackID()) {
-    owner.setTrackID()
-  }
   const record: RecordData = {
-    trackid: owner.getTrackID(),
+    trackid: OwnerManager.getOrSetTrackIDOnItsOwner(target),
     type
   }
   if (merge) {

@@ -46,13 +46,13 @@ export const decorators: { [name: string]: Decorator } = {
       // for attr has no owner, it might attach to some element
       // after actionFunc call, this will cause tracker to merge
       // the records of new owner instead of original NullOwner
-      const owner = OwnerManager.getOwner(attr)
+      const origOwnerID = OwnerManager.getTrackIDFromItsOwner(attr)
       const attattr = getAttachableAttr(attr)
       const result = actionFunc.call(this, attattr)
       record({
         caller: this, target, action,
         args: [attattr],
-        merge: owner.getTrackID()
+        merge: origOwnerID
       })
       return result
     })

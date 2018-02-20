@@ -2,7 +2,9 @@ import Owner from './Owner'
 import { SymbolOwner } from './Symbols'
 
 interface IOwnerManager {
-  getOwner(target: ActionTarget): Owner;
+  getOwnerElement(target: ActionTarget): Element;
+  getTrackIDFromItsOwner(target: ActionTarget): TrackID;
+  getOrSetTrackIDOnItsOwner(target: ActionTarget): TrackID;
   hasOwner(target: ActionTarget): boolean;
   hasShadowOwner(target: ActionTarget): boolean;
   setOwner(target: ActionTarget, ownerElement: Element): boolean;
@@ -11,8 +13,23 @@ interface IOwnerManager {
 
 class OwnerManager implements IOwnerManager {
 
-  public getOwner(target) {
-    return <Owner>Reflect.get(target, SymbolOwner) || Owner.NullOwner
+  /* public */
+
+  public getOwnerElement(target) {
+    return this.getOwner(target).getElement()
+  }
+
+  public getTrackIDFromItsOwner(target) {
+    return this.getOwner(target).getTrackID()
+  }
+
+  public getOrSetTrackIDOnItsOwner(target) {
+    const owner = this.getOwner(target)
+
+    if (!owner.hasTrackID()) {
+      owner.setTrackID()
+    }
+    return owner.getTrackID()
   }
 
   public hasOwner(target) {
@@ -43,6 +60,12 @@ class OwnerManager implements IOwnerManager {
           : Owner.NullOwner
       }
     })
+  }
+
+  /* private */
+
+  public getOwner(target) {
+    return <Owner>Reflect.get(target, SymbolOwner) || Owner.NullOwner
   }
 }
 export default <IOwnerManager>new OwnerManager()

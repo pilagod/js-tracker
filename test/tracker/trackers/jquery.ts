@@ -2,6 +2,7 @@ import { expect } from 'chai'
 import $ from 'jquery'
 
 import ActionType from '../../../src/tracker/public/ActionType'
+import OwnerManager from '../../../src/tracker/private/OwnerManager'
 import trackJqueryApis from '../../../src/tracker/trackers/jquery/tracker'
 import * as utils from './utils'
 
@@ -30,7 +31,7 @@ describe('jQuery API tracker', () => {
       $(div).attr('id', '1')
       const loc = utils.getPrevLineSourceLocation()
       const record = utils.createRecord('1', ActionType.Attr)
-      const ownerID = utils.getOwnerOf(div).getTrackID()
+      const ownerID = OwnerManager.getTrackIDFromItsOwner(div)
 
       expect(ownerID).to.equal(record.trackid)
       receiver.verifyMessages(loc, record)
@@ -50,7 +51,7 @@ describe('jQuery API tracker', () => {
       $(div).prop('id', '1')
       const loc = utils.getPrevLineSourceLocation()
       const record = utils.createRecord('1', ActionType.Attr)
-      const ownerID = utils.getOwnerOf(div).getTrackID()
+      const ownerID = OwnerManager.getTrackIDFromItsOwner(div)
 
       expect(ownerID).to.equal(record.trackid)
       receiver.verifyMessages(loc, record)
@@ -73,14 +74,14 @@ describe('jQuery API tracker', () => {
 
       // for div1
       const record1 = utils.createRecord('1', ActionType.Attr)
-      const ownerID1 = utils.getOwnerOf(div1).getTrackID()
+      const ownerID1 = OwnerManager.getTrackIDFromItsOwner(div1)
 
       expect(ownerID1).to.equal(record1.trackid)
       receiver.verifyMessages(loc, record1)
 
       // for div2
       const record2 = utils.createRecord('2', ActionType.Attr)
-      const ownerID2 = utils.getOwnerOf(div2).getTrackID()
+      const ownerID2 = OwnerManager.getTrackIDFromItsOwner(div2)
 
       expect(ownerID2).to.equal(record2.trackid)
       receiver.verifyMessages(loc, record2)
@@ -99,7 +100,7 @@ describe('jQuery API tracker', () => {
       $(div).click()
       const loc1 = utils.getPrevLineSourceLocation()
       const record1 = utils.createRecord('1', ActionType.Behav | ActionType.Event)
-      const ownerID = utils.getOwnerOf(div).getTrackID()
+      const ownerID = OwnerManager.getTrackIDFromItsOwner(div)
 
       expect(ownerID).to.equal('1')
       receiver.verifyMessages(loc1, record1)
@@ -119,9 +120,8 @@ describe('jQuery API tracker', () => {
       $(div).click()
       const loc2 = utils.getPrevLineSourceLocation()
       const record2 = utils.createRecord('1', ActionType.Behav | ActionType.Event)
-
-      const ownerID1 = utils.getOwnerOf(div.style).getTrackID()
-      const ownerID2 = utils.getOwnerOf(div).getTrackID()
+      const ownerID1 = OwnerManager.getTrackIDFromItsOwner(div.style)
+      const ownerID2 = OwnerManager.getTrackIDFromItsOwner(div)
 
       expect(ownerID1).to.equal(record1.trackid)
       expect(ownerID2).to.equal(record2.trackid)
@@ -145,9 +145,8 @@ describe('jQuery API tracker', () => {
       $(div).click()
       const loc2 = utils.getPrevLineSourceLocation()
       const record2 = utils.createRecord('1', ActionType.Behav | ActionType.Event)
-
-      const ownerID1 = utils.getOwnerOf(div.style).getTrackID()
-      const ownerID2 = utils.getOwnerOf(div).getTrackID()
+      const ownerID1 = OwnerManager.getTrackIDFromItsOwner(div.style)
+      const ownerID2 = OwnerManager.getTrackIDFromItsOwner(div)
 
       expect(ownerID1).to.equal(record1.trackid)
       expect(ownerID2).to.equal(record2.trackid)
@@ -163,7 +162,7 @@ describe('jQuery API tracker', () => {
       $(div).focus()
       const loc1 = utils.getPrevLineSourceLocation()
       const record1 = utils.createRecord('1', ActionType.Behav | ActionType.Event)
-      const ownerID = utils.getOwnerOf(div).getTrackID()
+      const ownerID = OwnerManager.getTrackIDFromItsOwner(div)
 
       expect(ownerID).to.equal('1')
       receiver.verifyMessages(loc1, record1)
@@ -175,7 +174,6 @@ describe('jQuery API tracker', () => {
       // make div focusable (1) set tabIndex (2) attach to page
       div.tabIndex = -1
       document.body.appendChild(div)
-
       receiver.reset()
 
       return div
@@ -195,7 +193,7 @@ describe('jQuery API tracker', () => {
       $(div).focus()
       const loc2 = utils.getPrevLineSourceLocation()
       const record2 = utils.createRecord('1', ActionType.Behav | ActionType.Event)
-      const ownerID = utils.getOwnerOf(div).getTrackID()
+      const ownerID = OwnerManager.getTrackIDFromItsOwner(div)
 
       expect(ownerID).to.equal('1')
       receiver.verifyListOfMessages([
@@ -218,7 +216,7 @@ describe('jQuery API tracker', () => {
       $(div).focus()
       const loc2 = utils.getPrevLineSourceLocation()
       const record2 = utils.createRecord('1', ActionType.Behav | ActionType.Event)
-      const ownerID = utils.getOwnerOf(div).getTrackID()
+      const ownerID = OwnerManager.getTrackIDFromItsOwner(div)
 
       expect(ownerID).to.equal('1')
       receiver.verifyListOfMessages([
@@ -241,9 +239,8 @@ describe('jQuery API tracker', () => {
       $(div).mouseenter()
       const loc2 = utils.getPrevLineSourceLocation()
       const record2 = utils.createRecord('1', ActionType.Behav | ActionType.Event)
-
-      const ownerID1 = utils.getOwnerOf(div.style).getTrackID()
-      const ownerID2 = utils.getOwnerOf(div).getTrackID()
+      const ownerID1 = OwnerManager.getTrackIDFromItsOwner(div.style)
+      const ownerID2 = OwnerManager.getTrackIDFromItsOwner(div)
 
       expect(ownerID1).to.equal(record1.trackid)
       expect(ownerID2).to.equal(record2.trackid)
@@ -267,9 +264,8 @@ describe('jQuery API tracker', () => {
       $(div).trigger('click')
       const loc2 = utils.getPrevLineSourceLocation()
       const record2 = utils.createRecord('1', ActionType.Behav | ActionType.Event)
-
-      const ownerID1 = utils.getOwnerOf(div.style).getTrackID()
-      const ownerID2 = utils.getOwnerOf(div).getTrackID()
+      const ownerID1 = OwnerManager.getTrackIDFromItsOwner(div.style)
+      const ownerID2 = OwnerManager.getTrackIDFromItsOwner(div)
 
       expect(ownerID1).to.equal(record1.trackid)
       expect(ownerID2).to.equal(record2.trackid)
@@ -293,9 +289,8 @@ describe('jQuery API tracker', () => {
       $(div).triggerHandler('click')
       const loc2 = utils.getPrevLineSourceLocation()
       const record2 = utils.createRecord('1', ActionType.Behav | ActionType.Event)
-
-      const ownerID1 = utils.getOwnerOf(div.style).getTrackID()
-      const ownerID2 = utils.getOwnerOf(div).getTrackID()
+      const ownerID1 = OwnerManager.getTrackIDFromItsOwner(div.style)
+      const ownerID2 = OwnerManager.getTrackIDFromItsOwner(div)
 
       expect(ownerID1).to.equal(record1.trackid)
       expect(ownerID2).to.equal(record2.trackid)
@@ -335,7 +330,7 @@ describe('jQuery API tracker', () => {
       $(div).ajaxStart(() => { })
       const loc = utils.getPrevLineSourceLocation()
       const record = utils.createRecord('1', ActionType.Event)
-      const ownerID = utils.getOwnerOf(div).getTrackID()
+      const ownerID = OwnerManager.getTrackIDFromItsOwner(div)
 
       expect(ownerID).to.equal(record.trackid)
       receiver.verifyMessages(loc, record)
@@ -347,7 +342,7 @@ describe('jQuery API tracker', () => {
       $(div).on('click', () => { })
       const loc = utils.getPrevLineSourceLocation()
       const record = utils.createRecord('1', ActionType.Event)
-      const ownerID = utils.getOwnerOf(div).getTrackID()
+      const ownerID = OwnerManager.getTrackIDFromItsOwner(div)
 
       expect(ownerID).to.equal(record.trackid)
       receiver.verifyMessages(loc, record)
@@ -359,7 +354,7 @@ describe('jQuery API tracker', () => {
       $(div).click(() => { })
       const loc = utils.getPrevLineSourceLocation()
       const record = utils.createRecord('1', ActionType.Event)
-      const ownerID = utils.getOwnerOf(div).getTrackID()
+      const ownerID = OwnerManager.getTrackIDFromItsOwner(div)
 
       expect(ownerID).to.equal(record.trackid)
       receiver.verifyMessages(loc, record)
@@ -374,14 +369,14 @@ describe('jQuery API tracker', () => {
 
       // for div1
       const record1 = utils.createRecord('1', ActionType.Event)
-      const ownerID1 = utils.getOwnerOf(div1).getTrackID()
+      const ownerID1 = OwnerManager.getTrackIDFromItsOwner(div1)
 
       expect(ownerID1).to.equal(record1.trackid)
       receiver.verifyMessages(loc, record1)
 
       // for div2
       const record2 = utils.createRecord('2', ActionType.Event)
-      const ownerID2 = utils.getOwnerOf(div2).getTrackID()
+      const ownerID2 = OwnerManager.getTrackIDFromItsOwner(div2)
 
       expect(ownerID2).to.equal(record2.trackid)
       receiver.verifyMessages(loc, record2)
@@ -400,7 +395,7 @@ describe('jQuery API tracker', () => {
       $(child).after(content)
       const loc = utils.getPrevLineSourceLocation()
       const record = utils.createRecord('1', ActionType.Node)
-      const ownerID = utils.getOwnerOf(parent).getTrackID()
+      const ownerID = OwnerManager.getTrackIDFromItsOwner(parent)
 
       expect(ownerID).to.equal(record.trackid)
       receiver.verifyMessages(loc, record)
@@ -413,7 +408,7 @@ describe('jQuery API tracker', () => {
       $(parent).append(child)
       const loc = utils.getPrevLineSourceLocation()
       const record = utils.createRecord('1', ActionType.Node)
-      const ownerID = utils.getOwnerOf(parent).getTrackID()
+      const ownerID = OwnerManager.getTrackIDFromItsOwner(parent)
 
       expect(ownerID).to.equal(record.trackid)
       receiver.verifyMessages(loc, record)
@@ -429,14 +424,14 @@ describe('jQuery API tracker', () => {
 
       // for parent1
       const record1 = utils.createRecord('1', ActionType.Node)
-      const ownerID1 = utils.getOwnerOf(parent1).getTrackID()
+      const ownerID1 = OwnerManager.getTrackIDFromItsOwner(parent1)
 
       expect(ownerID1).to.equal(record1.trackid)
       receiver.verifyMessages(loc, record1)
 
       // for parent2
       const record2 = utils.createRecord('2', ActionType.Node)
-      const ownerID2 = utils.getOwnerOf(parent2).getTrackID()
+      const ownerID2 = OwnerManager.getTrackIDFromItsOwner(parent2)
 
       expect(ownerID2).to.equal(record2.trackid)
       receiver.verifyMessages(loc, record2)
@@ -450,7 +445,7 @@ describe('jQuery API tracker', () => {
       $(div).addClass('class')
       const loc = utils.getPrevLineSourceLocation()
       const record = utils.createRecord('1', ActionType.Style)
-      const ownerID = utils.getOwnerOf(div).getTrackID()
+      const ownerID = OwnerManager.getTrackIDFromItsOwner(div)
 
       expect(ownerID).to.equal(record.trackid)
       receiver.verifyMessages(loc, record)
@@ -462,7 +457,7 @@ describe('jQuery API tracker', () => {
       $(div).css('background-color', 'red')
       const loc = utils.getPrevLineSourceLocation()
       const record = utils.createRecord('1', ActionType.Style)
-      const ownerID = utils.getOwnerOf(div).getTrackID()
+      const ownerID = OwnerManager.getTrackIDFromItsOwner(div)
 
       expect(ownerID).to.equal(record.trackid)
       receiver.verifyMessages(loc, record)
@@ -485,7 +480,7 @@ describe('jQuery API tracker', () => {
       $(div).prop('class', 'class')
       const loc = utils.getPrevLineSourceLocation()
       const record = utils.createRecord('1', ActionType.Style)
-      const ownerID = utils.getOwnerOf(div).getTrackID()
+      const ownerID = OwnerManager.getTrackIDFromItsOwner(div)
 
       expect(ownerID).to.equal(record.trackid)
       receiver.verifyMessages(loc, record)
@@ -505,7 +500,7 @@ describe('jQuery API tracker', () => {
       $(div).prop('style', 'background-color: red')
       const loc = utils.getPrevLineSourceLocation()
       const record = utils.createRecord('1', ActionType.Style)
-      const ownerID = utils.getOwnerOf(div).getTrackID()
+      const ownerID = OwnerManager.getTrackIDFromItsOwner(div)
 
       expect(ownerID).to.equal(record.trackid)
       receiver.verifyMessages(loc, record)
@@ -528,7 +523,7 @@ describe('jQuery API tracker', () => {
       $(div).show()
       const loc = utils.getPrevLineSourceLocation()
       const record = utils.createRecord('1', ActionType.Style)
-      const ownerID = utils.getOwnerOf(div).getTrackID()
+      const ownerID = OwnerManager.getTrackIDFromItsOwner(div)
 
       expect(ownerID).to.equal(record.trackid)
       receiver.verifyMessages(loc, record)
@@ -540,7 +535,7 @@ describe('jQuery API tracker', () => {
       $(div).hide()
       const loc = utils.getPrevLineSourceLocation()
       const record = utils.createRecord('1', ActionType.Style)
-      const ownerID = utils.getOwnerOf(div).getTrackID()
+      const ownerID = OwnerManager.getTrackIDFromItsOwner(div)
 
       expect(ownerID).to.equal(record.trackid)
       receiver.verifyMessages(loc, record)
@@ -552,7 +547,7 @@ describe('jQuery API tracker', () => {
       $(div).toggle()
       const loc = utils.getPrevLineSourceLocation()
       const record = utils.createRecord('1', ActionType.Style)
-      const ownerID = utils.getOwnerOf(div).getTrackID()
+      const ownerID = OwnerManager.getTrackIDFromItsOwner(div)
 
       expect(ownerID).to.equal(record.trackid)
       receiver.verifyMessages(loc, record)
@@ -567,14 +562,14 @@ describe('jQuery API tracker', () => {
 
       // for div1
       const record1 = utils.createRecord('1', ActionType.Style)
-      const ownerID1 = utils.getOwnerOf(div1).getTrackID()
+      const ownerID1 = OwnerManager.getTrackIDFromItsOwner(div1)
 
       expect(ownerID1).to.equal(record1.trackid)
       receiver.verifyMessages(loc, record1)
 
       // for div2
       const record2 = utils.createRecord('2', ActionType.Style)
-      const ownerID2 = utils.getOwnerOf(div2).getTrackID()
+      const ownerID2 = OwnerManager.getTrackIDFromItsOwner(div2)
 
       expect(ownerID2).to.equal(record2.trackid)
       receiver.verifyMessages(loc, record2)
@@ -584,79 +579,79 @@ describe('jQuery API tracker', () => {
   describe('animation apis', () => {
     it('should track only animate and exclude all details of its implementation code', (done) => {
       const div = document.createElement('div')
-      const owner = utils.getOwnerOf(div)
 
       $(div).animate({ "top": "100px" }, 100, () => {
         const loc = utils.getPrevLineSourceLocation()
-        const record = utils.createRecord(owner.getTrackID(), ActionType.Style)
-
-        expect(owner.hasTrackID()).to.be.true
+        const record = utils.createRecord(
+          OwnerManager.getTrackIDFromItsOwner(div),
+          ActionType.Style
+        )
         receiver.verifyMessages(loc, record)
-
         done()
       })
     })
 
     it('should track only specific animation (e.g., fadeIn, fadeOut) and exclude all details of its implementation code', (done) => {
       const div = document.createElement('div')
-      const owner = utils.getOwnerOf(div)
 
       $(div).fadeOut(100, () => {
         const loc = utils.getPrevLineSourceLocation()
-        const record = utils.createRecord(owner.getTrackID(), ActionType.Style)
-
-        expect(owner.hasTrackID()).to.be.true
+        const record = utils.createRecord(
+          OwnerManager.getTrackIDFromItsOwner(div),
+          ActionType.Style
+        )
         receiver.verifyMessages(loc, record)
-
         done()
       })
     })
 
     it('should track other Style actions after animation finishes', (done) => {
       const div = document.createElement('div')
-      const owner = utils.getOwnerOf(div)
 
       $(div).slideUp(100, () => {
         receiver.reset()
 
         $(div).css('color', 'red')
         const loc = utils.getPrevLineSourceLocation()
-        const record = utils.createRecord(owner.getTrackID(), ActionType.Style)
-
-        expect(owner.hasTrackID()).to.be.true
+        const record = utils.createRecord(
+          OwnerManager.getTrackIDFromItsOwner(div),
+          ActionType.Style
+        )
         receiver.verifyMessages(loc, record)
-
         done()
       })
     })
 
     it('should track other Style actions properly given animation executes only one tick ', () => {
       const div = document.createElement('div')
-      const owner = utils.getOwnerOf(div)
 
       $(div).fadeOut(0)
       receiver.reset()
 
       $(div).css('color', 'red')
       const loc = utils.getPrevLineSourceLocation()
-      const record = utils.createRecord(owner.getTrackID(), ActionType.Style)
-
-      expect(owner.hasTrackID()).to.be.true
+      const record = utils.createRecord(
+        OwnerManager.getTrackIDFromItsOwner(div),
+        ActionType.Style
+      )
       receiver.verifyMessages(loc, record)
     })
 
     it('should track other Style actions during animation', (done) => {
       const div = document.createElement('div')
-      const owner = utils.getOwnerOf(div)
 
       $(div).fadeOut(100, () => { done() })
       const loc1 = utils.getPrevLineSourceLocation()
-      const record1 = utils.createRecord(owner.getTrackID(), ActionType.Style)
-
+      const record1 = utils.createRecord(
+        OwnerManager.getTrackIDFromItsOwner(div),
+        ActionType.Style
+      )
       $(div).css('color', 'red')
       const loc2 = utils.getPrevLineSourceLocation()
-      const record2 = utils.createRecord(owner.getTrackID(), ActionType.Style)
-
+      const record2 = utils.createRecord(
+        OwnerManager.getTrackIDFromItsOwner(div),
+        ActionType.Style
+      )
       receiver.verifyListOfMessages([
         { loc: loc1, data: record1 },
         { loc: loc2, data: record2 }
@@ -665,25 +660,23 @@ describe('jQuery API tracker', () => {
 
     it('should track delay animation properly', (done) => {
       const div = document.createElement('div')
-      const owner = utils.getOwnerOf(div)
 
       $(div).css('display', 'none')
       receiver.reset()
 
       $(div).delay(100).slideDown(100, () => {
         const loc = utils.getPrevLineSourceLocation()
-        const record = utils.createRecord(owner.getTrackID(), ActionType.Style)
-
-        expect(owner.hasTrackID()).to.be.true
+        const record = utils.createRecord(
+          OwnerManager.getTrackIDFromItsOwner(div),
+          ActionType.Style
+        )
         receiver.verifyMessages(loc, record)
-
         done()
       })
     })
 
     it('should track stop properly', (done) => {
       const div = document.createElement('div')
-      const owner = utils.getOwnerOf(div)
 
       $(div).fadeOut(100)
       $(div)
@@ -694,11 +687,11 @@ describe('jQuery API tracker', () => {
         })
         .fadeIn(100, () => {
           const loc = utils.getPrevLineSourceLocation()
-          const record = utils.createRecord(owner.getTrackID(), ActionType.Style)
-
-          expect(owner.hasTrackID()).to.be.true
+          const record = utils.createRecord(
+            OwnerManager.getTrackIDFromItsOwner(div),
+            ActionType.Style
+          )
           receiver.verifyMessages(loc, record)
-
           done()
         })
     })
@@ -706,17 +699,15 @@ describe('jQuery API tracker', () => {
     it('should track double animation properly', (done) => {
       const div1 = document.createElement('div')
       const div2 = document.createElement('div')
-      const owner1 = utils.getOwnerOf(div1)
-      const owner2 = utils.getOwnerOf(div2)
 
       // for div1
       $(div1).animate({ 'margin-top': '300px', 'opacity': 0 }, 100)
       const loc1 = utils.getPrevLineSourceLocation()
-      const record1 = utils.createRecord(owner1.getTrackID(), ActionType.Style)
-
-      expect(owner1.hasTrackID()).to.be.true
+      const record1 = utils.createRecord(
+        OwnerManager.getTrackIDFromItsOwner(div1),
+        ActionType.Style
+      )
       receiver.verifyMessages(loc1, record1)
-
       receiver.reset()
 
       // for div2
@@ -726,11 +717,11 @@ describe('jQuery API tracker', () => {
       // jquery will not execute second immediately, it will wait 
       // until next animate cycle and do animation after first one.
       setTimeout(() => {
-        const record2 = utils.createRecord(owner2.getTrackID(), ActionType.Style)
-
-        expect(owner2.hasTrackID()).to.be.true
+        const record2 = utils.createRecord(
+          OwnerManager.getTrackIDFromItsOwner(div2),
+          ActionType.Style
+        )
         receiver.verifyMessages(loc2, record2)
-
         done()
       }, 10)
     })
