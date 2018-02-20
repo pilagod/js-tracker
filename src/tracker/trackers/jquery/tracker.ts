@@ -9,8 +9,8 @@ import {
   packAnimInGivenContextOnce
 } from './trackerHelpers'
 import {
-  callActionInCallerContext,
-  callActionInIsolatedContext,
+  packActionInCallerContext,
+  packActionInIsolatedContext,
   saveRecordDataTo
 } from '../utils'
 
@@ -29,11 +29,9 @@ function trackGeneralCases() {
   // @NOTE: never wrap jQuery.prototype init !!
   trackedApis.map((api) => {
     jquery.prototype[api] = ((actionFunc) => {
-      return function (...args: any[]) {
-        return callActionInCallerContext(() => {
-          return actionFunc.call(this, ...args)
-        })
-      }
+      return packActionInCallerContext(function (...args) {
+        return actionFunc.apply(this, args)
+      })
     })(jquery.prototype[api])
   })
 }
@@ -69,7 +67,8 @@ function trackAnimationEntryPoint() {
 
   function trackTimer(timer) {
     jquery.fx.timer = function (tick) {
-      // @NOTE: timer is where animation actually executing
+      // @NOTE: timer is where animation actually executing,
+      // and it is only used in animation
       return timer.call(
         this,
         packAnimInGivenContextOnce(tick, AnimController.getUntrackContextFrom(tick.elem))
@@ -136,10 +135,11 @@ function trackEventTriggers() {
 
   function trackEventTrigger(trigger) {
     // @NOTE: all trigger methods, like click and mouseenter, are all based on trigger
+    const isolatedTrigger =
+      packActionInIsolatedContext(trigger)
+
     jquery.event.trigger = function (event, data, elem, onlyHandlers) {
-      const result = callActionInIsolatedContext(() => {
-        return trigger.call(this, event, data, elem, onlyHandlers)
-      })
+      const result = isolatedTrigger.call(this, event, data, elem, onlyHandlers)
       // @NOTE: in jQuery.ajax, it will call event.trigger with no elem for 
       // series of ajax events, we should not track these low-level actions  
       const hasEventTarget = !!elem

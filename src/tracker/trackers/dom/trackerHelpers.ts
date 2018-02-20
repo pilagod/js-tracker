@@ -7,8 +7,8 @@ import ShadowElement from '../../private/ShadowElement'
 import { attachAttr, setAttrValue } from '../../private/NativeUtils'
 import { SymbolProxy, SymbolWhich } from '../../private/Symbols'
 import {
-  callActionInCallerContext,
-  callActionInIsolatedContext,
+  packActionInCallerContext,
+  packActionInIsolatedContext,
   saveRecordDataTo
 } from '../utils'
 
@@ -20,62 +20,55 @@ type Decorator = (
 
 export const decorators: { [name: string]: Decorator } = {
   general: (target, action, actionFunc) => {
-    return function (...args) {
-      return callActionInCallerContext(() => {
-        const result = actionFunc.call(this || window, ...args)
-        record({ caller: this || window, target, action, args })
-        return result
-      })
-    }
+    return packActionInCallerContext(function (...args) {
+      const result = actionFunc.apply(this || window, args)
+      record({ caller: this || window, target, action, args })
+      return result
+    })
   },
 
   trigger: (target, action, actionFunc) => {
-    return function (...args) {
-      return callActionInCallerContext(() => {
-        const result = callActionInIsolatedContext(() => {
-          return actionFunc.call(this, ...args)
-        })
-        record({ caller: this, target, action })
-        return result
-      })
-    }
+    const isolatedActionFunc =
+      packActionInIsolatedContext(actionFunc)
+
+    return packActionInCallerContext(function (...args) {
+      const result = isolatedActionFunc.apply(this, args)
+      record({ caller: this, target, action })
+      return result
+    })
   },
 
   // element.setAttributeNode(...)
   // element.attributes.setNamedItem(...)
   setAttributeNode: (target, action, actionFunc: (attr: Attr) => void) => {
-    return function (attr: Attr): void {
+    return packActionInCallerContext(function (attr) {
       // @NOTE: owner should get before actionFunc call,
-      // for no owner attr, it might attach to element after
-      // actionFunc call, and cause record to set merge to 
-      // the element's trackid instead of undefined from NullOwner
+      // for attr has no owner, it might attach to some element
+      // after actionFunc call, this will cause tracker to merge
+      // the records of new owner instead of original NullOwner
       const owner = OwnerManager.getOwner(attr)
       const attattr = getAttachableAttr(attr)
-
-      return callActionInCallerContext(() => {
-        const result = actionFunc.call(this, attattr)
-        record({
-          caller: this, target, action, args: [attattr],
-          merge: owner.getTrackID()
-        })
-        return result
+      const result = actionFunc.call(this, attattr)
+      record({
+        caller: this, target, action,
+        args: [attattr],
+        merge: owner.getTrackID()
       })
-    }
+      return result
+    })
   },
 
   // documemt.createAttribute('...').value = '...'
   value: (target, action, setter: (value: string) => void) => {
-    return function (this: Attr, value: string): void {
+    return packActionInCallerContext(function (this: Attr, value: string) {
       if (!OwnerManager.hasOwner(this)) {
         // @TODO: check namespaceURI
         attachAttr(document.createElement(ShadowElement.TagName), this)
       }
-      return callActionInCallerContext(() => {
-        const result = setter.call(this, value)
-        record({ caller: this, target, action })
-        return result
-      })
-    }
+      const result = setter.call(this, value)
+      record({ caller: this, target, action })
+      return result
+    })
   },
 
   /* getter */
@@ -89,24 +82,20 @@ export const decorators: { [name: string]: Decorator } = {
         ? target[action].bind(target)
         : target[action]
     },
-    set: function (target, action, value) {
-      return callActionInCallerContext(() => {
-        target[action] = value
-        record({ caller: target, target: 'CSSStyleDeclaration', action })
-        return true
-      })
-    }
+    set: packActionInCallerContext(function (target, action, value) {
+      target[action] = value
+      record({ caller: target, target: 'CSSStyleDeclaration', action })
+      return true
+    })
   }),
 
   // dataset
   DOMStringMap: proxyDecorator(<ProxyHandler<DOMStringMap>>{
-    set: function (target, action, value) {
-      return callActionInCallerContext(() => {
-        target[action] = value
-        record({ caller: target, target: 'DOMStringMap', action })
-        return true
-      })
-    }
+    set: packActionInCallerContext(function (target, action, value) {
+      target[action] = value
+      record({ caller: target, target: 'DOMStringMap', action })
+      return true
+    })
   }),
 
   // classList

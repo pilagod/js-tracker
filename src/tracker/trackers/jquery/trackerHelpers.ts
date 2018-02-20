@@ -1,7 +1,7 @@
 /// <reference path='../../types/RecordMessage.d.ts'/>
 
 import MessageBroker from '../../private/MessageBroker'
-import { callActionInGivenContext } from '../utils'
+import { packActionInGivenContext } from '../utils'
 
 const SymbolAnim = Symbol('Animation')
 
@@ -84,7 +84,7 @@ export function packAnimInGivenContextOnce(
       // @NOTE: when this function is called while queueing (MessageBroker is not empty),
       // it should not send any RecordContextMessage
       const result = MessageBroker.isEmpty()
-        ? callActionInGivenContext(() => target.apply(thisArg, argumentList), context)
+        ? packActionInGivenContext(target, context).apply(thisArg, argumentList)
         : target.apply(thisArg, argumentList)
       // @NOTE: reset animFunc and ignore already tracked actions (track only once)
       this.apply = function (target, thisArg, argumentList) {

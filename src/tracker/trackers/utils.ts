@@ -5,12 +5,65 @@ import * as StackTrace from 'stacktrace-js'
 import MessageBroker from '../private/MessageBroker'
 import OwnerManager from '../private/OwnerManager'
 
-export function callActionInCallerContext(actionFunc: () => any) {
-  return callActionInGivenContext(actionFunc, getCallerContext())
+export function packActionInCallerContext(
+  actionFunc: (...args: any[]) => any
+): (...args: any[]) => any {
+  return function (...args) {
+    return callActionInGivenContext.call(this, actionFunc, args, getCallerContext())
+  }
 }
 
-export function callActionInGivenContext(
-  actionFunc: () => any,
+export function packActionInGivenContext(
+  actionFunc: (...args: any[]) => any,
+  context: RecordContext
+): (...args: any[]) => any {
+  return function (...args) {
+    return callActionInGivenContext.call(this, actionFunc, args, context)
+  }
+}
+
+export function packActionInIsolatedContext(
+  actionFunc: (...args: any[]) => any,
+): (...args: any[]) => any {
+  return function (...args) {
+    return callActionInIsolatedContext.call(this, actionFunc, args)
+  }
+}
+
+export function saveRecordDataTo(target: ActionTarget, type: ActionType, merge?: TrackID) {
+  const owner = OwnerManager.getOwner(target)
+
+  if (!owner.hasTrackID()) {
+    owner.setTrackID()
+  }
+  const record: RecordData = {
+    trackid: owner.getTrackID(),
+    type
+  }
+  if (merge) {
+    record.merge = merge
+  }
+  MessageBroker.send({
+    state: 'record',
+    data: record
+  })
+}
+
+function getCallerContext(): RecordContext {
+  const stackframe = StackTrace.getSync()[2]
+
+  return <RecordContext>{
+    loc: {
+      scriptUrl: stackframe.fileName,
+      lineNumber: stackframe.lineNumber,
+      columnNumber: stackframe.columnNumber
+    }
+  }
+}
+
+function callActionInGivenContext(
+  actionFunc: (...args: any[]) => any,
+  args: any[],
   context: RecordContext
 ) {
   try {
@@ -18,7 +71,7 @@ export function callActionInGivenContext(
       state: 'record_start',
       data: context
     })
-    return actionFunc.call(this)
+    return actionFunc.apply(this, args)
   } catch (e) {
     throw (e)
   } finally {
@@ -29,39 +82,16 @@ export function callActionInGivenContext(
   }
 }
 
-export function callActionInIsolatedContext(actionFunc: () => any) {
+function callActionInIsolatedContext(
+  actionFunc: (...args: any[]) => any,
+  args: any[]
+) {
   try {
     MessageBroker.stackSnapshot()
-    return actionFunc.call(this)
+    return actionFunc.apply(this, args)
   } catch (e) {
     throw (e)
   } finally {
     MessageBroker.restoreSnapshot()
-  }
-}
-
-export function saveRecordDataTo(target: ActionTarget, type: ActionType, merge?: TrackID) {
-  const owner = OwnerManager.getOwner(target)
-
-  if (!owner.hasTrackID()) {
-    owner.setTrackID()
-  }
-  const record: RecordData = { trackid: owner.getTrackID(), type }
-
-  if (merge) {
-    record.merge = merge
-  }
-  MessageBroker.send({ state: 'record', data: record })
-}
-
-function getCallerContext(): RecordContext {
-  const stackframe = StackTrace.getSync()[3]
-
-  return <RecordContext>{
-    loc: {
-      scriptUrl: stackframe.fileName,
-      lineNumber: stackframe.lineNumber,
-      columnNumber: stackframe.columnNumber
-    }
   }
 }
