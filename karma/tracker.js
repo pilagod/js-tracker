@@ -12,10 +12,10 @@ module.exports = configFactory(function (defaultConfig) {
     files: [
       /* targets */
       { pattern: 'src/tracker/trackers/*/*[!(.d)].ts' },
+      { pattern: 'src/tracker/trackers/utils.ts' },
       { pattern: 'src/tracker/private/*[!(.d)].ts' },
 
       /* dependencies */
-      { pattern: 'src/tracker/trackers/utils.ts' },
       { pattern: 'src/tracker/public/*[!(.d)].ts' },
 
       /* static */
@@ -29,10 +29,10 @@ module.exports = configFactory(function (defaultConfig) {
     preprocessors: {
       /* targets */
       'src/tracker/trackers/*/*[!(.d)].ts': ['karma-typescript', 'coverage'],
+      'src/tracker/trackers/utils.ts': ['karma-typescript', 'coverage'],
       'src/tracker/private/*[!(.d)].ts': ['karma-typescript', 'coverage'],
 
       /* dependencies */
-      'src/tracker/trackers/utils.ts': ['karma-typescript'],
       'src/tracker/public/*[!(.d)].ts': ['karma-typescript'],
 
       /* tests */
