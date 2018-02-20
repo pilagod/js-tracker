@@ -16,7 +16,7 @@ module.exports = configFactory(function (defaultConfig) {
 
       // public
       { pattern: 'src/tracker/public/ActionStore.ts' },
-      { pattern: 'src/tracker/private/libs/ESTreeNodeFinder.ts' },
+      { pattern: 'src/tracker/private/libs/*[!(.d)].ts' },
 
       // private
       { pattern: 'src/tracker/private/ActionMap.ts' },
@@ -42,7 +42,7 @@ module.exports = configFactory(function (defaultConfig) {
 
       // publics
       'src/tracker/public/ActionStore.ts': ['karma-typescript', 'coverage'],
-      'src/tracker/private/libs/ESTreeNodeFinder.ts': ['karma-typescript', 'coverage'],
+      'src/tracker/private/libs/*[!(.d)].ts': ['karma-typescript', 'coverage'],
 
       // privates
       'src/tracker/private/ActionMap.ts': ['karma-typescript', 'coverage'],

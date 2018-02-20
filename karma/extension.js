@@ -1,9 +1,8 @@
 var configFactory = require('./configFactory')
-var PORT = 9879
 
 module.exports = configFactory(function (defaultConfig) {
   var customConfig = Object.assign({}, defaultConfig, {
-    port: PORT,
+    port: 9879,
 
     proxies: {
       '/script.js': `/base/test/script.js`
@@ -27,6 +26,7 @@ module.exports = configFactory(function (defaultConfig) {
       /* dependencies */
       { pattern: 'src/extension/utils.ts' },
       { pattern: 'src/tracker/public/*[!(.d)].ts' },
+      { pattern: 'src/tracker/private/libs/*[!(.d)].ts' },
 
       /* tests */
       { pattern: 'test/*.ts' },
@@ -51,6 +51,7 @@ module.exports = configFactory(function (defaultConfig) {
       /* dependencies */
       'src/extension/utils.ts': ['karma-typescript'],
       'src/tracker/public/*[!(.d)].ts': ['karma-typescript'],
+      'src/tracker/private/libs/*[!(.d)].ts': ['karma-typescript'],
 
       /* tests */
       'test/*.ts': ['karma-typescript'],
