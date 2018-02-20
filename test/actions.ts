@@ -33,7 +33,9 @@ const actionsOfJS = ((urlOfJS) => [
   createAction('1', ActionType.Attr | ActionType.Node, urlOfJS, 5, 15, `div.innerText = 'js-tracker'`),
   // action[4] `div.addEventListener('click', function () {console.log('clicked')})`
   createAction('1', ActionType.Event, urlOfJS, 6, 5, `div.addEventListener('click', function () { ... })`),
-  // action[5] `div.classList.add('class' + i)`
+  // action[5] `div.focus()`
+  createAction('1', ActionType.Event, urlOfJS, 7, 7, `div.focus()`),
+  // action[6] `div.classList.add('class' + i)`
   createAction('1', ActionType.Style, urlOfJS, 10, 17, `div.classList.add('class' + i)`),
 ])(`/script.js`)
 

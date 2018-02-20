@@ -4,7 +4,7 @@ div.style.color = 'red'
 div.removeAttribute('style')
 div.innerText = 'js-tracker'
 div.addEventListener('click', function () {
-  console.log('clicked')
+  div.focus()
 })
 for (let i = 0; i < 3; i++) {
   div.classList.add('class' + i)
