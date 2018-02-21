@@ -4,6 +4,11 @@ import * as StackTrace from 'stacktrace-js'
 
 import MessageBroker from '../private/MessageBroker'
 import OwnerManager from '../private/OwnerManager'
+import {
+  RECORD_CONTEXT_START,
+  RECORD_CONTEXT_END,
+  RECORD_DATA
+} from '../public/MessageTypes'
 
 export function saveRecordDataTo(target: ActionTarget, type: ActionType, merge?: TrackID) {
   const record: RecordData = {
@@ -14,7 +19,7 @@ export function saveRecordDataTo(target: ActionTarget, type: ActionType, merge?:
     record.merge = merge
   }
   MessageBroker.send({
-    type: 'record',
+    type: RECORD_DATA,
     data: record
   })
 }
@@ -79,7 +84,7 @@ function callActionInGivenContext(
 ) {
   try {
     MessageBroker.send({
-      type: 'record_start',
+      type: RECORD_CONTEXT_START,
       data: context
     })
     return actionFunc.apply(this, args)
@@ -87,7 +92,7 @@ function callActionInGivenContext(
     throw (e)
   } finally {
     MessageBroker.send({
-      type: 'record_end',
+      type: RECORD_CONTEXT_END,
       data: context
     })
   }

@@ -3,6 +3,11 @@ import * as StackTrace from 'stacktrace-js'
 
 import MessageBroker from '../../../src/tracker/private/MessageBroker';
 import {
+  RECORD_CONTEXT_START,
+  RECORD_CONTEXT_END,
+  RECORD_DATA,
+} from '../../../src/tracker/public/MessageTypes'
+import {
   attachListenerTo,
   detachListenerFrom
 } from '../../../src/tracker/private/NativeUtils'
@@ -38,10 +43,9 @@ export class TrackerMessageReceiver {
   ) {
     this.verifyContextMessage(context, messages);
 
-    [].concat(data).map((datum) => {
-      const record = { type: 'record', data: datum }
-      expect(messages).to.include(record)
-    })
+    expect(messages).to.include(
+      <RecordMessage>{ type: RECORD_DATA, data }
+    )
   }
 
   public verifyMultipleMessageChunks(list: Array<{ context: RecordContext, data: RecordData }>) {
@@ -72,12 +76,12 @@ export class TrackerMessageReceiver {
     messages: RecordMessage[]
   ) {
     const start = <RecordContextMessage>messages[0]
-    expect(start.type).to.equal('record_start')
+    expect(start.type).to.equal(RECORD_CONTEXT_START)
     expect(start.data.loc.scriptUrl).to.equal(context.loc.scriptUrl)
     expect(start.data.loc.lineNumber).to.equal(context.loc.lineNumber)
 
     const end = <RecordContextMessage>messages.slice(-1)[0]
-    expect(end.type).to.equal('record_end')
+    expect(end.type).to.equal(RECORD_CONTEXT_END)
     expect(end.data.loc.scriptUrl).to.equal(context.loc.scriptUrl)
     expect(end.data.loc.lineNumber).to.equal(context.loc.lineNumber)
   }
@@ -90,14 +94,14 @@ export class TrackerMessageReceiver {
 
     for (let i = 0; i < this.messages.length; i++) {
       switch (this.messages[i].type) {
-        case 'record_start':
+        case RECORD_CONTEXT_START:
           if (count === 0) {
             head = i
           }
           count += 1
           break
 
-        case 'record_end':
+        case RECORD_CONTEXT_END:
           count -= 1
           if (count === 0) {
             result.push(this.messages.slice(head, i + 1))

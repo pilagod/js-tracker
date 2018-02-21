@@ -1,8 +1,13 @@
 import { expect } from 'chai'
 import * as sinon from 'sinon'
 
-import { actionsOfJS as actions } from '../actions'
+import {
+  RECORD_CONTEXT_START,
+  RECORD_CONTEXT_END,
+  RECORD_DATA
+} from '../../src/tracker/public/MessageTypes'
 import initContentscriptHelpers from '../../src/extension/contentscriptHelpers'
+import { actionsOfJS as actions } from '../actions'
 
 describe('contentscript helpers', () => {
   const sandbox = sinon.sandbox.create()
@@ -21,11 +26,19 @@ describe('contentscript helpers', () => {
     const controller = (<any>helpers).contentscriptController
     const messageHandler = helpers.messageHandler // this is an async function
 
-    const createRecordDataMessage = (data: RecordData) => (<RecordDataMessage>{ type: 'record', data })
+    const createRecordDataMessage = (data: RecordData) => {
+      return <RecordDataMessage>{ type: RECORD_DATA, data }
+    }
     const createRecordContextMessage = (loc: SourceLocation) => ({
       // @NOTE: to simulate the real environment, we copy loc to a new object
-      start: <RecordContextMessage>{ type: 'record_start', data: { loc: Object.assign({}, loc) } },
-      end: <RecordContextMessage>{ type: 'record_end', data: { loc: Object.assign({}, loc) } }
+      start: <RecordContextMessage>{
+        type: RECORD_CONTEXT_START,
+        data: { loc: Object.assign({}, loc) }
+      },
+      end: <RecordContextMessage>{
+        type: RECORD_CONTEXT_END,
+        data: { loc: Object.assign({}, loc) }
+      }
     })
 
     beforeEach(() => {

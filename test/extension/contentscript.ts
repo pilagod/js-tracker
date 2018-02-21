@@ -2,8 +2,13 @@ import { expect } from 'chai'
 import * as sinon from 'sinon'
 import * as fs from 'fs'
 
-import { actionsOfJS as actions } from '../actions'
+import {
+  RECORD_CONTEXT_START,
+  RECORD_CONTEXT_END,
+  RECORD_DATA
+} from '../../src/tracker/public/MessageTypes'
 import contentscript from '../../src/extension/contentscript'
+import { actionsOfJS as actions } from '../actions'
 
 describe('contentscript', () => {
   const helpers = {
@@ -26,10 +31,16 @@ describe('contentscript', () => {
       )
     }
     it('should handle \'js-tracker\' CustomEvent and call helpers.messageHandler with event.detail.record', () => {
-      const start: RecordContextMessage = { type: 'record_start', data: { loc: actions[0].info.loc } }
-      const end: RecordContextMessage = { type: 'record_end', data: { loc: actions[0].info.loc } }
+      const start: RecordContextMessage = {
+        type: RECORD_CONTEXT_START,
+        data: { loc: actions[0].info.loc }
+      }
+      const end: RecordContextMessage = {
+        type: RECORD_CONTEXT_END,
+        data: { loc: actions[0].info.loc }
+      }
       const record: RecordDataMessage = {
-        type: 'record',
+        type: RECORD_DATA,
         data: {
           trackid: actions[0].info.trackid,
           type: actions[0].info.type

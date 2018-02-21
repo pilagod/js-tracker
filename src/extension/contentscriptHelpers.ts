@@ -3,6 +3,11 @@
 /// <reference path='./types/ContentscriptHelpers.d.ts'/>
 /// <reference path='./types/Message.d.ts'/>
 
+import {
+  RECORD_CONTEXT_START,
+  RECORD_CONTEXT_END,
+  RECORD_DATA
+} from '../tracker/public/MessageTypes'
 import { match } from '../tracker/public/SourceLocation'
 import { isTestEnv } from './utils'
 
@@ -28,17 +33,17 @@ class ContentscriptController {
 
   public messageHandler = async (message: RecordMessage) => {
     switch (message.type) {
-      case 'record_start':
+      case RECORD_CONTEXT_START:
         if (!this.context) {
           this.context = message.data
         }
         break
 
-      case 'record':
+      case RECORD_DATA:
         await this.recordDataHandler(message.data)
         break
 
-      case 'record_end':
+      case RECORD_CONTEXT_END:
         if (match(this.context.loc, message.data.loc)) {
           this.context = null
         }
