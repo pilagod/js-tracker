@@ -1,4 +1,4 @@
-/// <reference path='../types/RecordMessage.d.ts'/>
+/// <reference path='../types/MessageTypes.d.ts'/>
 
 import * as StackTrace from 'stacktrace-js'
 
@@ -14,7 +14,7 @@ export function saveRecordDataTo(target: ActionTarget, type: ActionType, merge?:
     record.merge = merge
   }
   MessageBroker.send({
-    state: 'record',
+    type: 'record',
     data: record
   })
 }
@@ -79,7 +79,7 @@ function callActionInGivenContext(
 ) {
   try {
     MessageBroker.send({
-      state: 'record_start',
+      type: 'record_start',
       data: context
     })
     return actionFunc.apply(this, args)
@@ -87,7 +87,7 @@ function callActionInGivenContext(
     throw (e)
   } finally {
     MessageBroker.send({
-      state: 'record_end',
+      type: 'record_end',
       data: context
     })
   }

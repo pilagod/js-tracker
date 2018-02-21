@@ -39,7 +39,7 @@ export class TrackerMessageReceiver {
     this.verifyContextMessage(context, messages);
 
     [].concat(data).map((datum) => {
-      const record = { state: 'record', data: datum }
+      const record = { type: 'record', data: datum }
       expect(messages).to.include(record)
     })
   }
@@ -72,12 +72,12 @@ export class TrackerMessageReceiver {
     messages: RecordMessage[]
   ) {
     const start = <RecordContextMessage>messages[0]
-    expect(start.state).to.equal('record_start')
+    expect(start.type).to.equal('record_start')
     expect(start.data.loc.scriptUrl).to.equal(context.loc.scriptUrl)
     expect(start.data.loc.lineNumber).to.equal(context.loc.lineNumber)
 
     const end = <RecordContextMessage>messages.slice(-1)[0]
-    expect(end.state).to.equal('record_end')
+    expect(end.type).to.equal('record_end')
     expect(end.data.loc.scriptUrl).to.equal(context.loc.scriptUrl)
     expect(end.data.loc.lineNumber).to.equal(context.loc.lineNumber)
   }
@@ -89,7 +89,7 @@ export class TrackerMessageReceiver {
     let head = -1
 
     for (let i = 0; i < this.messages.length; i++) {
-      switch (this.messages[i].state) {
+      switch (this.messages[i].type) {
         case 'record_start':
           if (count === 0) {
             head = i

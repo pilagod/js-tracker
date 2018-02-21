@@ -1,4 +1,4 @@
-/// <reference path='../../types/RecordMessage.d.ts'/>
+/// <reference path='../../types/MessageTypes.d.ts'/>
 
 import MessageBroker from '../../private/MessageBroker'
 import {

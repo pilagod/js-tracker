@@ -5,7 +5,7 @@ type RecordMessage =
   | RecordDataMessage
 
 type RecordContextMessage = {
-  state: 'record_start' | 'record_end'
+  type: 'record_start' | 'record_end'
   data: RecordContext
 }
 
@@ -14,7 +14,7 @@ type RecordContext = {
 }
 
 type RecordDataMessage = {
-  state: 'record',
+  type: 'record',
   data: RecordData
 }
 

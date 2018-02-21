@@ -1,5 +1,5 @@
 /// <reference path='../tracker/types/ActionStore.d.ts'/>
-/// <reference path='../tracker/types/RecordMessage.d.ts'/>
+/// <reference path='../tracker/types/MessageTypes.d.ts'/>
 /// <reference path='./types/ContentscriptHelpers.d.ts'/>
 /// <reference path='./types/Message.d.ts'/>
 
@@ -27,7 +27,7 @@ class ContentscriptController {
   /* public */
 
   public messageHandler = async (message: RecordMessage) => {
-    switch (message.state) {
+    switch (message.type) {
       case 'record_start':
         if (!this.context) {
           this.context = message.data

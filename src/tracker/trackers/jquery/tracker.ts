@@ -1,5 +1,3 @@
-/// <reference path='../../types/RecordMessage.d.ts'/>
-
 import ActionType from '../../public/ActionType';
 import MessageBroker from '../../private/MessageBroker';
 import {

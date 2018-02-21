@@ -1,4 +1,4 @@
-/// <reference path='../types/RecordMessage.d.ts'/>
+/// <reference path='../types/MessageTypes.d.ts'/>
 
 import { match } from '../public/SourceLocation'
 import { sendMessagesToContentScript } from './NativeUtils'
@@ -82,7 +82,7 @@ class MessageBroker {
   private handleMessage(message: RecordMessage) {
     this.messages.push(message)
 
-    switch (message.state) {
+    switch (message.type) {
       case 'record_start':
         if (!this.context) {
           this.context = message.data
@@ -114,7 +114,7 @@ class MessageBroker {
   }
 
   private hasRecord(messages: RecordMessage[]) {
-    return messages.some((message) => message.state === 'record')
+    return messages.some((message) => message.type === 'record')
   }
 }
 export default new MessageBroker()

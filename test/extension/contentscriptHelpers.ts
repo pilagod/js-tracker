@@ -21,11 +21,11 @@ describe('contentscript helpers', () => {
     const controller = (<any>helpers).contentscriptController
     const messageHandler = helpers.messageHandler // this is an async function
 
-    const createRecordDataMessage = (data: RecordData) => (<RecordDataMessage>{ state: 'record', data })
+    const createRecordDataMessage = (data: RecordData) => (<RecordDataMessage>{ type: 'record', data })
     const createRecordContextMessage = (loc: SourceLocation) => ({
       // @NOTE: to simulate the real environment, we copy loc to a new object
-      start: <RecordContextMessage>{ state: 'record_start', data: { loc: Object.assign({}, loc) } },
-      end: <RecordContextMessage>{ state: 'record_end', data: { loc: Object.assign({}, loc) } }
+      start: <RecordContextMessage>{ type: 'record_start', data: { loc: Object.assign({}, loc) } },
+      end: <RecordContextMessage>{ type: 'record_end', data: { loc: Object.assign({}, loc) } }
     })
 
     beforeEach(() => {
