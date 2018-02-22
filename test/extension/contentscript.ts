@@ -2,65 +2,39 @@ import { expect } from 'chai'
 import * as sinon from 'sinon'
 import * as fs from 'fs'
 
-import {
-  ACTION_CONTEXT_START,
-  ACTION_CONTEXT_END,
-  ACTION_DATA
-} from '../../src/tracker/public/MessageTypes'
+import { RECORD_STORE_ADD } from '../../src/extension/public/RecordStoreActions'
 import contentscript from '../../src/extension/contentscript'
 import { actionsOfJS as actions } from '../actions'
 
 describe('contentscript', () => {
   const helpers = {
-    messageHandler: sinon.spy(),
+    recordStoreAddMessageHandler: sinon.spy(),
     devtoolSelectionChangedHandler: sinon.spy(),
     injectScript: sinon.spy()
   }
-
   before(() => {
     contentscript(helpers)
   })
 
-  describe('listen to record message', () => {
-    const { messageHandler } = helpers
-    const dispatch = (messages: ActionMessage[]) => {
+  describe('listen to RecordStoreAddMessage', () => {
+    const { recordStoreAddMessageHandler } = helpers
+    const dispatch = (message: RecordStoreAddMessage) => {
       window.dispatchEvent(
-        new CustomEvent('js-tracker', {
-          detail: { messages }
+        new CustomEvent(RECORD_STORE_ADD, {
+          detail: { message }
         })
       )
     }
-    it('should handle \'js-tracker\' CustomEvent and call helpers.messageHandler with event.detail.record', () => {
-      const start: ActionContextMessage = {
-        type: ACTION_CONTEXT_START,
-        data: { loc: actions[0].info.loc }
+    it('should handle RECORD_STORE_ADD CustomEvent and call helpers.recordStoreAddMessageHandler with event.detail.message', () => {
+      const message = {
+        loc: actions[0].info.loc,
+        data: [
+          Object.assign({}, actions[0].info, { loc: undefined })
+        ]
       }
-      const end: ActionContextMessage = {
-        type: ACTION_CONTEXT_END,
-        data: { loc: actions[0].info.loc }
-      }
-      const record: ActionDataMessage = {
-        type: ACTION_DATA,
-        data: {
-          trackid: actions[0].info.trackid,
-          type: actions[0].info.type
-        }
-      }
-      dispatch([start, record, end])
+      dispatch(message)
 
-      expect(messageHandler.calledThrice).to.be.true
-      expect(
-        messageHandler.getCall(0)
-          .calledWith(start)
-      ).to.be.true
-      expect(
-        messageHandler.getCall(1)
-          .calledWith(record)
-      ).to.be.true
-      expect(
-        messageHandler.getCall(2)
-          .calledWith(end)
-      ).to.be.true
+      expect(recordStoreAddMessageHandler.calledOnce).to.be.true
     })
   })
 

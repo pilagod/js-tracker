@@ -1,11 +1,8 @@
+/// <reference path='../../src/extension/public/types/RecordStoreMessages.d.ts'/>
+
 import { expect } from 'chai'
 import * as sinon from 'sinon'
 
-import {
-  ACTION_CONTEXT_START,
-  ACTION_CONTEXT_END,
-  ACTION_DATA
-} from '../../src/tracker/public/MessageTypes'
 import initContentscriptHelpers from '../../src/extension/contentscriptHelpers'
 import { actionsOfJS as actions } from '../actions'
 
@@ -21,55 +18,25 @@ describe('contentscript helpers', () => {
     sandbox.reset()
   })
 
-  describe('messageHandler', () => {
+  describe('recordStoreAddMessageHandler', () => {
     const helpers = initContentscriptHelpers(store, updateSidebar)
-    const controller = (<any>helpers).contentscriptController
-    const messageHandler = helpers.messageHandler // this is an async function
-
-    const createActionDataMessage = (data: ActionData) => {
-      return <ActionDataMessage>{ type: ACTION_DATA, data }
-    }
-    const createActionContextMessage = (loc: SourceLocation) => ({
-      // @NOTE: to simulate the real environment, we copy loc to a new object
-      start: <ActionContextMessage>{
-        type: ACTION_CONTEXT_START,
-        data: { loc: Object.assign({}, loc) }
-      },
-      end: <ActionContextMessage>{
-        type: ACTION_CONTEXT_END,
-        data: { loc: Object.assign({}, loc) }
+    const recordStoreAddMessageHandler = helpers.recordStoreAddMessageHandler
+    const createRecordStoreAddDataFromActionInfo = (info: ActionInfo) => {
+      return {
+        trackid: info.trackid,
+        type: info.type
       }
-    })
-
-    beforeEach(() => {
-      controller.selection = null
-    })
-
+    }
     describe('handle record message stream', () => {
-      it('should not call store.registerFromActionInfo given ActionContextMessage', async () => {
-        const { start, end } = createActionContextMessage(actions[0].info.loc)
-
-        await messageHandler(start)
-        await messageHandler(end)
-
-        expect(store.registerFromActionInfo.called).to.be.false
-      })
-
       it('should call store.registerFromActionInfo with data of ActionDataMessage combining data of the start ActionContextMessage', async () => {
-        const { start, end } = createActionContextMessage(actions[0].info.loc)
-
-        const record1 = createActionDataMessage({
-          trackid: actions[0].info.trackid,
-          type: actions[0].info.type
-        })
-        const record2 = createActionDataMessage({
-          trackid: actions[1].info.trackid,
-          type: actions[1].info.type
-        })
-        await messageHandler(start)
-        await messageHandler(record1)
-        await messageHandler(record2)
-        await messageHandler(end)
+        const message = {
+          loc: actions[0].info.loc,
+          data: [
+            createRecordStoreAddDataFromActionInfo(actions[0].info),
+            createRecordStoreAddDataFromActionInfo(actions[1].info)
+          ]
+        }
+        recordStoreAddMessageHandler(message)
 
         expect(store.registerFromActionInfo.calledTwice).to.be.true
         expect(
@@ -81,98 +48,44 @@ describe('contentscript helpers', () => {
             .calledWith(Object.assign({}, actions[1].info, { loc: actions[0].info.loc }))
         ).to.be.true
       })
-
-      it('should ignore any ActionContextMessage which is not the matched end ActionContextMessage of the first start ActionContextMessage', async () => {
-        const { start: start1, end: end1 } = createActionContextMessage(actions[0].info.loc)
-        const { start: start2, end: end2 } = createActionContextMessage(actions[1].info.loc)
-
-        const { trackid, type } = actions[0].info
-        const record = createActionDataMessage({ trackid, type })
-
-        await messageHandler(start1)
-        await messageHandler(start2)
-        await messageHandler(record)
-        await messageHandler(end2)
-        await messageHandler(end1)
-
-        expect(store.registerFromActionInfo.calledOnce).to.be.true
-        expect(
-          store.registerFromActionInfo
-            .calledWith(actions[0].info)
-        ).to.be.true
-      })
-
-      it('should clear start ActionContextMessage given the matched end ActionContextMessage comes', async () => {
-        const { start: start1, end: end1 } = createActionContextMessage(actions[0].info.loc)
-        const { start: start2, end: end2 } = createActionContextMessage(actions[1].info.loc)
-
-        const { trackid, type } = actions[0].info
-        const record = createActionDataMessage({ trackid, type })
-
-        await messageHandler(start1)
-        await messageHandler(end1)
-
-        await messageHandler(start2)
-        await messageHandler(record)
-        await messageHandler(end2)
-
-        expect(store.registerFromActionInfo.calledOnce).to.be.true
-        expect(
-          store.registerFromActionInfo
-            .calledWith(Object.assign({}, actions[0].info, { loc: actions[1].info.loc }))
-        ).to.be.true
-      })
     })
 
     describe('update sidebar', () => {
-      const { start, end } = createActionContextMessage(actions[0].info.loc)
-      const { trackid, type } = actions[0].info
-      const record = createActionDataMessage({ trackid, type })
-
-      beforeEach(async () => {
-        await messageHandler(start)
-      })
-
-      afterEach(async () => {
-        await messageHandler(end)
+      const controller = (<any>helpers).contentscriptController
+      const message = {
+        loc: actions[0].info.loc,
+        data: [
+          createRecordStoreAddDataFromActionInfo(actions[0].info),
+        ]
+      }
+      beforeEach(() => {
+        controller.selection = document.createElement('div')
       })
 
       it('should not call updateSidebar given store.registerFromActionInfo fails', async () => {
+        controller.selection.setAttribute('trackid', '1')
         store.registerFromActionInfo.returns(new Promise((resolve) => resolve(false)))
 
-        await messageHandler(record)
+        await recordStoreAddMessageHandler(message)
 
         expect(updateSidebar.called).to.be.false
       })
 
-      it('should not call updateSidebar given store.registerFromActionInfo succeeds but info\'s trackid is different from controller.selection\'s trackid', async () => {
-        const div = document.createElement('div')
-        div.setAttribute('trackid', '2')
+      it('should not call updateSidebar given message.data\'s trackid is different from controller.selection\'s', async () => {
+        controller.selection.setAttribute('trackid', '2')
+        store.registerFromActionInfo.returns(new Promise((resolve) => resolve(true)))
 
-        controller.selection = div
-
-        store.registerFromActionInfo.returns(new Promise((resolve) => resolve(false)))
-
-        await messageHandler(record)
+        await recordStoreAddMessageHandler(message)
 
         expect(updateSidebar.called).to.be.false
       })
 
-      it('should call updateSidebar with records got from store and false selectionChanged flag given store.registerFromActionInfo succeeds and info\'s trackid is same as controller.selection\'s trackid', async () => {
-        const response = { status: 'OK', description: 'done' }
-
-        const div = document.createElement('div')
-        div.setAttribute('trackid', '1')
-
-        controller.selection = div
-
+      it('should call updateSidebar with records got from store and false selectionChanged flag given both store.registerFromActionInfo succeeds and message.data\'s trackid is same as controller.selection\'s', async () => {
+        controller.selection.setAttribute('trackid', '1')
         store.get.withArgs('1').returns([actions[0].record])
         store.registerFromActionInfo.returns(new Promise((resolve) => resolve(true)))
 
-        const logSpy = sandbox.spy(console, 'log')
-        updateSidebar.callsArgWith(1, response)
-
-        await messageHandler(record)
+        await recordStoreAddMessageHandler(message)
 
         expect(updateSidebar.calledOnce).to.be.true
         expect(
@@ -181,10 +94,6 @@ describe('contentscript helpers', () => {
               records: [actions[0].record],
               selectionChanged: false
             })
-        ).to.be.true
-        expect(
-          logSpy
-            .calledWith('response:', response)
         ).to.be.true
       })
     })

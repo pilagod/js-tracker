@@ -25,6 +25,7 @@ module.exports = configFactory(function (defaultConfig) {
 
       /* dependencies */
       { pattern: 'src/extension/utils.ts' },
+      { pattern: 'src/extension/public/**/*[!(.d)].ts' },
       { pattern: 'src/extension/private/**/*[!(.d)].ts' },
       { pattern: 'src/tracker/public/**/*[!(.d)].ts' },
 
@@ -51,6 +52,7 @@ module.exports = configFactory(function (defaultConfig) {
 
       /* dependencies */
       'src/extension/utils.ts': ['karma-typescript'],
+      'src/extension/public/**/*[!(.d)].ts': ['karma-typescript'],
       'src/extension/private/**/*[!(.d)].ts': ['karma-typescript'],
       'src/tracker/public/**/*[!(.d)].ts': ['karma-typescript'],
 

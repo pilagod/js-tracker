@@ -1,5 +1,5 @@
 import ActionType from '../../public/ActionType';
-import MessageBroker from '../../private/MessageBroker';
+import ActionRecorder from '../../private/ActionRecorder'
 import {
   AnimController,
   packAnimInGivenContextOnce,
@@ -47,7 +47,7 @@ function trackAnimationEntryPoint() {
 
   function trackQueue(queue) {
     jquery.prototype.queue = function (type, doAnimation) {
-      if (MessageBroker.isEmpty()) {
+      if (!ActionRecorder.isRecording()) {
         return queue.call(this, type, doAnimation)
       }
       this.each(function (this: Element) {
@@ -58,7 +58,7 @@ function trackAnimationEntryPoint() {
       return queue.call(
         this,
         type,
-        packAnimInGivenContextOnce(doAnimation, MessageBroker.getContext())
+        packAnimInGivenContextOnce(doAnimation, ActionRecorder.getRecordContext())
       )
     }
   }
@@ -115,11 +115,11 @@ function trackEventTriggers() {
         if (value) {
           // @NOTE: native trigger is about to begin, take out messages 
           // before trigger record process to give native trigger a right source
-          MessageBroker.restoreSnapshot()
+          ActionRecorder.restoreSnapshot()
         } else {
           // @NOTE: native trigger is about to end, put back messages to 
           // continue trigger restore process
-          MessageBroker.stackSnapshot()
+          ActionRecorder.saveSnapshot()
         }
         triggered = value
       },
@@ -141,7 +141,7 @@ function trackEventTriggers() {
       const hasEventTarget = !!elem
       // @NOTE: in order to simulate focusin/out, jquery will directly call 
       // event.trigger (in event.simulate) when focus/blur event happens
-      const isCalledByTrackedApi = !MessageBroker.isEmpty()
+      const isCalledByTrackedApi = ActionRecorder.isRecording()
 
       if (hasEventTarget && isCalledByTrackedApi) {
         saveActionDataTo(elem, ActionType.Behav | ActionType.Event)

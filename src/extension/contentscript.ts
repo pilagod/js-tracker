@@ -3,21 +3,22 @@
 
 import * as fs from 'fs'
 
+import { RECORD_STORE_ADD } from './public/RecordStoreActions'
 import ActionRecordStore from './private/ActionRecordStore'
 import initContentscriptHelpers from './contentscriptHelpers'
 import { isTestEnv } from './utils'
 
 function main(helpers: ContentscriptHelpers) {
-  listenToActionMessage(helpers.messageHandler)
+  listenToRecordStoreAddMessage(helpers.recordStoreAddMessageHandler)
   listenToDevtoolSelectionChanged(helpers.devtoolSelectionChangedHandler)
   injectTrackerScript(helpers.injectScript)
 }
 
-function listenToActionMessage(messageHandler: (message: ActionMessage) => void) {
-  window.addEventListener('js-tracker', (event: CustomEvent) => {
-    event.detail.messages.map((message: ActionMessage) => {
-      messageHandler(message)
-    })
+function listenToRecordStoreAddMessage(
+  recordStoreAddMessageHandler: (message: RecordStoreAddMessage) => void
+) {
+  window.addEventListener(RECORD_STORE_ADD, (event: CustomEvent) => {
+    recordStoreAddMessageHandler(event.detail.message)
   })
 }
 
@@ -38,5 +39,5 @@ function injectTrackerScript(injectScript: (container: Node, scriptText: string)
 if (!isTestEnv()) {
   main(initContentscriptHelpers(new ActionRecordStore(), chrome.runtime.sendMessage))
 }
-export default isTestEnv() ? main : null
+export default main
 

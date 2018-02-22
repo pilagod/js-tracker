@@ -1,27 +1,19 @@
-/// <reference path='../public/types/MessageTypes.d.ts'/>
+/// <reference path='../private/types/ActionData.d.ts'/>
 
 import * as StackTrace from 'stacktrace-js'
 
-import MessageBroker from '../private/MessageBroker'
+import ActionRecorder from '../private/ActionRecorder'
 import OwnerManager from '../private/OwnerManager'
-import {
-  ACTION_CONTEXT_START,
-  ACTION_CONTEXT_END,
-  ACTION_DATA
-} from '../public/MessageTypes'
 
 export function saveActionDataTo(target: ActionTarget, type: ActionType, merge?: TrackID) {
-  const record: ActionData = {
+  const data: ActionAddData = {
     trackid: OwnerManager.getOrSetTrackIDOnItsOwner(target),
     type
   }
   if (merge) {
-    record.merge = merge
+    data.merge = merge
   }
-  MessageBroker.send({
-    type: ACTION_DATA,
-    data: record
-  })
+  ActionRecorder.add(data)
 }
 
 export function packActionInCallerContext(
@@ -34,7 +26,7 @@ export function packActionInCallerContext(
 
 export function packActionInGivenContext(
   actionFunc: (...args: any[]) => any,
-  context: ActionContext
+  context: SourceLocation
 ): (...args: any[]) => any {
   return function (...args) {
     return callActionInGivenContext.call(this, actionFunc, args, context)
@@ -65,36 +57,28 @@ export function packActionInTrackingContext(
   }
 }
 
-function getCallerContext(): ActionContext {
+function getCallerContext(): SourceLocation {
   const stackframe = StackTrace.getSync()[2]
 
-  return <ActionContext>{
-    loc: {
-      scriptUrl: stackframe.fileName,
-      lineNumber: stackframe.lineNumber,
-      columnNumber: stackframe.columnNumber
-    }
+  return {
+    scriptUrl: stackframe.fileName,
+    lineNumber: stackframe.lineNumber,
+    columnNumber: stackframe.columnNumber
   }
 }
 
 function callActionInGivenContext(
   actionFunc: (...args: any[]) => any,
   args: any[],
-  context: ActionContext
+  context: SourceLocation
 ) {
   try {
-    MessageBroker.send({
-      type: ACTION_CONTEXT_START,
-      data: context
-    })
+    ActionRecorder.startRecording(context)
     return actionFunc.apply(this, args)
   } catch (e) {
     throw (e)
   } finally {
-    MessageBroker.send({
-      type: ACTION_CONTEXT_END,
-      data: context
-    })
+    ActionRecorder.stopRecording(context)
   }
 }
 
@@ -103,12 +87,12 @@ function callActionInIsolatedContext(
   args: any[]
 ) {
   try {
-    MessageBroker.stackSnapshot()
+    ActionRecorder.saveSnapshot()
     return actionFunc.apply(this, args)
   } catch (e) {
     throw (e)
   } finally {
-    MessageBroker.restoreSnapshot()
+    ActionRecorder.restoreSnapshot()
   }
 }
 
@@ -117,12 +101,12 @@ function callActionInNonTrackingContext(
   args: any[]
 ) {
   try {
-    MessageBroker.startBlocking()
+    ActionRecorder.startBlocking()
     return actionFunc.apply(this, args)
   } catch (e) {
     throw (e)
   } finally {
-    MessageBroker.stopBlocking()
+    ActionRecorder.stopBlocking()
   }
 }
 
@@ -130,18 +114,18 @@ function callActionInTrackingContext(
   actionFunc: (...args: any[]) => any,
   args: any[]
 ) {
-  const isInNonTrackingContext = MessageBroker.isBlocking()
+  const isInNonTrackingContext = ActionRecorder.isBlocking()
 
   try {
     if (isInNonTrackingContext) {
-      MessageBroker.stopBlocking()
+      ActionRecorder.stopBlocking()
     }
     return actionFunc.apply(this, args)
   } catch (e) {
     throw (e)
   } finally {
     if (isInNonTrackingContext) {
-      MessageBroker.startBlocking()
+      ActionRecorder.startBlocking()
     }
   }
 }

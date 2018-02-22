@@ -54,4 +54,4 @@ if (!isTestEnv()) {
     )
   )
 }
-export default isTestEnv() ? main : null
+export default main

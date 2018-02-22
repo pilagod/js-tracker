@@ -1,5 +1,6 @@
-/// <reference path='../public/types/MessageTypes.d.ts'/>
+/// <reference path='../../extension/public/types/RecordStoreMessages.d.ts'/>
 
+import { RecordStoreAction } from '../../extension/public/RecordStoreActions'
 import TrackIDFactory from './TrackIDFactory'
 
 // A series of actions bypass tracker's record process
@@ -22,10 +23,18 @@ export const detachListenerFrom = ((removeEventListener) => {
   }
 })(EventTarget.prototype.removeEventListener)
 
-export const sendMessagesToContentScript = ((context, dispatch) => {
-  return function (messages: ActionMessage[]) {
-    dispatch.call(context, new CustomEvent('js-tracker', {
-      detail: { messages }
+// export const sendMessagesToContentScript = ((context, dispatch) => {
+//   return function (messages: ActionMessage[]) {
+//     dispatch.call(context, new CustomEvent('js-tracker', {
+//       detail: { messages }
+//     }))
+//   }
+// })(window, EventTarget.prototype.dispatchEvent)
+
+export const sendMessageToRecordStore = ((context, dispatch) => {
+  return function (action: RecordStoreAction, message: RecordStoreMessage) {
+    dispatch.call(context, new CustomEvent(action, {
+      detail: { message }
     }))
   }
 })(window, EventTarget.prototype.dispatchEvent)

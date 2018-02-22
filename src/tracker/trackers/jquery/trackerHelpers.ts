@@ -1,6 +1,4 @@
-/// <reference path='../../public/types/MessageTypes.d.ts'/>
-
-import MessageBroker from '../../private/MessageBroker'
+import ActionRecorder from '../../private/ActionRecorder'
 import {
   packActionInGivenContext,
   packActionInNonTrackingContext
@@ -13,14 +11,14 @@ class AnimationController {
 
   private animid = 0
   private untrackAnims: {
-    [animid: number]: ActionContext[]
+    [animid: number]: SourceLocation[]
   } = {}
 
   /* public */
 
   public addUntrackContextTo(element: Element) {
     const animid = element[SymbolAnim] || this.setAnimIDOnElement(element)
-    const context = MessageBroker.getContext()
+    const context = ActionRecorder.getRecordContext()
 
     if (!this.untrackAnims.hasOwnProperty(animid)) {
       this.untrackAnims[animid] = []
@@ -28,7 +26,7 @@ class AnimationController {
     this.untrackAnims[animid].push(context)
   }
 
-  public getUntrackContextFrom(element: Element): ActionContext {
+  public getUntrackContextFrom(element: Element): SourceLocation {
     if (!element.hasOwnProperty(SymbolAnim)) {
       return
     }
@@ -52,15 +50,15 @@ export const AnimController = new AnimationController()
 
 export function packAnimInGivenContextOnce(
   animFunc: (...args: any[]) => void,
-  context: ActionContext
+  context: SourceLocation
 ): (...args: any[]) => void {
   return new Proxy(animFunc, {
     apply: function (target, thisArg, argumentList) {
       // @NOTE: when this function is called while queueing (MessageBroker is not empty),
       // it should not send any ActionContextMessage
-      const result = MessageBroker.isEmpty()
-        ? packActionInGivenContext(target, context).apply(thisArg, argumentList)
-        : target.apply(thisArg, argumentList)
+      const result = ActionRecorder.isRecording()
+        ? target.apply(thisArg, argumentList)
+        : packActionInGivenContext(target, context).apply(thisArg, argumentList)
       // @NOTE: reset animFunc and ignore already tracked actions (track only once)
       this.apply = packActionInNonTrackingContext(function (target, thisArg, argumentList) {
         return target.apply(thisArg, argumentList)
