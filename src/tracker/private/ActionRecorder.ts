@@ -80,6 +80,9 @@ class ActionRecorder implements Recorder {
   /* functioner */
 
   public add(data: ActionAddData) {
+    if (this.block) {
+      return
+    }
     this.brokers.adder.process(data)
   }
 

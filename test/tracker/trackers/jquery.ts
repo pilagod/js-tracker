@@ -110,7 +110,7 @@ describe('jQuery API tracker', () => {
       const ownerID = OwnerManager.getTrackIDFromItsOwner(div)
 
       expect(ownerID).to.equal(data.trackid)
-      receiver.verifyMessagesContain({ loc, data })
+      receiver.verifyMessagesContainExactly({ loc, data })
     })
 
     it('should track click with native listener', () => {
@@ -134,7 +134,7 @@ describe('jQuery API tracker', () => {
 
       expect(ownerID1).to.equal(data1.trackid)
       expect(ownerID2).to.equal(data2.trackid)
-      receiver.verifyMessagesContain([
+      receiver.verifyMessagesContainExactly([
         { loc: loc1, data: data1 },
         { loc: loc2, data: data2 },
       ])
@@ -161,23 +161,10 @@ describe('jQuery API tracker', () => {
 
       expect(ownerID1).to.equal(data1.trackid)
       expect(ownerID2).to.equal(data2.trackid)
-      receiver.verifyMultipleMessageChunks([
+      receiver.verifyMessagesContainExactly([
         { loc: loc1, data: data1 },
         { loc: loc2, data: data2 },
       ])
-    })
-
-    it('should track focus (which will use special trigger, same as blur) with no listener', () => {
-      const div = document.createElement('div')
-
-      $(div).focus()
-
-      const loc = utils.createSourceLocationWith(-2, 14)
-      const data = utils.createActionData('1', ActionType.Behav | ActionType.Event)
-      const ownerID = OwnerManager.getTrackIDFromItsOwner(div)
-
-      expect(ownerID).to.equal(data.trackid)
-      receiver.verifyMessagesContain({ loc, data })
     })
 
     function createFocusableDiv() {
@@ -190,6 +177,19 @@ describe('jQuery API tracker', () => {
 
       return div
     }
+
+    it('should track focus (which will use special trigger, same as blur) with no listener', () => {
+      const div = createFocusableDiv()
+
+      $(div).focus()
+
+      const loc = utils.createSourceLocationWith(-2, 14)
+      const data = utils.createActionData('1', ActionType.Behav | ActionType.Event)
+      const ownerID = OwnerManager.getTrackIDFromItsOwner(div)
+
+      expect(ownerID).to.equal(data.trackid)
+      receiver.verifyMessagesContainExactly({ loc, data })
+    })
 
     it('should track focus (which will use special trigger, same as blur) with native listener', () => {
       const div = createFocusableDiv()
@@ -209,7 +209,7 @@ describe('jQuery API tracker', () => {
       const ownerID = OwnerManager.getTrackIDFromItsOwner(div)
 
       expect(ownerID).to.equal('1')
-      receiver.verifyMessagesContain([
+      receiver.verifyMessagesContainExactly([
         { loc: loc1, data: data1 },
         { loc: loc2, data: data2 }
       ])
@@ -233,7 +233,7 @@ describe('jQuery API tracker', () => {
       const ownerID = OwnerManager.getTrackIDFromItsOwner(div)
 
       expect(ownerID).to.equal('1')
-      receiver.verifyMessagesContain([
+      receiver.verifyMessagesContainExactly([
         { loc: loc1, data: data1 },
         { loc: loc2, data: data2 }
       ])
@@ -259,7 +259,7 @@ describe('jQuery API tracker', () => {
 
       expect(ownerID1).to.equal(data1.trackid)
       expect(ownerID2).to.equal(data2.trackid)
-      receiver.verifyMessagesContain([
+      receiver.verifyMessagesContainExactly([
         { loc: loc1, data: data1 },
         { loc: loc2, data: data2 },
       ])
@@ -285,7 +285,33 @@ describe('jQuery API tracker', () => {
 
       expect(ownerID1).to.equal(data1.trackid)
       expect(ownerID2).to.equal(data2.trackid)
-      receiver.verifyMessagesContain([
+      receiver.verifyMessagesContainExactly([
+        { loc: loc1, data: data1 },
+        { loc: loc2, data: data2 }
+      ])
+    })
+
+    it('should track trigger and actions triggered by it properly (add jquery event listener)', () => {
+      const div = document.createElement('div')
+
+      $(div).on('click', () => {
+        div.style.color = 'red'
+      })
+      const loc1 = utils.createSourceLocationWith(-2, 24)
+      const data1 = utils.createActionData('1', ActionType.Style)
+
+      receiver.reset()
+
+      $(div).trigger('click')
+
+      const loc2 = utils.createSourceLocationWith(-2, 14)
+      const data2 = utils.createActionData('1', ActionType.Behav | ActionType.Event)
+      const ownerID1 = OwnerManager.getTrackIDFromItsOwner(div.style)
+      const ownerID2 = OwnerManager.getTrackIDFromItsOwner(div)
+
+      expect(ownerID1).to.equal(data1.trackid)
+      expect(ownerID2).to.equal(data2.trackid)
+      receiver.verifyMessagesContainExactly([
         { loc: loc1, data: data1 },
         { loc: loc2, data: data2 }
       ])
@@ -311,7 +337,7 @@ describe('jQuery API tracker', () => {
 
       expect(ownerID1).to.equal(data1.trackid)
       expect(ownerID2).to.equal(data2.trackid)
-      receiver.verifyMessagesContain([
+      receiver.verifyMessagesContainExactly([
         { loc: loc1, data: data1 },
         { loc: loc2, data: data2 }
       ])
@@ -624,7 +650,7 @@ describe('jQuery API tracker', () => {
           OwnerManager.getTrackIDFromItsOwner(div),
           ActionType.Style
         )
-        receiver.verifyMessagesContain({ loc, data })
+        receiver.verifyMessagesContainExactly({ loc, data })
         done()
       })
     })
@@ -638,7 +664,7 @@ describe('jQuery API tracker', () => {
           OwnerManager.getTrackIDFromItsOwner(div),
           ActionType.Style
         )
-        receiver.verifyMessagesContain({ loc, data })
+        receiver.verifyMessagesContainExactly({ loc, data })
         done()
       })
     })
@@ -655,7 +681,7 @@ describe('jQuery API tracker', () => {
           OwnerManager.getTrackIDFromItsOwner(div),
           ActionType.Style
         )
-        receiver.verifyMessagesContain({ loc, data })
+        receiver.verifyMessagesContainExactly({ loc, data })
         done()
       })
     })
@@ -673,7 +699,7 @@ describe('jQuery API tracker', () => {
         OwnerManager.getTrackIDFromItsOwner(div),
         ActionType.Style
       )
-      receiver.verifyMessagesContain({ loc, data })
+      receiver.verifyMessagesContainExactly({ loc, data })
     })
 
     it('should track other Style actions during animation', (done) => {
@@ -693,7 +719,7 @@ describe('jQuery API tracker', () => {
         OwnerManager.getTrackIDFromItsOwner(div),
         ActionType.Style
       )
-      receiver.verifyMessagesContain([
+      receiver.verifyMessagesContainExactly([
         { loc: loc1, data: data1 },
         { loc: loc2, data: data2 }
       ])
@@ -711,7 +737,7 @@ describe('jQuery API tracker', () => {
           OwnerManager.getTrackIDFromItsOwner(div),
           ActionType.Style
         )
-        receiver.verifyMessagesContain({ loc, data })
+        receiver.verifyMessagesContainExactly({ loc, data })
         done()
       })
     })
@@ -732,7 +758,7 @@ describe('jQuery API tracker', () => {
             OwnerManager.getTrackIDFromItsOwner(div),
             ActionType.Style
           )
-          receiver.verifyMessagesContain({ loc, data })
+          receiver.verifyMessagesContainExactly({ loc, data })
           done()
         })
     })
@@ -749,7 +775,7 @@ describe('jQuery API tracker', () => {
         OwnerManager.getTrackIDFromItsOwner(div1),
         ActionType.Style
       )
-      receiver.verifyMessagesContain({ loc: loc1, data: data1 })
+      receiver.verifyMessagesContainExactly({ loc: loc1, data: data1 })
       receiver.reset()
 
       // for div2
@@ -764,7 +790,7 @@ describe('jQuery API tracker', () => {
           OwnerManager.getTrackIDFromItsOwner(div2),
           ActionType.Style
         )
-        receiver.verifySingleMessageChunk(loc2, data2)
+        receiver.verifyMessagesContainExactly({ loc: loc2, data: data2 })
         done()
       }, 10)
     })
