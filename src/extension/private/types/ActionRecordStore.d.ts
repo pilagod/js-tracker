@@ -1,4 +1,5 @@
-// ActionInfo -> ActionStore -> ActionRecord
+/// <reference path='../../../tracker/public/types/TrackID.d.ts'/>
+/// <reference path='../../../tracker/public/types/SourceLocation.d.ts'/>
 
 type ActionInfo = {
   trackid: TrackID,
@@ -14,15 +15,7 @@ type ActionRecord = {
   code: string;
 }
 
-type TrackID = string
-
-type SourceLocation = {
-  scriptUrl: string;
-  lineNumber: number;
-  columnNumber: number;
-}
-
-interface IActionStore {
+interface IActionRecordStore {
   get(trackid: TrackID): ActionRecord[];
   registerFromActionInfo(info: ActionInfo): Promise<boolean>;
 }

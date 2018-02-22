@@ -1,4 +1,4 @@
-/// <reference path='../../tracker/types/ActionStore.d.ts'/>
+/// <reference path='./ActionRecordStore.d.ts'/>
 
 /* message between contentscript, background, devtool */
 

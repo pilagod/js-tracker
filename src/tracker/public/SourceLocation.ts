@@ -1,4 +1,4 @@
-/// <reference path='../types/ActionStore.d.ts'/>
+/// <reference path='./types/SourceLocation.d.ts'/>
 
 export function hashSourceLocation({ scriptUrl, lineNumber, columnNumber }: SourceLocation) {
   return hash(`${scriptUrl}:${lineNumber}:${columnNumber}`)

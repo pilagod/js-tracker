@@ -1,4 +1,4 @@
-/// <reference path='../types/MessageTypes.d.ts'/>
+/// <reference path='../public/types/MessageTypes.d.ts'/>
 
 import {
   RECORD_CONTEXT_START,

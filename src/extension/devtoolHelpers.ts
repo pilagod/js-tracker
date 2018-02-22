@@ -1,5 +1,5 @@
-/// <reference path='../tracker/types/ActionStore.d.ts'/>
-/// <reference path='./types/DevtoolHelpers.d.ts'/>
+/// <reference path='./private/types/ActionRecordStore.d.ts'/>
+/// <reference path='./private/types/DevtoolHelpers.d.ts'/>
 
 import { ISidebarRootProps } from '../extension/Sidebar/SidebarRoot'
 import { isTestEnv } from './utils'

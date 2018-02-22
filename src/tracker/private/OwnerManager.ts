@@ -1,3 +1,5 @@
+/// <reference path='../public/types/TrackID.d.ts'/>
+
 import Owner from './Owner'
 import { SymbolOwner } from './Symbols'
 

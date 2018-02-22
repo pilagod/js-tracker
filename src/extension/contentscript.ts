@@ -1,10 +1,9 @@
 /// <reference path='../../node_modules/@types/chrome/index.d.ts' />
-/// <reference path='./types/ContentscriptHelpers.d.ts'/>
+/// <reference path='./private/types/ContentscriptHelpers.d.ts'/>
 
 import * as fs from 'fs'
 
-import ActionStore from '../tracker/public/ActionStore'
-
+import ActionRecordStore from './private/ActionRecordStore'
 import initContentscriptHelpers from './contentscriptHelpers'
 import { isTestEnv } from './utils'
 
@@ -37,7 +36,7 @@ function injectTrackerScript(injectScript: (container: Node, scriptText: string)
 }
 
 if (!isTestEnv()) {
-  main(initContentscriptHelpers(new ActionStore(), chrome.runtime.sendMessage))
+  main(initContentscriptHelpers(new ActionRecordStore(), chrome.runtime.sendMessage))
 }
 export default isTestEnv() ? main : null
 

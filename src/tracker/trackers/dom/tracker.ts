@@ -1,4 +1,4 @@
-/// <reference path='../../types/ActionTarget.d.ts'/>
+/// <reference path='../../private/types/ActionTarget.d.ts'/>
 
 import ActionMap from '../../private/ActionMap'
 import Anomalies from '../../private/Anomalies'

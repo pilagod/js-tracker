@@ -1,16 +1,16 @@
-/// <reference path='../types/ActionStore.d.ts'/>
+/// <reference path='./types/ActionRecordStore.d.ts'/>
 
 import * as ESTree from '../../../node_modules/@types/estree'
 import * as esprima from 'esprima'
 import * as escodegen from 'escodegen'
 
-import { ESTreeNodeBinaryFinder } from '../private/libs/ESTreeNodeFinder'
-import { hashSourceLocation } from './SourceLocation'
+import { ESTreeNodeBinaryFinder } from './libs/ESTreeNodeFinder'
+import { hashSourceLocation } from '../../tracker/public/SourceLocation'
 
-export default class ActionStore implements IActionStore {
+export default class ActionRecordStore implements IActionRecordStore {
 
   private fetcher = new CodeFetcher()
-  private store = new RecordStore()
+  private store = new Store()
 
   /* public */
 
@@ -41,7 +41,7 @@ export default class ActionStore implements IActionStore {
   }
 }
 
-class RecordStore {
+class Store {
 
   private store: {
     [trackid in TrackID]: ActionRecord[]

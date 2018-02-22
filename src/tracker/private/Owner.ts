@@ -1,3 +1,5 @@
+/// <reference path='../public/types/TrackID.d.ts'/>
+
 import ShadowElement from './ShadowElement'
 import { setTrackID } from './NativeUtils'
 

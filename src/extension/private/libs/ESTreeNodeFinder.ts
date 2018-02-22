@@ -1,5 +1,5 @@
 import * as ESTree from '../../../../node_modules/@types/estree'
-import { ESTreeNodeFinder } from '../../public/ActionStore'
+import { ESTreeNodeFinder } from '../ActionRecordStore'
 
 abstract class BasicESTreeNodeFinder implements ESTreeNodeFinder {
 

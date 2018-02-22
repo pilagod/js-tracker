@@ -1,4 +1,4 @@
-/// <reference path='../src/tracker/types/ActionStore.d.ts'/>
+/// <reference path='../src/extension/private/types/ActionRecordStore.d.ts'/>
 
 import ActionType from '../src/tracker/public/ActionType'
 import { hashSourceLocation } from '../src/tracker/public/SourceLocation'

@@ -2,7 +2,7 @@ import * as esprima from 'esprima'
 import {
   ESTreeNodeSequentialFinder,
   ESTreeNodeBinaryFinder
-} from '../../src/tracker/private/libs/ESTreeNodeFinder'
+} from '../../src/extension/private/libs/ESTreeNodeFinder'
 
 describe('benchmark of ESTreeNodeFinder', function () {
   this.timeout(10000)

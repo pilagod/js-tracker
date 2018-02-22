@@ -8,7 +8,7 @@ module.exports = configFactory(function (defaultConfig) {
     // all modules including in tests should be included here
     files: [
       /* targets */
-      { pattern: 'src/tracker/private/libs/*[!(.d)].ts' },
+      { pattern: 'src/extension/private/libs/*[!(.d)].ts' },
 
       /* tests */
       { pattern: 'test/benchmark/*.ts' }
@@ -17,7 +17,7 @@ module.exports = configFactory(function (defaultConfig) {
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
       /* targets */
-      'src/tracker/private/libs/*[!(.d)].ts': ['karma-typescript'],
+      'src/extension/private/libs/*[!(.d)].ts': ['karma-typescript'],
 
       /* tests */
       'test/benchmark/*.ts': ['karma-typescript']

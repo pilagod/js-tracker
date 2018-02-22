@@ -25,12 +25,13 @@ module.exports = configFactory(function (defaultConfig) {
 
       /* dependencies */
       { pattern: 'src/extension/utils.ts' },
-      { pattern: 'src/tracker/public/*[!(.d)].ts' },
-      { pattern: 'src/tracker/private/libs/*[!(.d)].ts' },
+      { pattern: 'src/extension/private/**/*[!(.d)].ts' },
+      { pattern: 'src/tracker/public/**/*[!(.d)].ts' },
 
       /* tests */
       { pattern: 'test/*.ts' },
-      { pattern: 'test/extension/**/*.ts' }
+      { pattern: 'test/extension/*.ts' },
+      { pattern: 'test/extension/Sidebar/*.ts' }
     ],
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
@@ -50,12 +51,13 @@ module.exports = configFactory(function (defaultConfig) {
 
       /* dependencies */
       'src/extension/utils.ts': ['karma-typescript'],
-      'src/tracker/public/*[!(.d)].ts': ['karma-typescript'],
-      'src/tracker/private/libs/*[!(.d)].ts': ['karma-typescript'],
+      'src/extension/private/**/*[!(.d)].ts': ['karma-typescript'],
+      'src/tracker/public/**/*[!(.d)].ts': ['karma-typescript'],
 
       /* tests */
       'test/*.ts': ['karma-typescript'],
-      'test/extension/**/*.ts': ['karma-typescript']
+      'test/extension/*.ts': ['karma-typescript'],
+      'test/extension/Sidebar/*.ts': ['karma-typescript']
     }
   })
   customConfig.karmaTypescriptConfig.reports.html = 'coverage/extension'

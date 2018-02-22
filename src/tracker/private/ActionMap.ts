@@ -1,4 +1,4 @@
-/// <reference path='../types/ActionTarget.d.ts'/>
+/// <reference path='./types/ActionTarget.d.ts'/>
 
 import ActionType from '../public/ActionType'
 import ActionTagMap from './ActionTagMap'

@@ -1,7 +1,8 @@
-/// <reference path='../tracker/types/ActionStore.d.ts'/>
-/// <reference path='../tracker/types/MessageTypes.d.ts'/>
-/// <reference path='./types/ContentscriptHelpers.d.ts'/>
-/// <reference path='./types/Message.d.ts'/>
+/// <reference path='../tracker/public/types/MessageTypes.d.ts'/>
+
+/// <reference path='./private/types/ActionRecordStore.d.ts'/>
+/// <reference path='./private/types/ContentscriptHelpers.d.ts'/>
+/// <reference path='./private/types/Message.d.ts'/>
 
 import {
   RECORD_CONTEXT_START,
@@ -18,11 +19,11 @@ class ContentscriptController {
   public selection: Element = null
 
   private context: RecordContext = null
-  private store: IActionStore
+  private store: IActionRecordStore
   private updateSidebar: (message: Message, callback?: (response: any) => void) => void
 
   constructor(
-    store: IActionStore,
+    store: IActionRecordStore,
     updateSidebar: (message: Message, callback?: (response: any) => void) => void
   ) {
     this.store = store
@@ -113,7 +114,7 @@ function injectScript(container: Node, scriptText: string) {
 }
 
 export default function (
-  store: IActionStore,
+  store: IActionRecordStore,
   updateSidebar: (message: Message, callback?: (response: any) => void) => void
 ): ContentscriptHelpers {
   const contentscriptController = new ContentscriptController(store, updateSidebar)

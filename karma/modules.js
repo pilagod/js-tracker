@@ -14,11 +14,11 @@ module.exports = configFactory(function (defaultConfig) {
     files: [
       /* targets */
 
-      // public
-      { pattern: 'src/tracker/public/ActionStore.ts' },
-      { pattern: 'src/tracker/private/libs/*[!(.d)].ts' },
+      /* extension */
+      { pattern: 'src/extension/private/ActionRecordStore.ts' },
+      { pattern: 'src/extension/private/libs/*[!(.d)].ts' },
 
-      // private
+      /* tracker */
       { pattern: 'src/tracker/private/ActionMap.ts' },
 
       /* dependencies */
@@ -32,7 +32,7 @@ module.exports = configFactory(function (defaultConfig) {
 
       /* tests */
       { pattern: 'test/*.ts' },
-      { pattern: 'test/tracker/public/*.ts' },
+      { pattern: 'test/extension/private/*.ts' },
       { pattern: 'test/tracker/private/*.ts' }
     ],
     // preprocess matching files before serving them to the browser
@@ -40,11 +40,11 @@ module.exports = configFactory(function (defaultConfig) {
     preprocessors: {
       /* targets */
 
-      // publics
-      'src/tracker/public/ActionStore.ts': ['karma-typescript', 'coverage'],
-      'src/tracker/private/libs/*[!(.d)].ts': ['karma-typescript', 'coverage'],
+      /* extension */
+      'src/extension/private/ActionRecordStore.ts': ['karma-typescript', 'coverage'],
+      'src/extension/private/libs/*[!(.d)].ts': ['karma-typescript', 'coverage'],
 
-      // privates
+      /* tracker */
       'src/tracker/private/ActionMap.ts': ['karma-typescript', 'coverage'],
 
       /* dependencies */
@@ -53,7 +53,7 @@ module.exports = configFactory(function (defaultConfig) {
 
       /* tests */
       'test/*.ts': ['karma-typescript'],
-      'test/tracker/public/*.ts': ['karma-typescript'],
+      'test/extension/private/*.ts': ['karma-typescript'],
       'test/tracker/private/*.ts': ['karma-typescript']
     }
   })

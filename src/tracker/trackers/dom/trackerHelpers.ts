@@ -1,5 +1,5 @@
-/// <reference path='../../types/ActionTarget.d.ts'/>
-/// <reference path='../../types/ActionStore.d.ts'/>
+/// <reference path='../../private/types/ActionTarget.d.ts'/>
+/// <reference path='../../public/types/TrackID.d.ts'/>
 
 import ActionMap from '../../private/ActionMap'
 import OwnerManager from '../../private/OwnerManager'
