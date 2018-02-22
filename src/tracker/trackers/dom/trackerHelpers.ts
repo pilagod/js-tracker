@@ -9,7 +9,7 @@ import { SymbolProxy, SymbolWhich } from '../../private/Symbols'
 import {
   packActionInCallerContext,
   packActionInIsolatedContext,
-  saveRecordDataTo
+  saveActionDataTo
 } from '../utils'
 
 type Decorator = (
@@ -180,7 +180,7 @@ function record(info: {
     // callers, e.g., DocumentFragment, XHRHttpRequst
     return
   }
-  saveRecordDataTo(info.caller, ActionMap.getActionType(info), info.merge)
+  saveActionDataTo(info.caller, ActionMap.getActionType(info), info.merge)
 }
 
 function proxyDecorator<T extends ActionTarget>(proxyHandler: ProxyHandler<T>) {

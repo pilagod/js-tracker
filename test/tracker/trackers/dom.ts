@@ -33,8 +33,8 @@ describe('HTML DOM API tracker', () => {
 
     it('should track method call (e.g., addEventListener) as from window given no explicit target', () => {
       addEventListener('click', () => { })
-      const context = utils.getRecordContextFromPrevLine()
-      const record = utils.createRecordData('1', ActionType.Event)
+      const context = utils.getActionContextFromPrevLine()
+      const record = utils.createActionData('1', ActionType.Event)
       const ownerID = OwnerManager.getTrackIDFromItsOwner(window)
 
       expect(ownerID).to.equal(record.trackid)
@@ -72,8 +72,8 @@ describe('HTML DOM API tracker', () => {
       receiver.reset()
 
       div.appendChild(fragment)
-      const context = utils.getRecordContextFromPrevLine()
-      const record = utils.createRecordData('1', ActionType.Node)
+      const context = utils.getActionContextFromPrevLine()
+      const record = utils.createActionData('1', ActionType.Node)
       const ownerID = OwnerManager.getTrackIDFromItsOwner(div)
 
       expect(ownerID).to.equal(record.trackid)
@@ -86,8 +86,8 @@ describe('HTML DOM API tracker', () => {
       const div = document.createElement('div')
 
       div.accessKey = 'accessKey'
-      const context = utils.getRecordContextFromPrevLine()
-      const record = utils.createRecordData('1', ActionType.Attr)
+      const context = utils.getActionContextFromPrevLine()
+      const record = utils.createActionData('1', ActionType.Attr)
       const ownerID = OwnerManager.getTrackIDFromItsOwner(div)
 
       expect(ownerID).to.equal(record.trackid)
@@ -103,14 +103,14 @@ describe('HTML DOM API tracker', () => {
       div2.addEventListener('click', () => {
         div1.style.color = 'red'
       })
-      const context1 = utils.getRecordContextFromPrevLine(-1)
-      const record1 = utils.createRecordData('2', ActionType.Style)
+      const context1 = utils.getActionContextFromPrevLine(-1)
+      const record1 = utils.createActionData('2', ActionType.Style)
 
       receiver.reset()
 
       div2.click()
-      const context2 = utils.getRecordContextFromPrevLine()
-      const record2 = utils.createRecordData('1', ActionType.Behav | ActionType.Event)
+      const context2 = utils.getActionContextFromPrevLine()
+      const record2 = utils.createActionData('1', ActionType.Behav | ActionType.Event)
 
       const ownerID1 = OwnerManager.getTrackIDFromItsOwner(div1.style)
       const ownerID2 = OwnerManager.getTrackIDFromItsOwner(div2)
@@ -129,8 +129,8 @@ describe('HTML DOM API tracker', () => {
       const svg = document.createElementNS(svgns, 'svg');
 
       (<any>svg).tabIndex = 1
-      const context = utils.getRecordContextFromPrevLine()
-      const record = utils.createRecordData('1', ActionType.Attr)
+      const context = utils.getActionContextFromPrevLine()
+      const record = utils.createActionData('1', ActionType.Attr)
       const ownerID = OwnerManager.getTrackIDFromItsOwner(svg)
 
       expect(ownerID).to.equal(record.trackid)
@@ -141,8 +141,8 @@ describe('HTML DOM API tracker', () => {
       const svg = document.createElementNS(svgns, 'svg');
 
       (<any>svg).focus()
-      const context = utils.getRecordContextFromPrevLine()
-      const record = utils.createRecordData('1', ActionType.Behav | ActionType.Event)
+      const context = utils.getActionContextFromPrevLine()
+      const record = utils.createActionData('1', ActionType.Behav | ActionType.Event)
       const ownerID = OwnerManager.getTrackIDFromItsOwner(svg)
 
       expect(ownerID).to.equal(record.trackid)
@@ -155,8 +155,8 @@ describe('HTML DOM API tracker', () => {
       const div = document.createElement('div')
 
       div.id = 'id'
-      const context = utils.getRecordContextFromPrevLine()
-      const record = utils.createRecordData('1', ActionType.Attr)
+      const context = utils.getActionContextFromPrevLine()
+      const record = utils.createActionData('1', ActionType.Attr)
       const ownerID = OwnerManager.getTrackIDFromItsOwner(div)
 
       expect(ownerID).to.equal(record.trackid)
@@ -168,8 +168,8 @@ describe('HTML DOM API tracker', () => {
       const div2 = document.createElement('div')
 
       div.insertAdjacentElement('afterbegin', div2)
-      const context = utils.getRecordContextFromPrevLine()
-      const record = utils.createRecordData('1', ActionType.Node)
+      const context = utils.getActionContextFromPrevLine()
+      const record = utils.createActionData('1', ActionType.Node)
       const ownerID = OwnerManager.getTrackIDFromItsOwner(div)
 
       expect(ownerID).to.equal(record.trackid)
@@ -183,8 +183,8 @@ describe('HTML DOM API tracker', () => {
         const div = document.createElement('div')
 
         div.setAttribute('id', 'id')
-        const context = utils.getRecordContextFromPrevLine()
-        const record = utils.createRecordData('1', ActionType.Attr)
+        const context = utils.getActionContextFromPrevLine()
+        const record = utils.createActionData('1', ActionType.Attr)
         const ownerID = OwnerManager.getTrackIDFromItsOwner(div)
 
         expect(ownerID).to.equal(record.trackid)
@@ -198,8 +198,8 @@ describe('HTML DOM API tracker', () => {
         receiver.reset()
 
         div.removeAttribute('id')
-        const context = utils.getRecordContextFromPrevLine()
-        const record = utils.createRecordData('1', ActionType.Attr)
+        const context = utils.getActionContextFromPrevLine()
+        const record = utils.createActionData('1', ActionType.Attr)
         const ownerID = OwnerManager.getTrackIDFromItsOwner(div)
 
         expect(ownerID).to.equal(record.trackid)
@@ -213,8 +213,8 @@ describe('HTML DOM API tracker', () => {
         receiver.reset()
 
         div.removeAttributeNode(div.getAttributeNode('id'))
-        const context = utils.getRecordContextFromPrevLine()
-        const record = utils.createRecordData('1', ActionType.Attr)
+        const context = utils.getActionContextFromPrevLine()
+        const record = utils.createActionData('1', ActionType.Attr)
         const ownerID = OwnerManager.getTrackIDFromItsOwner(div)
 
         expect(ownerID).to.equal(record.trackid)
@@ -231,8 +231,8 @@ describe('HTML DOM API tracker', () => {
         const idAttr = document.createAttribute('id')
 
         div.setAttributeNode(idAttr)
-        const context = utils.getRecordContextFromPrevLine()
-        const record = utils.createRecordData('1', ActionType.Attr)
+        const context = utils.getActionContextFromPrevLine()
+        const record = utils.createActionData('1', ActionType.Attr)
         const ownerID = OwnerManager.getTrackIDFromItsOwner(div)
 
         expect(ownerID).to.equal(record.trackid)
@@ -247,8 +247,8 @@ describe('HTML DOM API tracker', () => {
         receiver.reset()
 
         div.setAttributeNode(idAttr) // trackid 2 attach to div
-        const context = utils.getRecordContextFromPrevLine()
-        const record = utils.createRecordData('2', ActionType.Attr, '1')
+        const context = utils.getActionContextFromPrevLine()
+        const record = utils.createActionData('2', ActionType.Attr, '1')
         const ownerID = OwnerManager.getTrackIDFromItsOwner(div)
 
         expect(ownerID).to.equal(record.trackid)
@@ -266,8 +266,8 @@ describe('HTML DOM API tracker', () => {
 
         // test set no owner attribute
         div.setAttributeNode(idAttr)
-        const context1 = utils.getRecordContextFromPrevLine()
-        const record1 = utils.createRecordData('1', ActionType.Attr)
+        const context1 = utils.getActionContextFromPrevLine()
+        const record1 = utils.createActionData('1', ActionType.Attr)
         const ownerID1 = OwnerManager.getTrackIDFromItsOwner(div)
 
         expect(ownerID1).to.equal(record1.trackid)
@@ -277,8 +277,8 @@ describe('HTML DOM API tracker', () => {
 
         // test set value after attach to element
         idAttr.value = 'id'
-        const context2 = utils.getRecordContextFromPrevLine()
-        const record2 = utils.createRecordData('1', ActionType.Attr)
+        const context2 = utils.getActionContextFromPrevLine()
+        const record2 = utils.createActionData('1', ActionType.Attr)
         const ownerID2 = OwnerManager.getTrackIDFromItsOwner(idAttr)
 
         expect(ownerID2).to.equal(record2.trackid)
@@ -305,8 +305,8 @@ describe('HTML DOM API tracker', () => {
       const div = document.createElement('div')
 
       div.textContent = 'content'
-      const context = utils.getRecordContextFromPrevLine()
-      const record = utils.createRecordData('1', ActionType.Attr | ActionType.Node)
+      const context = utils.getActionContextFromPrevLine()
+      const record = utils.createActionData('1', ActionType.Attr | ActionType.Node)
       const ownerID = OwnerManager.getTrackIDFromItsOwner(div)
 
       expect(ownerID).to.equal(record.trackid)
@@ -318,8 +318,8 @@ describe('HTML DOM API tracker', () => {
       const div2 = document.createElement('div')
 
       div.appendChild(div2)
-      const context = utils.getRecordContextFromPrevLine()
-      const record = utils.createRecordData('1', ActionType.Node)
+      const context = utils.getActionContextFromPrevLine()
+      const record = utils.createActionData('1', ActionType.Node)
       const ownerID = OwnerManager.getTrackIDFromItsOwner(div)
 
       expect(ownerID).to.equal(record.trackid)
@@ -332,8 +332,8 @@ describe('HTML DOM API tracker', () => {
       const div = document.createElement('div')
 
       div.addEventListener('click', () => { })
-      const context = utils.getRecordContextFromPrevLine()
-      const record = utils.createRecordData('1', ActionType.Event)
+      const context = utils.getActionContextFromPrevLine()
+      const record = utils.createActionData('1', ActionType.Event)
       const ownerID = OwnerManager.getTrackIDFromItsOwner(div)
 
       expect(ownerID).to.equal(record.trackid)
@@ -348,14 +348,14 @@ describe('HTML DOM API tracker', () => {
       div.addEventListener('click', () => {
         div.style.color = 'red'
       })
-      const context1 = utils.getRecordContextFromPrevLine(-1)
-      const record1 = utils.createRecordData('1', ActionType.Style)
+      const context1 = utils.getActionContextFromPrevLine(-1)
+      const record1 = utils.createActionData('1', ActionType.Style)
 
       receiver.reset()
 
       div.dispatchEvent(new Event('click'))
-      const context2 = utils.getRecordContextFromPrevLine()
-      const record2 = utils.createRecordData('1', ActionType.Behav | ActionType.Event)
+      const context2 = utils.getActionContextFromPrevLine()
+      const record2 = utils.createActionData('1', ActionType.Behav | ActionType.Event)
 
       const ownerID1 = OwnerManager.getTrackIDFromItsOwner(div.style)
       const ownerID2 = OwnerManager.getTrackIDFromItsOwner(div)
@@ -374,8 +374,8 @@ describe('HTML DOM API tracker', () => {
       const idAttr = document.createAttribute('id')
 
       idAttr.value = 'id'
-      const context = utils.getRecordContextFromPrevLine()
-      const record = utils.createRecordData('1', ActionType.Attr)
+      const context = utils.getActionContextFromPrevLine()
+      const record = utils.createActionData('1', ActionType.Attr)
       const ownerID = OwnerManager.getTrackIDFromItsOwner(idAttr)
 
       expect(ownerID).to.equal(record.trackid)
@@ -404,8 +404,8 @@ describe('HTML DOM API tracker', () => {
       const div = document.createElement('div')
 
       div.style.color = 'red'
-      const context = utils.getRecordContextFromPrevLine()
-      const record = utils.createRecordData('1', ActionType.Style)
+      const context = utils.getActionContextFromPrevLine()
+      const record = utils.createActionData('1', ActionType.Style)
       const ownerID = OwnerManager.getTrackIDFromItsOwner(div.style)
 
       expect(ownerID).to.equal(record.trackid)
@@ -416,8 +416,8 @@ describe('HTML DOM API tracker', () => {
       const svg = document.createElementNS(svgns, 'svg')
 
       svg.style.color = 'red'
-      const context = utils.getRecordContextFromPrevLine()
-      const record = utils.createRecordData('1', ActionType.Style)
+      const context = utils.getActionContextFromPrevLine()
+      const record = utils.createActionData('1', ActionType.Style)
       const ownerID = OwnerManager.getTrackIDFromItsOwner(svg.style)
 
       expect(ownerID).to.equal(record.trackid)
@@ -438,8 +438,8 @@ describe('HTML DOM API tracker', () => {
       const div = document.createElement('div')
 
       div.dataset.data = 'data'
-      const context = utils.getRecordContextFromPrevLine()
-      const record = utils.createRecordData('1', ActionType.Attr)
+      const context = utils.getActionContextFromPrevLine()
+      const record = utils.createActionData('1', ActionType.Attr)
       const ownerID = OwnerManager.getTrackIDFromItsOwner(div.dataset)
 
       expect(ownerID).to.equal(record.trackid)
@@ -460,8 +460,8 @@ describe('HTML DOM API tracker', () => {
       const div = document.createElement('div')
 
       div.classList.value = 'class'
-      const context = utils.getRecordContextFromPrevLine()
-      const record = utils.createRecordData('1', ActionType.Style)
+      const context = utils.getActionContextFromPrevLine()
+      const record = utils.createActionData('1', ActionType.Style)
       const ownerID = OwnerManager.getTrackIDFromItsOwner(div.classList)
 
       expect(ownerID).to.equal(record.trackid)
@@ -472,8 +472,8 @@ describe('HTML DOM API tracker', () => {
       const div = document.createElement('div')
 
       div.classList.add('class')
-      const context = utils.getRecordContextFromPrevLine()
-      const record = utils.createRecordData('1', ActionType.Style)
+      const context = utils.getActionContextFromPrevLine()
+      const record = utils.createActionData('1', ActionType.Style)
       const ownerID = OwnerManager.getTrackIDFromItsOwner(div.classList)
 
       expect(ownerID).to.equal(record.trackid)
@@ -497,8 +497,8 @@ describe('HTML DOM API tracker', () => {
       receiver.reset()
 
       div.attributes.removeNamedItem('id')
-      const context = utils.getRecordContextFromPrevLine()
-      const record = utils.createRecordData('1', ActionType.Attr)
+      const context = utils.getActionContextFromPrevLine()
+      const record = utils.createActionData('1', ActionType.Attr)
       const ownerID = OwnerManager.getTrackIDFromItsOwner(div.attributes)
 
       expect(ownerID).to.equal(record.trackid)
@@ -512,8 +512,8 @@ describe('HTML DOM API tracker', () => {
       receiver.reset()
 
       div.attributes.removeNamedItem('style')
-      const context = utils.getRecordContextFromPrevLine()
-      const record = utils.createRecordData('1', ActionType.Style)
+      const context = utils.getActionContextFromPrevLine()
+      const record = utils.createActionData('1', ActionType.Style)
       const ownerID = OwnerManager.getTrackIDFromItsOwner(div.attributes)
 
       expect(ownerID).to.equal(record.trackid)
@@ -530,8 +530,8 @@ describe('HTML DOM API tracker', () => {
       receiver.reset()
 
       div.attributes.setNamedItem(id) // trackid 2 attach to owner of attributes
-      const context = utils.getRecordContextFromPrevLine()
-      const record = utils.createRecordData('2', ActionType.Attr, '1')
+      const context = utils.getActionContextFromPrevLine()
+      const record = utils.createActionData('2', ActionType.Attr, '1')
       const ownerID = OwnerManager.getTrackIDFromItsOwner(div.attributes)
 
       expect(ownerID).to.equal(record.trackid)
@@ -546,8 +546,8 @@ describe('HTML DOM API tracker', () => {
       receiver.reset()
 
       div.attributes.setNamedItem(style) // trackid 2 attach to owner of attributes
-      const context = utils.getRecordContextFromPrevLine()
-      const record = utils.createRecordData('2', ActionType.Style, '1')
+      const context = utils.getActionContextFromPrevLine()
+      const record = utils.createActionData('2', ActionType.Style, '1')
       const ownerID = OwnerManager.getTrackIDFromItsOwner(div.attributes)
 
       expect(ownerID).to.equal(record.trackid)

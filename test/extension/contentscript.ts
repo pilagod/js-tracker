@@ -3,9 +3,9 @@ import * as sinon from 'sinon'
 import * as fs from 'fs'
 
 import {
-  RECORD_CONTEXT_START,
-  RECORD_CONTEXT_END,
-  RECORD_DATA
+  ACTION_CONTEXT_START,
+  ACTION_CONTEXT_END,
+  ACTION_DATA
 } from '../../src/tracker/public/MessageTypes'
 import contentscript from '../../src/extension/contentscript'
 import { actionsOfJS as actions } from '../actions'
@@ -23,7 +23,7 @@ describe('contentscript', () => {
 
   describe('listen to record message', () => {
     const { messageHandler } = helpers
-    const dispatch = (messages: RecordMessage[]) => {
+    const dispatch = (messages: ActionMessage[]) => {
       window.dispatchEvent(
         new CustomEvent('js-tracker', {
           detail: { messages }
@@ -31,16 +31,16 @@ describe('contentscript', () => {
       )
     }
     it('should handle \'js-tracker\' CustomEvent and call helpers.messageHandler with event.detail.record', () => {
-      const start: RecordContextMessage = {
-        type: RECORD_CONTEXT_START,
+      const start: ActionContextMessage = {
+        type: ACTION_CONTEXT_START,
         data: { loc: actions[0].info.loc }
       }
-      const end: RecordContextMessage = {
-        type: RECORD_CONTEXT_END,
+      const end: ActionContextMessage = {
+        type: ACTION_CONTEXT_END,
         data: { loc: actions[0].info.loc }
       }
-      const record: RecordDataMessage = {
-        type: RECORD_DATA,
+      const record: ActionDataMessage = {
+        type: ACTION_DATA,
         data: {
           trackid: actions[0].info.trackid,
           type: actions[0].info.type

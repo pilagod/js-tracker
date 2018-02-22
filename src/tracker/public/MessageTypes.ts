@@ -1,5 +1,5 @@
 /// <reference path='../public/types/MessageTypes.d.ts'/>
 
-export const RECORD_CONTEXT_START: RecordContextStartType = 'RECORD_CONTEXT_START'
-export const RECORD_CONTEXT_END: RecordContextEndType = 'RECORD_CONTEXT_END'
-export const RECORD_DATA: RecordDataType = 'RECORD_DATA'
+export const ACTION_CONTEXT_START: ActionContextStartType = 'ACTION_CONTEXT_START'
+export const ACTION_CONTEXT_END: ActionContextEndType = 'ACTION_CONTEXT_END'
+export const ACTION_DATA: ActionDataType = 'ACTION_DATA'

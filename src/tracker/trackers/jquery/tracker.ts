@@ -9,7 +9,7 @@ import {
   packActionInIsolatedContext,
   packActionInNonTrackingContext,
   packActionInTrackingContext,
-  saveRecordDataTo
+  saveActionDataTo
 } from '../utils'
 
 let jquery
@@ -144,7 +144,7 @@ function trackEventTriggers() {
       const isCalledByTrackedApi = !MessageBroker.isEmpty()
 
       if (hasEventTarget && isCalledByTrackedApi) {
-        saveRecordDataTo(elem, ActionType.Behav | ActionType.Event)
+        saveActionDataTo(elem, ActionType.Behav | ActionType.Event)
       }
       return result
     }

@@ -5,9 +5,9 @@
 /// <reference path='./private/types/Message.d.ts'/>
 
 import {
-  RECORD_CONTEXT_START,
-  RECORD_CONTEXT_END,
-  RECORD_DATA
+  ACTION_CONTEXT_START,
+  ACTION_CONTEXT_END,
+  ACTION_DATA
 } from '../tracker/public/MessageTypes'
 import { match } from '../tracker/public/SourceLocation'
 import { isTestEnv } from './utils'
@@ -18,7 +18,7 @@ class ContentscriptController {
 
   public selection: Element = null
 
-  private context: RecordContext = null
+  private context: ActionContext = null
   private store: IActionRecordStore
   private updateSidebar: (message: Message, callback?: (response: any) => void) => void
 
@@ -32,19 +32,19 @@ class ContentscriptController {
 
   /* public */
 
-  public messageHandler = async (message: RecordMessage) => {
+  public messageHandler = async (message: ActionMessage) => {
     switch (message.type) {
-      case RECORD_CONTEXT_START:
+      case ACTION_CONTEXT_START:
         if (!this.context) {
           this.context = message.data
         }
         break
 
-      case RECORD_DATA:
+      case ACTION_DATA:
         await this.recordDataHandler(message.data)
         break
 
-      case RECORD_CONTEXT_END:
+      case ACTION_CONTEXT_END:
         if (match(this.context.loc, message.data.loc)) {
           this.context = null
         }
@@ -69,7 +69,7 @@ class ContentscriptController {
 
   /* private */
 
-  private async recordDataHandler(data: RecordData) {
+  private async recordDataHandler(data: ActionData) {
     const info: ActionInfo = Object.assign({}, data, this.context)
     const success = await this.store.registerFromActionInfo(info)
     // @NOTE: it's easy to forget await store, success must be resolved value of boolean instead of Promise

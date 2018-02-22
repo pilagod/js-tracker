@@ -29,8 +29,8 @@ describe('jQuery API tracker', () => {
       const div = document.createElement('div')
 
       $(div).attr('id', '1')
-      const context = utils.getRecordContextFromPrevLine()
-      const record = utils.createRecordData('1', ActionType.Attr)
+      const context = utils.getActionContextFromPrevLine()
+      const record = utils.createActionData('1', ActionType.Attr)
       const ownerID = OwnerManager.getTrackIDFromItsOwner(div)
 
       expect(ownerID).to.equal(record.trackid)
@@ -49,8 +49,8 @@ describe('jQuery API tracker', () => {
       const div = document.createElement('div')
 
       $(div).prop('id', '1')
-      const context = utils.getRecordContextFromPrevLine()
-      const record = utils.createRecordData('1', ActionType.Attr)
+      const context = utils.getActionContextFromPrevLine()
+      const record = utils.createActionData('1', ActionType.Attr)
       const ownerID = OwnerManager.getTrackIDFromItsOwner(div)
 
       expect(ownerID).to.equal(record.trackid)
@@ -70,17 +70,17 @@ describe('jQuery API tracker', () => {
       const div2 = document.createElement('div')
 
       $(div1).add(div2).prop('id', '1')
-      const context = utils.getRecordContextFromPrevLine()
+      const context = utils.getActionContextFromPrevLine()
 
       // for div1
-      const record1 = utils.createRecordData('1', ActionType.Attr)
+      const record1 = utils.createActionData('1', ActionType.Attr)
       const ownerID1 = OwnerManager.getTrackIDFromItsOwner(div1)
 
       expect(ownerID1).to.equal(record1.trackid)
       receiver.verifySingleMessageChunk(context, record1)
 
       // for div2
-      const record2 = utils.createRecordData('2', ActionType.Attr)
+      const record2 = utils.createActionData('2', ActionType.Attr)
       const ownerID2 = OwnerManager.getTrackIDFromItsOwner(div2)
 
       expect(ownerID2).to.equal(record2.trackid)
@@ -98,8 +98,8 @@ describe('jQuery API tracker', () => {
       const div = document.createElement('div')
 
       $(div).click()
-      const context1 = utils.getRecordContextFromPrevLine()
-      const record1 = utils.createRecordData('1', ActionType.Behav | ActionType.Event)
+      const context1 = utils.getActionContextFromPrevLine()
+      const record1 = utils.createActionData('1', ActionType.Behav | ActionType.Event)
       const ownerID = OwnerManager.getTrackIDFromItsOwner(div)
 
       expect(ownerID).to.equal('1')
@@ -112,14 +112,14 @@ describe('jQuery API tracker', () => {
       div.addEventListener('click', () => {
         div.style.color = 'red'
       })
-      const context1 = utils.getRecordContextFromPrevLine(-1)
-      const record1 = utils.createRecordData('1', ActionType.Style)
+      const context1 = utils.getActionContextFromPrevLine(-1)
+      const record1 = utils.createActionData('1', ActionType.Style)
 
       receiver.reset()
 
       $(div).click()
-      const context2 = utils.getRecordContextFromPrevLine()
-      const record2 = utils.createRecordData('1', ActionType.Behav | ActionType.Event)
+      const context2 = utils.getActionContextFromPrevLine()
+      const record2 = utils.createActionData('1', ActionType.Behav | ActionType.Event)
       const ownerID1 = OwnerManager.getTrackIDFromItsOwner(div.style)
       const ownerID2 = OwnerManager.getTrackIDFromItsOwner(div)
 
@@ -137,14 +137,14 @@ describe('jQuery API tracker', () => {
       $(div).on('click', () => {
         div.style.color = 'red'
       })
-      const context1 = utils.getRecordContextFromPrevLine(-1)
-      const record1 = utils.createRecordData('1', ActionType.Style)
+      const context1 = utils.getActionContextFromPrevLine(-1)
+      const record1 = utils.createActionData('1', ActionType.Style)
 
       receiver.reset()
 
       $(div).click()
-      const context2 = utils.getRecordContextFromPrevLine()
-      const record2 = utils.createRecordData('1', ActionType.Behav | ActionType.Event)
+      const context2 = utils.getActionContextFromPrevLine()
+      const record2 = utils.createActionData('1', ActionType.Behav | ActionType.Event)
       const ownerID1 = OwnerManager.getTrackIDFromItsOwner(div.style)
       const ownerID2 = OwnerManager.getTrackIDFromItsOwner(div)
 
@@ -160,8 +160,8 @@ describe('jQuery API tracker', () => {
       const div = document.createElement('div')
 
       $(div).focus()
-      const context1 = utils.getRecordContextFromPrevLine()
-      const record1 = utils.createRecordData('1', ActionType.Behav | ActionType.Event)
+      const context1 = utils.getActionContextFromPrevLine()
+      const record1 = utils.createActionData('1', ActionType.Behav | ActionType.Event)
       const ownerID = OwnerManager.getTrackIDFromItsOwner(div)
 
       expect(ownerID).to.equal('1')
@@ -185,14 +185,14 @@ describe('jQuery API tracker', () => {
       div.addEventListener('focus', () => {
         div.style.color = 'red'
       })
-      const context1 = utils.getRecordContextFromPrevLine(-1)
-      const record1 = utils.createRecordData('1', ActionType.Style)
+      const context1 = utils.getActionContextFromPrevLine(-1)
+      const record1 = utils.createActionData('1', ActionType.Style)
 
       receiver.reset()
 
       $(div).focus()
-      const context2 = utils.getRecordContextFromPrevLine()
-      const record2 = utils.createRecordData('1', ActionType.Behav | ActionType.Event)
+      const context2 = utils.getActionContextFromPrevLine()
+      const record2 = utils.createActionData('1', ActionType.Behav | ActionType.Event)
       const ownerID = OwnerManager.getTrackIDFromItsOwner(div)
 
       expect(ownerID).to.equal('1')
@@ -208,14 +208,14 @@ describe('jQuery API tracker', () => {
       $(div).on('focus', () => {
         div.style.color = 'red'
       })
-      const context1 = utils.getRecordContextFromPrevLine(-1)
-      const record1 = utils.createRecordData('1', ActionType.Style)
+      const context1 = utils.getActionContextFromPrevLine(-1)
+      const record1 = utils.createActionData('1', ActionType.Style)
 
       receiver.reset()
 
       $(div).focus()
-      const context2 = utils.getRecordContextFromPrevLine()
-      const record2 = utils.createRecordData('1', ActionType.Behav | ActionType.Event)
+      const context2 = utils.getActionContextFromPrevLine()
+      const record2 = utils.createActionData('1', ActionType.Behav | ActionType.Event)
       const ownerID = OwnerManager.getTrackIDFromItsOwner(div)
 
       expect(ownerID).to.equal('1')
@@ -231,14 +231,14 @@ describe('jQuery API tracker', () => {
       $(div).on('mouseenter', () => {
         div.style.color = 'red'
       })
-      const context1 = utils.getRecordContextFromPrevLine(-1)
-      const record1 = utils.createRecordData('1', ActionType.Style)
+      const context1 = utils.getActionContextFromPrevLine(-1)
+      const record1 = utils.createActionData('1', ActionType.Style)
 
       receiver.reset()
 
       $(div).mouseenter()
-      const context2 = utils.getRecordContextFromPrevLine()
-      const record2 = utils.createRecordData('1', ActionType.Behav | ActionType.Event)
+      const context2 = utils.getActionContextFromPrevLine()
+      const record2 = utils.createActionData('1', ActionType.Behav | ActionType.Event)
       const ownerID1 = OwnerManager.getTrackIDFromItsOwner(div.style)
       const ownerID2 = OwnerManager.getTrackIDFromItsOwner(div)
 
@@ -256,14 +256,14 @@ describe('jQuery API tracker', () => {
       div.addEventListener('click', () => {
         div.style.color = 'red'
       })
-      const context1 = utils.getRecordContextFromPrevLine(-1)
-      const record1 = utils.createRecordData('1', ActionType.Style)
+      const context1 = utils.getActionContextFromPrevLine(-1)
+      const record1 = utils.createActionData('1', ActionType.Style)
 
       receiver.reset()
 
       $(div).trigger('click')
-      const context2 = utils.getRecordContextFromPrevLine()
-      const record2 = utils.createRecordData('1', ActionType.Behav | ActionType.Event)
+      const context2 = utils.getActionContextFromPrevLine()
+      const record2 = utils.createActionData('1', ActionType.Behav | ActionType.Event)
       const ownerID1 = OwnerManager.getTrackIDFromItsOwner(div.style)
       const ownerID2 = OwnerManager.getTrackIDFromItsOwner(div)
 
@@ -281,14 +281,14 @@ describe('jQuery API tracker', () => {
       $(div).on('click', () => {
         div.style.color = 'red'
       })
-      const context1 = utils.getRecordContextFromPrevLine(-1)
-      const record1 = utils.createRecordData('1', ActionType.Style)
+      const context1 = utils.getActionContextFromPrevLine(-1)
+      const record1 = utils.createActionData('1', ActionType.Style)
 
       receiver.reset()
 
       $(div).triggerHandler('click')
-      const context2 = utils.getRecordContextFromPrevLine()
-      const record2 = utils.createRecordData('1', ActionType.Behav | ActionType.Event)
+      const context2 = utils.getActionContextFromPrevLine()
+      const record2 = utils.createActionData('1', ActionType.Behav | ActionType.Event)
       const ownerID1 = OwnerManager.getTrackIDFromItsOwner(div.style)
       const ownerID2 = OwnerManager.getTrackIDFromItsOwner(div)
 
@@ -328,8 +328,8 @@ describe('jQuery API tracker', () => {
       const div = document.createElement('div')
 
       $(div).ajaxStart(() => { })
-      const context = utils.getRecordContextFromPrevLine()
-      const record = utils.createRecordData('1', ActionType.Event)
+      const context = utils.getActionContextFromPrevLine()
+      const record = utils.createActionData('1', ActionType.Event)
       const ownerID = OwnerManager.getTrackIDFromItsOwner(div)
 
       expect(ownerID).to.equal(record.trackid)
@@ -340,8 +340,8 @@ describe('jQuery API tracker', () => {
       const div = document.createElement('div')
 
       $(div).on('click', () => { })
-      const context = utils.getRecordContextFromPrevLine()
-      const record = utils.createRecordData('1', ActionType.Event)
+      const context = utils.getActionContextFromPrevLine()
+      const record = utils.createActionData('1', ActionType.Event)
       const ownerID = OwnerManager.getTrackIDFromItsOwner(div)
 
       expect(ownerID).to.equal(record.trackid)
@@ -352,8 +352,8 @@ describe('jQuery API tracker', () => {
       const div = document.createElement('div')
 
       $(div).click(() => { })
-      const context = utils.getRecordContextFromPrevLine()
-      const record = utils.createRecordData('1', ActionType.Event)
+      const context = utils.getActionContextFromPrevLine()
+      const record = utils.createActionData('1', ActionType.Event)
       const ownerID = OwnerManager.getTrackIDFromItsOwner(div)
 
       expect(ownerID).to.equal(record.trackid)
@@ -365,17 +365,17 @@ describe('jQuery API tracker', () => {
       const div2 = document.createElement('div')
 
       $(div1).add(div2).on('click', () => { })
-      const context = utils.getRecordContextFromPrevLine()
+      const context = utils.getActionContextFromPrevLine()
 
       // for div1
-      const record1 = utils.createRecordData('1', ActionType.Event)
+      const record1 = utils.createActionData('1', ActionType.Event)
       const ownerID1 = OwnerManager.getTrackIDFromItsOwner(div1)
 
       expect(ownerID1).to.equal(record1.trackid)
       receiver.verifySingleMessageChunk(context, record1)
 
       // for div2
-      const record2 = utils.createRecordData('2', ActionType.Event)
+      const record2 = utils.createActionData('2', ActionType.Event)
       const ownerID2 = OwnerManager.getTrackIDFromItsOwner(div2)
 
       expect(ownerID2).to.equal(record2.trackid)
@@ -393,8 +393,8 @@ describe('jQuery API tracker', () => {
       receiver.reset()
       // @NOTE: this record will be saved on parent
       $(child).after(content)
-      const context = utils.getRecordContextFromPrevLine()
-      const record = utils.createRecordData('1', ActionType.Node)
+      const context = utils.getActionContextFromPrevLine()
+      const record = utils.createActionData('1', ActionType.Node)
       const ownerID = OwnerManager.getTrackIDFromItsOwner(parent)
 
       expect(ownerID).to.equal(record.trackid)
@@ -406,8 +406,8 @@ describe('jQuery API tracker', () => {
       const child = document.createElement('div')
 
       $(parent).append(child)
-      const context = utils.getRecordContextFromPrevLine()
-      const record = utils.createRecordData('1', ActionType.Node)
+      const context = utils.getActionContextFromPrevLine()
+      const record = utils.createActionData('1', ActionType.Node)
       const ownerID = OwnerManager.getTrackIDFromItsOwner(parent)
 
       expect(ownerID).to.equal(record.trackid)
@@ -420,17 +420,17 @@ describe('jQuery API tracker', () => {
       const child = document.createElement('div')
 
       $(parent1).add(parent2).append(child)
-      const context = utils.getRecordContextFromPrevLine()
+      const context = utils.getActionContextFromPrevLine()
 
       // for parent1
-      const record1 = utils.createRecordData('1', ActionType.Node)
+      const record1 = utils.createActionData('1', ActionType.Node)
       const ownerID1 = OwnerManager.getTrackIDFromItsOwner(parent1)
 
       expect(ownerID1).to.equal(record1.trackid)
       receiver.verifySingleMessageChunk(context, record1)
 
       // for parent2
-      const record2 = utils.createRecordData('2', ActionType.Node)
+      const record2 = utils.createActionData('2', ActionType.Node)
       const ownerID2 = OwnerManager.getTrackIDFromItsOwner(parent2)
 
       expect(ownerID2).to.equal(record2.trackid)
@@ -443,8 +443,8 @@ describe('jQuery API tracker', () => {
       const div = document.createElement('div')
 
       $(div).addClass('class')
-      const context = utils.getRecordContextFromPrevLine()
-      const record = utils.createRecordData('1', ActionType.Style)
+      const context = utils.getActionContextFromPrevLine()
+      const record = utils.createActionData('1', ActionType.Style)
       const ownerID = OwnerManager.getTrackIDFromItsOwner(div)
 
       expect(ownerID).to.equal(record.trackid)
@@ -455,8 +455,8 @@ describe('jQuery API tracker', () => {
       const div = document.createElement('div')
 
       $(div).css('background-color', 'red')
-      const context = utils.getRecordContextFromPrevLine()
-      const record = utils.createRecordData('1', ActionType.Style)
+      const context = utils.getActionContextFromPrevLine()
+      const record = utils.createActionData('1', ActionType.Style)
       const ownerID = OwnerManager.getTrackIDFromItsOwner(div)
 
       expect(ownerID).to.equal(record.trackid)
@@ -478,8 +478,8 @@ describe('jQuery API tracker', () => {
       const div = document.createElement('div')
 
       $(div).prop('class', 'class')
-      const context = utils.getRecordContextFromPrevLine()
-      const record = utils.createRecordData('1', ActionType.Style)
+      const context = utils.getActionContextFromPrevLine()
+      const record = utils.createActionData('1', ActionType.Style)
       const ownerID = OwnerManager.getTrackIDFromItsOwner(div)
 
       expect(ownerID).to.equal(record.trackid)
@@ -498,8 +498,8 @@ describe('jQuery API tracker', () => {
       const div = document.createElement('div')
 
       $(div).prop('style', 'background-color: red')
-      const context = utils.getRecordContextFromPrevLine()
-      const record = utils.createRecordData('1', ActionType.Style)
+      const context = utils.getActionContextFromPrevLine()
+      const record = utils.createActionData('1', ActionType.Style)
       const ownerID = OwnerManager.getTrackIDFromItsOwner(div)
 
       expect(ownerID).to.equal(record.trackid)
@@ -521,8 +521,8 @@ describe('jQuery API tracker', () => {
       receiver.reset()
 
       $(div).show()
-      const context = utils.getRecordContextFromPrevLine()
-      const record = utils.createRecordData('1', ActionType.Style)
+      const context = utils.getActionContextFromPrevLine()
+      const record = utils.createActionData('1', ActionType.Style)
       const ownerID = OwnerManager.getTrackIDFromItsOwner(div)
 
       expect(ownerID).to.equal(record.trackid)
@@ -533,8 +533,8 @@ describe('jQuery API tracker', () => {
       const div = document.createElement('div')
 
       $(div).hide()
-      const context = utils.getRecordContextFromPrevLine()
-      const record = utils.createRecordData('1', ActionType.Style)
+      const context = utils.getActionContextFromPrevLine()
+      const record = utils.createActionData('1', ActionType.Style)
       const ownerID = OwnerManager.getTrackIDFromItsOwner(div)
 
       expect(ownerID).to.equal(record.trackid)
@@ -545,8 +545,8 @@ describe('jQuery API tracker', () => {
       const div = document.createElement('div')
 
       $(div).toggle()
-      const context = utils.getRecordContextFromPrevLine()
-      const record = utils.createRecordData('1', ActionType.Style)
+      const context = utils.getActionContextFromPrevLine()
+      const record = utils.createActionData('1', ActionType.Style)
       const ownerID = OwnerManager.getTrackIDFromItsOwner(div)
 
       expect(ownerID).to.equal(record.trackid)
@@ -558,17 +558,17 @@ describe('jQuery API tracker', () => {
       const div2 = document.createElement('div')
 
       $(div1).add(div2).addClass('class')
-      const context = utils.getRecordContextFromPrevLine()
+      const context = utils.getActionContextFromPrevLine()
 
       // for div1
-      const record1 = utils.createRecordData('1', ActionType.Style)
+      const record1 = utils.createActionData('1', ActionType.Style)
       const ownerID1 = OwnerManager.getTrackIDFromItsOwner(div1)
 
       expect(ownerID1).to.equal(record1.trackid)
       receiver.verifySingleMessageChunk(context, record1)
 
       // for div2
-      const record2 = utils.createRecordData('2', ActionType.Style)
+      const record2 = utils.createActionData('2', ActionType.Style)
       const ownerID2 = OwnerManager.getTrackIDFromItsOwner(div2)
 
       expect(ownerID2).to.equal(record2.trackid)
@@ -581,8 +581,8 @@ describe('jQuery API tracker', () => {
       const div = document.createElement('div')
 
       $(div).animate({ "top": "100px" }, 100, () => {
-        const context = utils.getRecordContextFromPrevLine()
-        const record = utils.createRecordData(
+        const context = utils.getActionContextFromPrevLine()
+        const record = utils.createActionData(
           OwnerManager.getTrackIDFromItsOwner(div),
           ActionType.Style
         )
@@ -595,8 +595,8 @@ describe('jQuery API tracker', () => {
       const div = document.createElement('div')
 
       $(div).fadeOut(100, () => {
-        const context = utils.getRecordContextFromPrevLine()
-        const record = utils.createRecordData(
+        const context = utils.getActionContextFromPrevLine()
+        const record = utils.createActionData(
           OwnerManager.getTrackIDFromItsOwner(div),
           ActionType.Style
         )
@@ -612,8 +612,8 @@ describe('jQuery API tracker', () => {
         receiver.reset()
 
         $(div).css('color', 'red')
-        const context = utils.getRecordContextFromPrevLine()
-        const record = utils.createRecordData(
+        const context = utils.getActionContextFromPrevLine()
+        const record = utils.createActionData(
           OwnerManager.getTrackIDFromItsOwner(div),
           ActionType.Style
         )
@@ -629,8 +629,8 @@ describe('jQuery API tracker', () => {
       receiver.reset()
 
       $(div).css('color', 'red')
-      const context = utils.getRecordContextFromPrevLine()
-      const record = utils.createRecordData(
+      const context = utils.getActionContextFromPrevLine()
+      const record = utils.createActionData(
         OwnerManager.getTrackIDFromItsOwner(div),
         ActionType.Style
       )
@@ -641,14 +641,14 @@ describe('jQuery API tracker', () => {
       const div = document.createElement('div')
 
       $(div).fadeOut(100, () => { done() })
-      const context1 = utils.getRecordContextFromPrevLine()
-      const record1 = utils.createRecordData(
+      const context1 = utils.getActionContextFromPrevLine()
+      const record1 = utils.createActionData(
         OwnerManager.getTrackIDFromItsOwner(div),
         ActionType.Style
       )
       $(div).css('color', 'red')
-      const context2 = utils.getRecordContextFromPrevLine()
-      const record2 = utils.createRecordData(
+      const context2 = utils.getActionContextFromPrevLine()
+      const record2 = utils.createActionData(
         OwnerManager.getTrackIDFromItsOwner(div),
         ActionType.Style
       )
@@ -665,8 +665,8 @@ describe('jQuery API tracker', () => {
       receiver.reset()
 
       $(div).delay(100).slideDown(100, () => {
-        const context = utils.getRecordContextFromPrevLine()
-        const record = utils.createRecordData(
+        const context = utils.getActionContextFromPrevLine()
+        const record = utils.createActionData(
           OwnerManager.getTrackIDFromItsOwner(div),
           ActionType.Style
         )
@@ -686,8 +686,8 @@ describe('jQuery API tracker', () => {
           $(this).dequeue()
         })
         .fadeIn(100, () => {
-          const context = utils.getRecordContextFromPrevLine()
-          const record = utils.createRecordData(
+          const context = utils.getActionContextFromPrevLine()
+          const record = utils.createActionData(
             OwnerManager.getTrackIDFromItsOwner(div),
             ActionType.Style
           )
@@ -702,8 +702,8 @@ describe('jQuery API tracker', () => {
 
       // for div1
       $(div1).animate({ 'margin-top': '300px', 'opacity': 0 }, 100)
-      const context1 = utils.getRecordContextFromPrevLine()
-      const record1 = utils.createRecordData(
+      const context1 = utils.getActionContextFromPrevLine()
+      const record1 = utils.createActionData(
         OwnerManager.getTrackIDFromItsOwner(div1),
         ActionType.Style
       )
@@ -712,12 +712,12 @@ describe('jQuery API tracker', () => {
 
       // for div2
       $(div2).animate({ 'top': -200 }, 100)
-      const context2 = utils.getRecordContextFromPrevLine()
+      const context2 = utils.getActionContextFromPrevLine()
       // @NOTE: setTimeout to wait for animation executing of div2.
       // jquery will not execute second immediately, it will wait 
       // until next animate cycle and do animation after first one.
       setTimeout(() => {
-        const record2 = utils.createRecordData(
+        const record2 = utils.createActionData(
           OwnerManager.getTrackIDFromItsOwner(div2),
           ActionType.Style
         )

@@ -1,17 +1,17 @@
 /// <reference path='../public/types/MessageTypes.d.ts'/>
 
 import {
-  RECORD_CONTEXT_START,
-  RECORD_CONTEXT_END,
-  RECORD_DATA,
+  ACTION_CONTEXT_START,
+  ACTION_CONTEXT_END,
+  ACTION_DATA,
 } from '../public/MessageTypes'
 import { match } from '../public/SourceLocation'
 import { sendMessagesToContentScript } from './NativeUtils'
 
 type SnapShot = {
   block: boolean;
-  context: RecordContext;
-  messages: RecordMessage[];
+  context: ActionContext;
+  messages: ActionMessage[];
 }
 
 class MessageBroker {
@@ -19,8 +19,8 @@ class MessageBroker {
   private snapshots: SnapShot[] = []
 
   private block: boolean = false
-  private context: RecordContext = null
-  private messages: RecordMessage[] = []
+  private context: ActionContext = null
+  private messages: ActionMessage[] = []
 
   /* public */
 
@@ -32,7 +32,7 @@ class MessageBroker {
     return this.block
   }
 
-  public getContext(): RecordContext {
+  public getContext(): ActionContext {
     return this.context
   }
 
@@ -53,7 +53,7 @@ class MessageBroker {
     this.use(this.snapshots.pop())
   }
 
-  public send(message: RecordMessage) {
+  public send(message: ActionMessage) {
     if (this.block) {
       return
     }
@@ -84,17 +84,17 @@ class MessageBroker {
     this.messages = snapshot.messages
   }
 
-  private handleMessage(message: RecordMessage) {
+  private handleMessage(message: ActionMessage) {
     this.messages.push(message)
 
     switch (message.type) {
-      case RECORD_CONTEXT_START:
+      case ACTION_CONTEXT_START:
         if (!this.context) {
           this.context = message.data
         }
         break
 
-      case RECORD_CONTEXT_END:
+      case ACTION_CONTEXT_END:
         if (match(this.context.loc, message.data.loc)) {
           this.context = null
           this.flush()
@@ -112,14 +112,14 @@ class MessageBroker {
     sendMessagesToContentScript(messages)
   }
 
-  private flushMessages(): RecordMessage[] {
+  private flushMessages(): ActionMessage[] {
     const messages = this.messages
     this.messages = []
     return messages
   }
 
-  private hasRecord(messages: RecordMessage[]) {
-    return messages.some((message) => message.type === RECORD_DATA)
+  private hasRecord(messages: ActionMessage[]) {
+    return messages.some((message) => message.type === ACTION_DATA)
   }
 }
 export default new MessageBroker()

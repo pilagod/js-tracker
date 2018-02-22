@@ -2,9 +2,9 @@ import { expect } from 'chai'
 import * as sinon from 'sinon'
 
 import {
-  RECORD_CONTEXT_START,
-  RECORD_CONTEXT_END,
-  RECORD_DATA
+  ACTION_CONTEXT_START,
+  ACTION_CONTEXT_END,
+  ACTION_DATA
 } from '../../src/tracker/public/MessageTypes'
 import initContentscriptHelpers from '../../src/extension/contentscriptHelpers'
 import { actionsOfJS as actions } from '../actions'
@@ -26,17 +26,17 @@ describe('contentscript helpers', () => {
     const controller = (<any>helpers).contentscriptController
     const messageHandler = helpers.messageHandler // this is an async function
 
-    const createRecordDataMessage = (data: RecordData) => {
-      return <RecordDataMessage>{ type: RECORD_DATA, data }
+    const createActionDataMessage = (data: ActionData) => {
+      return <ActionDataMessage>{ type: ACTION_DATA, data }
     }
-    const createRecordContextMessage = (loc: SourceLocation) => ({
+    const createActionContextMessage = (loc: SourceLocation) => ({
       // @NOTE: to simulate the real environment, we copy loc to a new object
-      start: <RecordContextMessage>{
-        type: RECORD_CONTEXT_START,
+      start: <ActionContextMessage>{
+        type: ACTION_CONTEXT_START,
         data: { loc: Object.assign({}, loc) }
       },
-      end: <RecordContextMessage>{
-        type: RECORD_CONTEXT_END,
+      end: <ActionContextMessage>{
+        type: ACTION_CONTEXT_END,
         data: { loc: Object.assign({}, loc) }
       }
     })
@@ -46,8 +46,8 @@ describe('contentscript helpers', () => {
     })
 
     describe('handle record message stream', () => {
-      it('should not call store.registerFromActionInfo given RecordContextMessage', async () => {
-        const { start, end } = createRecordContextMessage(actions[0].info.loc)
+      it('should not call store.registerFromActionInfo given ActionContextMessage', async () => {
+        const { start, end } = createActionContextMessage(actions[0].info.loc)
 
         await messageHandler(start)
         await messageHandler(end)
@@ -55,14 +55,14 @@ describe('contentscript helpers', () => {
         expect(store.registerFromActionInfo.called).to.be.false
       })
 
-      it('should call store.registerFromActionInfo with data of RecordDataMessage combining data of the start RecordContextMessage', async () => {
-        const { start, end } = createRecordContextMessage(actions[0].info.loc)
+      it('should call store.registerFromActionInfo with data of ActionDataMessage combining data of the start ActionContextMessage', async () => {
+        const { start, end } = createActionContextMessage(actions[0].info.loc)
 
-        const record1 = createRecordDataMessage({
+        const record1 = createActionDataMessage({
           trackid: actions[0].info.trackid,
           type: actions[0].info.type
         })
-        const record2 = createRecordDataMessage({
+        const record2 = createActionDataMessage({
           trackid: actions[1].info.trackid,
           type: actions[1].info.type
         })
@@ -82,12 +82,12 @@ describe('contentscript helpers', () => {
         ).to.be.true
       })
 
-      it('should ignore any RecordContextMessage which is not the matched end RecordContextMessage of the first start RecordContextMessage', async () => {
-        const { start: start1, end: end1 } = createRecordContextMessage(actions[0].info.loc)
-        const { start: start2, end: end2 } = createRecordContextMessage(actions[1].info.loc)
+      it('should ignore any ActionContextMessage which is not the matched end ActionContextMessage of the first start ActionContextMessage', async () => {
+        const { start: start1, end: end1 } = createActionContextMessage(actions[0].info.loc)
+        const { start: start2, end: end2 } = createActionContextMessage(actions[1].info.loc)
 
         const { trackid, type } = actions[0].info
-        const record = createRecordDataMessage({ trackid, type })
+        const record = createActionDataMessage({ trackid, type })
 
         await messageHandler(start1)
         await messageHandler(start2)
@@ -102,12 +102,12 @@ describe('contentscript helpers', () => {
         ).to.be.true
       })
 
-      it('should clear start RecordContextMessage given the matched end RecordContextMessage comes', async () => {
-        const { start: start1, end: end1 } = createRecordContextMessage(actions[0].info.loc)
-        const { start: start2, end: end2 } = createRecordContextMessage(actions[1].info.loc)
+      it('should clear start ActionContextMessage given the matched end ActionContextMessage comes', async () => {
+        const { start: start1, end: end1 } = createActionContextMessage(actions[0].info.loc)
+        const { start: start2, end: end2 } = createActionContextMessage(actions[1].info.loc)
 
         const { trackid, type } = actions[0].info
-        const record = createRecordDataMessage({ trackid, type })
+        const record = createActionDataMessage({ trackid, type })
 
         await messageHandler(start1)
         await messageHandler(end1)
@@ -125,9 +125,9 @@ describe('contentscript helpers', () => {
     })
 
     describe('update sidebar', () => {
-      const { start, end } = createRecordContextMessage(actions[0].info.loc)
+      const { start, end } = createActionContextMessage(actions[0].info.loc)
       const { trackid, type } = actions[0].info
-      const record = createRecordDataMessage({ trackid, type })
+      const record = createActionDataMessage({ trackid, type })
 
       beforeEach(async () => {
         await messageHandler(start)

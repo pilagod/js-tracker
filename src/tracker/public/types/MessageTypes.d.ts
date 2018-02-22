@@ -1,36 +1,36 @@
 /* message between tracker, contentscirpt */
 
-/* Record Message Types */
+/* Action Message Types */
 
-type RecordContextStartType = 'RECORD_CONTEXT_START'
-type RecordContextEndType = 'RECORD_CONTEXT_END'
-type RecordDataType = 'RECORD_DATA'
+type ActionContextStartType = 'ACTION_CONTEXT_START'
+type ActionContextEndType = 'ACTION_CONTEXT_END'
+type ActionDataType = 'ACTION_DATA'
 
-/* Record Messages */
+/* Action Messages */
 
-type RecordMessage =
-  RecordContextMessage
-  | RecordDataMessage
+type ActionMessage =
+  ActionContextMessage
+  | ActionDataMessage
 
-/* Record Context Message */
+/* Action Context Message */
 
-type RecordContextMessage = {
-  type: RecordContextStartType | RecordContextEndType
-  data: RecordContext
+type ActionContextMessage = {
+  type: ActionContextStartType | ActionContextEndType
+  data: ActionContext
 }
 
-type RecordContext = {
+type ActionContext = {
   loc: SourceLocation
 }
 
-/* Record Data Message */
+/* Action Data Message */
 
-type RecordDataMessage = {
-  type: RecordDataType,
-  data: RecordData
+type ActionDataMessage = {
+  type: ActionDataType,
+  data: ActionData
 }
 
-type RecordData = {
+type ActionData = {
   trackid: string,
   type: ActionType,
   merge?: string

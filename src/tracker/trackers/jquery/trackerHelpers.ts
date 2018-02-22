@@ -13,7 +13,7 @@ class AnimationController {
 
   private animid = 0
   private untrackAnims: {
-    [animid: number]: RecordContext[]
+    [animid: number]: ActionContext[]
   } = {}
 
   /* public */
@@ -28,7 +28,7 @@ class AnimationController {
     this.untrackAnims[animid].push(context)
   }
 
-  public getUntrackContextFrom(element: Element): RecordContext {
+  public getUntrackContextFrom(element: Element): ActionContext {
     if (!element.hasOwnProperty(SymbolAnim)) {
       return
     }
@@ -52,12 +52,12 @@ export const AnimController = new AnimationController()
 
 export function packAnimInGivenContextOnce(
   animFunc: (...args: any[]) => void,
-  context: RecordContext
+  context: ActionContext
 ): (...args: any[]) => void {
   return new Proxy(animFunc, {
     apply: function (target, thisArg, argumentList) {
       // @NOTE: when this function is called while queueing (MessageBroker is not empty),
-      // it should not send any RecordContextMessage
+      // it should not send any ActionContextMessage
       const result = MessageBroker.isEmpty()
         ? packActionInGivenContext(target, context).apply(thisArg, argumentList)
         : target.apply(thisArg, argumentList)

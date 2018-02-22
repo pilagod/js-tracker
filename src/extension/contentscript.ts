@@ -8,14 +8,14 @@ import initContentscriptHelpers from './contentscriptHelpers'
 import { isTestEnv } from './utils'
 
 function main(helpers: ContentscriptHelpers) {
-  listenToRecordMessage(helpers.messageHandler)
+  listenToActionMessage(helpers.messageHandler)
   listenToDevtoolSelectionChanged(helpers.devtoolSelectionChangedHandler)
   injectTrackerScript(helpers.injectScript)
 }
 
-function listenToRecordMessage(messageHandler: (message: RecordMessage) => void) {
+function listenToActionMessage(messageHandler: (message: ActionMessage) => void) {
   window.addEventListener('js-tracker', (event: CustomEvent) => {
-    event.detail.messages.map((message: RecordMessage) => {
+    event.detail.messages.map((message: ActionMessage) => {
       messageHandler(message)
     })
   })

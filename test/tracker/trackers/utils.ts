@@ -3,9 +3,9 @@ import * as StackTrace from 'stacktrace-js'
 
 import MessageBroker from '../../../src/tracker/private/MessageBroker';
 import {
-  RECORD_CONTEXT_START,
-  RECORD_CONTEXT_END,
-  RECORD_DATA,
+  ACTION_CONTEXT_START,
+  ACTION_CONTEXT_END,
+  ACTION_DATA,
 } from '../../../src/tracker/public/MessageTypes'
 import {
   attachListenerTo,
@@ -15,7 +15,7 @@ import {
 export class TrackerMessageReceiver {
 
   private sender: EventTarget
-  private messages: RecordMessage[]
+  private messages: ActionMessage[]
 
   constructor(sender: EventTarget) {
     this.messages = []
@@ -37,18 +37,18 @@ export class TrackerMessageReceiver {
   }
 
   public verifySingleMessageChunk(
-    context: RecordContext,
-    data: RecordData,
-    messages: RecordMessage[] = this.messages
+    context: ActionContext,
+    data: ActionData,
+    messages: ActionMessage[] = this.messages
   ) {
     this.verifyContextMessage(context, messages);
 
     expect(messages).to.include(
-      <RecordMessage>{ type: RECORD_DATA, data }
+      <ActionMessage>{ type: ACTION_DATA, data }
     )
   }
 
-  public verifyMultipleMessageChunks(list: Array<{ context: RecordContext, data: RecordData }>) {
+  public verifyMultipleMessageChunks(list: Array<{ context: ActionContext, data: ActionData }>) {
     const chunks = this.sliceMessagesToChunks(this.messages)
 
     expect(
@@ -72,21 +72,21 @@ export class TrackerMessageReceiver {
   /* private */
 
   private verifyContextMessage(
-    context: RecordContext,
-    messages: RecordMessage[]
+    context: ActionContext,
+    messages: ActionMessage[]
   ) {
-    const start = <RecordContextMessage>messages[0]
-    expect(start.type).to.equal(RECORD_CONTEXT_START)
+    const start = <ActionContextMessage>messages[0]
+    expect(start.type).to.equal(ACTION_CONTEXT_START)
     expect(start.data.loc.scriptUrl).to.equal(context.loc.scriptUrl)
     expect(start.data.loc.lineNumber).to.equal(context.loc.lineNumber)
 
-    const end = <RecordContextMessage>messages.slice(-1)[0]
-    expect(end.type).to.equal(RECORD_CONTEXT_END)
+    const end = <ActionContextMessage>messages.slice(-1)[0]
+    expect(end.type).to.equal(ACTION_CONTEXT_END)
     expect(end.data.loc.scriptUrl).to.equal(context.loc.scriptUrl)
     expect(end.data.loc.lineNumber).to.equal(context.loc.lineNumber)
   }
 
-  private sliceMessagesToChunks(messages: RecordMessage[]) {
+  private sliceMessagesToChunks(messages: ActionMessage[]) {
     const result = []
 
     let count = 0
@@ -94,14 +94,14 @@ export class TrackerMessageReceiver {
 
     for (let i = 0; i < this.messages.length; i++) {
       switch (this.messages[i].type) {
-        case RECORD_CONTEXT_START:
+        case ACTION_CONTEXT_START:
           if (count === 0) {
             head = i
           }
           count += 1
           break
 
-        case RECORD_CONTEXT_END:
+        case ACTION_CONTEXT_END:
           count -= 1
           if (count === 0) {
             result.push(this.messages.slice(head, i + 1))
@@ -117,7 +117,7 @@ export class TrackerMessageReceiver {
   }
 }
 
-export function getRecordContextFromPrevLine(offset: number = 0): RecordContext {
+export function getActionContextFromPrevLine(offset: number = 0): ActionContext {
   const loc = StackTrace.getSync()[1]
 
   return {
@@ -129,8 +129,8 @@ export function getRecordContextFromPrevLine(offset: number = 0): RecordContext 
   }
 }
 
-export function createRecordData(trackid: string, type: ActionType, merge?: string) {
-  const record: RecordData = { trackid, type }
+export function createActionData(trackid: string, type: ActionType, merge?: string) {
+  const record: ActionData = { trackid, type }
 
   if (merge) {
     record.merge = merge

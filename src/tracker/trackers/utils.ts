@@ -5,13 +5,13 @@ import * as StackTrace from 'stacktrace-js'
 import MessageBroker from '../private/MessageBroker'
 import OwnerManager from '../private/OwnerManager'
 import {
-  RECORD_CONTEXT_START,
-  RECORD_CONTEXT_END,
-  RECORD_DATA
+  ACTION_CONTEXT_START,
+  ACTION_CONTEXT_END,
+  ACTION_DATA
 } from '../public/MessageTypes'
 
-export function saveRecordDataTo(target: ActionTarget, type: ActionType, merge?: TrackID) {
-  const record: RecordData = {
+export function saveActionDataTo(target: ActionTarget, type: ActionType, merge?: TrackID) {
+  const record: ActionData = {
     trackid: OwnerManager.getOrSetTrackIDOnItsOwner(target),
     type
   }
@@ -19,7 +19,7 @@ export function saveRecordDataTo(target: ActionTarget, type: ActionType, merge?:
     record.merge = merge
   }
   MessageBroker.send({
-    type: RECORD_DATA,
+    type: ACTION_DATA,
     data: record
   })
 }
@@ -34,7 +34,7 @@ export function packActionInCallerContext(
 
 export function packActionInGivenContext(
   actionFunc: (...args: any[]) => any,
-  context: RecordContext
+  context: ActionContext
 ): (...args: any[]) => any {
   return function (...args) {
     return callActionInGivenContext.call(this, actionFunc, args, context)
@@ -65,10 +65,10 @@ export function packActionInTrackingContext(
   }
 }
 
-function getCallerContext(): RecordContext {
+function getCallerContext(): ActionContext {
   const stackframe = StackTrace.getSync()[2]
 
-  return <RecordContext>{
+  return <ActionContext>{
     loc: {
       scriptUrl: stackframe.fileName,
       lineNumber: stackframe.lineNumber,
@@ -80,11 +80,11 @@ function getCallerContext(): RecordContext {
 function callActionInGivenContext(
   actionFunc: (...args: any[]) => any,
   args: any[],
-  context: RecordContext
+  context: ActionContext
 ) {
   try {
     MessageBroker.send({
-      type: RECORD_CONTEXT_START,
+      type: ACTION_CONTEXT_START,
       data: context
     })
     return actionFunc.apply(this, args)
@@ -92,7 +92,7 @@ function callActionInGivenContext(
     throw (e)
   } finally {
     MessageBroker.send({
-      type: RECORD_CONTEXT_END,
+      type: ACTION_CONTEXT_END,
       data: context
     })
   }

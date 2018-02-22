@@ -3,7 +3,7 @@ interface Window {
 }
 
 interface ContentscriptHelpers {
-  messageHandler: (message: RecordMessage) => void;
+  messageHandler: (message: ActionMessage) => void;
   devtoolSelectionChangedHandler: (element: Element) => void;
   injectScript: (container: Node, scriptText: string) => void;
 }
