@@ -13,7 +13,7 @@ export function saveActionDataTo(target: ActionTarget, type: ActionType, merge?:
   if (merge) {
     data.merge = merge
   }
-  ActionRecorder.add(data)
+  ActionRecorder.record('add', data)
 }
 
 export function packActionInCallerContext(

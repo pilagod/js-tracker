@@ -21,11 +21,11 @@ interface RecorderController {
 }
 
 interface RecorderFunctioner {
-  add(data: ActionAddData): void;
+  record(action: keyof RecorderBrokers, data: ActionAddData): void;
 }
 
 type RecorderBrokers = {
-  'adder': new () => Broker
+  'add': new () => Broker
 }
 
 interface Broker {
@@ -40,7 +40,6 @@ class ActionRecorder implements Recorder {
   private pause: boolean = false
 
   constructor(brokers: RecorderBrokers) {
-    console.log(brokers)
     for (const broker of Object.keys(brokers)) {
       this.brokers[broker] = new brokers[broker]()
     }
@@ -83,11 +82,11 @@ class ActionRecorder implements Recorder {
 
   /* functioner */
 
-  public add(data: ActionAddData) {
+  public record(action: keyof RecorderBrokers, data: ActionAddData) {
     if (this.pause) {
       return
     }
-    this.brokers.adder.process(data)
+    this.brokers[action].process(data)
   }
 
   /* private */
@@ -99,4 +98,4 @@ class ActionRecorder implements Recorder {
   }
 }
 export default snaphottify(ActionRecorder, Brokers)
-export { Broker }
+export { Broker, RecorderBrokers }

@@ -1,5 +1,5 @@
 import { RECORD_STORE_ADD } from '../../extension/public/RecordStoreActions'
-import { Broker } from './ActionRecorder'
+import { Broker, RecorderBrokers } from './ActionRecorder'
 import { sendMessageToRecordStore } from './NativeUtils'
 
 class ActionAdder implements Broker {
@@ -21,6 +21,6 @@ class ActionAdder implements Broker {
     this.data.push(data)
   }
 }
-export default {
-  'adder': ActionAdder
+export default <RecorderBrokers>{
+  'add': ActionAdder
 }
