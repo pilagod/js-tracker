@@ -101,12 +101,12 @@ function callActionInNonTrackingContext(
   args: any[]
 ) {
   try {
-    ActionRecorder.startBlocking()
+    ActionRecorder.startPausing()
     return actionFunc.apply(this, args)
   } catch (e) {
     throw (e)
   } finally {
-    ActionRecorder.stopBlocking()
+    ActionRecorder.stopPausing()
   }
 }
 
@@ -114,18 +114,18 @@ function callActionInTrackingContext(
   actionFunc: (...args: any[]) => any,
   args: any[]
 ) {
-  const isInNonTrackingContext = ActionRecorder.isBlocking()
+  const isInNonTrackingContext = ActionRecorder.isPausing()
 
   try {
     if (isInNonTrackingContext) {
-      ActionRecorder.stopBlocking()
+      ActionRecorder.stopPausing()
     }
     return actionFunc.apply(this, args)
   } catch (e) {
     throw (e)
   } finally {
     if (isInNonTrackingContext) {
-      ActionRecorder.startBlocking()
+      ActionRecorder.startPausing()
     }
   }
 }

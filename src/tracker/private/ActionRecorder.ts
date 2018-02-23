@@ -8,12 +8,14 @@ interface Recorder extends
   RecorderController { }
 
 interface RecorderController {
+  isRecording(): boolean;
   startRecording(context: SourceLocation): void;
   stopRecording(context: SourceLocation): void;
-  startBlocking(): void;
-  stopBlocking(): void;
-  isBlocking(): boolean;
-  isRecording(): boolean;
+
+  isPausing(): boolean;
+  startPausing(): void;
+  stopPausing(): void;
+
   getRecordContext(): SourceLocation;
 }
 
@@ -32,9 +34,9 @@ interface Broker {
 
 class ActionRecorder implements Recorder {
 
-  private block: boolean = false
   private brokers: { [role: string]: Broker } = {}
   private context: SourceLocation = null
+  private pause: boolean = false
 
   constructor(brokers: RecorderBrokers) {
     for (const broker of Object.keys(brokers)) {
@@ -44,8 +46,8 @@ class ActionRecorder implements Recorder {
 
   /* controller */
 
-  public isBlocking() {
-    return this.block
+  public isPausing() {
+    return this.pause
   }
 
   public isRecording() {
@@ -69,18 +71,18 @@ class ActionRecorder implements Recorder {
     }
   }
 
-  public startBlocking() {
-    this.block = true
+  public startPausing() {
+    this.pause = true
   }
 
-  public stopBlocking() {
-    this.block = false
+  public stopPausing() {
+    this.pause = false
   }
 
   /* functioner */
 
   public add(data: ActionAddData) {
-    if (this.block) {
+    if (this.pause) {
       return
     }
     this.brokers.adder.process(data)
@@ -114,8 +116,8 @@ class ActionRecorderMaster implements Recorder, RecorderSnaphotter {
 
   /* controller */
 
-  public isBlocking() {
-    return this.recorder.isBlocking()
+  public isPausing() {
+    return this.recorder.isPausing()
   }
 
   public isRecording() {
@@ -134,12 +136,12 @@ class ActionRecorderMaster implements Recorder, RecorderSnaphotter {
     this.recorder.stopRecording(context)
   }
 
-  public startBlocking() {
-    this.recorder.startBlocking()
+  public startPausing() {
+    this.recorder.startPausing()
   }
 
-  public stopBlocking() {
-    this.recorder.stopBlocking()
+  public stopPausing() {
+    this.recorder.stopPausing()
   }
 
   public saveSnapshot() {
