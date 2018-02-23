@@ -1,6 +1,7 @@
 /// <reference path='../public/types/SourceLocation.d.ts'/>
 /// <reference path='./types/ActionData.d.ts'/>
 
+import snaphottify from './libs/snapshottify'
 import Brokers from './ActionRecorderBrokers'
 
 interface Recorder extends
@@ -39,6 +40,7 @@ class ActionRecorder implements Recorder {
   private pause: boolean = false
 
   constructor(brokers: RecorderBrokers) {
+    console.log(brokers)
     for (const broker of Object.keys(brokers)) {
       this.brokers[broker] = new brokers[broker]()
     }
@@ -96,74 +98,5 @@ class ActionRecorder implements Recorder {
     }
   }
 }
-
-interface RecorderSnaphotter {
-  saveSnapshot(): void;
-  restoreSnapshot(): void;
-}
-
-class ActionRecorderMaster implements Recorder, RecorderSnaphotter {
-
-  private recorder: Recorder
-  private snapshots: Recorder[] = []
-
-  constructor(
-    private Recorder: new (Brokers: RecorderBrokers) => Recorder,
-    private Brokers: RecorderBrokers
-  ) {
-    this.initRecorder()
-  }
-
-  /* controller */
-
-  public isPausing() {
-    return this.recorder.isPausing()
-  }
-
-  public isRecording() {
-    return this.recorder.isRecording()
-  }
-
-  public getRecordContext() {
-    return this.recorder.getRecordContext()
-  }
-
-  public startRecording(context: SourceLocation) {
-    this.recorder.startRecording(context)
-  }
-
-  public stopRecording(context: SourceLocation) {
-    this.recorder.stopRecording(context)
-  }
-
-  public startPausing() {
-    this.recorder.startPausing()
-  }
-
-  public stopPausing() {
-    this.recorder.stopPausing()
-  }
-
-  public saveSnapshot() {
-    this.snapshots.push(this.recorder)
-    this.initRecorder()
-  }
-
-  public restoreSnapshot() {
-    this.recorder = this.snapshots.pop()
-  }
-
-  /* functioner */
-
-  public add(data: ActionAddData) {
-    this.recorder.add(data)
-  }
-
-  /* private */
-
-  private initRecorder() {
-    this.recorder = new this.Recorder(this.Brokers)
-  }
-}
-export default new ActionRecorderMaster(ActionRecorder, Brokers)
+export default snaphottify(ActionRecorder, Brokers)
 export { Broker }
