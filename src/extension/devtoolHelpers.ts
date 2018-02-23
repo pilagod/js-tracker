@@ -1,5 +1,6 @@
 /// <reference path='./private/types/ActionRecordStore.d.ts'/>
 /// <reference path='./private/types/DevtoolHelpers.d.ts'/>
+/// <reference path='./private/types/DisplayMessages.d.ts'/>
 
 import { ISidebarRootProps } from '../extension/Sidebar/SidebarRoot'
 import { isTestEnv } from './utils'
@@ -69,7 +70,7 @@ function makeBackgroundMessageHandler(sidebarController: SidebarController) {
       ? SidebarController.SHOULD_NOT_TAG_DIFFS
       : SidebarController.SHOULD_TAG_DIFFS
   }
-  return (message: Message) => {
+  return (message: DisplayMessage) => {
     console.group('devtool page')
     console.log('--- message received from background ---')
     console.log('message:', message)

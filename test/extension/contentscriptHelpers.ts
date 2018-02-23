@@ -1,4 +1,5 @@
 /// <reference path='../../src/extension/public/types/RecordStoreMessages.d.ts'/>
+/// <reference path='../../src/extension/private/types/DisplayMessages.d.ts'/>
 
 import { expect } from 'chai'
 import * as sinon from 'sinon'
@@ -90,7 +91,7 @@ describe('contentscript helpers', () => {
         expect(updateSidebar.calledOnce).to.be.true
         expect(
           updateSidebar
-            .calledWith(<Message>{
+            .calledWith(<DisplayMessage>{
               records: [actions[0].record],
               selectionChanged: false
             })
@@ -115,7 +116,7 @@ describe('contentscript helpers', () => {
 
       expect(
         updateSidebar
-          .calledWith(<Message>{
+          .calledWith(<DisplayMessage>{
             records: [],
             selectionChanged: true
           })
@@ -129,7 +130,7 @@ describe('contentscript helpers', () => {
 
       expect(
         updateSidebar
-          .calledWith(<Message>{
+          .calledWith(<DisplayMessage>{
             records: [],
             selectionChanged: true
           })
@@ -147,7 +148,7 @@ describe('contentscript helpers', () => {
       expect(controller.selection).to.equal(div)
       expect(
         updateSidebar
-          .calledWith(<Message>{
+          .calledWith(<DisplayMessage>{
             records: [actions[0].record],
             selectionChanged: true
           })

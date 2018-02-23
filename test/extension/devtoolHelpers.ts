@@ -1,8 +1,10 @@
+/// <reference path='../../src/extension/private/types/DisplayMessages.d.ts'/>
+
 import { expect } from 'chai'
 import * as sinon from 'sinon'
 
-import { actionsOfJS as actions } from '../actions'
 import initDevtoolHelpers from '../../src/extension/devtoolHelpers'
+import { actionsOfJS as actions } from '../actions'
 
 describe('devtool helpers', () => {
   const sandbox = sinon.sandbox.create()
@@ -186,7 +188,7 @@ describe('devtool helpers', () => {
     })
 
     it('should not render anything given sidebar window is not opened', () => {
-      const message: Message = {
+      const message: DisplayMessage = {
         records: actions.map((action) => action.record),
         selectionChanged: false
       }
@@ -207,7 +209,7 @@ describe('devtool helpers', () => {
         }
         sidebarController.sidebarWindow = sidebarWindow
 
-        const message: Message = {
+        const message: DisplayMessage = {
           records: actions.map((action) => action.record),
           selectionChanged
         }

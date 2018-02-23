@@ -1,7 +1,7 @@
 /// <reference path='./public/types/RecordStoreMessages.d.ts'/>
 /// <reference path='./private/types/ActionRecordStore.d.ts'/>
 /// <reference path='./private/types/ContentscriptHelpers.d.ts'/>
-/// <reference path='./private/types/Message.d.ts'/>
+/// <reference path='./private/types/DisplayMessages.d.ts'/>
 
 import { match } from '../tracker/public/SourceLocation'
 import { isTestEnv } from './utils'
@@ -13,11 +13,11 @@ class ContentscriptController {
   public selection: Element = null
 
   private store: IActionRecordStore
-  private updateSidebar: (message: Message, callback?: (response: any) => void) => void
+  private updateSidebar: (message: DisplayMessage, callback?: (response: any) => void) => void
 
   constructor(
     store: IActionRecordStore,
-    updateSidebar: (message: Message, callback?: (response: any) => void) => void
+    updateSidebar: (message: DisplayMessage, callback?: (response: any) => void) => void
   ) {
     this.store = store
     this.updateSidebar = updateSidebar
@@ -111,7 +111,7 @@ function injectScript(container: Node, scriptText: string) {
 
 export default function (
   store: IActionRecordStore,
-  updateSidebar: (message: Message, callback?: (response: any) => void) => void
+  updateSidebar: (message: DisplayMessage, callback?: (response: any) => void) => void
 ): ContentscriptHelpers {
   const contentscriptController = new ContentscriptController(store, updateSidebar)
   const helpers: ContentscriptHelpers = {

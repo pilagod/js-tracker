@@ -1,5 +1,6 @@
 /// <reference path='../../node_modules/@types/chrome/index.d.ts'/>
 /// <reference path='./private/types/DevtoolHelpers.d.ts'/>
+/// <reference path='./private/types/DisplayMessages.d.ts'/>
 
 import initDevtoolHelpers from './devtoolHelpers'
 import { isTestEnv } from './utils'
@@ -15,7 +16,7 @@ function main(
 
 function setupConnectionToBackground(
   __chrome__: typeof chrome,
-  backgroundMessageHandler: (message: Message) => void
+  backgroundMessageHandler: (message: DisplayMessage) => void
 ) {
   const tabID = __chrome__.devtools.inspectedWindow.tabId.toString()
   const background = __chrome__.runtime.connect({

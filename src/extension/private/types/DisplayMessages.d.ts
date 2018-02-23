@@ -1,8 +1,8 @@
 /// <reference path='./ActionRecordStore.d.ts'/>
 
-/* message between contentscript, background, devtool */
+/* messages between contentscript, background, devtool for displaying records */
 
-type Message = {
+type DisplayMessage = {
   records: ActionRecord[];
   selectionChanged: boolean;
 }
