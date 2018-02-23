@@ -1,7 +1,7 @@
 /// <reference path='../public/types/SourceLocation.d.ts'/>
 /// <reference path='./types/ActionData.d.ts'/>
 
-import snaphottify from './libs/snapshottify'
+import snapshottify from './libs/snapshottify'
 import Brokers from './ActionRecorderBrokers'
 
 interface Recorder extends
@@ -20,10 +20,6 @@ interface RecorderController {
   getRecordContext(): SourceLocation;
 }
 
-interface RecorderFunctioner {
-  record(action: keyof RecorderBrokers, data: ActionAddData): void;
-}
-
 type RecorderBrokers = {
   'add': new () => Broker
 }
@@ -31,6 +27,10 @@ type RecorderBrokers = {
 interface Broker {
   flush(context: SourceLocation): void;
   process(data: ActionData): void;
+}
+
+interface RecorderFunctioner {
+  record(action: keyof RecorderBrokers, data: ActionAddData): void;
 }
 
 class ActionRecorder implements Recorder {
@@ -97,5 +97,5 @@ class ActionRecorder implements Recorder {
     }
   }
 }
-export default snaphottify(ActionRecorder, Brokers)
+export default snapshottify(ActionRecorder, Brokers)
 export { Broker, RecorderBrokers }

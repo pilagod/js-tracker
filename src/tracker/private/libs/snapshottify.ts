@@ -38,7 +38,7 @@ class SnapshotContainer<T> implements Snapshottable<T> {
     this.instance = new this.ctr(...this.ctrInitArgs)
   }
 }
-export default function snaphottify<T extends object>(ctr: new (...args: any[]) => T, ...ctrInitArgs: any[]): T & Snapshottable<T> {
+export default function snapshottify<T extends object>(ctr: new (...args: any[]) => T, ...ctrInitArgs: any[]): T & Snapshottable<T> {
   const container: Snapshottable<T> =
     new SnapshotContainer(ctr, ...ctrInitArgs)
   return <T & Snapshottable<T>>new Proxy(container, {
