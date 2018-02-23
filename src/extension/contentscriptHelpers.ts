@@ -27,7 +27,7 @@ class ContentscriptController {
 
   public recordStoreAddMessageHandler = (message: RecordStoreAddMessage) => {
     const loc = message.loc
-
+    // @NOTE: return promise here is for testing
     return Promise.all(
       message.data.map(async (data: RecordStoreAddData) => {
         const success = await this.store.registerFromActionInfo(
@@ -43,26 +43,6 @@ class ContentscriptController {
     )
   }
 
-  // public messageHandler = async (message: ActionMessage) => {
-  //   switch (message.type) {
-  //     case ACTION_CONTEXT_START:
-  //       if (!this.context) {
-  //         this.context = message.data
-  //       }
-  //       break
-
-  //     case ACTION_DATA:
-  //       await this.recordDataHandler(message.data)
-  //       break
-
-  //     case ACTION_CONTEXT_END:
-  //       if (match(this.context.loc, message.data.loc)) {
-  //         this.context = null
-  //       }
-  //       break
-  //   }
-  // }
-
   public devtoolSelectionChangedHandler = (element: Element) => {
     this.selection = element
     this.updateSidebar({
@@ -72,24 +52,6 @@ class ContentscriptController {
   }
 
   /* private */
-
-  // private async recordDataHandler(data: ActionData) {
-  //   const info: ActionInfo = Object.assign({}, data, this.context)
-  //   const success = await this.store.registerFromActionInfo(info)
-  //   // @NOTE: it's easy to forget await store, success must be resolved value of boolean instead of Promise
-  //   if (success === true && !this.isSelectionChanged(info.trackid)) {
-  //     console.group('contentscript')
-  //     console.log('--- On Selected Element Updated ---')
-  //     console.log('selected:', this.selection)
-  //     console.log('------------------------------------')
-  //     console.groupEnd()
-
-  //     this.updateSidebar({
-  //       records: this.store.get(info.trackid),
-  //       selectionChanged: ContentscriptController.SELECTION_IS_NOT_CHANGED
-  //     }, this.responseLogger)
-  //   }
-  // }
 
   private isSelectionChanged(trackid: TrackID): boolean {
     return this.getTrackIDFromSelection() !== trackid
