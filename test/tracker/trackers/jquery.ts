@@ -745,22 +745,41 @@ describe('jQuery API tracker', () => {
     it('should track stop properly', (done) => {
       const div = document.createElement('div')
 
-      $(div).fadeOut(100)
-      $(div)
-        .stop()
-        .queue(function () {
-          receiver.reset()
-          $(this).dequeue()
-        })
-        .fadeIn(100, () => {
-          const loc = utils.createSourceLocationWith(-1, 10)
-          const data = utils.createActionData(
-            OwnerManager.getTrackIDFromItsOwner(div),
-            ActionType.Style
-          )
-          receiver.verifyMessagesContainExactly({ loc, data })
-          done()
-        })
+      $(div).fadeOut(1000)
+      $(div).stop()
+      $(div).fadeIn(100, () => {
+        const loc1 = utils.createSourceLocationWith(-3, 14)
+        const loc2 = utils.createSourceLocationWith(-2, 14)
+        const data = utils.createActionData(
+          OwnerManager.getTrackIDFromItsOwner(div),
+          ActionType.Style
+        )
+        receiver.verifyMessagesContainExactly([
+          { loc: loc1, data },
+          { loc: loc2, data },
+        ])
+        done()
+      })
+    })
+
+    it('should not track unneeded infos with those animations that will tune overflow property when forced stop', (done) => {
+      const div = document.createElement('div')
+
+      $(div).slideUp(1000)
+      $(div).stop()
+      $(div).slideDown(100, () => {
+        const loc1 = utils.createSourceLocationWith(-3, 14)
+        const loc2 = utils.createSourceLocationWith(-2, 14)
+        const data = utils.createActionData(
+          OwnerManager.getTrackIDFromItsOwner(div),
+          ActionType.Style
+        )
+        receiver.verifyMessagesContainExactly([
+          { loc: loc1, data },
+          { loc: loc2, data },
+        ])
+        done()
+      })
     })
 
     it('should track double animation properly', (done) => {

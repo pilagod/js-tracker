@@ -55,10 +55,11 @@ function trackAnimationEntryPoint() {
       })
       // @NOTE: first time call doAnimation will do many other operations,
       // thus doAnimation also need to be wrapped
+      // @TODO: it should not track doAnimation
       return queue.call(
         this,
         type,
-        packAnimInGivenContextOnce(doAnimation, ActionRecorder.getRecordContext())
+        packActionInNonTrackingContext(doAnimation)
       )
     }
   }
@@ -77,6 +78,7 @@ function trackAnimationEntryPoint() {
 
 function trackAnimationExitPoint() {
   trackSpeed(jquery.speed)
+  trackStop(jquery.prototype.stop)
 
   function trackSpeed(speed) {
     jquery.speed = function (...args) {
@@ -93,6 +95,14 @@ function trackAnimationExitPoint() {
       })
       return opt
     }
+  }
+
+  function trackStop(stop) {
+    // @NOTE: stop will trigger animation promise always handlers to do
+    // some operations, which are not out target
+    jquery.prototype.stop = packActionInNonTrackingContext(function (...args) {
+      return stop.apply(this, args)
+    })
   }
 }
 

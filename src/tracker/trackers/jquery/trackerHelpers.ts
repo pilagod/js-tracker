@@ -1,7 +1,8 @@
 import ActionRecorder from '../../private/ActionRecorder'
 import {
   packActionInGivenContext,
-  packActionInNonTrackingContext
+  packActionInNonTrackingContext,
+  packActionInTrackingContext
 } from '../utils'
 
 const SymbolAnim = Symbol('Animation')
@@ -52,13 +53,18 @@ export function packAnimInGivenContextOnce(
   animFunc: (...args: any[]) => void,
   context: SourceLocation
 ): (...args: any[]) => void {
+  const trackedAnimFunc =
+    packActionInTrackingContext(
+      packActionInGivenContext(animFunc, context)
+    )
   return new Proxy(animFunc, {
     apply: function (target, thisArg, argumentList) {
       // @NOTE: when this function is called while queueing (MessageBroker is not empty),
       // it should not send any ActionContextMessage
-      const result = ActionRecorder.isRecording()
-        ? target.apply(thisArg, argumentList)
-        : packActionInGivenContext(target, context).apply(thisArg, argumentList)
+      const result = trackedAnimFunc.apply(thisArg, argumentList)
+      // const result = ActionRecorder.isRecording()
+      //   ? target.apply(thisArg, argumentList)
+      //   : packActionInGivenContext(target, context).apply(thisArg, argumentList)
       // @NOTE: reset animFunc and ignore already tracked actions (track only once)
       this.apply = packActionInNonTrackingContext(function (target, thisArg, argumentList) {
         return target.apply(thisArg, argumentList)

@@ -5,14 +5,8 @@
 import { expect } from 'chai'
 import * as StackTrace from 'stacktrace-js'
 
-// import MessageBroker from '../../../src/tracker/private/MessageBroker';
 import { RecordStoreAction } from '../../../src/extension/public/RecordStoreActions'
 import { match } from '../../../src/tracker/public/SourceLocation'
-// import {
-//   ACTION_CONTEXT_START,
-//   ACTION_CONTEXT_END,
-//   ACTION_DATA,
-// } from '../../../src/tracker/public/MessageTypes'
 import {
   attachListenerTo,
   detachListenerFrom
