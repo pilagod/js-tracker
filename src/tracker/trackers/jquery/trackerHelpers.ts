@@ -28,9 +28,6 @@ class AnimationController {
   }
 
   public getUntrackContextFrom(element: Element): SourceLocation {
-    if (!element.hasOwnProperty(SymbolAnim)) {
-      return
-    }
     const untrackList = this.untrackAnims[element[SymbolAnim]]
     // @NOTE: each element will animate by queueing order
     const context = untrackList.shift()

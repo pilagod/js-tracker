@@ -53,9 +53,6 @@ function trackAnimationEntryPoint() {
       this.each(function (this: Element) {
         AnimController.addUntrackContextTo(this)
       })
-      // @NOTE: first time call doAnimation will do many other operations,
-      // thus doAnimation also need to be wrapped
-      // @TODO: it should not track doAnimation
       return queue.call(
         this,
         type,
@@ -66,8 +63,11 @@ function trackAnimationEntryPoint() {
 
   function trackTimer(timer) {
     jquery.fx.timer = function (tick) {
-      // @NOTE: timer is where animation actually executing,
-      // and it is only used in animation
+      // @NOTE: timer is where animation actually executing
+      // @NOTE: fx.timer is only called in Animation initialization,
+      // and animation will always run through queue function above first,
+      // which will set untracked context to target elem in advance,
+      // getUntrackContextFrom will always return a valid context
       return timer.call(
         this,
         packAnimInGivenContextOnce(tick, AnimController.getUntrackContextFrom(tick.elem))
