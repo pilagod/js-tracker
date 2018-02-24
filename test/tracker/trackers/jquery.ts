@@ -640,11 +640,11 @@ describe('jQuery API tracker', () => {
     })
   })
 
-  describe('animation apis', () => {
+  describe('Animation actions', () => {
     it('should track only animate and exclude all details of its implementation code', (done) => {
       const div = document.createElement('div')
 
-      $(div).animate({ "top": "100px" }, 100, () => {
+      $(div).animate({ 'top': '100px' }, 100, () => {
         const loc = utils.createSourceLocationWith(-1, 14)
         const data = utils.createActionData(
           OwnerManager.getTrackIDFromItsOwner(div),
@@ -812,6 +812,23 @@ describe('jQuery API tracker', () => {
         receiver.verifyMessagesContainExactly({ loc: loc2, data: data2 })
         done()
       }, 10)
+    })
+
+    describe('queue actions', () => {
+      it('should track actions in queueed function', (done) => {
+        const div = document.createElement('div')
+
+        $(div).queue(() => {
+          div.style.color = 'red'
+
+          const loc = utils.createSourceLocationWith(-2, 26)
+          const data = utils.createActionData('1', ActionType.Style)
+
+          receiver.verifyMessagesContain({ loc, data })
+          $(div).dequeue()
+          done()
+        })
+      })
     })
   })
 })
