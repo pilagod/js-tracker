@@ -1,7 +1,7 @@
 JavaScript Tracker [![Build Status](https://travis-ci.org/pilagod/js-tracker.svg?branch=master)](https://travis-ci.org/pilagod/js-tracker)
 ==================
 
-A chrome extension tracks front-end JavaScript which using DOM or jQuery APIs to manipulate html dom elements (e.g., change style, attach event listener) on web page at runtime.
+A chrome extension tracks front-end JavaScript that uses DOM or jQuery APIs to manipulate html dom elements (e.g., change style, attach event listener) on web page at runtime.
 
 ## Features
 
@@ -10,34 +10,46 @@ A chrome extension tracks front-end JavaScript which using DOM or jQuery APIs to
 * **Brief Overview**, getting rough code information at a glance.
 * **Easy Filtering**, grouping manipulations into 5 types.
 * **Link to Source**, one click to see all details.
+* **Performance Improvement**, take advantage of browser JavaScript engine
 
-## Demo
+## Demo Video
 
-[![JavaScript Tracker Demo](http://i.imgur.com/JWC9xut.png)](https://www.youtube.com/watch?v=bHcgtOF9wLw)
+[![JavaScript Tracker Demo](https://i.imgur.com/hB59jrD.png)](https://youtu.be/8AxKYsUHn1Q)
 
 ## Installation
 
 Add JavaScript Tracker to your Google Chrome from [Chrome Web Store](https://goo.gl/D6WVAX)
 
-## Usage
+## Usage (see [Demo Video](#demo-video) for visual guide)
 
-1. Go to the [example page](https://pilagod.github.io/js-tracker/example/)
+1. Go to the page you want to track (you can use [example page](https://pilagod.github.io/js-tracker/example/) to give it a try).
 
-2. Click JavaScript Tracker extension
+2. Click JavaScript Tracker icon on Chrome  browser extension bar.
 
-3. Interact with the page (e.g., hover or click the button) opened by JavaScript Tracker
+3. Interact with the page opened by JavaScript Tracker.
 
-4. Open Elements panel in Chrome DevTools and select the button
+4. Open Elements panel in Developer Tools and select the element you are interested in.
 
-5. Check the sidebar pane "JS-Tracker" to see information about those JavaScript code manipulating the button
+5. Go to the "JS-Tracker" sidebar to see what JavaScript code affects the selected element.
 
-There are also many cool websites built with jQuery in [Best jQuery Websites](http://www.awwwards.com/websites/jquery/), you can try it out there : )
+There are also [some websites](https://github.com/pilagod/js-tracker/blob/gh-pages/README.md) selected by me that you can try JavaScript Tracker as much as you like. 😄
+
+## Limitations
+
+Those elements wrapped in `<iframe>` can not be tracked, since `<iframe>` creates an independent executive environment of its parent.
+
+## Future Works
+
+* Track [jQuery-UI](https://jqueryui.com)
+* Optimize resouce usage
 
 ## Contribution
 
-This extension is built on TDD (Test-Driven Development) using [mocha](https://mochajs.org), [karma](http://karma-runner.github.io/1.0/index.html),  [chai](http://chaijs.com) and [sinon](http://sinonjs.org). All production code are written after corresponding test code done first. If you are interesting to contribute, you can contact me for more details.
+Suggestions and discussions are highly welcome. Feel free to open issues or email me for any bug, question, idea or feature wish. 😃
 
-Suggestions and discussions are highly welcomed. Feel free to share any good ideas : )
+## Special Thanks
+
+Special thanks to Fiti, a fantastic UI/UX designer, for the design of logo, banner, music, and sidebar materials. Without her I will never give birth to this project. 🙂️
 
 ## License
 MIT
