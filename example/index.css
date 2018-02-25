@@ -69,8 +69,8 @@ body {
     border-top-right-radius: 5px;
   }
 
-  #demo.hover > .top-border,
-  #demo.hover > .bottom-border {
+  #demo:hover > .top-border,
+  #demo:hover > .bottom-border {
     width: calc(100% + 4px);
   }
 
@@ -87,11 +87,11 @@ body {
     transition-delay: 0.05s;
   }
 
-  #demo.hover > .top-border {
+  #demo:hover > .top-border {
     transition-delay: 0s;
   }
   
-  #demo.hover > .bottom-border {
+  #demo:hover > .bottom-border {
     transition-delay: 0.1s;
   }
 
@@ -106,8 +106,8 @@ body {
     border-bottom-right-radius: 5px;
   }
 
-  #demo.hover > .left-border, 
-  #demo.hover > .right-border {
+  #demo:hover > .left-border, 
+  #demo:hover > .right-border {
     height: calc(100% + 4px);
   }
 
@@ -125,11 +125,11 @@ body {
     transition-delay: 0.1s;
   }
 
-  #demo.hover > .left-border {
+  #demo:hover > .left-border {
     transition-delay: 0.15s;
   }  
 
-  #demo.hover > .right-border {
+  #demo:hover > .right-border {
     transition-delay: 0.05s;
   }  
 
