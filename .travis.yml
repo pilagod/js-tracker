@@ -13,8 +13,13 @@ before_install:
   - sudo dpkg -i google-chrome*.deb
 script:
   - npm run test-extension
+  - mv coverage/lcov.info coverage/lcov_extension.info
   - npm run test-modules
+  - mv coverage/lcov.info coverage/lcov_modules.info
   - npm run test-tracker
+  - mv coverage/lcov.info coverage/lcov_tracker.info
+  - cat coverage/*.info > coverage/lcov.info
+  - grunt
 cache:
   directories:
     - node_modules
