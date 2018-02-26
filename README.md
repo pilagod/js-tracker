@@ -51,7 +51,7 @@ Suggestions and discussions are highly welcome. Feel free to open issues or emai
 
 ## Special Thanks
 
-Special thanks to Fiti, a fantastic UI/UX designer, for the design of logo, banner, music, and sidebar materials. Without her I will never give birth to this project. 🙂️
+Special thanks to Fiti, a fantastic UI/UX designer, for the design of logo, banner, music, and materials in sidebar. Without her I will never give birth to this project. 🙂️
 
 ## License
 MIT
