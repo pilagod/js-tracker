@@ -9,24 +9,18 @@
     "test-modules": "karma start ./karma/modules.js",
     "test-tracker": "karma start ./karma/tracker.js",
     "build": "node webpack/compiler.js && rm ./dist/tracker.js ./dist/StaticFilesPacker.js",
-    "deploy": "rm ~/Desktop/JS-Tracker.zip & zip ~/Desktop/JS-Tracker.zip manifest.json assets/* dist/*"
+    "deploy": "node webpack/compiler.js deploy && rm ./dist/tracker.js ./dist/StaticFilesPacker.js && zip ~/Desktop/JS-Tracker.zip manifest.json assets/* dist/*"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/pilagod/js-tracker.git"
   },
   "keywords": [
-    "chrome",
-    "extension",
+    "chrome-extension",
+    "developer-tool",
     "track",
-    "debug",
-    "web",
-    "front-end",
-    "javascript",
-    "dom",
-    "jquery",
-    "manipulation",
-    "api"
+    "JavaScript",
+    "jQuery"
   ],
   "author": "pilagod <pilagooood@gmail.com>",
   "license": "MIT",
@@ -69,6 +63,7 @@
     "stacktrace-js": "^2.0.0",
     "transform-loader": "^0.2.4",
     "typescript": "^2.6.2",
+    "uglifyjs-webpack-plugin": "^1.2.2",
     "webpack": "^3.3.0"
   }
 }

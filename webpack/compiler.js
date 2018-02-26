@@ -3,6 +3,19 @@
 // @NOTE: Webpack Node API, using callback to realize synchronous compilation [https://webpack.js.org/api/node/]
 const webpack = require('webpack')
 const config = require('./config.js')
+// @NOTE: [https://stackoverflow.com/questions/4351521/how-do-i-pass-command-line-arguments]
+if (process.argv[2] === 'deploy') {
+  config.plugins = [
+    new (require('uglifyjs-webpack-plugin'))({
+      uglifyOptions: {
+        ecma: 6,
+        output: {
+          beautify: false
+        }
+      }
+    })
+  ]
+}
 const compile = (config, callback) => {
   const compiler = webpack(config)
   const _callback = callback || function (err, stats) {
