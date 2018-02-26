@@ -3,7 +3,7 @@
   "name": "JavaScript Tracker",
   "short_name": "JS-Tracker",
   "description": "Track JavaScript that uses DOM/jQuery APIs on web page at runtime",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "icons": {
     "16": "assets/appicon-16.png",
     "48": "assets/appicon-48.png",
