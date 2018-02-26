@@ -77,7 +77,6 @@ export default function (
 ): ContentscriptHelpers {
   const contentscriptController = new ContentscriptController(store, updateSidebar)
   const helpers: ContentscriptHelpers = {
-    // messageHandler: contentscriptController.messageHandler,
     devtoolSelectionChangedHandler: contentscriptController.devtoolSelectionChangedHandler,
     injectScript,
     recordStoreAddMessageHandler: contentscriptController.recordStoreAddMessageHandler,

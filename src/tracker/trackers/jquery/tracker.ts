@@ -99,7 +99,7 @@ function trackAnimationExitPoint() {
 
   function trackStop(stop) {
     // @NOTE: stop will trigger animation promise always handlers to do
-    // some operations, which are not out target
+    // some operations, which are not our target
     jquery.prototype.stop = packActionInNonTrackingContext(function (...args) {
       return stop.apply(this, args)
     })
@@ -123,12 +123,12 @@ function trackEventTriggers() {
     Reflect.defineProperty(jquery.event, 'triggered', {
       set: function (value) {
         if (value) {
-          // @NOTE: native trigger is about to begin, take out messages 
-          // before trigger record process to give native trigger a right source
+          // @NOTE: native trigger is about to begin, restore ActionRecorder snapshot 
+          // to make native trigger actions included in jQuery API
           ActionRecorder.restoreSnapshot()
         } else {
-          // @NOTE: native trigger is about to end, put back messages to 
-          // continue trigger restore process
+          // @NOTE: native trigger is about to end, save ActionRecorder snapshot
+          // to start a new context for upcoming triggered actions
           ActionRecorder.saveSnapshot()
         }
         triggered = value
@@ -138,9 +138,8 @@ function trackEventTriggers() {
       }
     })
   }
-
+  // @NOTE: all trigger methods, like click and mouseenter, are all based on trigger
   function trackEventTrigger(trigger) {
-    // @NOTE: all trigger methods, like click and mouseenter, are all based on trigger
     const isolatedTrigger =
       packActionInIsolatedContext(trigger)
 

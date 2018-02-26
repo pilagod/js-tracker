@@ -56,12 +56,7 @@ export function packAnimInGivenContextOnce(
     )
   return new Proxy(animFunc, {
     apply: function (target, thisArg, argumentList) {
-      // @NOTE: when this function is called while queueing (MessageBroker is not empty),
-      // it should not send any ActionContextMessage
       const result = trackedAnimFunc.apply(thisArg, argumentList)
-      // const result = ActionRecorder.isRecording()
-      //   ? target.apply(thisArg, argumentList)
-      //   : packActionInGivenContext(target, context).apply(thisArg, argumentList)
       // @NOTE: reset animFunc and ignore already tracked actions (track only once)
       this.apply = packActionInNonTrackingContext(function (target, thisArg, argumentList) {
         return target.apply(thisArg, argumentList)

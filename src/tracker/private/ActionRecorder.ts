@@ -8,6 +8,10 @@ interface Recorder extends
   RecorderFunctioner,
   RecorderController { }
 
+interface RecorderFunctioner {
+  record(action: keyof RecorderBrokers, data: ActionAddData): void;
+}
+
 interface RecorderController {
   isRecording(): boolean;
   startRecording(context: SourceLocation): void;
@@ -27,10 +31,6 @@ type RecorderBrokers = {
 interface Broker {
   flush(context: SourceLocation): void;
   process(data: ActionData): void;
-}
-
-interface RecorderFunctioner {
-  record(action: keyof RecorderBrokers, data: ActionAddData): void;
 }
 
 class ActionRecorder implements Recorder {

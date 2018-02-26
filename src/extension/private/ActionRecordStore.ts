@@ -125,7 +125,6 @@ class ScriptParser {
   /* public */
 
   public async findNode(loc: SourceLocation): Promise<ESTree.Node> {
-    // @TODO: remove subset node of elected one 
     // @NOTE: There is 1 offset of column between stacktrace and esprima
     // stacktrace counts column from 1, while esprima counts column from 0
     return this.finder.find(

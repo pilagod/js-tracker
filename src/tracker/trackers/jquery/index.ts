@@ -3,7 +3,7 @@ import trackJqueryApis from './tracker'
 export default function () {
   ['jQuery', '$'].map((propOfJquery) => {
     let value = undefined
-    // noConflict issue: [http://api.jquery.com/jQuery.noconflict/]
+    // @NOTE: noConflict issue: [http://api.jquery.com/jQuery.noconflict/]
     Reflect.defineProperty(window, propOfJquery, {
       set: function (obj) {
         if (isJquery(obj) && !isTracked(obj)) {
