@@ -23,14 +23,6 @@ export const detachListenerFrom = ((removeEventListener) => {
   }
 })(EventTarget.prototype.removeEventListener)
 
-// export const sendMessagesToContentScript = ((context, dispatch) => {
-//   return function (messages: ActionMessage[]) {
-//     dispatch.call(context, new CustomEvent('js-tracker', {
-//       detail: { messages }
-//     }))
-//   }
-// })(window, EventTarget.prototype.dispatchEvent)
-
 export const sendMessageToRecordStore = ((context, dispatch) => {
   return function (action: RecordStoreAction, message: RecordStoreMessage) {
     dispatch.call(context, new CustomEvent(action, {
