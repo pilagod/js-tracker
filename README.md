@@ -1,3 +1,4 @@
+![Logo](https://github.com/pilagod/js-tracker/blob/master/assets/appicon-48.png)
 JavaScript Tracker 
 [![Build Status](https://travis-ci.org/pilagod/js-tracker.svg?branch=master)](https://travis-ci.org/pilagod/js-tracker)
 [![Coverage Status](https://coveralls.io/repos/github/pilagod/js-tracker/badge.svg?branch=master)](https://coveralls.io/github/pilagod/js-tracker?branch=master)
