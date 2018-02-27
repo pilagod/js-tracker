@@ -17,7 +17,7 @@ A chrome extension tracks front-end JavaScript that uses DOM or jQuery APIs to m
 
 ## Demo Video
 
-[![JavaScript Tracker Demo](https://i.imgur.com/SLCEL8S.png)](https://youtu.be/8AxKYsUHn1Q)
+[![JavaScript Tracker Demo](https://i.imgur.com/fLGShu9.png)](https://youtu.be/8AxKYsUHn1Q)
 
 ## Installation
 
