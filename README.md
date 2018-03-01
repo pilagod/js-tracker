@@ -13,7 +13,7 @@ A chrome extension tracks front-end JavaScript that uses DOM or jQuery APIs to m
 * **Brief Overview**, getting rough code information at a glance.
 * **Easy Filtering**, grouping manipulations into 5 types.
 * **Link to Source**, one click to see all details.
-* **Performance Improvement**, take advantage of browser JavaScript engine
+* **Performance Improvement**, better performance than previous version by taking advantage of browser JavaScript engine
 
 ## Demo Video
 
