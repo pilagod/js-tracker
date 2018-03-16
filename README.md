@@ -43,6 +43,7 @@ Those elements wrapped in `<iframe>` can not be tracked, since `<iframe>` create
 
 ## Future Works
 
+* Support Firefox
 * Track [jQuery-UI](https://jqueryui.com)
 * Optimize resouce usage
 
